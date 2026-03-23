@@ -87,7 +87,7 @@ def fetch_systembolaget():
                 "size": 30,
                 "page": page,
                 "categoryLevel1": cat1,
-                "isInStoreAssortmentSearch": "true",
+                
             }
             if cat2:
                 params["categoryLevel2"] = cat2

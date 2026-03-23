@@ -43,6 +43,7 @@ html = f"""<!DOCTYPE html>
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<{comp} />);
   </script>
+<script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>"""
 
