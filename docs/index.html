@@ -181,7 +181,7 @@ function Card({ p, rank, delay, totalInCategory }) {
   const s100 = rescale(p.smakfynd_score);
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
-  const sbUrl = `https://www.systembolaget.se/produkt/${p.nr}`;
+  const sbUrl = `https://www.systembolaget.se/sortiment/?q=${encodeURIComponent(p.name)}`;
   
   // Rank badges
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Top ${rank}` : null;
