@@ -790,6 +790,11 @@ export default function Smakfynd() {
         </div>
 
         {/* ═══ FOOTER ═══ */}
+        <div style={{ marginTop: 32, padding: "24px 20px", borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, textAlign: "center" }}>
+          <div style={{ fontSize: 20, fontFamily: "'Instrument Serif', serif", marginBottom: 6, color: t.tx }}>Missa inga fynd</div>
+          <p style={{ fontSize: 13, color: t.txM, marginBottom: 14, lineHeight: 1.5 }}>Få veckans bästa viner, prissänkningar och tips direkt i din inbox.</p>
+          <a href="https://smakfynd.substack.com" target="_blank" rel="noopener" style={{ display: "inline-block", padding: "10px 24px", borderRadius: 10, background: t.wine, color: "white", textDecoration: "none", fontFamily: "system-ui, sans-serif", fontSize: 14, fontWeight: 600 }}>Prenumerera gratis</a>
+        </div>
         <footer style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${t.bdr}`, textAlign: "center" }}>
           <div style={{ fontSize: 12, color: t.txL, lineHeight: 1.8 }}>
             <p style={{ margin: "0 0 8px" }}>
