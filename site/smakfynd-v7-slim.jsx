@@ -162,7 +162,7 @@ function Card({ p, rank, delay, totalInCategory }) {
   const s100 = rescale(p.smakfynd_score);
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
-  const sbUrl = `https://www.systembolaget.se/sortiment/?q=${encodeURIComponent(p.name)}`;
+  const sbUrl = `https://www.systembolaget.se/sortiment/?q=${p.nr}`;
   
   // Rank badges
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Top ${rank}` : null;
@@ -371,7 +371,7 @@ function FoodMatch({ products }) {
       {matches.length > 0 && (
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
           {matches.map((m, i) => (
-            <a key={i} href={`https://www.systembolaget.se/sortiment/?q=${encodeURIComponent(m.name)}`} target="_blank" rel="noopener noreferrer"
+            <a key={i} href={`https://www.systembolaget.se/sortiment/?q=${m.nr}`} target="_blank" rel="noopener noreferrer"
               style={{ padding: "10px 14px", borderRadius: 10, background: t.card, border: `1px solid ${t.bdrL}`, textDecoration: "none", display: "block", transition: "border-color 0.2s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
               onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
@@ -645,7 +645,7 @@ export default function Smakfynd() {
                 </p>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: `1px solid ${t.bdrL}`, gap: 8 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: t.green }}>{rescale(pick.score)}/100</span>
-                  <a href={`https://www.systembolaget.se/sortiment/?q=${encodeURIComponent(pick.name)}`} target="_blank" rel="noopener noreferrer"
+                  <a href={`https://www.systembolaget.se/sortiment/?q=${pick.nr}`} target="_blank" rel="noopener noreferrer"
                     style={{
                       display: "inline-flex", alignItems: "center", gap: 4,
                       padding: "5px 12px", borderRadius: 8,
