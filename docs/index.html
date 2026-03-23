@@ -42,9 +42,9 @@ const PRICES = [
 ];
 
 const GABRIELS_PICKS = [
-  {name:"Delas Saint-Esprit",sub:"Syrah & Grenache · Côtes du Rhône",price:"129 kr",score:14.2,nr:"2174",note:"Delas tillhör Rhônedalens finaste producenter, men det här är deras vardagsvin — och det märks inte. Svartpeppar, violer och mörka bär med en generositet som får det att kännas som ett vin i en helt annan prisklass. Servera till lördagsbiffen eller en mustig gryta."},
-  {name:"Umani Ronchi Montepulciano",sub:"Montepulciano · Abruzzo",price:"89 kr",score:16.8,nr:"77130",note:"Har funnits på Systembolaget i 25 år av en anledning. Solmogna plommon, tranbär och en jordighet som gör den till en naturlig partner till pizza och pasta. Inte flashig — bara pålitligt bra, varje gång. Italiens svar på husvin."},
-  {name:"Mezzacorona Pinot Nero",sub:"Pinot Nero · Trentino",price:"89 kr",score:15.4,nr:"1368",note:"Pinot noir för under 90 kronor som faktiskt levererar druvans karaktär — det är ovanligt. Friska hallon, körsbär och en fin örtighet från Alpernas fot. Servera lätt sval till charkbrickan eller en enklare fiskrätt. Mitt mars-tips för den som vill utforska."},
+  {name:"Delas Saint-Esprit",sub:"Syrah & Grenache, Côtes du Rhône, Frankrike",price:"129 kr",score:14.2,nr:"2174",note:"Robert Parker kallade den \"a screaming value\" och jag håller med. Mörka bär, lakrits och lite peppar. Inte komplicerad, bara riktigt bra. Jag gillar den bäst till en grillad burgare eller en enkel köttgryta. Delas är ett av de äldre vinhusen i Rhône, grundat 1835."},
+  {name:"Umani Ronchi Montepulciano",sub:"Montepulciano d'Abruzzo, Italien",price:"89 kr",score:16.8,nr:"77130",note:"Gambero Rosso utsåg Umani Ronchi till årets vingård 2024. Det här är deras enklaste vin och det kostar 89 kr. Körsbär, lite lakrits, mjuka tanniner. Wine Enthusiast kallade det \"a solid weekday red\" och det stämmer. Perfekt till pizza eller pasta en tisdagskväll. Familjen Bianchi-Bernetti har drivit stället sedan 1959 i Abruzzo."},
+  {name:"Mezzacorona Pinot Nero",sub:"Pinot Nero, Trentino, Italien",price:"89 kr",score:15.4,nr:"1368",note:"92 poäng i Wine Enthusiast för ett 89-kronorsvin. Pinot Noir från de italienska alperna. Körsbär och tranbär, lite kryddigt, lätt och friskt. Bra till kyckling eller chark. Mezzacorona är ett kooperativ i Trentino som gör vin i skuggan av Dolomiterna. Inte fancy, bara väldigt prisvärt."},
 ];
 
 const FOOD_TIPS = [
@@ -578,15 +578,15 @@ function Smakfynd() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Smakfynd är en oberoende tjänst som hjälper dig hitta de bästa vinfynden på Systembolaget — oavsett budget. Vi rankar <strong>{products.length} viner</strong> baserat på {reviewsStr} omdömen från Vivino.
+              Hej! Jag heter Gabriel, bor i Örebro och har länge irriterat mig på samma sak: det är svårt att välja vin på Systembolaget. Så jag byggde det här. Smakfynd tar betyg från miljontals vinälskare på Vivino och jämför med priset på Bolaget. Resultatet är en poäng som visar vilka viner som ger mest för pengarna.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
-              Röda viner jämförs med röda viner, inte med öl. Du hittar det bästa valet oavsett budget.
+              Inga sponsrade viner, ingen reklam. Listan är vad den är. Jag håller på att prova mig igenom den själv. Mina fynd hamnar under "Gabriels val".
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 4 }}>Gabriel Linton, grundare</div>
               <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
-                Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan (Örebro universitet). Regelbunden besökare av vingårdar i Italien och resten av Sydeuropa. Smakfynd föddes ur frustrationen att behöva gissa sig fram på Systembolaget — och insikten att datan redan fanns, men att ingen kopplat ihop den åt konsumenten.
+                Utbildad i dryckeskunskap vid Grythyttan (Örebro universitet). Åker regelbundet ner till vingårdar i Italien och Sydeuropa. Startade Smakfynd för att jag tröttnade på att gissa framför hyllan. Datan fanns redan, det var bara ingen som kopplat ihop den åt oss konsumenter.
               </p>
             </div>
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Ingen alkoholförsäljning · Inget samarbete med Systembolaget</p>
@@ -675,7 +675,7 @@ function Smakfynd() {
                     }}
                     onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                     onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                  >Köp på SB ↗</a>
+                  >Systembolaget ↗</a>
                 </div>
               </div>
             ))}
