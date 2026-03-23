@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-"""
-Build standalone HTML from JSX for GitHub Pages deployment.
-Usage: python3 deploy_html.py
-"""
 import os, re
 
 BASE = os.path.expanduser("~/smakfynd")
 JSX_PATH = os.path.join(BASE, "site", "smakfynd-v7-slim.jsx")
 OUT_PATH = os.path.join(BASE, "docs", "index.html")
 
-# Read JSX
 jsx = open(JSX_PATH).read()
-
-# Remove React import line (CDN provides it globally)
 jsx = re.sub(r'^import\s+\{[^}]+\}\s+from\s+"react";\s*\n', '', jsx)
 
-# Find the main component name (last function declaration)
-components = re.findall(r'function\s+(\w+)\s*\(', jsx)
-main_component = components[-1] if components else "SmakfyndApp"
+m = re.search(r'export\s+default\s+function\s+(\w+)', jsx)
+if m:
+    comp = m.group(1)
+else:
+    m2 = re.search(r'export\s+default\s+(\w+)', jsx)
+    comp = m2.group(1) if m2 else "SmakfyndApp"
 
-# Fix: ensure default export is removed
-jsx = re.sub(r'export\s+default\s+\w+;?\s*$', '', jsx)
+jsx = re.sub(r'export\s+default\s+', '', jsx)
 
 html = f"""<!DOCTYPE html>
 <html lang="sv">
@@ -46,7 +41,7 @@ html = f"""<!DOCTYPE html>
 {jsx}
 
     const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<{main_component} />);
+    root.render(<{comp} />);
   </script>
 </body>
 </html>"""
@@ -54,14 +49,5 @@ html = f"""<!DOCTYPE html>
 os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
 with open(OUT_PATH, "w") as f:
     f.write(html)
-
-size_kb = os.path.getsize(OUT_PATH) / 1024
-print(f"Built: {OUT_PATH} ({size_kb:.0f} KB)")
-print(f"Main component: {main_component}")
-print(f"\nNext steps:")
-print(f"  cd ~/smakfynd")
-print(f"  git add docs/")
-print(f"  git commit -m 'Add GitHub Pages site'")
-print(f"  git push")
-print(f"  # Then go to: https://github.com/Lingabton/smakfynd/settings/pages")
-print(f"  # Source: Deploy from a branch → main → /docs → Save")
+print(f"Built: {OUT_PATH} ({os.path.getsize(OUT_PATH)/1024:.0f} KB)")
+print(f"Main component: {comp}")
