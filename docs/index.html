@@ -653,6 +653,7 @@ function Smakfynd() {
                 flexShrink: 0, display: "flex", flexDirection: "column", gap: 8,
                 animation: `slideUp 0.4s ease ${0.1 + i * 0.08}s both`,
               }}>
+                {pick.image_url && <img src={pick.image_url} alt={pick.name} style={{ width: 56, height: 56, objectFit: "contain", borderRadius: 8, marginBottom: 4 }} />}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
