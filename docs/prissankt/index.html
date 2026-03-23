@@ -143,7 +143,7 @@ function Prissankt() {
         {wines.map((w, i) => {
           const s100 = Math.round(Math.min(99, Math.max(1, w.score_100 || 50)));
           const [label, col] = getScoreInfo(s100);
-          const sbUrl = `https://www.systembolaget.se/produkt/${w.nr}`;
+          const sbUrl = `https://www.systembolaget.se/sortiment/?q=${encodeURIComponent(w.name)}`;
           
           return (
             <div key={w.nr} style={{ background: "white", borderRadius: 14, padding: "14px 16px", border: "1px solid #e8e0d4", position: "relative" }}>
@@ -218,7 +218,7 @@ function Prissankt() {
                     background: "#292524", color: "white", textDecoration: "none",
                     fontFamily: "system-ui, sans-serif", fontSize: 13, fontWeight: 600
                   }}>
-                    Köp på Systembolaget ↗
+                    Hitta på Systembolaget ↗
                   </a>
                 </div>
               </div>

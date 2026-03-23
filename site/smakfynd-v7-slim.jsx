@@ -263,7 +263,7 @@ function Card({ p, rank, delay, totalInCategory }) {
           onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >
-          Köp på Systembolaget
+          Hitta på Systembolaget
           <span style={{ fontSize: 10 }}>↗</span>
         </a>
         <span
