@@ -23,9 +23,9 @@ const PRICES = [
 ];
 
 const GABRIELS_PICKS = [
-  {name:"Delas Saint-Esprit",sub:"Syrah & Grenache, Côtes du Rhône, Frankrike",price:"129 kr",score:14.2,nr:"2174",note:"Robert Parker kallade den \"a screaming value\" och jag håller med. Mörka bär, lakrits och lite peppar. Inte komplicerad, bara riktigt bra. Jag gillar den bäst till en grillad burgare eller en enkel köttgryta. Delas är ett av de äldre vinhusen i Rhône, grundat 1835."},
-  {name:"Umani Ronchi Montepulciano",sub:"Montepulciano d'Abruzzo, Italien",price:"89 kr",score:16.8,nr:"77130",note:"Gambero Rosso utsåg Umani Ronchi till årets vingård 2024. Det här är deras enklaste vin och det kostar 89 kr. Körsbär, lite lakrits, mjuka tanniner. Wine Enthusiast kallade det \"a solid weekday red\" och det stämmer. Perfekt till pizza eller pasta en tisdagskväll. Familjen Bianchi-Bernetti har drivit stället sedan 1959 i Abruzzo."},
-  {name:"Mezzacorona Pinot Nero",sub:"Pinot Nero, Trentino, Italien",price:"89 kr",score:15.4,nr:"1368",note:"92 poäng i Wine Enthusiast för ett 89-kronorsvin. Pinot Noir från de italienska alperna. Körsbär och tranbär, lite kryddigt, lätt och friskt. Bra till kyckling eller chark. Mezzacorona är ett kooperativ i Trentino som gör vin i skuggan av Dolomiterna. Inte fancy, bara väldigt prisvärt."},
+  {name:"Three Finger Jack",sub:"Cabernet Sauvignon, Lodi, USA",price:"159 kr",score:16.2,nr:"352801",note:"91 poäng i Wine Enthusiast. Uppkallad efter en laglös från guldrushen i Kalifornien. Mörka plommon, blåbär, choklad och svartpeppar. Bra till grillat kött eller en rejäl hamburgare.",image_url:"https://product-cdn.systembolaget.se/productimages/23458751/23458751_400.png"},
+  {name:"Mucho Mas",sub:"Tempranillo Grenache Syrah, Spanien",price:"99 kr",score:14.3,nr:"5234001",note:"Över 112 000 betyg på Vivino och 4.1 i snitt. En blend av gamla vinstockar, handplockade. En Vivino-användare skrev \"One of the best value wines you can find.\" Svårt att argumentera emot det för 99 kr. Bra till tapas och vardagsmat.",image_url:"https://product-cdn.systembolaget.se/productimages/37439730/37439730_400.png"},
+  {name:"Leitz Eins Zwei Dry",sub:"Riesling, Rheingau, Tyskland",price:"107 kr",score:14.0,nr:"582201",note:"Importören kallade det \"the best everyday dry Riesling from Germany.\" Äpple, persika, mineral och en frisk avslutning. Ekologiskt odlat i Rheingau. Perfekt till skaldjur, sushi eller bara som det är en varm kväll.",image_url:"https://product-cdn.systembolaget.se/productimages/650825/650825_400.png"},
 ];
 
 const FOOD_TIPS = [
