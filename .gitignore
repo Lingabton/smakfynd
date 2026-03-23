@@ -1,0 +1,5 @@
+data/vivino_cache.json
+data/price_history/
+data/systembolaget_raw.json
+__pycache__/
+.DS_Store
