@@ -561,6 +561,7 @@ function Smakfynd() {
         </div>
 
         {/* Nav links */}
+        <div style={{ marginBottom: 12 }}><a href="/prissankt/" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 20, background: "#dc2626", color: "white", textDecoration: "none", fontFamily: "system-ui, sans-serif", fontSize: 13, fontWeight: 600, boxShadow: "0 2px 8px rgba(220,38,38,0.25)" }}>🏷️ Prissänkta viner just nu</a></div>
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
           {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"]].map(([k, l]) => (
             <span key={k} onClick={() => setPanel(panel === k ? null : k)}
