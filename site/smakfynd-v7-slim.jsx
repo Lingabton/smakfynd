@@ -774,26 +774,13 @@ export default function Smakfynd() {
           <h3 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Veckans bästa köp</h3>
           <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.5 }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
           <div style={{ display: "flex", gap: 8, maxWidth: 380, margin: "0 auto" }}>
-            <input type="email" placeholder="din@email.se"
-              style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.bg, fontSize: 14, color: t.tx, outline: "none" }} />
-            <button style={{
-              padding: "12px 20px", borderRadius: 12, border: "none", cursor: "pointer",
-              background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#fff", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap",
-              boxShadow: `0 2px 8px ${t.wine}25`, transition: "opacity 0.2s",
-            }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+          <a href="https://smakfynd.substack.com" target="_blank" rel="noopener" style={{ display: "inline-block", padding: "12px 28px", borderRadius: 12, background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 600, boxShadow: `0 2px 8px ${t.wine}25` }}>Prenumerera gratis</a>
               onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >Prenumerera</button>
           </div>
           <p style={{ fontSize: 11, color: t.txL, margin: "10px 0 0" }}>Gratis. Avsluta när du vill.</p>
         </div>
 
-        {/* ═══ FOOTER ═══ */}
-        <div style={{ marginTop: 32, padding: "24px 20px", borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, textAlign: "center" }}>
-          <div style={{ fontSize: 20, fontFamily: "'Instrument Serif', serif", marginBottom: 6, color: t.tx }}>Missa inga fynd</div>
-          <p style={{ fontSize: 13, color: t.txM, marginBottom: 14, lineHeight: 1.5 }}>Få veckans bästa viner, prissänkningar och tips direkt i din inbox.</p>
-          <a href="https://smakfynd.substack.com" target="_blank" rel="noopener" style={{ display: "inline-block", padding: "10px 24px", borderRadius: 10, background: t.wine, color: "white", textDecoration: "none", fontFamily: "system-ui, sans-serif", fontSize: 14, fontWeight: 600 }}>Prenumerera gratis</a>
         </div>
         <footer style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${t.bdr}`, textAlign: "center" }}>
           <div style={{ fontSize: 12, color: t.txL, lineHeight: 1.8 }}>
