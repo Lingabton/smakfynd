@@ -37,6 +37,7 @@ for p in slim:
         "score": p.get("score",0),
         "rating": p.get("rating",0),
         "reviews": p.get("reviews",0),
+        "image_url": (p.get("image_url","") + "_400.png") if p.get("image_url") else "",
     }
     if p.get("organic"): m["organic"] = True
     if p.get("cat3"): m["cat3"] = p["cat3"]
