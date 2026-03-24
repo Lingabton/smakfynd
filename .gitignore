@@ -3,3 +3,6 @@ data/price_history/
 data/systembolaget_raw.json
 __pycache__/
 .DS_Store
+data/
+vivino_log.txt
+node_modules/
