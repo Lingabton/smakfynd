@@ -239,14 +239,15 @@ function Card({ p, rank, delay, totalInCategory }) {
             {/* Score badge with overlapping tags */}
             <div style={{ flexShrink: 0, textAlign: "center" }}>
               <div style={{ position: "relative", display: "inline-block" }}>
-                <div style={{
-                  width: 46, height: 46, borderRadius: 12,
-                  background: `linear-gradient(135deg, ${col}18, ${col}08)`,
-                  border: `2px solid ${col}30`,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                }}>
-                  <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
-                </div>
+                <svg width="50" height="50" viewBox="0 0 50 50" style={{ display: "block" }}>
+                  <circle cx="25" cy="25" r="22" fill="none" stroke={t.bdr} strokeWidth="2.5" />
+                  <circle cx="25" cy="25" r="22" fill="none" stroke={col} strokeWidth="2.5"
+                    strokeDasharray={`${s100 * 1.38} 138`} strokeLinecap="round"
+                    transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 0.8s ease" }} />
+                  <circle cx="25" cy="25" r="18" fill={`${col}08`} />
+                  <text x="25" y="29" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                    fontSize="18" fontWeight="900" fill={col}>{s100}</text>
+                </svg>
               {/* Overlapping mini-badges */}
               {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
                 <div style={{ position: "absolute", top: -6, left: -14, display: "flex", gap: 2 }}>
@@ -997,17 +998,8 @@ function SmakfyndApp() {
 
       {/* ═══ HERO ═══ */}
       <header style={{ padding: "44px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.6s ease" }}>
-        {/* Logo */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 16, color: "#fff", fontWeight: 700, fontFamily: "'Instrument Serif', serif",
-            boxShadow: `0 2px 8px ${t.wine}30`,
-          }}>S</div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: t.wine, letterSpacing: "0.16em", textTransform: "uppercase" }}>Smakfynd</span>
-        </div>
+        {/* Logo — wordmark */}
+        <div style={{ marginBottom: 20 }} dangerouslySetInnerHTML={{ __html: `<svg width="160" height="36" viewBox="0 0 200 44"><text x="0" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="400" fill="#7a2332" letter-spacing="0.3">Smakfynd</text><line x1="0" y1="37" x2="178" y2="37" stroke="#c9a84c" stroke-width="1.2" opacity="0.7"/></svg>` }} />
 
         {/* Headline */}
         <h1 style={{
@@ -1031,16 +1023,16 @@ function SmakfyndApp() {
           textAlign: "left",
         }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Så funkar Smakfynd</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel",
-              "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde",
-              "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre",
-              "Vi säljer inte vin — vi hjälper dig välja bättre",
-            ].map((t2, i) => (
+              ["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"],
+              ["⚖️", "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde"],
+              ["📊", "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre"],
+              ["🤝", "Vi säljer inte vin — vi hjälper dig välja bättre"],
+            ].map(([icon, text], i) => (
               <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <span style={{ color: t.green, fontSize: 12, lineHeight: 1.5, flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 12, color: t.txM, lineHeight: 1.5 }}>{t2}</span>
+                <span style={{ fontSize: 13, lineHeight: 1.4, flexShrink: 0 }}>{icon}</span>
+                <span style={{ fontSize: 12, color: t.txM, lineHeight: 1.5 }}>{text}</span>
               </div>
             ))}
           </div>
