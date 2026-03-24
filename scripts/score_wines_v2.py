@@ -153,6 +153,11 @@ def main():
         c10 = vivino_to_10(v_rating, v_reviews)
         e10 = expert_to_10(e_pts)
         p10 = p.get('_price_score')
+
+        # Minimum threshold: need 25+ crowd reviews OR expert score
+        if (v_reviews or 0) < 25 and not e10:
+            continue
+
         sf = smakfynd_score(c10, e10, p10, organic=p.get('organic', False))
         if sf is None:
             continue
