@@ -215,25 +215,33 @@ function Card({ p, rank, delay, totalInCategory }) {
                 {p.sub} · {p.country}{p.region ? `, ${p.region}` : ""}
               </p>
             </div>
-            <div style={{
-              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-              background: `linear-gradient(135deg, ${col}18, ${col}08)`,
-              border: `2px solid ${col}30`,
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ fontSize: 19, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
-              <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
+            {/* Score badge with overlapping tags */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: 12,
+                background: `linear-gradient(135deg, ${col}18, ${col}08)`,
+                border: `2px solid ${col}30`,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
+                <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
+              </div>
+              {/* Overlapping mini-badges */}
+              {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
+                <div style={{ position: "absolute", top: -6, left: -8, display: "flex", gap: 2 }}>
+                  {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 8, fontWeight: 800, padding: "2px 5px", borderRadius: 4, background: t.deal, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>−{p.price_vs_launch_pct}%</span>}
+                  {p.organic && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: t.green, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>EKO</span>}
+                  {p.is_new && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: t.wine, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>NY</span>}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Row 2: Price + deal + grape + food */}
+          {/* Row 2: Price + grape + food */}
           <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
             {p.launch_price && p.price_vs_launch_pct > 0 && (
-              <span style={{ display: "inline-flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
-                <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: t.deal, color: "#fff" }}>−{p.price_vs_launch_pct}%</span>
-              </span>
+              <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
             )}
             {(p.grape || foodStr) && <span style={{ color: t.bdr }}>·</span>}
             {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
@@ -245,15 +253,6 @@ function Card({ p, rank, delay, totalInCategory }) {
           <div style={{ marginTop: 8 }}>
             <ScoreBars p={p} />
           </div>
-
-          {/* Row 4: Tags — only show meaningful ones */}
-          {(p.price_vs_launch_pct > 0 || p.organic || p.is_new) && (
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-              {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
-              {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
-              {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
-            </div>
-          )}
         </div>
       </div>
 

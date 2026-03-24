@@ -74,7 +74,7 @@ def compute_price_scores(wines):
         # Steeper curve: a wine at half median price → 8.0, at median → 5.5, at double → 1.0
         w['_price_score'] = round(max(1.0, min(10.0, 10.5 - ratio * 5.0)), 1)
 
-def smakfynd_score(crowd, expert, price_val):
+def smakfynd_score(crowd, expert, price_val, organic=False):
     # Determine quality score (weighted blend of crowd + expert)
     if crowd and expert:
         # Bonus when crowd and expert agree (within 1.5 of each other)
@@ -95,6 +95,10 @@ def smakfynd_score(crowd, expert, price_val):
     # crowd 6.5/10 or expert 7.0/10 maps to quality ~6.3
     # Below that → score capped at 50
     quality_floor = quality >= 6.3
+
+    # Sustainability bonus: small nudge for organic wines
+    if organic:
+        quality += 0.2
 
     # Final blend: quality 75%, price 25%
     # This ensures quality dominates, but a 100kr wine with same quality
@@ -149,7 +153,7 @@ def main():
         c10 = vivino_to_10(v_rating, v_reviews)
         e10 = expert_to_10(e_pts)
         p10 = p.get('_price_score')
-        sf = smakfynd_score(c10, e10, p10)
+        sf = smakfynd_score(c10, e10, p10, organic=p.get('organic', False))
         if sf is None:
             continue
 
