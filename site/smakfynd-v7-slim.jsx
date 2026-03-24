@@ -501,11 +501,14 @@ function Smakfynd() {
 
   const [showEco, setShowEco] = useState(false);
   const [assortment, setAssortment] = useState("fast");
+  const [selCountry, setSelCountry] = useState(null);
+  const [selFoods, setSelFoods] = useState([]);
+
+  const toggleFood = (f) => setSelFoods(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
   const filtered = useMemo(() => {
     let r = [...products];
     if (assortment === "fast") r = r.filter(p => p.assortment === "Fast sortiment");
-    // Package filter
     r = r.filter(p => p.package === pkg);
     if (cat !== "all") r = r.filter(p => p.category === cat);
     if (price !== "all") { const [a, b] = price.split("-").map(Number); r = r.filter(p => p.price >= a && p.price <= b); }
@@ -513,13 +516,17 @@ function Smakfynd() {
     if (showNew) r = r.filter(p => p.is_new);
     if (showDeals) r = r.filter(p => p.price_vs_launch_pct > 0);
     if (showEco) r = r.filter(p => p.organic);
+    if (selCountry) r = r.filter(p => p.country === selCountry);
+    if (selFoods.length > 0) r = r.filter(p => selFoods.some(f => (p.food_pairings || []).some(fp => fp.toLowerCase().includes(f.toLowerCase()))));
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, assortment]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, assortment, selCountry, selFoods]);
 
   const newN = products.filter(p => p.is_new).length;
   const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
   const ecoN = products.filter(p => p.organic).length;
-  const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco;
+  const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0;
+
+  const clearAll = () => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); setSelCountry(null); setSelFoods([]); };
 
   return (
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
@@ -758,34 +765,45 @@ function Smakfynd() {
           ))}
         </div>
 
-        {/* ═══ FILTER ROW ═══ */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 22, flexWrap: "wrap", alignItems: "center" }}>
-          <select value={price} onChange={e => setPrice(e.target.value)}
-            style={{
-              padding: "8px 14px", borderRadius: 100, border: `1px solid ${t.bdr}`,
-              background: "transparent", color: t.txM, fontSize: 13, cursor: "pointer",
-              outline: "none", fontFamily: "inherit", appearance: "none",
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%239a8e7e'/%3E%3C/svg%3E\")",
-              backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center", paddingRight: 30,
-            }}>
-            {PRICES.map(p => <option key={p.k} value={p.k}>{p.l}</option>)}
-          </select>
+        {/* ═══ PRICE PILLS ═══ */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+          {[["0-99", "Under 100"], ["100-150", "100–150"], ["151-200", "150–200"], ["201-9999", "200+"]].map(([k, l]) => (
+            <button key={k} onClick={() => setPrice(price === k ? "all" : k)} style={pill(price === k)}>{l} kr</button>
+          ))}
           <button onClick={() => { setShowDeals(!showDeals); if (!showDeals) setShowNew(false); }} style={pill(showDeals, t.deal)}>
             Prissänkt <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 100, background: showDeals ? t.deal : t.bdr, color: showDeals ? "#fff" : t.txL, marginLeft: 2 }}>{dealN}</span>
           </button>
-          <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>
-            Eko <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 100, background: showEco ? t.green : t.bdr, color: showEco ? "#fff" : t.txL, marginLeft: 2 }}>{ecoN}</span>
-          </button>
-          <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>
-            Nyheter <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 100, background: showNew ? t.wine : t.bdr, color: showNew ? "#fff" : t.txL, marginLeft: 2 }}>{newN}</span>
-          </button>
-          {hasFilters && (
-            <button onClick={() => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); }}
-              style={{ padding: "8px 14px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: "transparent", color: t.txL, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
-              Rensa ✕
-            </button>
-          )}
+          <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
+          <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
         </div>
+
+        {/* ═══ COUNTRY PILLS ═══ */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+          {[
+            ["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"],
+            ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"],
+            ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"],
+          ].map(([c, flag]) => (
+            <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{flag} {c}</button>
+          ))}
+        </div>
+
+        {/* ═══ FOOD PILLS ═══ */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+          {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt"].map(f => (
+            <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
+          ))}
+        </div>
+
+        {/* ═══ CLEAR FILTERS ═══ */}
+        {hasFilters && (
+          <div style={{ marginBottom: 16 }}>
+            <button onClick={clearAll}
+              style={{ padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: "transparent", color: t.txL, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
+              Rensa filter ✕
+            </button>
+          </div>
+        )}
 
         {/* ═══ RESULTS ═══ */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14, padding: "0 4px" }}>
@@ -802,7 +820,7 @@ function Smakfynd() {
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
             <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.4 }}>🔍</div>
             <p style={{ fontSize: 17, fontFamily: "'Instrument Serif', serif", fontStyle: "italic", color: t.txM }}>Inga produkter matchade din sökning.</p>
-            <button onClick={() => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); }}
+            <button onClick={clearAll}
               style={{ marginTop: 10, fontSize: 13, color: t.wine, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
               Visa alla produkter
             </button>
