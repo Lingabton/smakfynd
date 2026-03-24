@@ -47,12 +47,33 @@ def load_cache():
 def save_cache(cache):
     json.dump(cache, open(CACHE_FILE, 'w'), ensure_ascii=False, indent=1)
 
-def build_search_url(wine):
+def build_search_queries(wine):
+    """Build multiple search queries to try, from specific to broad."""
     name = wine.get('name', '').replace(' ', '+')
+    sub = wine.get('sub', '').replace(' ', '+')
     grape = wine.get('grape', '').split(',')[0].strip().replace(' ', '+')
     country = COUNTRY_MAP.get(wine.get('country', ''), '')
-    parts = [p for p in [name, grape, country] if p]
-    return f"https://www.wine-searcher.com/find/{'+'.join(parts)}"
+    region = wine.get('region', '').replace(' ', '+')
+
+    queries = []
+    # Try 1: name + grape + country (most specific)
+    queries.append('+'.join(p for p in [name, grape, country] if p))
+    # Try 2: name + sub (e.g. "Catena" + "Malbec")
+    if sub and sub != grape:
+        queries.append('+'.join(p for p in [name, sub] if p))
+    # Try 3: just name + country
+    queries.append('+'.join(p for p in [name, country] if p))
+    # Try 4: just name
+    queries.append(name)
+
+    # Deduplicate while preserving order
+    seen = set()
+    result = []
+    for q in queries:
+        if q and q not in seen:
+            seen.add(q)
+            result.append(f"https://www.wine-searcher.com/find/{q}")
+    return result
 
 def wait_captcha(page, timeout=120):
     for i in range(timeout):
@@ -153,19 +174,68 @@ def parse_critic_section(text):
 
     return result
 
+def try_click_first_wine(page):
+    """If we're on a search results page, click the first wine result."""
+    try:
+        # Wine-Searcher results have wine cards with links
+        # Look for the main wine heading link
+        selectors = [
+            'a.wine-name',
+            'h3 a[href*="/find/"]',
+            '.wine-card a',
+            'a[href*="/find/"][class*="name"]',
+        ]
+        for sel in selectors:
+            el = page.query_selector(sel)
+            if el:
+                el.click()
+                time.sleep(3)
+                return True
+
+        # Fallback: look for any prominent link with a wine-like pattern
+        links = page.query_selector_all('a[href*="/find/"]')
+        # Skip navigation links (first few are usually nav)
+        for link in links[3:8]:
+            href = link.get_attribute('href') or ''
+            text = link.inner_text().strip()
+            if text and len(text) > 3 and '/' not in text:
+                link.click()
+                time.sleep(3)
+                return True
+    except:
+        pass
+    return False
+
 def scrape_wine(page, wine):
-    url = build_search_url(wine)
-    page.goto(url)
-    time.sleep(RATE_LIMIT)
-    if not wait_captcha(page):
-        return None
+    queries = build_search_queries(wine)
 
-    # Check if we're on a wine page (has "/ 100" score)
-    body = page.inner_text('body')
-    if '/ 100' not in body:
-        return parse_critic_section(body)
+    for url in queries:
+        page.goto(url)
+        time.sleep(RATE_LIMIT)
+        if not wait_captcha(page):
+            return None
 
-    # Click "Reviews" tab
+        body = page.inner_text('body')
+
+        # Check if we landed on a wine page (has critic score or "Critic Reviews")
+        if '/ 100' in body and ('Critic Review' in body or 'User Rating' in body):
+            break  # We're on a wine page!
+
+        # We might be on search results — try clicking first result
+        if try_click_first_wine(page):
+            if not wait_captcha(page):
+                return None
+            body = page.inner_text('body')
+            if '/ 100' in body:
+                break  # Got to a wine page
+
+        # If still no wine page, try next query
+        continue
+    else:
+        # None of the queries worked
+        return parse_critic_section(page.inner_text('body'))
+
+    # We're on a wine page — click Reviews tab
     try:
         page.click('text=Reviews')
         time.sleep(3)
@@ -184,7 +254,9 @@ def scrape_wine(page, wine):
         pass
 
     body = page.inner_text('body')
-    return parse_critic_section(body)
+    result = parse_critic_section(body)
+    result['query'] = url
+    return result
 
 def main():
     parser = argparse.ArgumentParser()

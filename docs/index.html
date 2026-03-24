@@ -137,7 +137,7 @@ function ScoreBars({ p }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <MiniBar label="Crowd" value={p.crowd_score} color="#6b8cce" />
-      <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
+      {p.expert_score && <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />}
     </div>
   );
 }
@@ -247,20 +247,19 @@ function Card({ p, rank, delay, totalInCategory }) {
             </div>
           </div>
 
-          {/* Row 2: Price + deal + grape */}
-          <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
-              {p.launch_price && p.price_vs_launch_pct > 0 && (
-                <span style={{ display: "inline-flex", alignItems: "baseline", gap: 4 }}>
-                  <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
-                  <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: t.deal, color: "#fff" }}>−{p.price_vs_launch_pct}%</span>
-                </span>
-              )}
-            </div>
-            <span style={{ color: t.bdr }}>·</span>
+          {/* Row 2: Price + deal + grape + food */}
+          <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
+            {p.launch_price && p.price_vs_launch_pct > 0 && (
+              <span style={{ display: "inline-flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
+                <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: t.deal, color: "#fff" }}>−{p.price_vs_launch_pct}%</span>
+              </span>
+            )}
+            {(p.grape || foodStr) && <span style={{ color: t.bdr }}>·</span>}
             {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
-            {foodStr && <span style={{ fontSize: 11, color: t.txL }}>· {foodStr}</span>}
+            {p.grape && foodStr && <span style={{ color: t.bdr }}>·</span>}
+            {foodStr && <span style={{ fontSize: 11, color: t.txL }}>{foodStr}</span>}
           </div>
 
           {/* Row 3: Crowd/Expert bars */}
@@ -268,57 +267,55 @@ function Card({ p, rank, delay, totalInCategory }) {
             <ScoreBars p={p} />
           </div>
 
-          {/* Row 4: Tags */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-            {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
-            <span style={{ fontSize: 10, fontWeight: 600, color: col, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
-            {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
-            {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
-            {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
-          </div>
+          {/* Row 4: Tags — only show meaningful ones */}
+          {(p.price_vs_launch_pct > 0 || p.organic || p.is_new) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+              {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
+              {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
+              {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Action row — always visible: SB link + expand hint */}
+      {/* Action row */}
       <div style={{
         padding: "0 18px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
           style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "7px 14px", borderRadius: 10,
-            background: t.tx, color: "#faf6f0",
-            fontSize: 12, fontWeight: 600, textDecoration: "none", letterSpacing: "0.02em",
-            transition: "opacity 0.2s",
+            display: "inline-flex", alignItems: "center", gap: 4,
+            fontSize: 11, color: t.txM, textDecoration: "none",
+            transition: "color 0.2s",
           }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          onMouseEnter={e => e.currentTarget.style.color = t.wine}
+          onMouseLeave={e => e.currentTarget.style.color = t.txM}
         >
-          Köp på <span style={{ fontWeight: 700 }}>Systembolaget</span>
-          <span style={{ fontSize: 10 }}>↗</span>
+          Systembolaget <span style={{ fontSize: 9 }}>↗</span>
         </a>
-        <span
-          onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-          style={{
-            fontSize: 11, color: t.txL, cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
-            padding: "4px 0",
-          }}
-        >
-          {open ? "Dölj detaljer" : "Mer info"}
-          <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+        <span style={{ fontSize: 10, color: t.txF, display: "flex", alignItems: "center", gap: 3 }}>
+          {open ? "Stäng ▲" : "Detaljer ▼"}
         </span>
       </div>
 
       {/* Expanded detail */}
       {open && (
         <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${t.bdrL}`, paddingTop: 14 }}>
+          {/* Badges */}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+            {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
+            <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: `${col}12`, color: col, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
+            {p.confidence === "hög" && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Hög konfidens</span>}
+            {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt −{p.price_vs_launch_pct}%</span>}
+            {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Ekologiskt</span>}
+          </div>
           <div style={{ display: "flex", gap: 16, marginBottom: 14 }}>
             {/* Large bottle image */}
             <ProductImage p={p} size={100} style={{ borderRadius: 12, background: "#faf7f2" }} />
             {/* Details grid */}
             <div style={{ flex: 1 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginBottom: 10 }}>
-                {[["Druva", p.grape || "—"], ["Stil", p.style || "—"], ["Alkohol", p.alc ? `${p.alc}%` : "—"], ["Volym", `${p.vol} ml`]].map(([l, v], i) => (
+                {[["Druva", p.grape], ["Stil", p.style], ["Alkohol", p.alc ? `${p.alc}%` : null], ["Volym", `${p.vol} ml`]].filter(([_l, v]) => v).map(([l, v], i) => (
                   <div key={i}>
                     <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>{l}</div>
                     <div style={{ fontSize: 13, color: t.txM, fontWeight: 500 }}>{v}</div>
@@ -373,25 +370,6 @@ function Card({ p, rank, delay, totalInCategory }) {
             </div>
           )}
 
-          {/* Score explanation */}
-          <div style={{ padding: "10px 14px", borderRadius: 10, background: t.bg, marginBottom: 0, fontSize: 12, color: t.txM, lineHeight: 1.6 }}>
-            <strong style={{ color: t.tx }}>Smakfynd-poäng {s100}/100:</strong>{" "}
-            {[
-              p.crowd_score && `Crowd ${p.crowd_score.toFixed(1)}/10`,
-              p.expert_score && `Expert ${p.expert_score.toFixed(1)}/10`,
-              p.price_score && `Pris ${p.price_score.toFixed(1)}/10`,
-            ].filter(Boolean).join(" · ")}
-            {" — "}
-            {s100 >= 90
-              ? "Fantastiskt fynd. Höga betyg till klart lägre pris än snittet."
-              : s100 >= 75
-              ? "Utmärkt värde. Starka betyg relativt priset."
-              : s100 >= 60
-              ? "Bra fynd i sin prisklass."
-              : "Godkänt men inte bland de bästa fynden."
-            }
-            {p.confidence && <span style={{ marginLeft: 6, fontSize: 10, color: t.txL }}>(Konfidens: {p.confidence})</span>}
-          </div>
         </div>
       )}
     </div>
