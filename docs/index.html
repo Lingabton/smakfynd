@@ -521,7 +521,7 @@ function Smakfynd() {
   const countries = [...new Set(products.map(p => p.country).filter(Boolean))].length;
 
   const [showEco, setShowEco] = useState(false);
-  const [assortment, setAssortment] = useState("fast");
+  const [showBest, setShowBest] = useState(false);
   const [selCountry, setSelCountry] = useState(null);
   const [selFoods, setSelFoods] = useState([]);
 
@@ -529,7 +529,7 @@ function Smakfynd() {
 
   const filtered = useMemo(() => {
     let r = [...products];
-    if (assortment === "fast") r = r.filter(p => p.assortment === "Fast sortiment");
+    if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
     if (cat !== "all") r = r.filter(p => p.category === cat);
     if (price !== "all") { const [a, b] = price.split("-").map(Number); r = r.filter(p => p.price >= a && p.price <= b); }
@@ -540,14 +540,14 @@ function Smakfynd() {
     if (selCountry) r = r.filter(p => p.country === selCountry);
     if (selFoods.length > 0) r = r.filter(p => selFoods.some(f => (p.food_pairings || []).some(fp => fp.toLowerCase().includes(f.toLowerCase()))));
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, assortment, selCountry, selFoods]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods]);
 
   const newN = products.filter(p => p.is_new).length;
   const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
   const ecoN = products.filter(p => p.organic).length;
   const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0;
 
-  const clearAll = () => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); setSelCountry(null); setSelFoods([]); };
+  const clearAll = () => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); setSelCountry(null); setSelFoods([]); setShowBest(false); };
 
   return (
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
@@ -760,18 +760,6 @@ function Smakfynd() {
               }}>{l}</button>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
-            {[["fast", "Fast sortiment"], ["all", "Alla"]].map(([k, l]) => (
-              <button key={k} onClick={() => setAssortment(k)} style={{
-                padding: "7px 14px", borderRadius: 100, border: "none", cursor: "pointer",
-                fontSize: 12, fontWeight: assortment === k ? 600 : 400, fontFamily: "inherit",
-                background: assortment === k ? t.card : "transparent",
-                color: assortment === k ? t.tx : t.txL,
-                boxShadow: assortment === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                transition: "all 0.2s",
-              }}>{l}</button>
-            ))}
-          </div>
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -796,6 +784,7 @@ function Smakfynd() {
           </button>
           <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
           <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
+          <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
         </div>
 
         {/* ═══ COUNTRY PILLS ═══ */}
