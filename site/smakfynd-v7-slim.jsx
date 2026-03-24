@@ -595,7 +595,7 @@ function Smakfynd() {
 }
 
 function SmakfyndApp() {
-  const [cat, setCat] = useState("all");
+  const [cat, setCat] = useState("Rött");
   const [price, setPrice] = useState("all");
   const [search, setSearch] = useState("");
   const [showNew, setShowNew] = useState(false);

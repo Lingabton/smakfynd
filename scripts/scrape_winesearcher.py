@@ -16,7 +16,7 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 SB_FILE = DATA_DIR / "systembolaget_raw.json"
 CACHE_FILE = DATA_DIR / "winesearcher_cache.json"
 CHROME_PROFILE = str(Path.home() / ".ws-chrome-profile")
-RATE_LIMIT = 4
+RATE_LIMIT = 8
 
 COUNTRY_MAP = {
     'Italien': 'Italy', 'Frankrike': 'France', 'Spanien': 'Spain',
@@ -174,37 +174,90 @@ def parse_critic_section(text):
 
     return result
 
-def try_click_first_wine(page):
-    """If we're on a search results page, click the first wine result."""
+def navigate_to_wine_page(page):
+    """From search results, navigate to the first wine's review page."""
     try:
-        # Wine-Searcher results have wine cards with links
-        # Look for the main wine heading link
+        # Step 1: Click "Products" tab if we're on Prices tab
+        products_tab = page.query_selector('text=Products')
+        if products_tab:
+            products_tab.click()
+            time.sleep(3)
+            if not wait_captcha(page):
+                return False
+
+        # Step 2: Find wine links in products list
+        # WS product links look like /find/wine-name/...
+        body = page.inner_text('body')
+
+        # Look for clickable wine names — they're usually in card-like elements
         selectors = [
-            'a.wine-name',
-            'h3 a[href*="/find/"]',
-            '.wine-card a',
-            'a[href*="/find/"][class*="name"]',
+            'a[class*="wine"]',
+            'a[class*="name"]',
+            'a[href*="/find/"][href*="/"]',  # wine detail links have extra path
         ]
         for sel in selectors:
-            el = page.query_selector(sel)
-            if el:
-                el.click()
-                time.sleep(3)
-                return True
+            links = page.query_selector_all(sel)
+            for link in links:
+                href = link.get_attribute('href') or ''
+                text = (link.inner_text() or '').strip()
+                # Skip nav links, short text, and price links
+                if len(text) < 3 or 'find more' in text.lower() or 'search' in text.lower():
+                    continue
+                if '/find/' in href and text:
+                    link.click()
+                    time.sleep(3)
+                    return wait_captcha(page)
 
-        # Fallback: look for any prominent link with a wine-like pattern
+        # Fallback: look for any link under a heading-like element
         links = page.query_selector_all('a[href*="/find/"]')
-        # Skip navigation links (first few are usually nav)
-        for link in links[3:8]:
+        for link in links:
             href = link.get_attribute('href') or ''
-            text = link.inner_text().strip()
-            if text and len(text) > 3 and '/' not in text:
+            text = (link.inner_text() or '').strip()
+            # Wine detail pages have longer paths
+            parts = href.replace('https://www.wine-searcher.com', '').split('/')
+            if len(parts) >= 3 and len(text) > 5 and text[0].isupper():
                 link.click()
                 time.sleep(3)
-                return True
+                return wait_captcha(page)
     except:
         pass
     return False
+
+def parse_products_page(text):
+    """Extract scores from Products tab listing."""
+    result = {
+        'aggregate_score': None,
+        'num_scores': 0,
+        'critics': [],
+        'user_rating': None,
+        'user_count': 0,
+        'style': None,
+        'source': 'products_tab',
+    }
+
+    # Products page shows wines with scores like "91 / 100" after each wine name
+    lines = text.split('\n')
+    scores = []
+    for i, line in enumerate(lines):
+        m = re.match(r'^\s*(\d{2,3})\s*/\s*100\s*$', line.strip())
+        if m:
+            score = int(m.group(1))
+            if 50 <= score <= 100:
+                # Get wine name from a few lines above
+                wine_name = ""
+                for j in range(max(0, i-3), i):
+                    candidate = lines[j].strip()
+                    if candidate and len(candidate) > 5 and not candidate.startswith(('Searching', 'Sweden', 'Verified')):
+                        wine_name = candidate
+                scores.append({'score': score, 'name': wine_name})
+
+    if scores:
+        # Use the first/best score as aggregate
+        result['aggregate_score'] = scores[0]['score']
+        result['num_scores'] = len(scores)
+        result['products'] = scores
+
+    return result
 
 def scrape_wine(page, wine):
     queries = build_search_queries(wine)
@@ -217,46 +270,69 @@ def scrape_wine(page, wine):
 
         body = page.inner_text('body')
 
-        # Check if we landed on a wine page (has critic score or "Critic Reviews")
-        if '/ 100' in body and ('Critic Review' in body or 'User Rating' in body):
-            break  # We're on a wine page!
+        # Strategy 1: We landed directly on a wine page (has Reviews tab + Critic Reviews)
+        if 'Critic Review' in body or ('User Rating' in body and '/ 100' in body and 'Showing results' not in body):
+            # Click Reviews tab
+            try:
+                page.click('text=Reviews')
+                time.sleep(3)
+                if not wait_captcha(page):
+                    return None
+                try:
+                    see_more = page.query_selector('text=See more')
+                    if see_more:
+                        see_more.click()
+                        time.sleep(2)
+                except: pass
+                body = page.inner_text('body')
+            except: pass
 
-        # We might be on search results — try clicking first result
-        if try_click_first_wine(page):
+            result = parse_critic_section(body)
+            if result.get('aggregate_score'):
+                result['query'] = url
+                return result
+
+        # Strategy 2: We're on search results — click Products tab and scrape scores from listing
+        if 'Showing results' in body or 'Products' in body:
+            try:
+                products_tab = page.query_selector('text=Products')
+                if products_tab:
+                    products_tab.click()
+                    time.sleep(3)
+                    if not wait_captcha(page):
+                        return None
+                    body = page.inner_text('body')
+
+                    result = parse_products_page(body)
+                    if result.get('aggregate_score'):
+                        result['query'] = url
+                        return result
+            except: pass
+
+        # Strategy 3: Navigate into first wine from Products tab
+        if navigate_to_wine_page(page):
             if not wait_captcha(page):
                 return None
+            try:
+                page.click('text=Reviews')
+                time.sleep(3)
+                wait_captcha(page)
+                try:
+                    see_more = page.query_selector('text=See more')
+                    if see_more:
+                        see_more.click()
+                        time.sleep(2)
+                except: pass
+            except: pass
+
             body = page.inner_text('body')
-            if '/ 100' in body:
-                break  # Got to a wine page
+            result = parse_critic_section(body)
+            if result.get('aggregate_score'):
+                result['query'] = url
+                return result
 
-        # If still no wine page, try next query
-        continue
-    else:
-        # None of the queries worked
-        return parse_critic_section(page.inner_text('body'))
-
-    # We're on a wine page — click Reviews tab
-    try:
-        page.click('text=Reviews')
-        time.sleep(3)
-        if not wait_captcha(page):
-            return None
-    except:
-        pass
-
-    # Click "See more" to load all reviews
-    try:
-        see_more = page.query_selector('text=See more')
-        if see_more:
-            see_more.click()
-            time.sleep(2)
-    except:
-        pass
-
-    body = page.inner_text('body')
-    result = parse_critic_section(body)
-    result['query'] = url
-    return result
+    # Nothing worked
+    return {'aggregate_score': None, 'critics': [], 'query': queries[0] if queries else ''}
 
 def main():
     parser = argparse.ArgumentParser()
