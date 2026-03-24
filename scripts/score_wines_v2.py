@@ -38,7 +38,12 @@ def vivino_to_10(rating, reviews):
     k = 30
     n = reviews or 0
     adjusted = (n / (n + k)) * raw + (k / (n + k)) * 6.0
-    return round(adjusted, 1)
+    # High-confidence bonus: many reviews = more trustworthy
+    if n >= 50000:
+        adjusted += 0.3
+    elif n >= 10000:
+        adjusted += 0.15
+    return round(min(10.0, adjusted), 1)
 
 def expert_to_10(points):
     if not points or points < 80:
