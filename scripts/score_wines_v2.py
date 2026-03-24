@@ -1,191 +1,182 @@
 #!/usr/bin/env python3
 """
-SMAKFYND SCORER v2
-Proper category separation, volume-type handling, and deduplication.
+Smakfynd Scoring v2 — Fixed
+Correctly maps Vivino cache (name|sub|country) and Expert cache (nr)
 """
-import json, os, statistics, time
 
-DATA_DIR = os.path.expanduser("~/smakfynd/data")
-SB_FILE = os.path.join(DATA_DIR, "systembolaget_raw.json")
-CACHE_FILE = os.path.join(DATA_DIR, "vivino_cache.json")
-OUTPUT_FILE = os.path.join(DATA_DIR, "smakfynd_ranked.json")
-WEB_FILE = os.path.join(DATA_DIR, "smakfynd_web.json")
+import json, statistics
+from pathlib import Path
 
-def classify(p):
-    """Classify product into type and package."""
-    cat2 = p.get('cat2', '').lower()
-    vol = p.get('vol', 750)
-    
-    # Wine type
-    if 'rött' in cat2:
-        wtype = 'Rött'
-    elif 'vitt' in cat2:
-        wtype = 'Vitt'
-    elif 'rosé' in cat2:
-        wtype = 'Rosé'
-    elif 'mousserande' in cat2:
-        wtype = 'Mousserande'
-    elif any(x in cat2 for x in ['lager', 'ale', 'porter', 'stout', 'veteöl', 'syrlig', 'öl']):
-        wtype = 'Öl'
-    elif any(x in cat2 for x in ['cider', 'blanddryck']):
-        wtype = 'Cider'
-    else:
-        wtype = 'Övrigt'
-    
-    # Package type
-    if vol >= 2000:
-        pkg = 'BiB'
-    elif vol > 750:
-        pkg = 'Stor'
-    else:
-        pkg = 'Flaska'
-    
-    return wtype, pkg
+DATA_DIR = Path(__file__).parent.parent / "data"
 
-def score_group(products, group_name):
-    """Score a group of products using their own median."""
-    prices = [p['price_per_l'] for p in products if p.get('price_per_l', 0) > 0]
-    if not prices:
-        return products
-    
-    median = statistics.median(prices)
-    
-    for p in products:
-        ppl = p.get('price_per_l', 0)
-        if ppl <= 0:
-            p['smakfynd_score'] = 0
+def load_data():
+    sb = json.load(open(DATA_DIR / "systembolaget_raw.json"))
+    vivino = json.load(open(DATA_DIR / "vivino_cache.json")) if (DATA_DIR / "vivino_cache.json").exists() else {}
+    expert = json.load(open(DATA_DIR / "expert_cache.json")) if (DATA_DIR / "expert_cache.json").exists() else {}
+    print(f"SB: {len(sb)} | Vivino cache: {len(vivino)} | Expert cache: {len(expert)}")
+    return sb, vivino, expert
+
+def get_vivino(p, vivino_cache):
+    """Look up Vivino data using name|sub|country key format."""
+    name = p.get('name', '')
+    sub = p.get('sub', '')
+    country = p.get('country', '')
+    key = f"{name}|{sub}|{country}"
+    v = vivino_cache.get(key, {})
+    rating = v.get('vivino_rating', 0)
+    reviews = v.get('vivino_reviews', 0)
+    if rating and rating > 0:
+        return rating, reviews
+    return None, 0
+
+def vivino_to_10(rating, reviews):
+    if not rating or rating < 1:
+        return None
+    raw = (rating - 1) * 2.25 + 0.5
+    raw = max(1.0, min(10.0, raw))
+    k = 100
+    n = reviews or 0
+    adjusted = (n / (n + k)) * raw + (k / (n + k)) * 6.0
+    return round(adjusted, 1)
+
+def expert_to_10(points):
+    if not points or points < 80:
+        return None
+    raw = (points - 80) * 0.375 + 4.0
+    return round(max(1.0, min(10.0, raw)), 1)
+
+def compute_price_scores(wines):
+    groups = {}
+    for w in wines:
+        key = (w.get('cat2', ''), w.get('_pkg', ''))
+        groups.setdefault(key, []).append(w)
+    medians = {}
+    for key, group in groups.items():
+        prices = [w['price'] / (w['vol'] / 1000) for w in group if w.get('vol', 0) > 0 and w.get('price', 0) > 0]
+        if prices:
+            medians[key] = statistics.median(prices)
+    for w in wines:
+        key = (w.get('cat2', ''), w.get('_pkg', ''))
+        median = medians.get(key)
+        vol = w.get('vol', 750)
+        price = w.get('price', 0)
+        if not median or vol <= 0 or price <= 0:
+            w['_price_score'] = None
             continue
-        
-        rating = p['vivino_rating']
-        reviews = p.get('vivino_reviews', 0)
-        quality = rating * (0.55 + 0.45 * min(reviews / 15000.0, 1.0))
-        rel_price = ppl / median
-        score = (quality / rel_price) * 3.5
-        
-        p['smakfynd_score'] = round(score, 1)
-        p['quality_score'] = round(quality, 2)
-        p['relative_price'] = round(rel_price, 2)
-    
-    return products
+        ratio = (price / (vol / 1000)) / median
+        w['_price_score'] = round(max(1.0, min(10.0, 10.5 - ratio * 5.0)), 1)
+
+def smakfynd_score(crowd, expert, price_val):
+    if crowd and expert and price_val:
+        raw = expert * 0.35 + crowd * 0.35 + price_val * 0.30
+    elif crowd and price_val:
+        raw = crowd * 0.55 + price_val * 0.45
+    elif expert and price_val:
+        raw = expert * 0.55 + price_val * 0.45
+    else:
+        return None
+    if raw >= 8: return round(min(99, 80 + (raw - 8) * 10))
+    if raw >= 6: return round(55 + (raw - 6) * 12.5)
+    if raw >= 4: return round(30 + (raw - 4) * 12.5)
+    return round(max(1, raw * 7.5))
+
+def confidence(reviews, has_exp, conf=0):
+    s = 0
+    if reviews and reviews >= 5000: s += 2
+    elif reviews and reviews >= 500: s += 1
+    if has_exp:
+        s += 2
+        if conf and conf >= 90: s += 1
+    return "hög" if s >= 4 else "medel" if s >= 2 else "låg"
 
 def main():
-    products = json.load(open(SB_FILE))
-    cache = json.load(open(CACHE_FILE))
-    
-    print(f"Products: {len(products)}")
-    print(f"Cache: {len(cache)}")
-    
-    # Match to Vivino
-    matched = []
-    for p in products:
-        key = f"{p.get('name','')}|{p.get('sub','')}|{p.get('country','')}"
-        c = cache.get(key, {})
-        rating = c.get('vivino_rating', 0)
-        if rating > 0:
-            p['vivino_rating'] = rating
-            p['vivino_reviews'] = c.get('vivino_reviews', 0)
-            p['vivino_name'] = c.get('vivino_name', '')
-            
-            vol = p.get('vol', 750)
-            price = p.get('price', 0)
-            if price > 0 and vol > 0:
-                p['price_per_l'] = round(price / (vol / 1000.0), 1)
-            
-            wtype, pkg = classify(p)
-            p['wine_type'] = wtype
-            p['package'] = pkg
-            matched.append(p)
-    
-    print(f"Matched: {len(matched)}")
-    
-    # Score each (wine_type + package) group separately
-    groups = {}
-    for p in matched:
-        key = f"{p['wine_type']}|{p['package']}"
-        groups.setdefault(key, []).append(p)
-    
-    all_scored = []
-    print("\nGroups:")
-    for key, prods in sorted(groups.items(), key=lambda x: -len(x[1])):
-        prices = [p['price_per_l'] for p in prods if p.get('price_per_l', 0) > 0]
-        med = statistics.median(prices) if prices else 0
-        score_group(prods, key)
-        print(f"  {key:25s}: {len(prods):4d} products, median {med:.0f} kr/L")
-        all_scored.extend(prods)
-    
-    # Deduplicate: same name+sub = keep highest scored
-    seen = {}
-    deduped = []
-    for p in sorted(all_scored, key=lambda x: -x.get('smakfynd_score', 0)):
-        dedup_key = f"{p.get('name','')}|{p.get('sub','')}|{p.get('wine_type','')}|{p.get('package','')}"
-        if dedup_key not in seen:
-            seen[dedup_key] = True
-            deduped.append(p)
-    
-    print(f"\nAfter dedup: {len(deduped)} (removed {len(all_scored) - len(deduped)} duplicates)")
-    
-    # Print top lists
-    wine_types = ['Rött', 'Vitt', 'Rosé', 'Mousserande']
-    for wt in wine_types:
-        bottles = [p for p in deduped if p['wine_type'] == wt and p['package'] == 'Flaska']
-        bottles.sort(key=lambda x: -x.get('smakfynd_score', 0))
-        
-        if not bottles:
+    print("=" * 60)
+    print("  SMAKFYND SCORING v2")
+    print("=" * 60)
+    sb, vivino, expert = load_data()
+    wines = [p for p in sb if p.get('cat1') == 'Vin']
+    print(f"Wines: {len(wines)}")
+
+    for w in wines:
+        vol = w.get('vol', 750)
+        w['_pkg'] = 'Flaska' if vol == 750 else ('BiB' if vol >= 2000 else 'Stor')
+
+    compute_price_scores(wines)
+
+    results = []
+    n_crowd = n_expert = n_both = 0
+
+    for p in wines:
+        nr = str(p.get('nr', ''))
+        v_rating, v_reviews = get_vivino(p, vivino)
+        e = expert.get(nr, {})
+        e_pts = e.get('expert_score')
+        e_conf = e.get('match_confidence', 0)
+
+        c10 = vivino_to_10(v_rating, v_reviews)
+        e10 = expert_to_10(e_pts)
+        p10 = p.get('_price_score')
+        sf = smakfynd_score(c10, e10, p10)
+        if sf is None:
             continue
-        
-        print(f"\n{'='*70}")
-        print(f" TOP 10 {wt.upper()} VIN (flaska)")
-        print(f"{'='*70}")
-        for i, p in enumerate(bottles[:10]):
-            org = ' ⚘' if p.get('organic') else ''
-            print(f"  {i+1:2d}. {p['smakfynd_score']:5.1f}  ★{p['vivino_rating']:.1f}  {p['price']:>5.0f}kr  {p['name'][:28]:28s} {p.get('sub','')[:18]:18s} {p.get('country','')[:8]}{org}")
-    
-    # BiB top 5
-    bib = [p for p in deduped if p['package'] == 'BiB' and p['wine_type'] in ('Rött', 'Vitt')]
-    bib.sort(key=lambda x: -x.get('smakfynd_score', 0))
-    if bib:
-        print(f"\n{'='*70}")
-        print(f" TOP 5 BAG-IN-BOX")
-        print(f"{'='*70}")
-        for i, p in enumerate(bib[:5]):
-            print(f"  {i+1:2d}. {p['smakfynd_score']:5.1f}  ★{p['vivino_rating']:.1f}  {p['price']:>5.0f}kr  {p['name'][:28]:28s} {p.get('sub','')[:18]:18s} {p['wine_type']}")
-    
-    # Save full ranked JSON
-    output = {
-        "generated": time.strftime("%Y-%m-%d %H:%M"),
-        "total_scored": len(deduped),
-        "products": deduped,
-    }
-    json.dump(output, open(OUTPUT_FILE, 'w'), ensure_ascii=False, indent=2)
-    
-    # Save slim web JSON
-    slim = []
-    for p in deduped:
-        slim.append({
-            "nr": p.get("nr", ""),
-            "name": p.get("name", ""),
-            "sub": p.get("sub", ""),
-            "price": p.get("price", 0),
-            "vol": p.get("vol", 750),
-            "type": p.get("wine_type", ""),
-            "pkg": p.get("package", ""),
-            "country": p.get("country", ""),
-            "grape": p.get("grape", ""),
-            "organic": p.get("organic", False),
-            "score": p.get("smakfynd_score", 0),
-            "rating": p.get("vivino_rating", 0),
-            "reviews": p.get("vivino_reviews", 0),
-            "image_url": p.get("image_url", ""),
-            "taste_body": p.get("taste_body", ""),
-            "taste_fruit": p.get("taste_fruit", ""),
-            "food_pairings": p.get("food_pairings", ""),
-            "cat3": p.get("cat3", ""),
+
+        if c10: n_crowd += 1
+        if e10: n_expert += 1
+        if c10 and e10: n_both += 1
+
+        results.append({
+            'nr': nr,
+            'name': p.get('name', ''),
+            'sub': p.get('sub', ''),
+            'price': p.get('price', 0),
+            'vol': p.get('vol', 750),
+            'alc': p.get('alc', 0),
+            'type': p.get('cat2', '').replace('Rött vin', 'Rött').replace('Vitt vin', 'Vitt').replace('Rosévin', 'Rosé').replace('Mousserande vin', 'Mousserande'),
+            'pkg': p.get('_pkg'),
+            'country': p.get('country', ''),
+            'region': p.get('region', ''),
+            'grape': p.get('grape', ''),
+            'organic': p.get('organic', False),
+            'style': p.get('style', ''),
+            'cat3': p.get('cat3', ''),
+            'image_url': p.get('image_url', ''),
+            'food_pairings': p.get('food_pairings', []),
+            'assortment': p.get('assortment', ''),
+            'taste_body': p.get('taste_body'),
+            'taste_sweet': p.get('taste_sweet'),
+            'taste_fruit': p.get('taste_fruit'),
+            'taste_bitter': p.get('taste_bitter'),
+            'crowd_score': c10,
+            'crowd_rating': v_rating,
+            'crowd_reviews': v_reviews,
+            'expert_score': e10,
+            'expert_points': e_pts,
+            'expert_source': e.get('expert_source', ''),
+            'has_expert': e10 is not None,
+            'price_score': p10,
+            'smakfynd_score': sf,
+            'confidence': confidence(v_reviews, e10 is not None, e_conf),
+            'score': sf / 10,
+            'rating': v_rating,
+            'reviews': v_reviews,
         })
-    
-    json.dump(slim, open(WEB_FILE, 'w'), ensure_ascii=False)
-    size = os.path.getsize(WEB_FILE) / 1024
-    print(f"\nSaved {len(deduped)} products to {OUTPUT_FILE}")
-    print(f"Saved web data to {WEB_FILE} ({size:.0f} KB)")
+
+    results.sort(key=lambda x: -x['smakfynd_score'])
+    out = DATA_DIR / "smakfynd_ranked_v2.json"
+    json.dump(results, open(out, 'w'), ensure_ascii=False, indent=1)
+
+    print(f"\n  Scored:     {len(results)}")
+    print(f"  Has crowd:  {n_crowd}")
+    print(f"  Has expert: {n_expert}")
+    print(f"  Has both:   {n_both}")
+    print(f"\n  TOP 15:")
+    for i, w in enumerate(results[:15]):
+        c = f"C:{w['crowd_score']}" if w['crowd_score'] else "C:--"
+        e = f"E:{w['expert_score']}" if w['expert_score'] else "E:--"
+        p = f"P:{w['price_score']}" if w['price_score'] else "P:--"
+        conf = w['confidence']
+        print(f"  {i+1:2}. {w['smakfynd_score']:3}/100  {c:>7}  {e:>7}  {p:>7}  {w['name'][:28]:28}  {w['price']}kr  [{conf}]")
+    print(f"\n  Saved: {out}")
 
 if __name__ == "__main__":
     main()

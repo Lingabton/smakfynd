@@ -1,5 +1,3 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-
 // ═══════════════════════════════════════════════════════════════
 // SMAKFYND v7 — Real Data + Package Filter
 // Smartare vinval på Systembolaget
@@ -39,7 +37,7 @@ const FOOD_TIPS = [
 
 const FAQS = [
   {q:"Hur beräknas Smakfynd-poängen?",a:"Vi tittar på två saker: hur bra vinet är (enligt vanliga människors betyg) och vad det kostar jämfört med andra viner i samma prisklass. Ett vin för 159 kr jämförs med andra viner i spannet 150–249 kr — inte med viner för 79 kr. Poängen visas på en skala 1–100 där högre är bättre."},
-  {q:"Var kommer betygen ifrån?",a:"Vinbetyg kommer från Vivino, en app som används av över 70 miljoner vinälskare världen över. Vanliga människor sätter betyg varje gång de dricker — som Google-recensioner för restauranger."},
+  {q:"Var kommer betygen ifrån?",a:"Smakfynd kombinerar crowd-betyg från miljontals användare med expertrecensioner från vinkritiker, och väger in priset relativt kategorin. Resultatet är en enda poäng som visar kvalitet per krona."},
   {q:"Vad betyder 'pris sedan lansering'?",a:"När ett vin först börjar säljas på Systembolaget har det ett visst pris. Ibland sänker importören priset senare. Systembolaget skyltar inte med dessa prissänkningar, men vi håller koll."},
   {q:"Säljer Smakfynd alkohol?",a:"Nej. Vi är en helt oberoende informationstjänst som drivs av Olav Innovation AB. Alla köp gör du via Systembolaget."},
   {q:"Hur ofta uppdateras informationen?",a:"Varje vecka. Vi går igenom hela Systembolagets sortiment, hämtar senaste betygen och räknar om poängen."},
@@ -95,26 +93,35 @@ function getScoreInfo(s100) {
   return ["Medel", "#8a7a6a", ""];
 }
 
-function ScoreBar({ score }) {
-  const s100 = rescale(score);
-  const [label, col] = getScoreInfo(s100);
+function MiniBar({ label, value, max = 10, color }) {
+  const pct = value ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ flex: 1, height: 5, borderRadius: 3, background: t.bdr, overflow: "hidden" }}>
-        <div style={{ width: `${s100}%`, height: "100%", borderRadius: 3, background: `linear-gradient(90deg, ${col}88, ${col})`, transition: "width 0.8s ease" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <span style={{ fontSize: 10, color: t.txL, width: 52, flexShrink: 0, textAlign: "right" }}>{label}</span>
+      <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", borderRadius: 2, background: color || t.txM, transition: "width 0.8s ease" }} />
       </div>
-      <span style={{ fontSize: 13, fontWeight: 800, color: col, minWidth: 28, textAlign: "right" }}>{s100}</span>
+      <span style={{ fontSize: 10, fontWeight: 700, color: color || t.txM, minWidth: 20, textAlign: "right" }}>{value ? value.toFixed(1) : "—"}</span>
     </div>
   );
 }
 
-function Stars({ r }) {
+function ScoreBars({ p }) {
+  const s100 = p.smakfynd_score;
+  const [label, col] = getScoreInfo(s100);
   return (
-    <span style={{ display: "inline-flex", gap: 1 }}>
-      {[1, 2, 3, 4, 5].map(i => (
-        <span key={i} style={{ fontSize: 11, color: i <= Math.round(r) ? t.gold : t.bdr }}>★</span>
-      ))}
-    </span>
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <MiniBar label="Crowd" value={p.crowd_score} color="#6b8cce" />
+      <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+        <span style={{ fontSize: 10, color: col, width: 52, flexShrink: 0, textAlign: "right", fontWeight: 800 }}>Smakfynd</span>
+        <div style={{ flex: 1, height: 7, borderRadius: 4, background: t.bdr, overflow: "hidden" }}>
+          <div style={{ width: `${s100}%`, height: "100%", borderRadius: 4, background: `linear-gradient(90deg, ${col}99, ${col})`, transition: "width 0.8s ease" }} />
+        </div>
+        <span style={{ fontSize: 15, fontWeight: 900, color: col, minWidth: 32, textAlign: "right", fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
+      </div>
+      <div style={{ textAlign: "right", fontSize: 9, color: t.txL, marginTop: 1 }}>Kvalitet + Prisvärde</div>
+    </div>
   );
 }
 
@@ -159,7 +166,7 @@ function ProductImage({ p, size = 52, style: extraStyle = {} }) {
 function Card({ p, rank, delay, totalInCategory }) {
   const [open, setOpen] = useState(false);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾" })[p.category] || "✦";
-  const s100 = rescale(p.smakfynd_score);
+  const s100 = p.smakfynd_score;
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/${p.nr}`;
@@ -169,16 +176,18 @@ function Card({ p, rank, delay, totalInCategory }) {
 
   return (
     <div
+      onClick={() => setOpen(!open)}
       style={{
         background: t.card, borderRadius: 16,
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
         boxShadow: open ? "0 12px 40px rgba(30,23,16,0.08)" : "0 1px 3px rgba(30,23,16,0.03)",
         transition: "all 0.3s ease", overflow: "hidden",
         animation: `slideUp 0.4s ease ${delay}s both`,
+        cursor: "pointer",
       }}
     >
-      {/* Main row — clickable to expand */}
-      <div onClick={() => setOpen(!open)} style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start", cursor: "pointer" }}>
+      {/* Main row */}
+      <div style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start" }}>
         {/* Product image with rank overlay */}
         <div style={{ position: "relative", flexShrink: 0 }}>
           <ProductImage p={p} size={52} />
@@ -230,16 +239,10 @@ function Card({ p, rank, delay, totalInCategory }) {
 
           {/* Score + meta row */}
           <div style={{ marginTop: 8 }}>
-            <ScoreBar score={p.smakfynd_score} />
+            <ScoreBars p={p} />
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
               {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
               <span style={{ fontSize: 10, fontWeight: 600, color: col, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
-              <span style={{ width: 1, height: 10, background: t.bdr }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                <Stars r={p.vivino_rating} />
-                <span style={{ fontSize: 11, color: t.txM }}>{p.vivino_rating}</span>
-                <span style={{ fontSize: 10, color: t.txL }}>({p.vivino_reviews > 999 ? `${(p.vivino_reviews / 1000).toFixed(0)}k` : p.vivino_reviews})</span>
-              </div>
               {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
               {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
               {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
@@ -305,6 +308,36 @@ function Card({ p, rank, delay, totalInCategory }) {
             </div>
           </div>
 
+          {/* Taste profile */}
+          {(p.taste_body || p.taste_fruit || p.taste_sweet != null) && (
+            <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 10, background: t.bg }}>
+              <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Smakprofil</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  ["Lätt", "Fylligt", p.taste_body, 12],
+                  ["Stram", "Fruktigt", p.taste_fruit, 12],
+                  ["Torrt", "Sött", p.taste_sweet, 12],
+                ].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => (
+                  <div key={lo}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 10, color: t.txL, width: 40, textAlign: "right", flexShrink: 0 }}>{lo}</span>
+                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdr, position: "relative" }}>
+                        <div style={{
+                          position: "absolute", top: "50%", left: `${(val / max) * 100}%`,
+                          width: 9, height: 9, borderRadius: "50%",
+                          background: t.wine, border: `2px solid ${t.card}`,
+                          transform: "translate(-50%, -50%)",
+                          boxShadow: `0 0 0 1px ${t.wine}40`,
+                        }} />
+                      </div>
+                      <span style={{ fontSize: 10, color: t.txL, width: 40, flexShrink: 0 }}>{hi}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Price drop info */}
           {p.launch_price && p.price_vs_launch_pct > 0 && (
             <div style={{ padding: "10px 14px", borderRadius: 10, background: t.dealL, marginBottom: 14, fontSize: 13, color: t.deal, lineHeight: 1.5 }}>
@@ -315,14 +348,21 @@ function Card({ p, rank, delay, totalInCategory }) {
           {/* Score explanation */}
           <div style={{ padding: "10px 14px", borderRadius: 10, background: t.bg, marginBottom: 0, fontSize: 12, color: t.txM, lineHeight: 1.6 }}>
             <strong style={{ color: t.tx }}>Smakfynd-poäng {s100}/100:</strong>{" "}
+            {[
+              p.crowd_score && `Crowd ${p.crowd_score.toFixed(1)}/10`,
+              p.expert_score && `Expert ${p.expert_score.toFixed(1)}/10`,
+              p.price_score && `Pris ${p.price_score.toFixed(1)}/10`,
+            ].filter(Boolean).join(" · ")}
+            {" — "}
             {s100 >= 90
-              ? `${p.name} har högt Vivino-betyg (${p.vivino_rating}) och kostar klart mindre än snittet i sin prisklass. Fantastiskt fynd.`
+              ? "Fantastiskt fynd. Höga betyg till klart lägre pris än snittet."
               : s100 >= 75
-              ? `Starkt betyg (${p.vivino_rating}) till bra pris relativt sin prisklass. Utmärkt värde.`
+              ? "Utmärkt värde. Starka betyg relativt priset."
               : s100 >= 60
-              ? `Bra betyg (${p.vivino_rating}) till rimligt pris. Ett bra fynd i sin prisklass.`
-              : `Betyg ${p.vivino_rating} till ${p.price} kr — godkänt men inte bland de bästa fynden.`
+              ? "Bra fynd i sin prisklass."
+              : "Godkänt men inte bland de bästa fynden."
             }
+            {p.confidence && <span style={{ marginLeft: 6, fontSize: 10, color: t.txL }}>(Konfidens: {p.confidence})</span>}
           </div>
         </div>
       )}
@@ -395,7 +435,7 @@ function FoodMatch({ products }) {
   );
 }
 
-export default function Smakfynd() {
+function Smakfynd() {
   const [cat, setCat] = useState("all");
   const [price, setPrice] = useState("all");
   const [search, setSearch] = useState("");
@@ -445,7 +485,7 @@ export default function Smakfynd() {
       ...p,
       id: p.nr || String(i),
       category: p.type || p.category || '',
-      smakfynd_score: p.score || p.smakfynd_score || 0,
+      smakfynd_score: p.smakfynd_score || (p.score ? rescale(p.score) : 0),
       vivino_rating: p.rating || p.vivino_rating || 0,
       vivino_reviews: p.reviews || p.vivino_reviews || 0,
       style: p.cat3 || p.style || '',
@@ -460,9 +500,11 @@ export default function Smakfynd() {
   const countries = [...new Set(products.map(p => p.country).filter(Boolean))].length;
 
   const [showEco, setShowEco] = useState(false);
+  const [assortment, setAssortment] = useState("fast");
 
   const filtered = useMemo(() => {
     let r = [...products];
+    if (assortment === "fast") r = r.filter(p => p.assortment === "Fast sortiment");
     // Package filter
     r = r.filter(p => p.package === pkg);
     if (cat !== "all") r = r.filter(p => p.category === cat);
@@ -472,7 +514,7 @@ export default function Smakfynd() {
     if (showDeals) r = r.filter(p => p.price_vs_launch_pct > 0);
     if (showEco) r = r.filter(p => p.organic);
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, assortment]);
 
   const newN = products.filter(p => p.is_new).length;
   const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
@@ -518,7 +560,7 @@ export default function Smakfynd() {
           margin: "0 auto 28px", fontSize: 15, color: t.txM, lineHeight: 1.6,
           maxWidth: 400, fontWeight: 300,
         }}>
-          Varje produkt rankad efter kvalitet i förhållande till pris — baserat på {reviewsStr} omdömen från Vivino.
+          Varje produkt rankad efter kvalitet i förhållande till pris — baserat på crowd-betyg, expertrecensioner och prisjämförelse.
         </p>
 
         {/* Stats */}
@@ -558,7 +600,7 @@ export default function Smakfynd() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Smakfynd är en oberoende tjänst som hjälper dig hitta de bästa vinfynden på Systembolaget — oavsett budget. Vi rankar <strong>{products.length} viner</strong> baserat på {reviewsStr} omdömen från Vivino.
+              Smakfynd är en oberoende tjänst som hjälper dig hitta de bästa vinfynden på Systembolaget — oavsett budget. Vi rankar <strong>{products.length} viner</strong> baserat på crowd-betyg, expertrecensioner och prisvärde.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
               Röda viner jämförs med röda viner, inte med öl. Du hittar det bästa valet oavsett budget.
@@ -677,17 +719,31 @@ export default function Smakfynd() {
         </div>
 
         {/* ═══ PACKAGE TOGGLE ═══ */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 10, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
-          {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
-            <button key={k} onClick={() => setPkg(k)} style={{
-              padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
-              fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
-              background: pkg === k ? t.card : "transparent",
-              color: pkg === k ? t.tx : t.txL,
-              boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-              transition: "all 0.2s",
-            }}>{l}</button>
-          ))}
+        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
+            {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
+              <button key={k} onClick={() => setPkg(k)} style={{
+                padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
+                background: pkg === k ? t.card : "transparent",
+                color: pkg === k ? t.tx : t.txL,
+                boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                transition: "all 0.2s",
+              }}>{l}</button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
+            {[["fast", "Fast sortiment"], ["all", "Alla"]].map(([k, l]) => (
+              <button key={k} onClick={() => setAssortment(k)} style={{
+                padding: "7px 14px", borderRadius: 100, border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: assortment === k ? 600 : 400, fontFamily: "inherit",
+                background: assortment === k ? t.card : "transparent",
+                color: assortment === k ? t.tx : t.txL,
+                boxShadow: assortment === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                transition: "all 0.2s",
+              }}>{l}</button>
+            ))}
+          </div>
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -798,7 +854,7 @@ export default function Smakfynd() {
               Skapad av <strong>Gabriel Linton</strong> · Dryckeskunskap, Grythyttan · <strong>Olav Innovation AB</strong>
             </p>
           </div>
-          <p style={{ fontSize: 10, color: t.txF, margin: "0 0 10px" }}>Data från Vivino och Systembolaget · Uppdaterad mars 2026</p>
+          <p style={{ fontSize: 10, color: t.txF, margin: "0 0 10px" }}>Data från Systembolaget · Uppdaterad mars 2026</p>
           <p style={{ fontSize: 10, color: t.txF, fontStyle: "italic" }}>Njut med måtta.</p>
         </footer>
       </div>
