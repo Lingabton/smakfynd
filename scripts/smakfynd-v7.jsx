@@ -203,7 +203,8 @@ function Card({ p, rank, delay, totalInCategory }) {
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+          {/* Row 1: Name + score badge */}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <h3 style={{
                 margin: 0, fontSize: 17, fontFamily: "'Instrument Serif', Georgia, serif",
@@ -214,44 +215,45 @@ function Card({ p, rank, delay, totalInCategory }) {
                 {p.sub} · {p.country}{p.region ? `, ${p.region}` : ""}
               </p>
             </div>
-            {/* Score badge + price */}
-            <div style={{ textAlign: "center", flexShrink: 0 }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 12,
-                background: `linear-gradient(135deg, ${col}18, ${col}08)`,
-                border: `2px solid ${col}30`,
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                margin: "0 auto",
-              }}>
-                <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
-                <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
-              </div>
-              <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, lineHeight: 1, marginTop: 5, fontFamily: "'Instrument Serif', Georgia, serif" }}>
-                {p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL, marginLeft: 1 }}>kr</span>
-              </div>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+              background: `linear-gradient(135deg, ${col}18, ${col}08)`,
+              border: `2px solid ${col}30`,
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontSize: 19, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
+              <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
+            </div>
+          </div>
+
+          {/* Row 2: Price + deal + grape */}
+          <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
               {p.launch_price && p.price_vs_launch_pct > 0 && (
-                <span style={{ fontSize: 9, color: t.deal, fontWeight: 600 }}>−{p.price_vs_launch_pct}%</span>
+                <span style={{ display: "inline-flex", alignItems: "baseline", gap: 4 }}>
+                  <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: t.deal, color: "#fff" }}>−{p.price_vs_launch_pct}%</span>
+                </span>
               )}
             </div>
-          </div>
-
-          {/* Grape + food */}
-          <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ color: t.bdr }}>·</span>
             {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
-            {p.grape && foodStr && <span style={{ color: t.bdr }}>·</span>}
-            {foodStr && <span style={{ fontSize: 11, color: t.txL }}>Passar till {foodStr}</span>}
+            {foodStr && <span style={{ fontSize: 11, color: t.txL }}>· {foodStr}</span>}
           </div>
 
-          {/* Crowd/Expert bars + tags */}
+          {/* Row 3: Crowd/Expert bars */}
           <div style={{ marginTop: 8 }}>
             <ScoreBars p={p} />
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-              {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
-              <span style={{ fontSize: 10, fontWeight: 600, color: col, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
-              {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
-              {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
-              {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
-            </div>
+          </div>
+
+          {/* Row 4: Tags */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+            {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
+            <span style={{ fontSize: 10, fontWeight: 600, color: col, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
+            {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt</span>}
+            {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: t.greenL, color: t.green }}>Eko</span>}
+            {p.is_new && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 100, background: t.wineL, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em" }}>Nyhet</span>}
           </div>
         </div>
       </div>

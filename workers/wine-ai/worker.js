@@ -63,7 +63,49 @@ export default {
     }
 
     try {
-      const { meal } = await request.json();
+      const body = await request.json();
+      const url = new URL(request.url);
+
+      // Expert estimation endpoint
+      if (url.pathname === "/expert" && body.wines) {
+        const expertPrompt = `Du är en erfaren vinkritiker. Uppskatta kvalitetspoäng (80-100, Wine Spectator-skala) för varje vin.
+
+Basera din bedömning på: producent/varumärke, druva, region, prispositionering.
+- 80-84: Enkel/vardaglig kvalitet
+- 85-87: Bra kvalitet, välgjort
+- 88-90: Mycket bra, utmärkt producent eller region
+- 91-93: Exceptionellt, toppproducent
+- 94+: Världsklass
+
+Var realistisk. De flesta viner under 150kr hamnar 82-87. Var inte för generös.
+Svara BARA med JSON-array: [{"name": "...", "points": 88}, ...]
+
+Viner:
+` + JSON.stringify(body.wines);
+
+        const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": env.ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 4096,
+            messages: [{ role: "user", content: expertPrompt }],
+          }),
+        });
+        const data = await resp.json();
+        const text = data.content?.[0]?.text || "";
+        const match = text.match(/\[[\s\S]*\]/);
+        const parsed = match ? JSON.parse(match[0]) : [];
+        return new Response(JSON.stringify(parsed), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { meal } = body;
       if (!meal || meal.length < 3 || meal.length > 500) {
         return new Response(JSON.stringify({ error: "Beskriv din måltid (3-500 tecken)" }), {
           status: 400,

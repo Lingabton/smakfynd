@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build smakfynd site with v2 data (crowd + expert + price scores)."""
-import json, os
+import json, os, math
 
 DATA_DIR = os.path.expanduser("~/smakfynd/data")
 SITE_FILE = os.path.expanduser("~/smakfynd/scripts/smakfynd-v7.jsx")
@@ -14,6 +14,54 @@ if not os.path.exists(src):
 
 data = json.load(open(src))
 print(f"Total: {len(data)} scored products")
+
+# Load price drop data from multiple sources
+# 1. Bootstrap data (historical drops from prissankt etc.)
+bootstrap_file = os.path.join(DATA_DIR, "prissankt_bootstrap.json")
+bootstrap = {}
+if os.path.exists(bootstrap_file):
+    for d in json.load(open(bootstrap_file)):
+        bootstrap[str(d['nr'])] = d
+
+# 2. Our own price history (tracks ongoing changes)
+price_hist_file = os.path.join(DATA_DIR, "history", "first_seen_prices.json")
+price_hist = {}
+if os.path.exists(price_hist_file):
+    price_hist = json.load(open(price_hist_file))
+
+print(f"Price sources: {len(bootstrap)} bootstrap, {len(price_hist)} tracked")
+
+# Add price drop info
+drops = 0
+for p in data:
+    nr = str(p.get('nr', ''))
+    current = p.get('price', 0)
+    if not current:
+        continue
+
+    old_price = None
+    # Check bootstrap first (historical data)
+    if nr in bootstrap:
+        b = bootstrap[nr]
+        if b.get('price_now') and abs(b['price_now'] - current) < 5:
+            # Price still matches the drop price — drop is still active
+            old_price = b.get('price_old')
+
+    # Check our own history
+    if not old_price and nr in price_hist:
+        hist = price_hist[nr]
+        first = hist.get('price', 0) if isinstance(hist, dict) else hist
+        if first and first > current:
+            old_price = first
+
+    if old_price and old_price > current:
+        drop_pct = round((old_price - current) / old_price * 100)
+        if drop_pct >= 5:
+            p['launch_price'] = old_price
+            p['price_vs_launch_pct'] = drop_pct
+            drops += 1
+
+print(f"Price drops (5%+): {drops}")
 
 # Filter: must have a score, default to "Fast sortiment"
 data = [p for p in data if p.get('smakfynd_score') and p.get('smakfynd_score') > 0]
@@ -78,6 +126,8 @@ for p in slim:
     if p.get("style"): m["style"] = p["style"]
     if p.get("region"): m["region"] = p["region"]
     if p.get("expert_source"): m["expert_source"] = p["expert_source"]
+    if p.get("launch_price"): m["launch_price"] = p["launch_price"]
+    if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
     mini.append(m)
 
 # Remove None values to save space

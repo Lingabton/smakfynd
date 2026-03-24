@@ -1,0 +1,293 @@
+#!/usr/bin/env python3
+"""
+Scrape Wine-Searcher Pro for critic scores.
+Uses a persistent Chrome profile with your logged-in WS Pro session.
+
+First run:  python3 scripts/scrape_winesearcher.py --login
+Then:       python3 scripts/scrape_winesearcher.py --test 10
+Full run:   python3 scripts/scrape_winesearcher.py
+"""
+
+import json, time, re, sys, argparse
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+DATA_DIR = Path(__file__).parent.parent / "data"
+SB_FILE = DATA_DIR / "systembolaget_raw.json"
+CACHE_FILE = DATA_DIR / "winesearcher_cache.json"
+CHROME_PROFILE = str(Path.home() / ".ws-chrome-profile")
+RATE_LIMIT = 4
+
+COUNTRY_MAP = {
+    'Italien': 'Italy', 'Frankrike': 'France', 'Spanien': 'Spain',
+    'USA': 'US', 'Tyskland': 'Germany', 'Sydafrika': 'South+Africa',
+    'Portugal': 'Portugal', 'Chile': 'Chile', 'Australien': 'Australia',
+    'Argentina': 'Argentina', 'Nya Zeeland': 'New+Zealand',
+    'Österrike': 'Austria', 'Grekland': 'Greece', 'Ungern': 'Hungary',
+}
+
+RECOGNIZED_CRITICS = [
+    'James Suckling', 'Falstaff', 'Decanter', 'Jancis Robinson',
+    'Wine Enthusiast', 'Wine Spectator', 'Robert Parker', 'Wine Advocate',
+    'Vinous', 'Tim Atkin', 'Antonio Galloni', 'Vinum Wine Magazine',
+    'Gismondi on Wine', 'Owen Bargreen', 'Cameron Douglas',
+    'Patricio Tapia', 'Revista Adega', 'Guia Penin',
+    'Lisa Perrotti-Brown', 'Neal Martin', 'Luis Gutierrez',
+    'Stephan Reinhardt', 'Monica Larner', 'Jeff Leve',
+    'Jane Anson', 'Huon Hooke', 'Bob Campbell',
+    'Gambero Rosso', 'Gilbert & Gaillard', 'Luca Maroni',
+    'Wine & Spirits', 'Halliday Wine Companion',
+]
+
+def load_cache():
+    if CACHE_FILE.exists():
+        return json.load(open(CACHE_FILE))
+    return {}
+
+def save_cache(cache):
+    json.dump(cache, open(CACHE_FILE, 'w'), ensure_ascii=False, indent=1)
+
+def build_search_url(wine):
+    name = wine.get('name', '').replace(' ', '+')
+    grape = wine.get('grape', '').split(',')[0].strip().replace(' ', '+')
+    country = COUNTRY_MAP.get(wine.get('country', ''), '')
+    parts = [p for p in [name, grape, country] if p]
+    return f"https://www.wine-searcher.com/find/{'+'.join(parts)}"
+
+def wait_captcha(page, timeout=120):
+    for i in range(timeout):
+        try:
+            body = page.inner_text('body')
+            if 'Press & Hold' not in body and 'confirm you are' not in body:
+                return True
+        except:
+            pass
+        if i == 0:
+            print("  CAPTCHA — lös den!", flush=True)
+        time.sleep(1)
+    return False
+
+def parse_critic_section(text):
+    """Parse critic scores from page text."""
+    result = {
+        'aggregate_score': None,
+        'num_scores': 0,
+        'critics': [],
+        'user_rating': None,
+        'user_count': 0,
+        'style': None,
+    }
+
+    # Style
+    style_m = re.search(r'Style\n(.+)', text)
+    if style_m:
+        result['style'] = style_m.group(1).strip()
+
+    # User rating from top of page: "4\nfrom 529 User Ratings"
+    user_m = re.search(r'(\d(?:\.\d)?)\nfrom\s+(\d[\d,]*)\s+User Ratings?', text)
+    if user_m:
+        result['user_rating'] = float(user_m.group(1))
+        result['user_count'] = int(user_m.group(2).replace(',', ''))
+
+    # Cut to critics section only
+    start = text.find('Critics Scores')
+    end = text.find('User Ratings (')
+    if start < 0:
+        return result
+    section = text[start:end] if end > start else text[start:]
+
+    # Aggregate: first "N / 100\nN scores" in section
+    agg = re.search(r'(\d{2,3})\s*/\s*100\n\s*(\d+)\s*scores?', section)
+    if agg:
+        result['aggregate_score'] = int(agg.group(1))
+        result['num_scores'] = int(agg.group(2))
+
+    # Individual critics
+    lines = section.split('\n')
+    # Skip past the aggregate/histogram (find first "About" which ends first review)
+    first_about = next((i for i, l in enumerate(lines) if 'About ' in l), 0)
+    # Actually parse from after histogram — find "0 - 74" line which ends histogram
+    hist_end = 0
+    for i, l in enumerate(lines):
+        if '0 - 74' in l:
+            hist_end = i + 2  # skip the count after it
+            break
+
+    for i in range(hist_end, len(lines)):
+        line_s = lines[i].strip()
+        m = re.match(r'^(\d{1,3}(?:\.\d)?)\s*/\s*(100|20)$', line_s)
+        if not m:
+            continue
+
+        score_raw = float(m.group(1))
+        scale = int(m.group(2))
+
+        if i + 1 >= len(lines):
+            continue
+        critic = lines[i + 1].strip()
+
+        # Skip noise
+        if len(critic) < 3 or critic.startswith('About') or 'score' in critic.lower():
+            continue
+
+        score_100 = round(score_raw * 5) if scale == 20 else int(score_raw)
+        if score_100 < 50 or score_100 > 100:
+            continue
+
+        # Vintage
+        vintage = None
+        if i + 2 < len(lines):
+            vm = re.search(r'(\d{4})\s*Vintage', lines[i + 2])
+            if vm:
+                vintage = int(vm.group(1))
+
+        is_recognized = any(rc.lower() in critic.lower() for rc in RECOGNIZED_CRITICS)
+
+        result['critics'].append({
+            'critic': critic,
+            'score': score_100,
+            'score_raw': f"{m.group(1)}/{m.group(2)}",
+            'vintage': vintage,
+            'recognized': is_recognized,
+        })
+
+    return result
+
+def scrape_wine(page, wine):
+    url = build_search_url(wine)
+    page.goto(url)
+    time.sleep(RATE_LIMIT)
+    if not wait_captcha(page):
+        return None
+
+    # Check if we're on a wine page (has "/ 100" score)
+    body = page.inner_text('body')
+    if '/ 100' not in body:
+        return parse_critic_section(body)
+
+    # Click "Reviews" tab
+    try:
+        page.click('text=Reviews')
+        time.sleep(3)
+        if not wait_captcha(page):
+            return None
+    except:
+        pass
+
+    # Click "See more" to load all reviews
+    try:
+        see_more = page.query_selector('text=See more')
+        if see_more:
+            see_more.click()
+            time.sleep(2)
+    except:
+        pass
+
+    body = page.inner_text('body')
+    return parse_critic_section(body)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--test', type=int, default=0)
+    parser.add_argument('--offset', type=int, default=0)
+    parser.add_argument('--login', action='store_true', help='Just open browser for login')
+    args = parser.parse_args()
+
+    if args.login:
+        with sync_playwright() as p:
+            browser = p.chromium.launch_persistent_context(
+                user_data_dir=CHROME_PROFILE, headless=False,
+                args=['--disable-blink-features=AutomationControlled'],
+            )
+            page = browser.pages[0] if browser.pages else browser.new_page()
+            page.goto('https://www.wine-searcher.com/login')
+            print("Logga in i browsern. Stäng fönstret när du är klar.")
+            for _ in range(600):
+                time.sleep(1)
+                if not browser.contexts:
+                    break
+            try:
+                browser.close()
+            except:
+                pass
+        print("Session sparad!")
+        return
+
+    sb = json.load(open(SB_FILE))
+    wines = [p for p in sb if p.get('cat1') == 'Vin' and p.get('assortment') == 'Fast sortiment']
+    print(f"Fast sortiment: {len(wines)} viner")
+
+    cache = load_cache()
+    print(f"Cache: {len(cache)} entries")
+
+    if args.offset:
+        wines = wines[args.offset:]
+    if args.test:
+        wines = wines[:args.test]
+        print(f"Test: {args.test} viner")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch_persistent_context(
+            user_data_dir=CHROME_PROFILE, headless=False, slow_mo=200,
+            args=['--disable-blink-features=AutomationControlled'],
+        )
+        page = browser.pages[0] if browser.pages else browser.new_page()
+
+        # Verify login
+        page.goto('https://www.wine-searcher.com')
+        time.sleep(3)
+        wait_captcha(page)
+        if 'PRO' not in page.inner_text('body'):
+            print("Inte inloggad som PRO! Kör --login först.")
+            browser.close()
+            return
+
+        print("PRO inloggad!\n")
+
+        matched = skipped = no_score = errors = 0
+
+        for i, wine in enumerate(wines):
+            nr = str(wine.get('nr', ''))
+            if nr in cache and cache[nr].get('aggregate_score') is not None:
+                skipped += 1
+                continue
+
+            name = wine.get('name', '')
+            print(f"[{i+1}/{len(wines)}] {name[:35]}...", end=" ", flush=True)
+
+            try:
+                result = scrape_wine(page, wine)
+                if result and result.get('aggregate_score'):
+                    rec = [c for c in result.get('critics', []) if c.get('recognized')]
+                    cache[nr] = {**result, 'sb_name': name}
+                    matched += 1
+                    print(f"✓ {result['aggregate_score']}/100 ({len(rec)} recognized critics)")
+                elif result:
+                    cache[nr] = {**result, 'sb_name': name}
+                    no_score += 1
+                    print("– no scores")
+                else:
+                    errors += 1
+                    print("✗ error")
+            except Exception as e:
+                errors += 1
+                print(f"✗ {str(e)[:60]}")
+
+            if (matched + no_score + errors) % 10 == 0 and (matched + no_score + errors) > 0:
+                save_cache(cache)
+
+        browser.close()
+
+    save_cache(cache)
+    with_scores = sum(1 for v in cache.values() if v.get('aggregate_score'))
+    print(f"\n{'='*50}")
+    print(f"  Med scores:  {matched} (totalt {with_scores} i cache)")
+    print(f"  Utan scores: {no_score}")
+    print(f"  Errors:      {errors}")
+    print(f"  Skipped:     {skipped}")
+    print(f"  Cache:       {len(cache)} entries")
+    print(f"  Sparat:      {CACHE_FILE}")
+    print(f"{'='*50}")
+
+if __name__ == "__main__":
+    main()
