@@ -335,13 +335,13 @@ function Card({ p, rank, delay, totalInCategory }) {
             <div style={{ flexShrink: 0, textAlign: "center" }}>
               <div style={{ position: "relative", display: "inline-block" }}>
                 <svg width="50" height="50" viewBox="0 0 50 50" style={{ display: "block" }}>
-                  <circle cx="25" cy="25" r="22" fill="none" stroke={t.bdr} strokeWidth="2.5" />
-                  <circle cx="25" cy="25" r="22" fill="none" stroke={col} strokeWidth="2.5"
+                  <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+                  <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
+                  <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
                     strokeDasharray={`${s100 * 1.38} 138`} strokeLinecap="round"
                     transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 0.8s ease" }} />
-                  <circle cx="25" cy="25" r="18" fill={`${col}08`} />
-                  <text x="25" y="29" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
-                    fontSize="18" fontWeight="900" fill={col}>{s100}</text>
+                  <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                    fontSize="19" fontWeight="900" fill="#2d6b3f">{s100}</text>
                 </svg>
               {/* Overlapping mini-badges */}
               {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
@@ -352,7 +352,7 @@ function Card({ p, rank, delay, totalInCategory }) {
                 </div>
               )}
               </div>
-              <div style={{ fontSize: 9, color: t.txL, marginTop: 3 }}>Kvalitet/pris</div>
+              <div style={{ fontSize: 9, color: "#998877", marginTop: 3 }}>Kvalitet/pris</div>
             </div>
           </div>
 
