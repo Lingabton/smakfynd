@@ -231,9 +231,9 @@ function Card({ p, rank, delay, totalInCategory }) {
               </div>
               {/* Overlapping mini-badges */}
               {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
-                <div style={{ position: "absolute", top: -6, left: -8, display: "flex", gap: 2 }}>
+                <div style={{ position: "absolute", top: -6, left: -14, display: "flex", gap: 2 }}>
                   {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 8, fontWeight: 800, padding: "2px 5px", borderRadius: 4, background: t.deal, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>−{p.price_vs_launch_pct}%</span>}
-                  {p.organic && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: t.green, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>EKO</span>}
+                  {p.organic && <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 7px", borderRadius: 5, background: t.green, color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", letterSpacing: "0.05em" }}>EKO</span>}
                   {p.is_new && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: t.wine, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>NY</span>}
                 </div>
               )}
@@ -972,11 +972,14 @@ function SmakfyndApp() {
           ))}
         </div>
 
-        {/* ═══ PRICE PILLS ═══ */}
+        {/* ═══ PRICE PILLS + EKO ═══ */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
           {[["0-99", "Under 100 kr"], ["100-150", "100–150 kr"], ["151-200", "150–200 kr"], ["201-9999", "200+ kr"]].map(([k, l]) => (
             <button key={k} onClick={() => setPrice(price === k ? "all" : k)} style={pill(price === k)}>{l}</button>
           ))}
+          <button onClick={() => setShowEco(!showEco)} style={{ ...pill(showEco, t.green), display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 12 }}>🌿</span> Ekologiskt
+          </button>
         </div>
 
         {/* ═══ ADVANCED TOGGLE ═══ */}
