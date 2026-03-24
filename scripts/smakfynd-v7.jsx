@@ -42,11 +42,14 @@ const FOOD_CATS = [
 ];
 
 const FAQS = [
-  {q:"Hur beräknas Smakfynd-poängen?",a:"Vi tittar på två saker: hur bra vinet är (enligt vanliga människors betyg) och vad det kostar jämfört med andra viner i samma prisklass. Ett vin för 159 kr jämförs med andra viner i spannet 150–249 kr — inte med viner för 79 kr. Poängen visas på en skala 1–100 där högre är bättre."},
-  {q:"Var kommer betygen ifrån?",a:"Smakfynd kombinerar crowd-betyg från miljontals användare med expertrecensioner från vinkritiker, och väger in priset relativt kategorin. Resultatet är en enda poäng som visar kvalitet per krona."},
-  {q:"Vad betyder 'pris sedan lansering'?",a:"När ett vin först börjar säljas på Systembolaget har det ett visst pris. Ibland sänker importören priset senare. Systembolaget skyltar inte med dessa prissänkningar, men vi håller koll."},
-  {q:"Säljer Smakfynd alkohol?",a:"Nej. Vi är en helt oberoende informationstjänst som drivs av Olav Innovation AB. Alla köp gör du via Systembolaget."},
-  {q:"Hur ofta uppdateras informationen?",a:"Varje vecka. Vi går igenom hela Systembolagets sortiment, hämtar senaste betygen och räknar om poängen."},
+  {q:"Hur beräknas Smakfynd-poängen?",a:"Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Kvalitet väger 75%, prisvärde 25%. Poängen visas på en skala 1–100."},
+  {q:"Var kommer betygen ifrån?",a:"Crowd-betyg kommer från hundratusentals vindrickare världen över. Expertbetyg hämtas från erkända vinkritiker som James Suckling, Falstaff, Decanter och Wine Enthusiast. Prisvärdet beräknar vi själva genom att jämföra literpriset mot medianen i samma kategori — rött jämförs med rött, bubbel med bubbel."},
+  {q:"Vad betyder Crowd- och Expert-staplarna?",a:"Crowd visar vad vanliga vindrickare tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas betyder det att vi inte hittat kritikerrecensioner för det vinet — men crowd-betyget finns alltid."},
+  {q:"Hur fungerar AI-vinmatcharen?",a:"Beskriv vad du ska äta — till exempel 'grillad lax med potatisgratäng' eller 'toast skagen, sedan entrecôte'. Vår AI analyserar måltiden och föreslår viner för varje rätt i olika prisklasser, direkt från Systembolagets sortiment."},
+  {q:"Vad betyder prissänkt?",a:"Vi sparar priset varje vecka. När ett vin sänks i pris visar vi det gamla priset överstruket och procentuell sänkning. Systembolaget skyltar inte alltid med prissänkningar — vi håller koll åt dig."},
+  {q:"Varför får ekologiska viner bonus?",a:"Vi ger ekologiska viner en liten poängbonus (+0.2 av 10) för att främja hållbarhet. Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner det ekologiska alternativet."},
+  {q:"Säljer Smakfynd alkohol?",a:"Nej. Smakfynd är en helt oberoende informationstjänst som drivs av Olav Innovation AB. Vi har ingen koppling till Systembolaget. Alla köp gör du via Systembolaget.se."},
+  {q:"Hur ofta uppdateras sajten?",a:"Varje vecka. Vi hämtar hela Systembolagets sortiment, uppdaterar betyg och räknar om poängen. Prishistoriken uppdateras samtidigt."},
 ];
 
 // ── Color system ──
@@ -765,38 +768,50 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Smakfynd är en oberoende tjänst som hjälper dig hitta de bästa vinfynden på Systembolaget — oavsett budget. Vi rankar <strong>{products.length} viner</strong> baserat på crowd-betyg, expertrecensioner och prisvärde.
+              Smakfynd hjälper dig hitta viner som ger mest smak för pengarna. Vi rankar <strong>{products.length} viner</strong> på Systembolaget genom att kombinera tre datakällor: crowd-betyg från hundratusentals vindrickare, poäng från erkända vinkritiker, och en prisjämförelse mot andra viner i samma kategori.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
-              Röda viner jämförs med röda viner, inte med öl. Du hittar det bästa valet oavsett budget.
+              Resultatet är en enda poäng — <strong>Smakfynd-poängen</strong> — som visar kvalitet per krona. Vi har även en AI-vinmatchare som föreslår viner baserat på vad du ska äta.
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 4 }}>Gabriel Linton, grundare</div>
               <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
-                Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan (Örebro universitet). Regelbunden besökare av vingårdar i Italien och resten av Sydeuropa. Smakfynd föddes ur frustrationen att behöva gissa sig fram på Systembolaget — och insikten att datan redan fanns, men att ingen kopplat ihop den åt konsumenten.
+                Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan (Örebro universitet). Besöker regelbundet vingårdar i Italien och Sydeuropa. Smakfynd föddes ur frustrationen att behöva gissa sig fram bland tusentals viner — och insikten att all data redan fanns, men ingen hade kopplat ihop den åt konsumenten.
               </p>
             </div>
-            <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Ingen alkoholförsäljning · Inget samarbete med Systembolaget</p>
+            <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
         )}
 
         {panel === "method" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
-            <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Så beräknas poängen</h2>
-            <div style={{ padding: 14, borderRadius: 10, background: t.bg, fontFamily: "'DM Mono', monospace", fontSize: 12, color: t.tx, lineHeight: 1.9, marginBottom: 14, border: `1px solid ${t.bdrL}` }}>
-              <div><strong>Smakfynd-poäng</strong> = Kvalitet ÷ Relativt pris</div>
-              <div style={{ marginTop: 4, opacity: 0.7 }}>Kvalitet = betyg × (0.55 + 0.45 × min(omdömen / 15000, 1))</div>
-              <div style={{ opacity: 0.7 }}>Relativt pris = literpris ÷ medianpris i kategorin</div>
+            <h2 style={{ margin: "0 0 14px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Så beräknas poängen</h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+              {[
+                ["👥", "Crowd-betyg (75%)", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre — ett vin med 100 000 röster är mer pålitligt än ett med 50. Viner med 50 000+ omdömen får en liten tillförlitlighetsbonus."],
+                ["🏆", "Expertrecensioner (75%)", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om både crowd och experter är överens får vinet en extra bonus. Saknas expertbetyg räknas bara crowd."],
+                ["💰", "Prisvärde (25%)", "Literpriset jämförs mot medianen i samma kategori. Ett rött vin för 99 kr jämförs mot andra röda viner — inte mot bubbel eller vitt. Billigare än snittet = högre poäng."],
+              ].map(([icon, title, desc], i) => (
+                <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>{icon}</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: t.tx, marginBottom: 2 }}>{title}</div>
+                    <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 8px" }}>
-              <strong>Kvalitet</strong> baseras på crowd-betyg viktat mot antal omdömen — fler röster ger högre tillförlitlighet.
-            </p>
-            <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 8px" }}>
-              <strong>Relativt pris</strong> jämför mot medianen i samma kategori. Ett rött vin jämförs mot andra röda viner, inte mot öl.
-            </p>
-            <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: 0 }}>
-              <strong>Resultat:</strong> Högt betyg + lägre pris = hög poäng. Lågt betyg = alltid låg poäng oavsett pris.
+
+            <div style={{ padding: 14, borderRadius: 10, background: t.bg, marginBottom: 14, border: `1px solid ${t.bdrL}` }}>
+              <div style={{ fontSize: 13, color: t.tx, lineHeight: 1.7 }}>
+                <strong>Kvalitet</strong> (crowd + expert snittet) väger <strong>75%</strong>, prisvärde <strong>25%</strong>. Ekologiska viner får en liten hållbarhetsbonus. Viner med dålig kvalitet (under 6.3/10) kan aldrig få mer än 50 poäng — oavsett hur billiga de är.
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
+              <strong>Resultat:</strong> Ett vin med höga betyg och lägre pris relativt sin kategori hamnar högt. Ett dyrt vin med mediokra betyg hamnar lågt. Kvalitet går alltid före pris.
             </p>
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
