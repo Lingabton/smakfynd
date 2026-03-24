@@ -368,6 +368,15 @@ function Card({ p, rank, delay, totalInCategory }) {
           <div style={{ marginTop: 8 }}>
             <ScoreBars p={p} />
           </div>
+
+          {/* Row 4: Why this wine ranks high */}
+          <div style={{ marginTop: 6, display: "flex", gap: 4, flexWrap: "wrap" }}>
+            {p.crowd_score >= 8.0 && <span style={{ fontSize: 9, color: "#6b8cce", background: "#6b8cce10", padding: "2px 7px", borderRadius: 100 }}>Starkt crowd-stöd</span>}
+            {p.crowd_score >= 7.0 && p.crowd_score < 8.0 && p.crowd_reviews >= 10000 && <span style={{ fontSize: 9, color: "#6b8cce", background: "#6b8cce10", padding: "2px 7px", borderRadius: 100 }}>Många omdömen</span>}
+            {p.expert_score >= 7.5 && <span style={{ fontSize: 9, color: "#b07d3b", background: "#b07d3b10", padding: "2px 7px", borderRadius: 100 }}>Gott expertstöd</span>}
+            {p.price_score >= 8 && <span style={{ fontSize: 9, color: t.green, background: `${t.green}10`, padding: "2px 7px", borderRadius: 100 }}>Prisvärt i sin kategori</span>}
+            {p.price_score >= 6 && p.price_score < 8 && p.crowd_score >= 7.5 && <span style={{ fontSize: 9, color: t.txM, background: `${t.txM}10`, padding: "2px 7px", borderRadius: 100 }}>Bra betyg till rimligt pris</span>}
+          </div>
         </div>
       </div>
 
@@ -1280,9 +1289,12 @@ function SmakfyndApp() {
         )}
 
         {/* ═══ RESULTS ═══ */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14, padding: "0 4px" }}>
-          <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
-          <span style={{ fontSize: 11, color: t.txF }}>Sorterat efter Smakfynd-poäng</span>
+        <div style={{ marginBottom: 14, padding: "0 4px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
+            <span style={{ fontSize: 11, color: t.txF }}>Sorterat efter kvalitet per krona</span>
+          </div>
+          <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Poängen visar prisvärde — inte "bästa vinet", utan mest smak för pengarna i sin kategori.</div>
         </div>
 
         {loading ? (
