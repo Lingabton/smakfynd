@@ -365,6 +365,14 @@ def main():
     wines = [p for p in sb if p.get('cat1') == 'Vin' and p.get('assortment') == 'Fast sortiment']
     print(f"Fast sortiment: {len(wines)} viner")
 
+    # Sort by Smakfynd ranking so top wines get scraped first
+    ranked_file = DATA_DIR / "smakfynd_ranked_v2.json"
+    if ranked_file.exists():
+        ranked = json.load(open(ranked_file))
+        rank_order = {str(p.get('nr','')): i for i, p in enumerate(ranked)}
+        wines.sort(key=lambda p: rank_order.get(str(p.get('nr','')), 99999))
+        print("Sorted by Smakfynd rank (top wines first)")
+
     cache = load_cache()
     print(f"Cache: {len(cache)} entries")
 
