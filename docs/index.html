@@ -470,6 +470,92 @@ function Card({ p, rank, delay, totalInCategory }) {
             </div>
           )}
 
+          {/* Score breakdown */}
+          <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 10, background: t.bg }}>
+            <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Poängfördelning</div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {/* Left: score bars */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Crowd */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#6b8cce" }}>Crowd</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: p.crowd_score ? "#6b8cce" : t.txL }}>{p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.crowd_score && (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} />
+                      </div>
+                      <div style={{ fontSize: 10, color: t.txL }}>
+                        {p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : ""}
+                        {p.crowd_reviews >= 50000 && <span style={{ color: t.green, fontWeight: 600 }}> — mycket pålitligt</span>}
+                        {p.crowd_reviews >= 10000 && p.crowd_reviews < 50000 && <span style={{ color: t.txM }}> — pålitligt</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Expert */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#b07d3b" }}>Expert</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: p.expert_score ? "#b07d3b" : t.txL }}>{p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.expert_score ? (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} />
+                      </div>
+                      <div style={{ fontSize: 10, color: t.txL }}>
+                        Snitt från erkända vinkritiker
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 10, color: t.txL, fontStyle: "italic" }}>Inga kritikerrecensioner hittade för detta vin</div>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: t.txM }}>Prisvärde</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: t.txM }}>{p.price_score ? `${p.price_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.price_score && (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.price_score * 10}%`, height: "100%", borderRadius: 2, background: t.txM }} />
+                      </div>
+                      <div style={{ fontSize: 10, color: t.txL }}>
+                        {(() => {
+                          const catMedians = { "Rött": 279, "Vitt": 239, "Rosé": 160, "Mousserande": 399 };
+                          const catNames = { "Rött": "rött vin", "Vitt": "vitt vin", "Rosé": "rosévin", "Mousserande": "mousserande" };
+                          const median = catMedians[p.category] || 250;
+                          return `${p.price}kr · Medianen för ${catNames[p.category] || "vin"}: ${median}kr`;
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: total score */}
+              <div style={{ textAlign: "center", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 14,
+                  background: `linear-gradient(135deg, ${col}18, ${col}08)`,
+                  border: `2px solid ${col}30`,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
+                </div>
+                <span style={{ fontSize: 9, color: t.txL, marginTop: 4 }}>Smakfynd-</span>
+                <span style={{ fontSize: 9, color: t.txL }}>poäng</span>
+              </div>
+            </div>
+          </div>
+
           {/* Price drop info */}
           {p.launch_price && p.price_vs_launch_pct > 0 && (
             <div style={{ padding: "10px 14px", borderRadius: 10, background: t.dealL, marginBottom: 14, fontSize: 13, color: t.deal, lineHeight: 1.5 }}>
