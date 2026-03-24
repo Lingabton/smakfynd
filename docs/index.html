@@ -42,9 +42,18 @@ const PRICES = [
 ];
 
 const GABRIELS_PICKS = [
-  {name:"Three Finger Jack",sub:"Cabernet Sauvignon · USA",price:"159 kr",smakfynd_score:76,nr:"352801",note:"Kraftfull Cabernet från Lodi i Kalifornien. Mörka körsbär, vanilj och en mjuk finish som gör den till en perfekt stekkompis. Prisvärd för den som gillar Nya världens generösa stil utan att det blir för tungt."},
-  {name:"Mucho Mas",sub:"Grenache · Spanien",price:"99 kr",smakfynd_score:80,nr:"5234001",note:"Fruktbomb under hundralappen. Mogna hallon och körsbär med en kryddig touch — perfekt vardagsvin till pasta, tacos eller bara ett glas på balkongen. Svårslaget värde."},
-  {name:"Leitz Eins Zwei Dry",sub:"Riesling · Tyskland",price:"107 kr",smakfynd_score:73,nr:"582201",note:"Torr tysk Riesling med skarp syra och gröna äpplen. Passar utmärkt till asiatisk mat, fisk och skaldjur. Annorlunda val för den som vill utforska bortom det vanliga."},
+  {name:"Three Finger Jack",sub:"Cabernet Sauvignon · USA",price:"159 kr",smakfynd_score:75,nr:"352801",
+   food:"Grillat kött, burgare, BBQ",
+   verdict:"Till grillkvällen",
+   note:"Rankas #102 av nästan 11 000 viner med 75 poäng. Crowd-betyget 4.1 på Vivino från 28 000 recensioner och 90 poäng från Wine Enthusiast — alltså omtyckt av både vanligt folk och experter. Till 159 kr är det prisvärda bra. Köpte den till hamburgare en fredagskväll och den levererade verkligen. Rejäl Cabernet med lite vanilj men utan att det blir för mycket. Har blivit mitt go-to till allt grillat."},
+  {name:"Mucho Mas",sub:"Grenache · Spanien",price:"99 kr",smakfynd_score:78,nr:"5234001",
+   food:"Pasta, tacos, pizza",
+   verdict:"Vardagsfavoriten",
+   note:"78 poäng och rank #27 — nästan topp 0.3% av alla viner. Över 112 000 crowd-recensioner med 4.1 i snitt, det är många som gillar det här vinet. Inga expert-betyg, men med så många reviews behövs det inte. Och 99 kr? Prispoängen 8.7/10 säger allt. Det här är vinet jag alltid har hemma. Funkar till tacos, pasta, eller bara ett glas på balkongen."},
+  {name:"Leitz Eins Zwei Dry",sub:"Riesling · Tyskland",price:"107 kr",smakfynd_score:70,nr:"582201",
+   food:"Asiatiskt, fisk, skaldjur",
+   verdict:"Oväntat bra",
+   note:"70 poäng och rank #862 — inte topplistan, men det beror på att crowd-betyget 3.8 drar ner den. Jag tror Riesling är underskattat på Vivino — folk som betygsätter dricker mest rött. Till 107 kr tycker jag den ger mer än siffran säger. Testade den till hemmagjord pad thai och det var en perfekt kombo. Fräsch, torr, lite äpple. Om du alltid köper samma vin — ge den här en chans."},
 ];
 
 const FOOD_CATS = [
@@ -858,48 +867,94 @@ function SmakfyndApp() {
         {/* ═══ FOOD MATCH ═══ */}
         <FoodMatch products={products} />
 
-        {/* ═══ GABRIELS VAL ═══ */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-            <h2 style={{ margin: 0, fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Gabriels val</h2>
-            <span style={{ fontSize: 12, color: t.txL }}>mars 2026</span>
-          </div>
-          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6 }}>
-            {GABRIELS_PICKS.map((pick, i) => (
-              <div key={i} style={{
-                minWidth: 260, maxWidth: 280, padding: 18, borderRadius: 16,
-                background: t.card, border: `1px solid ${t.bdr}`,
-                flexShrink: 0, display: "flex", flexDirection: "column", gap: 8,
-                animation: `slideUp 0.4s ease ${0.1 + i * 0.08}s both`,
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
-                    <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{pick.sub}</div>
-                  </div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, flexShrink: 0 }}>{pick.price}</div>
+        {/* ═══ MÅNADENS TIPS ═══ */}
+        {(() => {
+          const [tipsOpen, setTipsOpen] = useState(false);
+          return (
+            <div style={{ marginBottom: 16 }}>
+              <button onClick={() => setTipsOpen(!tipsOpen)}
+                style={{
+                  width: "100%", padding: "12px 16px", borderRadius: 12,
+                  background: t.card, border: `1px solid ${t.bdr}`,
+                  cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 14 }}>🍷</span>
+                  <span style={{ fontSize: 13, color: t.tx }}>
+                    <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}>Månadens tips</strong>
+                    <span style={{ color: t.txL }}> — Gabriel har testat 3 viner från topplistan</span>
+                  </span>
                 </div>
-                <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.55, margin: 0, fontStyle: "italic", flex: 1 }}>
-                  &ldquo;{pick.note}&rdquo;
-                </p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: `1px solid ${t.bdrL}`, gap: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: t.green }}>{pick.smakfynd_score}/100</span>
-                  <a href={`https://www.systembolaget.se/produkt/${pick.nr}`} target="_blank" rel="noopener noreferrer"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: 4,
-                      padding: "5px 12px", borderRadius: 8,
-                      background: t.tx, color: "#faf6f0",
-                      fontSize: 11, fontWeight: 600, textDecoration: "none",
-                      transition: "opacity 0.2s",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                  >Systembolaget ↗</a>
+                <span style={{ fontSize: 10, color: t.txL, transition: "transform 0.2s", display: "inline-block", transform: tipsOpen ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+              </button>
+              {tipsOpen && (
+                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 12 }}>
+                  {GABRIELS_PICKS.map((pick, i) => {
+                    const [_l, col] = getScoreInfo(pick.smakfynd_score);
+                    return (
+                      <div key={i} style={{
+                        padding: "16px 18px", borderRadius: 14,
+                        background: t.card, border: `1px solid ${t.bdr}`,
+                      }}>
+                        {/* Header: score + name + price */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                          <div style={{
+                            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                            background: `${col}12`, border: `2px solid ${col}30`,
+                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <span style={{ fontSize: 18, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{pick.smakfynd_score}</span>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 17, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
+                            <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{pick.sub}</div>
+                          </div>
+                          <div style={{ textAlign: "right", flexShrink: 0 }}>
+                            <div style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{pick.price}</div>
+                          </div>
+                        </div>
+
+                        {/* Verdict badge */}
+                        {pick.verdict && (
+                          <div style={{ fontSize: 11, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                            {pick.verdict}
+                          </div>
+                        )}
+
+                        {/* Note */}
+                        <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.65, margin: "0 0 12px" }}>
+                          {pick.note}
+                        </p>
+
+                        {/* Food + buy */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: `1px solid ${t.bdrL}` }}>
+                          {pick.food && (
+                            <div style={{ fontSize: 11, color: t.txL }}>
+                              Passar till: <span style={{ color: t.txM }}>{pick.food}</span>
+                            </div>
+                          )}
+                          <a href={`https://www.systembolaget.se/produkt/${pick.nr}`} target="_blank" rel="noopener noreferrer"
+                            style={{
+                              display: "inline-flex", alignItems: "center", gap: 4,
+                              padding: "6px 14px", borderRadius: 8,
+                              background: t.tx, color: "#faf6f0",
+                              fontSize: 11, fontWeight: 600, textDecoration: "none",
+                              transition: "opacity 0.2s", flexShrink: 0,
+                            }}
+                            onClick={e => e.stopPropagation()}
+                            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                          >Köp på Systembolaget ↗</a>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══ SEARCH ═══ */}
         <div style={{ position: "relative", marginBottom: 14 }}>
