@@ -24,15 +24,15 @@ const GABRIELS_PICKS = [
   {name:"Three Finger Jack",sub:"Cabernet Sauvignon · USA",price:"159 kr",smakfynd_score:75,nr:"352801",
    food:"Grillat kött, burgare, BBQ",
    verdict:"Till grillkvällen",
-   note:"Rankas #102 av nästan 11 000 viner med 75 poäng. Crowd-betyget 4.1 på Vivino från 28 000 recensioner och 90 poäng från Wine Enthusiast — alltså omtyckt av både vanligt folk och experter. Till 159 kr är det prisvärda bra. Köpte den till hamburgare en fredagskväll och den levererade verkligen. Rejäl Cabernet med lite vanilj men utan att det blir för mycket. Har blivit mitt go-to till allt grillat."},
+   note:"Köpte den här till hamburgare en fredagskväll och den levererade verkligen. Rejäl Cabernet med lite vanilj men utan att det blir för mycket. Har blivit mitt go-to till allt grillat. Omtyckt av både crowd och experter — och till 159 kr känns den prisvärd."},
   {name:"Mucho Mas",sub:"Grenache · Spanien",price:"99 kr",smakfynd_score:78,nr:"5234001",
    food:"Pasta, tacos, pizza",
    verdict:"Vardagsfavoriten",
-   note:"78 poäng och rank #27 — nästan topp 0.3% av alla viner. Över 112 000 crowd-recensioner med 4.1 i snitt, det är många som gillar det här vinet. Inga expert-betyg, men med så många reviews behövs det inte. Och 99 kr? Prispoängen 8.7/10 säger allt. Det här är vinet jag alltid har hemma. Funkar till tacos, pasta, eller bara ett glas på balkongen."},
+   note:"Det här är vinet jag alltid har hemma. Funkar till tacos, pasta, eller bara ett glas på balkongen. Under hundralappen och över 112 000 personer har gett det bra betyg — det säger en del. Inget fancy, bara pålitligt bra."},
   {name:"Leitz Eins Zwei Dry",sub:"Riesling · Tyskland",price:"107 kr",smakfynd_score:70,nr:"582201",
    food:"Asiatiskt, fisk, skaldjur",
    verdict:"Oväntat bra",
-   note:"70 poäng och rank #862 — inte topplistan, men det beror på att crowd-betyget 3.8 drar ner den. Jag tror Riesling är underskattat på Vivino — folk som betygsätter dricker mest rött. Till 107 kr tycker jag den ger mer än siffran säger. Testade den till hemmagjord pad thai och det var en perfekt kombo. Fräsch, torr, lite äpple. Om du alltid köper samma vin — ge den här en chans."},
+   note:"Jag dricker mest rött, men den här fick mig att tänka om. Fräsch, torr, lite äpple. Testade till hemmagjord pad thai — perfekt kombo. Crowd-betyget är lite lågt, men jag tror Riesling är underskattat. Om du alltid köper samma vin — ge den här en chans."},
 ];
 
 const FOOD_CATS = [
@@ -742,31 +742,11 @@ function SmakfyndApp() {
         </h1>
 
         <p style={{
-          margin: "0 auto 28px", fontSize: 15, color: t.txM, lineHeight: 1.6,
-          maxWidth: 400, fontWeight: 300,
+          margin: "0 auto 24px", fontSize: 15, color: t.txM, lineHeight: 1.6,
+          maxWidth: 420, fontWeight: 300,
         }}>
-          Varje produkt rankad efter kvalitet i förhållande till pris — baserat på crowd-betyg, expertrecensioner och prisjämförelse.
+          Vi rankar {products.length} viner från {countries} länder efter kvalitet per krona.
         </p>
-
-        {/* Stats */}
-        <div style={{
-          display: "inline-flex", gap: 0, borderRadius: 14, overflow: "hidden",
-          border: `1px solid ${t.bdr}`, background: t.card, marginBottom: 20,
-        }}>
-          {[
-            [products.length, "produkter"],
-            [reviewsStr, "omdömen"],
-            [countries, "länder"],
-          ].map(([val, label], i) => (
-            <div key={i} style={{
-              padding: "14px 24px", textAlign: "center",
-              borderLeft: i > 0 ? `1px solid ${t.bdr}` : "none",
-            }}>
-              <div style={{ fontSize: 22, fontWeight: 400, color: t.tx, fontFamily: "'Instrument Serif', serif", lineHeight: 1 }}>{val}</div>
-              <div style={{ fontSize: 10, color: t.txL, marginTop: 3, letterSpacing: "0.04em" }}>{label}</div>
-            </div>
-          ))}
-        </div>
 
         {/* Nav links */}
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
