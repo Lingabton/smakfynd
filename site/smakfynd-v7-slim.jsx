@@ -717,15 +717,36 @@ function SmakfyndApp() {
           margin: "0 0 12px", fontSize: 36, lineHeight: 1.1,
           fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: t.tx,
         }}>
-          Smartare vinval<br />på <em style={{ color: t.wine }}>Systembolaget</em>
+          Hitta vinet som ger<br />mest <em style={{ color: t.wine }}>smak för pengarna</em>
         </h1>
 
         <p style={{
-          margin: "0 auto 24px", fontSize: 15, color: t.txM, lineHeight: 1.6,
-          maxWidth: 420, fontWeight: 300,
+          margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
+          maxWidth: 440, fontWeight: 300,
         }}>
-          Vi rankar {products.length} viner från {countries} länder efter kvalitet per krona.
+          {products.length} viner rankade efter kvalitet per krona — baserat på crowd-betyg, expertrecensioner och prisjämförelse.
         </p>
+
+        {/* How it works — 3 pillars */}
+        <div style={{
+          display: "flex", gap: 0, borderRadius: 14, overflow: "hidden",
+          border: `1px solid ${t.bdr}`, background: t.card, marginBottom: 20,
+        }}>
+          {[
+            ["👥", "Crowd", "Tusentals omdömen"],
+            ["🏆", "Experter", "Vinkritiker-poäng"],
+            ["💰", "Prisvärde", "Jämfört i kategorin"],
+          ].map(([icon, title, desc], i) => (
+            <div key={i} style={{
+              flex: 1, padding: "12px 8px", textAlign: "center",
+              borderLeft: i > 0 ? `1px solid ${t.bdr}` : "none",
+            }}>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: t.tx }}>{title}</div>
+              <div style={{ fontSize: 9, color: t.txL, marginTop: 1 }}>{desc}</div>
+            </div>
+          ))}
+        </div>
 
         {/* Nav links */}
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
