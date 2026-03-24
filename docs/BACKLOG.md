@@ -21,6 +21,11 @@
 - [ ] Wine-Searcher API för aggregerade kritiker-poäng
 - [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
 
+## Analytics & SEO
+- [ ] Registrera smakfynd.se i Google Search Console + skicka sitemap
+- [ ] Koppla GoatCounter dashboard (smakfynd.goatcounter.com) — redan integrerat, kolla data
+- [ ] Google Analytics eller Plausible som komplement?
+
 ## Content & distribution
 - [ ] Instagram @smakfynd
 - [ ] Reddit/Flashback/Facebook vingrupper (organisk reach)
