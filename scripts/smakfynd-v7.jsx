@@ -23,16 +23,16 @@ const PRICES = [
 const GABRIELS_PICKS = [
   {name:"Three Finger Jack",sub:"Cabernet Sauvignon · USA",price:"159 kr",smakfynd_score:75,nr:"352801",
    food:"Grillat kött, burgare, BBQ",
-   verdict:"Till grillkvällen",
-   note:"Köpte den här till hamburgare en fredagskväll och den levererade verkligen. Rejäl Cabernet med lite vanilj men utan att det blir för mycket. Har blivit mitt go-to till allt grillat. Omtyckt av både crowd och experter — och till 159 kr känns den prisvärd."},
+   verdict:"Bäst till grillat",
+   note:"Rejäl Cabernet med lite vanilj men utan att det blir för mycket. Funkar utmärkt till hamburgare och grillat kött. Omtyckt av både crowd och experter — och till 159 kr prisvärt för kvaliteten."},
   {name:"Mucho Mas",sub:"Grenache · Spanien",price:"99 kr",smakfynd_score:78,nr:"5234001",
    food:"Pasta, tacos, pizza",
-   verdict:"Vardagsfavoriten",
-   note:"Det här är vinet jag alltid har hemma. Funkar till tacos, pasta, eller bara ett glas på balkongen. Under hundralappen och över 112 000 personer har gett det bra betyg — det säger en del. Inget fancy, bara pålitligt bra."},
+   verdict:"Vardagsfynd under 100 kr",
+   note:"Under hundralappen och över 112 000 personer har gett det bra betyg. Funkar till tacos, pasta, eller bara ett glas. Inget fancy — bara pålitligt bra varje gång."},
   {name:"Leitz Eins Zwei Dry",sub:"Riesling · Tyskland",price:"107 kr",smakfynd_score:70,nr:"582201",
    food:"Asiatiskt, fisk, skaldjur",
-   verdict:"Oväntat bra",
-   note:"Jag dricker mest rött, men den här fick mig att tänka om. Fräsch, torr, lite äpple. Testade till hemmagjord pad thai — perfekt kombo. Crowd-betyget är lite lågt, men jag tror Riesling är underskattat. Om du alltid köper samma vin — ge den här en chans."},
+   verdict:"Underskattat vitt val",
+   note:"Fräsch, torr Riesling med äpple och syra. Perfekt till asiatisk mat och fisk. Crowd-betyget är lågt — vi tror Riesling är underskattat i betygsättningen. Värt att testa om du vill prova något nytt."},
 ];
 
 const FOOD_CATS = [
@@ -730,25 +730,26 @@ function SmakfyndApp() {
           {products.length} viner rankade efter kvalitet per krona — baserat på crowd-betyg, expertrecensioner och prisjämförelse.
         </p>
 
-        {/* How it works — 3 pillars */}
+        {/* Trust module — concrete promises */}
         <div style={{
-          display: "flex", gap: 0, borderRadius: 14, overflow: "hidden",
+          padding: "14px 20px", borderRadius: 14,
           border: `1px solid ${t.bdr}`, background: t.card, marginBottom: 20,
+          textAlign: "left",
         }}>
-          {[
-            ["👥", "Crowd", "Tusentals omdömen"],
-            ["🏆", "Experter", "Vinkritiker-poäng"],
-            ["💰", "Prisvärde", "Jämfört i kategorin"],
-          ].map(([icon, title, desc], i) => (
-            <div key={i} style={{
-              flex: 1, padding: "12px 8px", textAlign: "center",
-              borderLeft: i > 0 ? `1px solid ${t.bdr}` : "none",
-            }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: t.tx }}>{title}</div>
-              <div style={{ fontSize: 9, color: t.txL, marginTop: 1 }}>{desc}</div>
-            </div>
-          ))}
+          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Så funkar Smakfynd</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            {[
+              "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel",
+              "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde",
+              "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre",
+              "Vi säljer inte vin — vi hjälper dig välja bättre",
+            ].map((t2, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <span style={{ color: t.green, fontSize: 12, lineHeight: 1.5, flexShrink: 0 }}>✓</span>
+                <span style={{ fontSize: 12, color: t.txM, lineHeight: 1.5 }}>{t2}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Nav links */}
@@ -788,11 +789,12 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 14px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Så beräknas poängen</h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+            {/* The three components */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {[
-                ["👥", "Crowd-betyg (75%)", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre — ett vin med 100 000 röster är mer pålitligt än ett med 50. Viner med 50 000+ omdömen får en liten tillförlitlighetsbonus."],
-                ["🏆", "Expertrecensioner (75%)", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om både crowd och experter är överens får vinet en extra bonus. Saknas expertbetyg räknas bara crowd."],
-                ["💰", "Prisvärde (25%)", "Literpriset jämförs mot medianen i samma kategori. Ett rött vin för 99 kr jämförs mot andra röda viner — inte mot bubbel eller vitt. Billigare än snittet = högre poäng."],
+                ["👥", "Crowd-betyg", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre. Viner med färre än 25 omdömen rankas inte alls."],
+                ["🏆", "Expertrecensioner", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om crowd och experter är överens får vinet en extra bonus."],
+                ["💰", "Prisvärde", "Literpriset jämförs mot medianen i samma kategori. Rött jämförs med rött — aldrig med bubbel. Billigare än snittet med samma kvalitet = högre poäng."],
               ].map(([icon, title, desc], i) => (
                 <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>{icon}</span>
@@ -804,16 +806,29 @@ function SmakfyndApp() {
               ))}
             </div>
 
-            <div style={{ padding: 14, borderRadius: 10, background: t.bg, marginBottom: 14, border: `1px solid ${t.bdrL}` }}>
+            <div style={{ padding: 14, borderRadius: 10, background: t.bg, marginBottom: 16, border: `1px solid ${t.bdrL}` }}>
               <div style={{ fontSize: 13, color: t.tx, lineHeight: 1.7 }}>
-                <strong>Kvalitet</strong> (crowd + expert snittet) väger <strong>75%</strong>, prisvärde <strong>25%</strong>. Ekologiska viner får en liten hållbarhetsbonus. Viner med dålig kvalitet (under 6.3/10) kan aldrig få mer än 50 poäng — oavsett hur billiga de är.
+                <strong>Kvalitet väger 75%</strong>, prisvärde <strong>25%</strong>. Kvalitet går alltid före pris — ett billigt vin med dåligt betyg kan aldrig hamna högt.
               </div>
             </div>
 
-            <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
-              <strong>Resultat:</strong> Ett vin med höga betyg och lägre pris relativt sin kategori hamnar högt. Ett dyrt vin med mediokra betyg hamnar lågt. Kvalitet går alltid före pris.
-            </p>
-            <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
+            {/* Transparency section */}
+            <h3 style={{ margin: "0 0 10px", fontSize: 15, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Transparens</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+              {[
+                ["Datakällor", "Crowd-betyg hämtas från internationella vindrickare. Expertpoäng kommer från Wine Enthusiast (130 000 recensioner) och Wine-Searcher (aggregat från flera kritiker). Prisdata från Systembolaget."],
+                ["Osäker matchning", "Vi matchar viner mot kritiker-databaser med namn och region. Ibland blir det fel — vi kräver ordöverlapp och filtrerar bort osäkra matchningar. Viner utan expertmatch rankas bara på crowd + pris."],
+                ["Vad poängen inte betyder", "Hög poäng betyder inte att vinet passar just dig — det betyder att det ger bra kvalitet för pengarna enligt crowd och experter. Smak är personligt. Använd smakprofilen och AI-matcharen för att hitta rätt."],
+                ["Ekologiskt", "Ekologiska viner får en liten poängbonus (+0.2 av 10). Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner eko."],
+              ].map(([title, desc], i) => (
+                <div key={i}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 2 }}>{title}</div>
+                  <p style={{ fontSize: 12, color: t.txM, lineHeight: 1.6, margin: 0 }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => setPanel(null)} style={{ marginTop: 4, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
         )}
 
@@ -856,8 +871,8 @@ function SmakfyndApp() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 14 }}>🍷</span>
                   <span style={{ fontSize: 13, color: t.tx }}>
-                    <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}>Månadens tips</strong>
-                    <span style={{ color: t.txL }}> — Gabriel har testat 3 viner från topplistan</span>
+                    <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}>Redaktionens val</strong>
+                    <span style={{ color: t.txL }}> — 3 utvalda fynd vi testat och gillar</span>
                   </span>
                 </div>
                 <span style={{ fontSize: 10, color: t.txL, transition: "transform 0.2s", display: "inline-block", transform: tipsOpen ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
