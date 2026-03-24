@@ -6,7 +6,8 @@
 
 ## Nya ingångar / features
 - [ ] Present-sektion: kurerade listor per prisklass (under 200, 200-300, 300-500, champagne)
-- [ ] "Stå i butiken"-läge: stort sökfält, snabbsök på namn/nr, visa Smakfynd-poäng + "bättre alternativ i samma prisklass"
+- [x] "Stå i butiken"-läge: stort sökfält, snabbsök på namn/nr, visa Smakfynd-poäng + "bättre alternativ i samma prisklass"
+- [ ] Streckkods-scanner: scrapa EAN-koder från SB API, använd BarcodeDetector API för scan → Smakfynd-poäng direkt
 - [ ] Situationsbaserade ingångar: dejt, grillkväll, svärföräldrar, fredagsmys, picknick
 - [ ] Säsongsinnehåll: sommarvin, kräftskiva, glögg, nyårsbubbel, midsommar
 - [ ] "Jag gillar X, vad mer?": rekommendationer baserat på liknande vin
@@ -17,6 +18,7 @@
 - [ ] Prishistorik: spara veckovis prissnapshots för att visa prisändringar
 - [ ] Fler Vivino-matcher (scrapen var på 8516/13414)
 - [ ] Wine-Searcher API för aggregerade kritiker-poäng
+- [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
 
 ## Content & distribution
 - [ ] Instagram @smakfynd
