@@ -137,7 +137,7 @@ const FOOD_CATS = [
 ];
 
 const FAQS = [
-  {q:"Hur beräknas Smakfynd-poängen?",a:"Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Kvalitet väger 75%, prisvärde 25%. Poängen visas på en skala 1–100."},
+  {q:"Hur beräknas Smakfynd-poängen?",a:"Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Hög kvalitet till lågt pris = hög poäng. Poängen visas på en skala 1–100."},
   {q:"Var kommer betygen ifrån?",a:"Crowd-betyg kommer från hundratusentals vindrickare världen över. Expertbetyg hämtas från erkända vinkritiker som James Suckling, Falstaff, Decanter och Wine Enthusiast. Prisvärdet beräknar vi själva genom att jämföra literpriset mot medianen i samma kategori — rött jämförs med rött, bubbel med bubbel."},
   {q:"Vad betyder Crowd- och Expert-staplarna?",a:"Crowd visar vad vanliga vindrickare tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas betyder det att vi inte hittat kritikerrecensioner för det vinet — men crowd-betyget finns alltid."},
   {q:"Hur fungerar AI-vinmatcharen?",a:"Beskriv vad du ska äta — till exempel 'grillad lax med potatisgratäng' eller 'toast skagen, sedan entrecôte'. Vår AI analyserar måltiden och föreslår viner för varje rätt i olika prisklasser, direkt från Systembolagets sortiment."},
@@ -283,7 +283,8 @@ function Card({ p, rank, delay, totalInCategory }) {
   const sbUrl = `https://www.systembolaget.se/produkt/${p.nr}`;
   
   // Rank badges
-  const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Top ${rank}` : null;
+  const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
+  // Don't show rank numbers — just show wines as "Topp-viner" when scores are close
 
   return (
     <div
@@ -339,8 +340,8 @@ function Card({ p, rank, delay, totalInCategory }) {
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
               }}>
                 <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
-                <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
               </div>
+              <span style={{ fontSize: 9, color: t.txL, marginTop: 3 }}>Kvalitet/pris</span>
               {/* Overlapping mini-badges */}
               {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
                 <div style={{ position: "absolute", top: -6, left: -14, display: "flex", gap: 2 }}>
@@ -866,17 +867,18 @@ function StoreMode({ products, onClose }) {
       {/* Big search */}
       <div style={{ position: "relative", marginBottom: 20 }}>
         <input ref={inputRef} type="search" inputMode="search" value={q} onChange={e => setQ(e.target.value)}
-          placeholder="Vinnamn eller artikelnr (från hyllkanten)..."
+          placeholder="Skriv vinets namn eller artikelnummer..."
           style={{
-            width: "100%", padding: "18px 20px 18px 48px", borderRadius: 16,
-            border: `2px solid ${t.wine}30`, background: t.card, fontSize: 18,
+            width: "100%", padding: "20px 60px 20px 52px", borderRadius: 16,
+            border: `2px solid ${t.wine}30`, background: t.card, fontSize: 20,
             color: t.tx, outline: "none", boxSizing: "border-box",
             fontFamily: "'Instrument Serif', Georgia, serif",
           }}
           onFocus={e => e.target.style.borderColor = t.wine}
           onBlur={e => e.target.style.borderColor = t.wine + "30"}
         />
-        <span style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", fontSize: 20, color: t.txL, pointerEvents: "none" }}>🔍</span>
+        <span style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", fontSize: 22, color: t.txL, pointerEvents: "none" }}>🔍</span>
+        <span style={{ position: "absolute", right: 18, top: "50%", transform: "translateY(-50%)", fontSize: 20, color: t.bdr, pointerEvents: "none" }} title="Streckkods-scanner kommer snart">📷</span>
       </div>
 
       {/* Result */}
@@ -1112,7 +1114,7 @@ function SmakfyndApp() {
           margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
           maxWidth: 440, fontWeight: 300,
         }}>
-          {products.length} viner rankade efter kvalitet per krona — baserat på crowd-betyg, expertrecensioner och prisjämförelse.
+          {Math.floor(products.length / 100) * 100}+ viner från hela världen, rankade efter kvalitet per krona.
         </p>
 
         {/* Trust module — concrete promises */}
@@ -1193,7 +1195,7 @@ function SmakfyndApp() {
 
             <div style={{ padding: 14, borderRadius: 10, background: t.bg, marginBottom: 16, border: `1px solid ${t.bdrL}` }}>
               <div style={{ fontSize: 13, color: t.tx, lineHeight: 1.7 }}>
-                <strong>Kvalitet väger 75%</strong>, prisvärde <strong>25%</strong>. Kvalitet går alltid före pris — ett billigt vin med dåligt betyg kan aldrig hamna högt.
+                <strong>Hög kvalitet till lågt pris = hög poäng.</strong> Kvalitet går alltid före pris — ett billigt vin med dåligt betyg kan aldrig hamna högt.
               </div>
             </div>
 
@@ -1460,9 +1462,9 @@ function SmakfyndApp() {
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
-            <span style={{ fontSize: 11, color: t.txF }}>Sorterat efter kvalitet per krona</span>
+            <span style={{ fontSize: 11, color: t.txF }}>Mest smak för pengarna</span>
           </div>
-          <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Poängen visar prisvärde — inte "bästa vinet", utan mest smak för pengarna i sin kategori.</div>
+          <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Rankade efter kvalitet i förhållande till pris — inte "bästa vinet", utan bästa värdet i sin kategori.</div>
         </div>
 
         {loading ? (
@@ -1519,16 +1521,19 @@ function SmakfyndApp() {
         <footer style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${t.bdr}`, textAlign: "center" }}>
           <div style={{ fontSize: 12, color: t.txL, lineHeight: 1.8 }}>
             <p style={{ margin: "0 0 8px" }}>
-              Smakfynd hjälper dig hitta vinet som ger mest smak för pengarna.<br />
-              Hela Systembolagets sortiment, rankat efter kvalitet per krona.
+              Smakfynd hjälper dig hitta vinet som ger mest smak för pengarna.
             </p>
             <p style={{ margin: "0 0 10px", color: t.txM }}>
               Skapad av <strong>Gabriel Linton</strong> · Dryckeskunskap, Grythyttan · <strong>Olav Innovation AB</strong>
             </p>
+            <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-block", fontSize: 12, color: t.wine, textDecoration: "none", marginBottom: 10 }}>
+              Prenumerera på Veckans fynd ↗
+            </a>
           </div>
           <div style={{ fontSize: 10, color: t.txF, margin: "0 0 10px", lineHeight: 1.7 }}>
-            <p style={{ margin: "0 0 4px" }}>Produktdata från Systembolagets öppna sortiment · Uppdaterad mars 2026</p>
-            <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol. Alla köp sker via Systembolaget.se.</p>
+            <p style={{ margin: "0 0 4px" }}>Uppdaterad mars 2026 · Produktdata från Systembolagets öppna sortiment</p>
+            <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol.</p>
           </div>
           <p style={{ fontSize: 10, color: t.txF, fontStyle: "italic" }}>Njut med måtta.</p>
         </footer>
