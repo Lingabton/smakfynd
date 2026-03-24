@@ -13,8 +13,10 @@ def load_data():
     sb = json.load(open(DATA_DIR / "systembolaget_raw.json"))
     vivino = json.load(open(DATA_DIR / "vivino_cache.json")) if (DATA_DIR / "vivino_cache.json").exists() else {}
     expert = json.load(open(DATA_DIR / "expert_cache.json")) if (DATA_DIR / "expert_cache.json").exists() else {}
-    print(f"SB: {len(sb)} | Vivino cache: {len(vivino)} | Expert cache: {len(expert)}")
-    return sb, vivino, expert
+    ws = json.load(open(DATA_DIR / "winesearcher_cache.json")) if (DATA_DIR / "winesearcher_cache.json").exists() else {}
+    ws_scores = {nr: v['aggregate_score'] for nr, v in ws.items() if v.get('aggregate_score')}
+    print(f"SB: {len(sb)} | Vivino: {len(vivino)} | WE expert: {len(expert)} | WS critic: {len(ws_scores)}")
+    return sb, vivino, expert, ws_scores
 
 def get_vivino(p, vivino_cache):
     """Look up Vivino data using name|sub|country key format."""
@@ -130,7 +132,7 @@ def main():
     print("=" * 60)
     print("  SMAKFYND SCORING v2")
     print("=" * 60)
-    sb, vivino, expert = load_data()
+    sb, vivino, expert, ws_scores = load_data()
     wines = [p for p in sb if p.get('cat1') == 'Vin']
     print(f"Wines: {len(wines)}")
 
@@ -141,14 +143,27 @@ def main():
     compute_price_scores(wines)
 
     results = []
-    n_crowd = n_expert = n_both = 0
+    n_crowd = n_expert = n_both = n_ws = 0
 
     for p in wines:
         nr = str(p.get('nr', ''))
         v_rating, v_reviews = get_vivino(p, vivino)
-        e = expert.get(nr, {})
-        e_pts = e.get('expert_score')
-        e_conf = e.get('match_confidence', 0)
+
+        # Expert score: prefer Wine-Searcher (fresh, aggregated), fall back to WE
+        ws_pts = ws_scores.get(nr)
+        we = expert.get(nr, {})
+        we_pts = we.get('expert_score')
+
+        if ws_pts:
+            e_pts = ws_pts
+            e_source = 'Wine-Searcher'
+            n_ws += 1
+        elif we_pts:
+            e_pts = we_pts
+            e_source = we.get('expert_source', 'Wine Enthusiast')
+        else:
+            e_pts = None
+            e_source = ''
 
         c10 = vivino_to_10(v_rating, v_reviews)
         e10 = expert_to_10(e_pts)
@@ -193,11 +208,11 @@ def main():
             'crowd_reviews': v_reviews,
             'expert_score': e10,
             'expert_points': e_pts,
-            'expert_source': e.get('expert_source', ''),
+            'expert_source': e_source,
             'has_expert': e10 is not None,
             'price_score': p10,
             'smakfynd_score': sf,
-            'confidence': confidence(v_reviews, e10 is not None, e_conf),
+            'confidence': confidence(v_reviews, e10 is not None, 0),
             'score': sf / 10,
             'rating': v_rating,
             'reviews': v_reviews,
@@ -209,7 +224,7 @@ def main():
 
     print(f"\n  Scored:     {len(results)}")
     print(f"  Has crowd:  {n_crowd}")
-    print(f"  Has expert: {n_expert}")
+    print(f"  Has expert: {n_expert} (WS: {n_ws}, WE: {n_expert - n_ws})")
     print(f"  Has both:   {n_both}")
     print(f"\n  TOP 15:")
     for i, w in enumerate(results[:15]):
