@@ -257,7 +257,7 @@ function Card({ p, rank, delay, totalInCategory }) {
                 </div>
               )}
               </div>
-              <div style={{ fontSize: 9, color: "#998877", marginTop: 3 }}>Kvalitet/pris</div>
+              <div style={{ fontSize: 9, color: "#998877", marginTop: 3 }}>Smak för pengarna</div>
             </div>
           </div>
 
@@ -327,23 +327,24 @@ function Card({ p, rank, delay, totalInCategory }) {
       {open && (
         <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${t.bdrL}`, paddingTop: 14 }}>
           {/* Badges */}
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
             {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
-            <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: `${col}12`, color: col, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
-            {p.confidence === "hög" && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Hög konfidens</span>}
+            {p.confidence === "hög" && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Hög trygghet</span>}
             {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt −{p.price_vs_launch_pct}%</span>}
             {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Ekologiskt</span>}
+            {p.food_pairings?.length > 0 && <span style={{ fontSize: 9, fontWeight: 500, padding: "3px 10px", borderRadius: 100, background: t.bg, color: t.txM, border: `1px solid ${t.bdrL}` }}>Passar till {p.food_pairings.slice(0,2).join(", ")}</span>}
           </div>
-          <div style={{ display: "flex", gap: 16, marginBottom: 14 }}>
-            {/* Large bottle image */}
-            <ProductImage p={p} size={100} style={{ borderRadius: 12, background: "#faf7f2" }} />
-            {/* Details grid */}
+          {/* Quick taste description */}
+          {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 10, lineHeight: 1.5 }}>{p.style}</div>}
+
+          <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+            <ProductImage p={p} size={72} style={{ borderRadius: 10, background: "#faf7f2" }} />
             <div style={{ flex: 1 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginBottom: 10 }}>
-                {[["Druva", p.grape], ["Stil", p.style], ["Alkohol", p.alc ? `${p.alc}%` : null], ["Volym", `${p.vol} ml`]].filter(([_l, v]) => v).map(([l, v], i) => (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 6 }}>
+                {[["Druva", p.grape], ["Alkohol", p.alc ? `${p.alc}%` : null], ["Volym", `${p.vol} ml`], ["Land", `${p.country}${p.region ? `, ${p.region}` : ""}`]].filter(([_l, v]) => v).map(([l, v], i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>{l}</div>
-                    <div style={{ fontSize: 13, color: t.txM, fontWeight: 500 }}>{v}</div>
+                    <div style={{ fontSize: 8, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 1 }}>{l}</div>
+                    <div style={{ fontSize: 12, color: t.txM, fontWeight: 500 }}>{v}</div>
                   </div>
                 ))}
               </div>
@@ -468,8 +469,8 @@ function Card({ p, rank, delay, totalInCategory }) {
                 }}>
                   <span style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
                 </div>
-                <span style={{ fontSize: 9, color: t.txL, marginTop: 4 }}>Smakfynd-</span>
-                <span style={{ fontSize: 9, color: t.txL }}>poäng</span>
+                <span style={{ fontSize: 9, color: t.txL, marginTop: 4 }}>Smak för</span>
+                <span style={{ fontSize: 9, color: t.txL }}>pengarna</span>
               </div>
             </div>
           </div>
@@ -632,7 +633,7 @@ function FoodMatch({ products }) {
       </div>
 
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-        {["Grillat kött med potatis", "Pasta carbonara", "Sushi och sashimi", "Toast skagen, sedan entrecôte", "Ostbricka med honung"].map(s => (
+        {["Fredagstacos", "Lax med citronsås", "Grillat kött", "Pizza", "Skaldjur", "Ost och chark"].map(s => (
           <button key={s} onClick={() => setMeal(s)}
             style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.bdrL}`, background: "transparent", color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
           >{s}</button>
@@ -1013,7 +1014,7 @@ function SmakfyndApp() {
           margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
           maxWidth: 440, fontWeight: 300,
         }}>
-          {Math.floor(products.length / 100) * 100}+ viner från hela världen, rankade efter kvalitet per krona.
+          Vi följer 11 500+ viner — och lyfter fram de mest prisvärda fynden just nu.
         </p>
 
         {/* Trust module — concrete promises */}
@@ -1022,7 +1023,8 @@ function SmakfyndApp() {
           border: `1px solid ${t.bdr}`, background: t.card, marginBottom: 20,
           textAlign: "left",
         }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Så funkar Smakfynd</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Så funkar Smakfynd</div>
+          <div style={{ fontSize: 11, color: t.txM, marginBottom: 8, lineHeight: 1.4 }}>Vi hjälper dig hitta de mest prisvärda köpen i varje kategori — inte bara de mest hypade.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {[
               ["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"],
@@ -1055,7 +1057,7 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Smakfynd hjälper dig hitta viner som ger mest smak för pengarna. Vi rankar <strong>{products.length} viner</strong> på Systembolaget genom att kombinera tre datakällor: crowd-betyg från hundratusentals vindrickare, poäng från erkända vinkritiker, och en prisjämförelse mot andra viner i samma kategori.
+              Smakfynd hjälper dig hitta viner som ger mest smak för pengarna. Vi följer <strong>11 500+ viner</strong> på Systembolaget och kombinerar crowd-betyg, expertrecensioner och prisjämförelse för att lyfta fram de bästa fynden.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
               Resultatet är en enda poäng — <strong>Smakfynd-poängen</strong> — som visar kvalitet per krona. Vi har även en AI-vinmatchare som föreslår viner baserat på vad du ska äta.
@@ -1369,7 +1371,7 @@ function SmakfyndApp() {
         {loading ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
-            <p style={{ fontSize: 15, color: t.txM }}>Laddar {products.length > 0 ? products.length : ''} produkter...</p>
+            <p style={{ fontSize: 15, color: t.txM }}>Laddar...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
@@ -1379,6 +1381,30 @@ function SmakfyndApp() {
               style={{ marginTop: 10, fontSize: 13, color: t.wine, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
               Visa alla produkter
             </button>
+          </div>
+        ) : cat === "all" && !hasFilters ? (
+          /* Situation-based sections when viewing "Alla" without filters */
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {[
+              ["Bästa röda fynden", "Rött", null, null],
+              ["Bästa vita just nu", "Vitt", null, null],
+              ["Mest prisvärda bubbel", "Mousserande", null, null],
+              ["Trygga köp under 100 kr", null, 0, 100],
+              ["Mest smak för pengarna 100–200 kr", null, 100, 200],
+            ].map(([title, catFilter, pLo, pHi]) => {
+              const sectionWines = filtered
+                .filter(p => (!catFilter || p.category === catFilter) && (!pLo && !pHi || (p.price >= (pLo||0) && p.price < (pHi||99999))))
+                .slice(0, 5);
+              if (sectionWines.length === 0) return null;
+              return (
+                <div key={title}>
+                  <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} />)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
