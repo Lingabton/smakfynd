@@ -16,6 +16,7 @@
 ## Data & teknik
 - [ ] Fräschare expertdata: scrapa Wine Enthusiast direkt (Kaggle-data är från 2017)
 - [ ] Prishistorik: spara veckovis prissnapshots för att visa prisändringar
+- [ ] Vinpriser.se deep scrape: 594 prissänkta viner, kräver paginering/filter-klick (bara 3 i hero laddas)
 - [ ] Fler Vivino-matcher (scrapen var på 8516/13414)
 - [ ] Wine-Searcher API för aggregerade kritiker-poäng
 - [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
