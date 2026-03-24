@@ -21,18 +21,15 @@ const PRICES = [
 ];
 
 const GABRIELS_PICKS = [
-  {name:"Delas Saint-Esprit",sub:"Syrah & Grenache · Côtes du Rhône",price:"129 kr",score:14.2,nr:"2174",note:"Delas tillhör Rhônedalens finaste producenter, men det här är deras vardagsvin — och det märks inte. Svartpeppar, violer och mörka bär med en generositet som får det att kännas som ett vin i en helt annan prisklass. Servera till lördagsbiffen eller en mustig gryta."},
-  {name:"Umani Ronchi Montepulciano",sub:"Montepulciano · Abruzzo",price:"89 kr",score:16.8,nr:"77130",note:"Har funnits på Systembolaget i 25 år av en anledning. Solmogna plommon, tranbär och en jordighet som gör den till en naturlig partner till pizza och pasta. Inte flashig — bara pålitligt bra, varje gång. Italiens svar på husvin."},
-  {name:"Mezzacorona Pinot Nero",sub:"Pinot Nero · Trentino",price:"89 kr",score:15.4,nr:"1368",note:"Pinot noir för under 90 kronor som faktiskt levererar druvans karaktär — det är ovanligt. Friska hallon, körsbär och en fin örtighet från Alpernas fot. Servera lätt sval till charkbrickan eller en enklare fiskrätt. Mitt mars-tips för den som vill utforska."},
+  {name:"Three Finger Jack",sub:"Cabernet Sauvignon · USA",price:"159 kr",smakfynd_score:76,nr:"352801",note:"Kraftfull Cabernet från Lodi i Kalifornien. Mörka körsbär, vanilj och en mjuk finish som gör den till en perfekt stekkompis. Prisvärd för den som gillar Nya världens generösa stil utan att det blir för tungt."},
+  {name:"Mucho Mas",sub:"Grenache · Spanien",price:"99 kr",smakfynd_score:80,nr:"5234001",note:"Fruktbomb under hundralappen. Mogna hallon och körsbär med en kryddig touch — perfekt vardagsvin till pasta, tacos eller bara ett glas på balkongen. Svårslaget värde."},
+  {name:"Leitz Eins Zwei Dry",sub:"Riesling · Tyskland",price:"107 kr",smakfynd_score:73,nr:"582201",note:"Torr tysk Riesling med skarp syra och gröna äpplen. Passar utmärkt till asiatisk mat, fisk och skaldjur. Annorlunda val för den som vill utforska bortom det vanliga."},
 ];
 
-const FOOD_TIPS = [
-  {m:"pasta",w:"Palazzo del Mare, Primitivo — 89 kr",s:"14.5"},
-  {m:"lax",w:"Oyster Bay, Sauvignon Blanc — 109 kr",s:"12.4"},
-  {m:"pizza",w:"Fantini, Montepulciano — 89 kr",s:"12.8"},
-  {m:"grillat",w:"Borsao, Selección Tinto — 69 kr",s:"18.7"},
-  {m:"fisk",w:"Torres, Viña Sol — 79 kr",s:"16.3"},
-  {m:"kyckling",w:"Cono Sur, Pinot Noir — 79 kr",s:"14.8"},
+const FOOD_CATS = [
+  { k: "Kött", e: "🥩" }, { k: "Fågel", e: "🍗" }, { k: "Fisk", e: "🐟" },
+  { k: "Skaldjur", e: "🦐" }, { k: "Fläsk", e: "🥓" }, { k: "Grönsaker", e: "🥦" },
+  { k: "Ost", e: "🧀" }, { k: "Vilt", e: "🦌" }, { k: "Pasta", e: "🍝" },
 ];
 
 const FAQS = [
@@ -107,20 +104,10 @@ function MiniBar({ label, value, max = 10, color }) {
 }
 
 function ScoreBars({ p }) {
-  const s100 = p.smakfynd_score;
-  const [label, col] = getScoreInfo(s100);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <MiniBar label="Crowd" value={p.crowd_score} color="#6b8cce" />
       <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-        <span style={{ fontSize: 10, color: col, width: 52, flexShrink: 0, textAlign: "right", fontWeight: 800 }}>Smakfynd</span>
-        <div style={{ flex: 1, height: 7, borderRadius: 4, background: t.bdr, overflow: "hidden" }}>
-          <div style={{ width: `${s100}%`, height: "100%", borderRadius: 4, background: `linear-gradient(90deg, ${col}99, ${col})`, transition: "width 0.8s ease" }} />
-        </div>
-        <span style={{ fontSize: 15, fontWeight: 900, color: col, minWidth: 32, textAlign: "right", fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
-      </div>
-      <div style={{ textAlign: "right", fontSize: 9, color: t.txL, marginTop: 1 }}>Kvalitet + Prisvärde</div>
     </div>
   );
 }
@@ -208,7 +195,7 @@ function Card({ p, rank, delay, totalInCategory }) {
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-            <div style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <h3 style={{
                 margin: 0, fontSize: 17, fontFamily: "'Instrument Serif', Georgia, serif",
                 fontWeight: 400, color: t.tx, lineHeight: 1.2,
@@ -218,26 +205,35 @@ function Card({ p, rank, delay, totalInCategory }) {
                 {p.sub} · {p.country}{p.region ? `, ${p.region}` : ""}
               </p>
             </div>
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 20, fontWeight: 700, color: t.tx, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>
-                {p.price}<span style={{ fontSize: 12, fontWeight: 400, color: t.txL, marginLeft: 1 }}>kr</span>
+            {/* Score badge + price */}
+            <div style={{ textAlign: "center", flexShrink: 0 }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 12,
+                background: `linear-gradient(135deg, ${col}18, ${col}08)`,
+                border: `2px solid ${col}30`,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                margin: "0 auto",
+              }}>
+                <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
+                <span style={{ fontSize: 6, fontWeight: 700, color: col, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 }}>poäng</span>
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, lineHeight: 1, marginTop: 5, fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                {p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL, marginLeft: 1 }}>kr</span>
               </div>
               {p.launch_price && p.price_vs_launch_pct > 0 && (
-                <span style={{ fontSize: 10, color: t.deal, fontWeight: 600 }}>
-                  <span style={{ textDecoration: "line-through", opacity: 0.5 }}>{p.launch_price}</span> −{p.price_vs_launch_pct}%
-                </span>
+                <span style={{ fontSize: 9, color: t.deal, fontWeight: 600 }}>−{p.price_vs_launch_pct}%</span>
               )}
             </div>
           </div>
 
-          {/* Quick info row — always visible: grape + food */}
+          {/* Grape + food */}
           <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
             {p.grape && foodStr && <span style={{ color: t.bdr }}>·</span>}
             {foodStr && <span style={{ fontSize: 11, color: t.txL }}>Passar till {foodStr}</span>}
           </div>
 
-          {/* Score + meta row */}
+          {/* Crowd/Expert bars + tags */}
           <div style={{ marginTop: 8 }}>
             <ScoreBars p={p} />
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
@@ -266,7 +262,7 @@ function Card({ p, rank, delay, totalInCategory }) {
           onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >
-          Köp på Systembolaget
+          Köp på <span style={{ fontWeight: 700 }}>Systembolaget</span>
           <span style={{ fontSize: 10 }}>↗</span>
         </a>
         <span
@@ -370,72 +366,244 @@ function Card({ p, rank, delay, totalInCategory }) {
   );
 }
 
+const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
+
+function matchWinesForCourses(courses, products) {
+  if (!courses || !courses.length) return [];
+  const bodyRange = { light: [0, 4], medium: [5, 8], full: [9, 12] };
+  const priceTiers = [[0, 110, "Budget"], [110, 200, "Mellan"], [200, 99999, "Fint"]];
+  const tierColors = { "Budget": "#5a8a5a", "Mellan": "#7a6a4a", "Fint": "#8a5a6a" };
+  const usedNrs = new Set();
+
+  return courses.map(course => {
+    const wines = [];
+    for (const c of (course.criteria || [])) {
+      const typeMap = { "Rött": "Rött", "Vitt": "Vitt", "Rosé": "Rosé", "Mousserande": "Mousserande" };
+      const wineType = typeMap[c.type] || c.type;
+      const [bMin, bMax] = bodyRange[c.body] || [0, 12];
+      const kw = (c.keywords || []).map(k => k.toLowerCase());
+
+      const scored = products
+        .filter(p => p.category === wineType && p.package === "Flaska" && p.assortment === "Fast sortiment")
+        .map(p => {
+          let fit = 0;
+          const body = p.taste_body || 6;
+          if (body >= bMin && body <= bMax) fit += 3;
+          else if (Math.abs(body - (bMin + bMax) / 2) <= 3) fit += 1;
+          const haystack = [p.name, p.sub, p.grape, p.style, p.cat3, ...(p.food_pairings || [])].join(" ").toLowerCase();
+          for (const k of kw) { if (haystack.includes(k)) fit += 2; }
+          return { ...p, _fit: fit, _why: c.why };
+        })
+        .filter(p => p._fit >= 2)
+        .sort((a, b) => (b._fit * 10 + b.smakfynd_score) - (a._fit * 10 + a.smakfynd_score));
+
+      for (const [lo, hi, tierLabel] of priceTiers) {
+        const pick = scored.find(p => p.price >= lo && p.price < hi && !usedNrs.has(p.nr));
+        if (pick) {
+          usedNrs.add(pick.nr);
+          wines.push({ ...pick, _tier: tierLabel, _tierCol: tierColors[tierLabel] });
+        }
+      }
+    }
+    return { dish: course.dish, wines };
+  }).filter(c => c.wines.length > 0);
+
+  return results;
+}
+
+function WineResult({ m }) {
+  const [_lbl, col] = getScoreInfo(m.smakfynd_score);
+  return (
+    <a href={`https://www.systembolaget.se/produkt/${m.nr}`} target="_blank" rel="noopener noreferrer"
+      onClick={e => e.stopPropagation()}
+      style={{ padding: "12px 14px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdrL}`, textDecoration: "none", display: "flex", alignItems: "center", gap: 12, transition: "border-color 0.2s" }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+      onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
+    >
+      <div style={{
+        width: 42, height: 42, borderRadius: 11, flexShrink: 0,
+        background: `${col}12`, border: `2px solid ${col}30`,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      }}>
+        <span style={{ fontSize: 17, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{m.smakfynd_score}</span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
+        <div style={{ fontSize: 12, color: t.txL }}>{m.sub} · {m.country}</div>
+        {m._why && <div style={{ fontSize: 11, color: t.txM, marginTop: 3, lineHeight: 1.4 }}>{m._why}</div>}
+      </div>
+      <div style={{ textAlign: "right", flexShrink: 0 }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>
+          {m.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+        </div>
+        {m._tier && <div style={{ fontSize: 9, fontWeight: 700, color: m._tierCol || t.txL, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{m._tier}</div>}
+      </div>
+    </a>
+  );
+}
+
 function FoodMatch({ products }) {
-  const [q, setQ] = useState("");
-  
-  // Search real product data by food_pairings field
-  const matches = useMemo(() => {
-    if (q.length < 2) return [];
-    const query = q.toLowerCase();
-    const foodMap = { "kött": "kött", "nöt": "nöt", "lamm": "lamm", "fläsk": "fläsk", "kyckling": "kyckling", "fågel": "fågel",
-      "fisk": "fisk", "lax": "fisk", "torsk": "fisk", "skaldjur": "skaldjur", "räkor": "skaldjur",
-      "pasta": "pasta", "pizza": "pizza", "grillat": "grillat", "bbq": "grillat",
-      "ost": "ost", "sallad": "sallad", "vilt": "vilt", "dessert": "dessert", "choklad": "dessert",
-      "asiatiskt": "asiatiskt", "sushi": "fisk", "thai": "asiatiskt", "indiskt": "asiatiskt" };
-    const mapped = foodMap[query] || query;
-    
-    return products
-      .filter(p => {
-        const fp = (p.food_pairings || []);
-        const fpStr = Array.isArray(fp) ? fp.join(' ').toLowerCase() : String(fp).toLowerCase();
-        return fpStr.includes(mapped) && p.package === 'Flaska';
-      })
-      .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
-      .slice(0, 3);
-  }, [q, products]);
+  const [meal, setMeal] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const [courseResults, setCourseResults] = useState([]);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async () => {
+    if (!meal.trim() || meal.length < 3) return;
+    setLoading(true);
+    setError(null);
+    setAiResult(null);
+    setCourseResults([]);
+
+    try {
+      let data;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await fetch(WINE_AI_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ meal: meal.trim() }),
+        });
+        data = await res.json();
+        if (!data.error) break;
+        if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
+      }
+      if (data.error) throw new Error(data.error);
+
+      setAiResult(data);
+      // Support both old (criteria) and new (courses) format
+      if (data.courses) {
+        setCourseResults(matchWinesForCourses(data.courses, products));
+      } else if (data.criteria) {
+        setCourseResults(matchWinesForCourses([{ dish: "Hela måltiden", criteria: data.criteria }], products));
+      }
+    } catch (e) {
+      setError("Kunde inte hämta vinförslag just nu. Försök igen.");
+    }
+    setLoading(false);
+  };
+
+  const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
 
   return (
     <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 18 }}>🍽</span>
         <div>
           <div style={{ fontSize: 15, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>Kvällens middag?</div>
-          <div style={{ fontSize: 12, color: t.txL }}>Berätta vad du äter — vi föreslår vinet.</div>
+          <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta — vi föreslår vinet.</div>
         </div>
       </div>
-      <input type="text" placeholder="T.ex. pasta, grillat, lax, pizza, ost..." value={q} onChange={e => setQ(e.target.value)}
-        style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
-        onFocus={e => e.target.style.borderColor = t.wine + "55"}
-        onBlur={e => e.target.style.borderColor = t.bdr}
-      />
-      {matches.length > 0 && (
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-          {matches.map((m, i) => (
-            <a key={i} href={`https://www.systembolaget.se/produkt/${m.nr}`} target="_blank" rel="noopener noreferrer"
-              style={{ padding: "10px 14px", borderRadius: 10, background: t.card, border: `1px solid ${t.bdrL}`, textDecoration: "none", display: "block", transition: "border-color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
-              onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>{m.name}</div>
-                  <div style={{ fontSize: 11, color: t.txL }}>{m.sub} · {m.country}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: t.tx }}>{m.price} kr</div>
-                  <div style={{ fontSize: 11, color: t.green, fontWeight: 600 }}>{rescale(m.smakfynd_score)}/100</div>
-                </div>
-              </div>
-            </a>
-          ))}
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="text" value={meal} onChange={e => setMeal(e.target.value)}
+          placeholder="T.ex. toast skagen, sedan oxfilé med rödvinssky..."
+          onKeyDown={e => e.key === "Enter" && handleSubmit()}
+          style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
+          onFocus={e => e.target.style.borderColor = t.wine + "55"}
+          onBlur={e => e.target.style.borderColor = t.bdr}
+        />
+        <button onClick={handleSubmit} disabled={loading || meal.length < 3}
+          style={{
+            padding: "12px 18px", borderRadius: 12, border: "none", cursor: loading ? "wait" : "pointer",
+            background: t.wine, color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "inherit",
+            opacity: loading || meal.length < 3 ? 0.5 : 1, transition: "opacity 0.2s", flexShrink: 0,
+          }}>{loading ? "Tänker..." : "Hitta vin"}</button>
+      </div>
+
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+        {["Grillat kött med potatis", "Pasta carbonara", "Sushi och sashimi", "Toast skagen, sedan entrecôte", "Ostbricka med honung"].map(s => (
+          <button key={s} onClick={() => setMeal(s)}
+            style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.bdrL}`, background: "transparent", color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+          >{s}</button>
+        ))}
+      </div>
+
+      {loading && (
+        <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
+          <div style={{ fontSize: 24, marginBottom: 6 }}>🍷</div>
+          <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid...</div>
         </div>
       )}
-      {q.length >= 2 && matches.length === 0 && <p style={{ marginTop: 8, fontSize: 12, color: t.txL, fontStyle: "italic" }}>Inga viner matchade "{q}". Prova: pasta, lax, grillat, pizza, fisk, kyckling, ost, skaldjur</p>}
+
+      {error && <p style={{ marginTop: 10, fontSize: 12, color: t.deal }}>{error}</p>}
+
+      {aiResult && !loading && (
+        <div style={{ marginTop: 14 }}>
+          <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 14px", fontStyle: "italic" }}>
+            {aiResult.reasoning}
+          </p>
+
+          {courseResults.map((course, ci) => (
+            <div key={ci} style={{ marginBottom: ci < courseResults.length - 1 ? 16 : 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <div style={{
+                  width: 4, height: 18, borderRadius: 2,
+                  background: dishColors[ci % dishColors.length],
+                }} />
+                <span style={{
+                  fontSize: 13, fontWeight: 600, color: dishColors[ci % dishColors.length],
+                  fontFamily: "'Instrument Serif', Georgia, serif",
+                }}>{course.dish}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5, paddingLeft: 12 }}>
+                {course.wines.map((m, i) => <WineResult key={i} m={m} />)}
+              </div>
+            </div>
+          ))}
+
+          {courseResults.length === 0 && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar i fast sortiment. Prova en annan beskrivning.</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AgeGate({ onConfirm }) {
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#f5f1eb", display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'DM Sans', -apple-system, sans-serif", padding: 20,
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      <div style={{ textAlign: "center", maxWidth: 380 }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🍷</div>
+        <h1 style={{ margin: "0 0 8px", fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: "#2d2520" }}>Smakfynd</h1>
+        <p style={{ margin: "0 0 24px", fontSize: 14, color: "#8a7e72", lineHeight: 1.6 }}>
+          Den här sidan innehåller information om alkoholhaltiga drycker och riktar sig till personer som fyllt 25 år.
+        </p>
+        <button onClick={onConfirm} style={{
+          padding: "14px 36px", borderRadius: 14, border: "none", cursor: "pointer",
+          background: "#6b2a3a", color: "#fff", fontSize: 15, fontWeight: 600,
+          fontFamily: "inherit", transition: "opacity 0.2s", marginBottom: 12,
+        }}
+          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+        >Ja, jag är över 25</button>
+        <p style={{ margin: "0 0 16px", fontSize: 12, color: "#b0a898" }}>
+          Genom att gå vidare bekräftar du att du är minst 25 år.
+        </p>
+        <p style={{ margin: 0, fontSize: 10, color: "#c5bdb3", lineHeight: 1.6 }}>
+          Smakfynd är en oberoende informationstjänst från Olav Innovation AB.<br />Ingen koppling till Systembolaget. Vi säljer inte alkohol.
+        </p>
+      </div>
     </div>
   );
 }
 
 function Smakfynd() {
+  const [ageOk, setAgeOk] = useState(() => {
+    try { return localStorage.getItem("smakfynd_age") === "ok"; } catch(e) { return false; }
+  });
+  const confirmAge = () => {
+    try { localStorage.setItem("smakfynd_age", "ok"); } catch(e) {}
+    setAgeOk(true);
+  };
+  if (!ageOk) return <AgeGate onConfirm={confirmAge} />;
+
+  return <SmakfyndApp />;
+}
+
+function SmakfyndApp() {
   const [cat, setCat] = useState("all");
   const [price, setPrice] = useState("all");
   const [search, setSearch] = useState("");
@@ -501,6 +669,7 @@ function Smakfynd() {
 
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [selCountry, setSelCountry] = useState(null);
   const [selFoods, setSelFoods] = useState([]);
 
@@ -693,7 +862,7 @@ function Smakfynd() {
                   &ldquo;{pick.note}&rdquo;
                 </p>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: `1px solid ${t.bdrL}`, gap: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: t.green }}>{rescale(pick.score)}/100</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: t.green }}>{pick.smakfynd_score}/100</span>
                   <a href={`https://www.systembolaget.se/produkt/${pick.nr}`} target="_blank" rel="noopener noreferrer"
                     style={{
                       display: "inline-flex", alignItems: "center", gap: 4,
@@ -704,7 +873,7 @@ function Smakfynd() {
                     }}
                     onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                     onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                  >Köp på SB ↗</a>
+                  >Systembolaget ↗</a>
                 </div>
               </div>
             ))}
@@ -754,43 +923,57 @@ function Smakfynd() {
         </div>
 
         {/* ═══ PRICE PILLS ═══ */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-          {[["0-99", "Under 100"], ["100-150", "100–150"], ["151-200", "150–200"], ["201-9999", "200+"]].map(([k, l]) => (
-            <button key={k} onClick={() => setPrice(price === k ? "all" : k)} style={pill(price === k)}>{l} kr</button>
-          ))}
-          <button onClick={() => { setShowDeals(!showDeals); if (!showDeals) setShowNew(false); }} style={pill(showDeals, t.deal)}>
-            Prissänkt <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 100, background: showDeals ? t.deal : t.bdr, color: showDeals ? "#fff" : t.txL, marginLeft: 2 }}>{dealN}</span>
-          </button>
-          <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
-          <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
-          <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
-        </div>
-
-        {/* ═══ COUNTRY PILLS ═══ */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-          {[
-            ["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"],
-            ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"],
-            ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"],
-          ].map(([c, flag]) => (
-            <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{flag} {c}</button>
-          ))}
-        </div>
-
-        {/* ═══ FOOD PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-          {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt"].map(f => (
-            <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
+          {[["0-99", "Under 100 kr"], ["100-150", "100–150 kr"], ["151-200", "150–200 kr"], ["201-9999", "200+ kr"]].map(([k, l]) => (
+            <button key={k} onClick={() => setPrice(price === k ? "all" : k)} style={pill(price === k)}>{l}</button>
           ))}
         </div>
 
-        {/* ═══ CLEAR FILTERS ═══ */}
-        {hasFilters && (
-          <div style={{ marginBottom: 16 }}>
+        {/* ═══ ADVANCED TOGGLE ═══ */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
+          <button onClick={() => setShowAdvanced(!showAdvanced)}
+            style={{ ...pill(showAdvanced), display: "flex", alignItems: "center", gap: 4 }}>
+            Fler filter <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+          </button>
+          {hasFilters && (
             <button onClick={clearAll}
-              style={{ padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: "transparent", color: t.txL, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
+              style={{ padding: "8px 14px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: "transparent", color: t.txL, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
               Rensa filter ✕
             </button>
+          )}
+        </div>
+
+        {showAdvanced && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdrL}` }}>
+            {/* Tags row */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
+              <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
+              <button onClick={() => { setShowDeals(!showDeals); if (!showDeals) setShowNew(false); }} style={pill(showDeals, t.deal)}>Prissänkt</button>
+              <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
+            </div>
+            {/* Country */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {[
+                  ["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"],
+                  ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"],
+                  ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"],
+                ].map(([c, flag]) => (
+                  <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{flag} {c}</button>
+                ))}
+              </div>
+            </div>
+            {/* Food */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Passar till</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt"].map(f => (
+                  <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -861,7 +1044,10 @@ function Smakfynd() {
               Skapad av <strong>Gabriel Linton</strong> · Dryckeskunskap, Grythyttan · <strong>Olav Innovation AB</strong>
             </p>
           </div>
-          <p style={{ fontSize: 10, color: t.txF, margin: "0 0 10px" }}>Data från Systembolaget · Uppdaterad mars 2026</p>
+          <div style={{ fontSize: 10, color: t.txF, margin: "0 0 10px", lineHeight: 1.7 }}>
+            <p style={{ margin: "0 0 4px" }}>Produktdata från Systembolagets öppna sortiment · Uppdaterad mars 2026</p>
+            <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol. Alla köp sker via Systembolaget.se.</p>
+          </div>
           <p style={{ fontSize: 10, color: t.txF, fontStyle: "italic" }}>Njut med måtta.</p>
         </footer>
       </div>

@@ -34,7 +34,8 @@ def vivino_to_10(rating, reviews):
         return None
     raw = (rating - 1) * 2.25 + 0.5
     raw = max(1.0, min(10.0, raw))
-    k = 100
+    # Bayesian shrinkage: k=30 (less aggressive, trust actual ratings more)
+    k = 30
     n = reviews or 0
     adjusted = (n / (n + k)) * raw + (k / (n + k)) * 6.0
     return round(adjusted, 1)
@@ -42,7 +43,8 @@ def vivino_to_10(rating, reviews):
 def expert_to_10(points):
     if not points or points < 80:
         return None
-    raw = (points - 80) * 0.375 + 4.0
+    # 80→4.0, 86→5.8, 90→7.0, 94→8.2, 97→9.1, 100→10.0
+    raw = (points - 80) * 0.3 + 4.0
     return round(max(1.0, min(10.0, raw)), 1)
 
 def compute_price_scores(wines):
@@ -64,21 +66,47 @@ def compute_price_scores(wines):
             w['_price_score'] = None
             continue
         ratio = (price / (vol / 1000)) / median
+        # Steeper curve: a wine at half median price → 8.0, at median → 5.5, at double → 1.0
         w['_price_score'] = round(max(1.0, min(10.0, 10.5 - ratio * 5.0)), 1)
 
 def smakfynd_score(crowd, expert, price_val):
-    if crowd and expert and price_val:
-        raw = expert * 0.35 + crowd * 0.35 + price_val * 0.30
-    elif crowd and price_val:
-        raw = crowd * 0.55 + price_val * 0.45
-    elif expert and price_val:
-        raw = expert * 0.55 + price_val * 0.45
+    # Determine quality score (weighted blend of crowd + expert)
+    if crowd and expert:
+        # Bonus when crowd and expert agree (within 1.5 of each other)
+        agreement_bonus = 0.3 if abs(crowd - expert) < 1.5 else 0
+        quality = (crowd + expert) / 2 + agreement_bonus
+    elif crowd:
+        quality = crowd
+    elif expert:
+        # Expert-only: slight penalty (no crowd validation)
+        quality = expert * 0.9
     else:
         return None
-    if raw >= 8: return round(min(99, 80 + (raw - 8) * 10))
-    if raw >= 6: return round(55 + (raw - 6) * 12.5)
-    if raw >= 4: return round(30 + (raw - 4) * 12.5)
-    return round(max(1, raw * 7.5))
+
+    if not price_val:
+        return None
+
+    # Quality must meet minimum threshold
+    # crowd 6.5/10 or expert 7.0/10 maps to quality ~6.3
+    # Below that → score capped at 50
+    quality_floor = quality >= 6.3
+
+    # Final blend: quality 75%, price 25%
+    # This ensures quality dominates, but a 100kr wine with same quality
+    # as a 300kr wine will clearly win
+    raw = quality * 0.75 + price_val * 0.25
+
+    # Map to 1-99 scale
+    if raw >= 8: score = round(min(99, 80 + (raw - 8) * 10))
+    elif raw >= 6: score = round(55 + (raw - 6) * 12.5)
+    elif raw >= 4: score = round(30 + (raw - 4) * 12.5)
+    else: score = round(max(1, raw * 7.5))
+
+    # Apply quality floor
+    if not quality_floor and score > 50:
+        score = 50
+
+    return score
 
 def confidence(reviews, has_exp, conf=0):
     s = 0

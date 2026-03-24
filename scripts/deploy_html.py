@@ -16,9 +16,8 @@ else:
     if m2:
         comp = m2.group(1)
     else:
-        # Find last top-level function (the main app component)
-        funcs = re.findall(r'^function\s+(\w+)', jsx, re.MULTILINE)
-        comp = funcs[-1] if funcs else "Smakfynd"
+        # Find the Smakfynd entry-point function
+        comp = "Smakfynd"
 
 jsx = re.sub(r'export\s+default\s+', '', jsx)
 

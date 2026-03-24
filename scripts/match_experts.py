@@ -35,55 +35,77 @@ def load_we():
     print(f"Loaded {total} WE reviews across {len(we_by_country)} countries")
     return we_by_country
 
+def _name_words(s):
+    """Extract meaningful words (3+ chars) from a string."""
+    import re
+    return set(w.lower() for w in re.findall(r'[a-zà-öø-ÿ]{3,}', s.lower()))
+
 def match_wine(sb_wine, candidates):
     """
     Try to match a SB wine against WE candidates from same country.
     Returns (score, we_entry) or (0, None) if no good match.
+
+    Requires meaningful word overlap between SB name and WE winery/title
+    to avoid false positives from grape-only or fuzzy-noise matches.
     """
     name = sb_wine.get('name', '')
     sub = sb_wine.get('sub', '')
     grape = sb_wine.get('grape', '').lower()
-    
+
     best = 0
     best_we = None
-    
-    # Build search string
+
     search = f"{name} {sub}".strip().lower()
     name_lower = name.lower()
-    
+
+    # Words from SB name (excluding common grape names to avoid false matches)
+    grape_words = _name_words(grape) if grape else set()
+    sb_words = _name_words(name) - grape_words
+    # Also exclude very common wine terms
+    noise = {'vin', 'wine', 'the', 'les', 'del', 'von', 'cuvée', 'cuvee',
+             'reserva', 'riserva', 'gran', 'grand', 'cru', 'chateau', 'domaine',
+             'brut', 'blanc', 'rouge', 'rosé', 'rose', 'champagne', 'cremant'}
+    sb_words -= noise
+
     for we in candidates:
         title = we.get('title', '').lower()
         winery = we.get('winery', '').lower()
         we_variety = we.get('variety', '').lower()
-        
+
+        # Core requirement: at least one meaningful SB name word must appear
+        # in the WE winery or title (not just in the grape/variety)
+        we_text = f"{winery} {title}"
+        we_text_no_variety = we_text.replace(we_variety, '')
+        has_word_overlap = any(w in we_text_no_variety for w in sb_words) if sb_words else False
+
+        if not has_word_overlap:
+            continue
+
         # Strategy 1: Match full SB name against WE title
         r1 = fuzz.token_set_ratio(search, title)
-        
+
         # Strategy 2: Match SB name against WE winery
         r2 = fuzz.token_set_ratio(name_lower, winery)
-        
+
         # Strategy 3: Match SB name against WE winery + variety
         r3 = fuzz.token_set_ratio(search, f"{winery} {we_variety}")
-        
+
         score = max(r1, r2 * 0.85, r3)
-        
+
         # Bonus if grape matches
         if grape and len(grape) > 3 and grape in we_variety:
-            score += 8
-        
+            score += 5
+
         # Penalty if grape explicitly mismatches
         if grape and we_variety and len(grape) > 3 and len(we_variety) > 3:
             if grape not in we_variety and we_variety not in grape:
-                # Only penalize if both have grape info and they don't match
-                if r2 > r1 and r2 > r3:  # Only when matched on winery name alone
-                    score -= 5
-        
+                score -= 10
+
         if score > best:
             best = score
             best_we = we
-    
-    # Stricter threshold
-    if best >= 82:
+
+    if best >= 85:
         return best, best_we
     return 0, None
 
