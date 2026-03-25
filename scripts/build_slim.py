@@ -108,6 +108,12 @@ for p in slim:
         "confidence": p.get("confidence", "låg"),
         "assortment": p.get("assortment", ""),
     }
+    # Image URL (uses different ID than product nr — must keep)
+    img = p.get("image_url", "")
+    if img:
+        if not img.endswith(".png"):
+            img = img + "_400.png"
+        m["image_url"] = img
     # Optional fields (only include if they have data)
     if p.get("organic"): m["organic"] = True
     if p.get("cat3"): m["cat3"] = p["cat3"]

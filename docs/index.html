@@ -353,6 +353,7 @@ function ScoreBars({
 
 // Product image URL from Systembolaget CDN
 function getImageUrl(p, size = 200) {
+  if (p.image_url) return p.image_url;
   if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
   return null;
 }
