@@ -1,6 +1,12 @@
 # Smakfynd Feature Backlog
 
-## Buggar / att fixa
+## Buggar / att fixa (persona-audit 2026-03-25)
+- [ ] React hooks-violation: useState inuti render-funktion (Redaktionens val rad 1343, AI freetext rad 751) — extrahera till sub-komponenter
+- [ ] Store mode visar bara 1 resultat — ändra .find() till .filter().slice(0,5)
+- [ ] Död kod rad 598: `return results` i matchWinesForCourses nås aldrig
+- [ ] Prisfilter-inkonsekvens: PRICES-arrayen (rad 17) vs renderade pills (rad 1452) har olika intervall
+
+## Buggar / att fixa (äldre)
 - [ ] Verifiera att ALLA SB-länkar fungerar (format: /produkt/vin/nr — fixat i kod men behöver testas bredare)
 - [ ] Redaktionens val: klick → söker vinnamnet i listan, men borde scrolla dit och öppna kortet
 - [ ] AI-matcharen: Card-kort inuti kraschar ibland? Testa edge cases
@@ -20,6 +26,40 @@
 - [ ] Landflaggor på landningssidor (visuell differentiering)
 - [ ] Kort: varje vin borde visa situationspassning ("Fynd till lamm", "Tryggt middagsvin")
 - [ ] Minska luft ovanför first action på startsidan
+
+## Persona-audit förbättringar (2026-03-25)
+### Låg insats
+- [ ] Visa kr/liter på alla kort (spec. BiB/Storpack)
+- [ ] Visa "Under 80 kr"-filter (finns i data, dolt i UI)
+- [ ] Kryss-länkar mellan landningssidor ("Se även: Bästa vita vin")
+- [ ] Deep-links från landningssidor till huvudappen (#vin/nr)
+- [ ] Minska hero-höjd på mobil — kollapsa trust-box som default
+- [ ] "Tillbaka till toppen"-knapp
+- [ ] "Tryck på ett vin för att se mer"-hint på första kortet
+- [ ] Flytta font-<link> från komponent till <head>
+- [ ] Utöka food-matching keywords: lamm, biff, entrecôte, BBQ, marinerat
+- [ ] Visa eko-antal på filterpill ("🌿 Ekologiskt (342)")
+- [ ] Lägg till fler länder i filter: Argentina, Nya Zeeland, Österrike
+- [ ] CTA på landningssidor → AI-matchern
+
+### Medel insats
+- [ ] Sorteringsval: expert-score, crowd-score, pris, smakfynd-score
+- [ ] Dela-knapp per vin (Web Share API på mobil)
+- [ ] Budget-input till AI-matchern (snabbpills: under 100, 100-200, 200+)
+- [ ] Smakpreferens-filter (fruktigt, torrt, lätt, fylligt) i huvudfiltret
+- [ ] Visa individuella expert-källor per vin (Suckling: 91, Decanter: 88)
+- [ ] Region-filter (Bordeaux, Toscana, Rioja, Barolo)
+- [ ] Keyboard-accessibility: focus rings, tab order, aria labels
+- [ ] Loading skeleton istället för "⏳ Laddar..."
+- [ ] Prisfilter premium: 200-300, 300-500, 500+
+- [ ] Prissegmentering på landningssidor (budget, mellanklass, premium)
+
+### Hög insats
+- [ ] Streckkods-scanner i butikläge
+- [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
+- [ ] Årgångsinformation på vinkort
+- [ ] Onboarding-guide för förstagångsbesökare
+- [ ] Tannin/syra/mineralitet i smakprofil
 
 ## Nästa prioritet
 - [ ] Fredags-nyhetsbrev "Veckans fynd" via Substack (smakfynd.substack.com)
