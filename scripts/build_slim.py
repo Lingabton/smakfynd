@@ -72,7 +72,7 @@ print(f"Fast sortiment: {len(fast)} | Tillfälligt/övrigt: {len(tillfälligt)}"
 # Include all but mark assortment so JSX can filter
 print(f"After filter: {len(data)} products")
 
-# Keep top 80 per type+package combo
+# Include ALL fast sortiment + top 40 beställning per category
 groups = {}
 for p in data:
     key = f"{p.get('type','')}|{p.get('pkg','')}"
@@ -81,8 +81,11 @@ for p in data:
 slim = []
 for key, prods in groups.items():
     prods.sort(key=lambda x: -(x.get('smakfynd_score', 0)))
-    slim.extend(prods[:80])
-    print(f"  {key}: {len(prods)} -> {min(len(prods), 80)}")
+    fast_prods = [p for p in prods if p.get('assortment') == 'Fast sortiment']
+    other_prods = [p for p in prods if p.get('assortment') != 'Fast sortiment'][:40]
+    combined = fast_prods + other_prods
+    slim.extend(combined)
+    print(f"  {key}: {len(prods)} -> {len(combined)} (fast: {len(fast_prods)}, övrigt: {len(other_prods)})")
 
 # Build minimal JSON with all needed fields
 mini = []
