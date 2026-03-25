@@ -163,6 +163,7 @@ html = f"""<!DOCTYPE html>
   <script type="application/ld+json">{wine_ld_json}</script>
   <script type="application/ld+json">{faq_ld}</script>
 
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
@@ -214,6 +215,7 @@ html = f"""<!DOCTYPE html>
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(React.createElement({comp}));
   </script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js')</script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>"""

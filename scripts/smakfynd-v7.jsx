@@ -4,11 +4,10 @@
 // By Olav Innovation AB · Gabriel Linton
 // ═══════════════════════════════════════════════════════════════
 
-// Data loaded from smakfynd_web.json (paste into DATA_URL or embed)
-// To update: run python3 ~/smakfynd/scripts/score_wines_v2.py
-const DATA_URL = null; // Set to hosted JSON URL when deployed
+// Data: loaded async from wines.json, or embedded at build time as fallback
+const DATA_URL = "wines.json";
 
-const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data
+const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL
 
 const CATS = [
   { k:"all", l:"Alla", i:"✦" }, { k:"Rött", l:"Rött vin", i:"🍷" },
@@ -127,7 +126,6 @@ function ScoreBars({ p }) {
 
 // Product image URL from Systembolaget CDN
 function getImageUrl(p, size = 200) {
-  if (p.image_url) return p.image_url;
   if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
   return null;
 }
@@ -1030,20 +1028,32 @@ function Smakfynd() {
   return <SmakfyndApp />;
 }
 
+// Hash routing: read initial state from URL hash
+function parseHash() {
+  const hash = window.location.hash.slice(1); // remove #
+  if (!hash) return {};
+  if (hash.startsWith('vin/')) return { openWine: hash.slice(4) };
+  const catMap = { rott: 'Rött', vitt: 'Vitt', rose: 'Rosé', bubbel: 'Mousserande', alla: 'all' };
+  if (catMap[hash]) return { cat: catMap[hash] };
+  return { search: decodeURIComponent(hash) };
+}
+
 function SmakfyndApp() {
   const sv = useSaved();
+  const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
   const [storeMode, setStoreMode] = useState(false);
-  const [cat, setCat] = useState("Rött");
+  const [cat, setCat] = useState(initHash.cat || "Rött");
   const [price, setPrice] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initHash.search || "");
   const [showNew, setShowNew] = useState(false);
   const [showDeals, setShowDeals] = useState(false);
   const [panel, setPanel] = useState(null);
   const [faqOpen, setFaqOpen] = useState(null);
-  const [pkg, setPkg] = useState("Flaska"); // Flaska or BiB
+  const [pkg, setPkg] = useState("Flaska");
   const [allData, setAllData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
 
   // Load data from storage or embedded
   useEffect(() => {
@@ -1082,20 +1092,37 @@ function SmakfyndApp() {
     return allData.map((p, i) => ({
       ...p,
       id: p.nr || String(i),
-      category: p.type || p.category || '',
-      smakfynd_score: p.smakfynd_score || (p.score ? rescale(p.score) : 0),
-      vivino_rating: p.rating || p.vivino_rating || 0,
-      vivino_reviews: p.reviews || p.vivino_reviews || 0,
+      category: p.type || '',
       style: p.cat3 || p.style || '',
-      food_pairings: typeof p.food_pairings === 'string' 
+      food_pairings: typeof p.food_pairings === 'string'
         ? p.food_pairings.split(',').map(s => s.trim()).filter(Boolean)
         : (p.food_pairings || []),
-      package: p.pkg || p.package || 'Flaska',
+      package: p.pkg || 'Flaska',
     })).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
   }, [allData]);
-  const totalReviews = products.reduce((sum, p) => sum + (p.vivino_reviews || 0), 0);
+  const totalReviews = products.reduce((sum, p) => sum + (p.crowd_reviews || 0), 0);
   const reviewsStr = totalReviews > 1000000 ? `${(totalReviews / 1000000).toFixed(1)}M` : totalReviews > 1000 ? `${Math.round(totalReviews / 1000)}K` : String(totalReviews);
   const countries = [...new Set(products.map(p => p.country).filter(Boolean))].length;
+
+  // Handle #vin/nr hash — search for the wine when data loads
+  useEffect(() => {
+    if (openWineNr && products.length > 0) {
+      const wine = products.find(p => String(p.nr) === String(openWineNr));
+      if (wine) {
+        setSearch(wine.name);
+        setCat("all");
+      }
+      setOpenWineNr(null);
+    }
+  }, [openWineNr, products]);
+
+  // Update hash on category change
+  useEffect(() => {
+    const catMap = { Rött: 'rott', Vitt: 'vitt', Rosé: 'rose', Mousserande: 'bubbel', all: 'alla' };
+    if (!search && catMap[cat]) {
+      history.replaceState(null, '', '#' + catMap[cat]);
+    }
+  }, [cat]);
 
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);

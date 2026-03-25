@@ -17,6 +17,7 @@
 - [ ] CTA starkare visuellt — sök/filter/klick bör sticka ut mer
 - [ ] Detaljvy: tydligare hierarki (1. Vad är det? 2. Varför bra köp? 3. Smak/mat 4. Alternativ)
 - [ ] Kontrast: fortfarande lite blekt på boxar, linjer, smakprofil, etiketter
+- [ ] Landflaggor på landningssidor (visuell differentiering)
 - [ ] Kort: varje vin borde visa situationspassning ("Fynd till lamm", "Tryggt middagsvin")
 - [ ] Minska luft ovanför first action på startsidan
 

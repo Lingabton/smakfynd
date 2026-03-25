@@ -1,0 +1,17 @@
+{
+  "name": "Smakfynd",
+  "short_name": "Smakfynd",
+  "description": "Hitta bästa vinerna på Systembolaget — rankade efter kvalitet per krona",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ec",
+  "theme_color": "#7a2332",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%237a2332'/><text x='256' y='340' text-anchor='middle' font-family='Georgia,serif' font-size='280' fill='%23f5ede3'>S</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
