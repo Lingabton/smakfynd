@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
 """Deploy smakfynd JSX to docs/index.html with full SEO."""
-import os, re, json
+import os, re, json, subprocess
 
 BASE = os.path.expanduser("~/smakfynd")
 JSX_PATH = os.path.join(BASE, "site", "smakfynd-v7-slim.jsx")
 DATA_PATH = os.path.join(BASE, "data", "smakfynd_ranked_v2.json")
 OUT_PATH = os.path.join(BASE, "docs", "index.html")
+JS_PATH = os.path.join(BASE, "site", "smakfynd-v7-slim.js")
 
-jsx = open(JSX_PATH).read()
-jsx = re.sub(r'^import\s+\{[^}]+\}\s+from\s+"react";\s*\n', '', jsx)
+# Pre-transpile JSX → JS (removes need for 1.2 MB Babel in browser)
+print("Transpiling JSX → JS with Babel...")
+result = subprocess.run(
+    ["npx", "babel", "--presets", "@babel/preset-react", JSX_PATH, "-o", JS_PATH],
+    capture_output=True, text=True, cwd=BASE
+)
+if result.returncode != 0:
+    print(f"Babel error: {result.stderr}")
+    raise SystemExit(1)
+print(f"  {os.path.getsize(JS_PATH)/1024:.0f} KB transpiled")
 
-m = re.search(r'export\s+default\s+function\s+(\w+)', jsx)
+js = open(JS_PATH).read()
+js = re.sub(r'^import\s+\{[^}]+\}\s+from\s+"react";\s*\n', '', js)
+
+m = re.search(r'export\s+default\s+function\s+(\w+)', js)
 if m:
     comp = m.group(1)
 else:
-    m2 = re.search(r'export\s+default\s+(\w+)', jsx)
+    m2 = re.search(r'export\s+default\s+(\w+)', js)
     comp = m2.group(1) if m2 else "Smakfynd"
 
-jsx = re.sub(r'export\s+default\s+', '', jsx)
+js = re.sub(r'export\s+default\s+', '', js)
 
 # Load data for noscript content and structured data
 wines = []
@@ -154,7 +166,6 @@ html = f"""<!DOCTYPE html>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.9/babel.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -195,13 +206,13 @@ html = f"""<!DOCTYPE html>
     </div>
   </noscript>
 
-  <script type="text/babel">
+  <script>
     const {{ useState, useMemo, useEffect, useRef }} = React;
 
-{jsx}
+{js}
 
     const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<{comp} />);
+    root.render(React.createElement({comp}));
   </script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
