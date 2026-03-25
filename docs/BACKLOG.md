@@ -1,5 +1,11 @@
 # Smakfynd Feature Backlog
 
+## Buggar / att fixa
+- [ ] Verifiera att ALLA SB-länkar fungerar (format: /produkt/vin/nr — fixat i kod men behöver testas bredare)
+- [ ] Redaktionens val: klick → söker vinnamnet i listan, men borde scrolla dit och öppna kortet
+- [ ] AI-matcharen: Card-kort inuti kraschar ibland? Testa edge cases
+- [ ] "Gillar du X"-rekommendationer: ska öppna fullprofil, inte bara SB-länk
+
 ## UX/Design (feedback från kompis, runda 3)
 - [ ] Komprimera detaljvyn — för mycket scroll för lite ny info
 - [ ] Smakprofil: lägg till verbal descriptor ("fylligt, mörkfruktigt, mjukt")
