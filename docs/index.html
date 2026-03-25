@@ -158,9 +158,9 @@ const t = {
   wineD: "#6b1a27",
   wineL: "#8b233212",
   tx: "#1e1710",
-  txM: "#5c5043",
-  txL: "#9a8e7e",
-  txF: "#c2b8a8",
+  txM: "#4a4238",
+  txL: "#7a7060",
+  txF: "#a89e8e",
   green: "#3d7a3e",
   greenL: "#3d7a3e10",
   deal: "#c44020",
@@ -373,13 +373,19 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
             <ScoreBars p={p} />
           </div>
 
-          {/* Row 4: Why this wine ranks high */}
-          <div style={{ marginTop: 6, display: "flex", gap: 4, flexWrap: "wrap" }}>
-            {p.crowd_score >= 8.0 && <span style={{ fontSize: 9, color: "#6b8cce", background: "#6b8cce10", padding: "2px 7px", borderRadius: 100 }}>Starkt crowd-stöd</span>}
-            {p.crowd_score >= 7.0 && p.crowd_score < 8.0 && p.crowd_reviews >= 10000 && <span style={{ fontSize: 9, color: "#6b8cce", background: "#6b8cce10", padding: "2px 7px", borderRadius: 100 }}>Många omdömen</span>}
-            {p.expert_score >= 7.5 && <span style={{ fontSize: 9, color: "#b07d3b", background: "#b07d3b10", padding: "2px 7px", borderRadius: 100 }}>Gott expertstöd</span>}
-            {p.price_score >= 8 && <span style={{ fontSize: 9, color: t.green, background: `${t.green}10`, padding: "2px 7px", borderRadius: 100 }}>Prisvärt i sin kategori</span>}
-            {p.price_score >= 6 && p.price_score < 8 && p.crowd_score >= 7.5 && <span style={{ fontSize: 9, color: t.txM, background: `${t.txM}10`, padding: "2px 7px", borderRadius: 100 }}>Bra betyg till rimligt pris</span>}
+          {/* Row 4: Human-readable verdict */}
+          <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4 }}>
+            {(() => {
+              const reasons = [];
+              if (p.crowd_score >= 8.0) reasons.push("Publikfavorit");
+              else if (p.crowd_score >= 7.0 && p.crowd_reviews >= 10000) reasons.push("Många gillar det");
+              if (p.expert_score >= 7.5) reasons.push("experterna håller med");
+              else if (p.expert_score) reasons.push("godkänt av kritiker");
+              if (p.price_score >= 9) reasons.push("extremt prisvärt");
+              else if (p.price_score >= 8) reasons.push("starkt pris för kvaliteten");
+              else if (p.price_score >= 6) reasons.push("rimligt pris");
+              return reasons.length > 0 ? reasons.join(" · ") : null;
+            })()}
           </div>
         </div>
       </div>
@@ -408,13 +414,13 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 background: "none", border: "none", cursor: "pointer", padding: "2px 0",
                 fontFamily: "inherit", transition: "all 0.2s",
               }}>
-              <span style={{ fontSize: 18, lineHeight: 1 }}>{sv.isSaved(p.nr || p.id) ? "♥" : "♡"}</span>
-              <span style={{ fontWeight: sv.isSaved(p.nr || p.id) ? 600 : 400 }}>{sv.isSaved(p.nr || p.id) ? "I min lista" : "Spara i min lista"}</span>
+              <span style={{ fontSize: 15, lineHeight: 1 }}>{sv.isSaved(p.nr || p.id) ? "♥" : "♡"}</span>
+              <span style={{ fontWeight: sv.isSaved(p.nr || p.id) ? 600 : 400 }}>{sv.isSaved(p.nr || p.id) ? "Sparad" : "Spara"}</span>
             </button>
           )}
         </div>
         <span style={{ fontSize: 10, color: t.txF, display: "flex", alignItems: "center", gap: 3 }}>
-          {open ? "Stäng ▲" : "Detaljer ▼"}
+          {open ? "Stäng ▲" : "Se varför ▼"}
         </span>
       </div>
 
@@ -776,16 +782,11 @@ function FoodMatch({ products }) {
       </div>
 
       <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
-        {[["🥂", "Dejt"], ["🔥", "Grillkväll"], ["👨‍👩‍👧‍👦", "Svärföräldrar på middag"], ["🍿", "Fredagsmys"], ["🧺", "Picknick"], ["🎉", "Fest"]].map(([icon, s]) => (
+        {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => (
           <button key={s} onClick={() => setMeal(s)}
-            style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.wine}20`, background: `${t.wine}06`, color: t.wine, fontSize: 11, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 3 }}
-          ><span style={{ fontSize: 12 }}>{icon}</span> {s}</button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}>
-        {["Fredagstacos", "Lax", "Grillat kött", "Pizza", "Skaldjur", "Ost och chark", "Pasta bolognese"].map(s => (
-          <button key={s} onClick={() => setMeal(s)}
-            style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.bdrL}`, background: "transparent", color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+            style={{ padding: "5px 12px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine; e.currentTarget.style.color = t.wine; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
           >{s}</button>
         ))}
       </div>
@@ -1157,14 +1158,14 @@ function SmakfyndApp() {
           margin: "0 0 12px", fontSize: 36, lineHeight: 1.1,
           fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: t.tx,
         }}>
-          Hitta vinet som ger<br />mest <em style={{ color: t.wine }}>smak för pengarna</em>
+          Mindre hype,<br />bättre <em style={{ color: t.wine }}>vinköp</em>
         </h1>
 
         <p style={{
           margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
           maxWidth: 440, fontWeight: 300,
         }}>
-          Vi följer 11 500+ viner — och lyfter fram de mest prisvärda fynden just nu.
+          Vi jämför 11 500+ viner mot rätt kategori — inte hela hyllan. Här hittar du fynden.
         </p>
 
         {/* Trust module — concrete promises */}
@@ -1174,7 +1175,7 @@ function SmakfyndApp() {
           textAlign: "left",
         }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Så funkar Smakfynd</div>
-          <div style={{ fontSize: 11, color: t.txM, marginBottom: 8, lineHeight: 1.4 }}>Vi hjälper dig hitta de mest prisvärda köpen i varje kategori — inte bara de mest hypade.</div>
+          <div style={{ fontSize: 11, color: t.txM, marginBottom: 8, lineHeight: 1.4 }}>Bästa köp i varje stil och prisklass — baserat på data, inte magkänsla.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {[
               ["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"],

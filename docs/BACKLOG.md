@@ -1,5 +1,15 @@
 # Smakfynd Feature Backlog
 
+## UX/Design (feedback från kompis)
+- [ ] Komprimera detaljvyn — för mycket scroll för lite ny info
+- [ ] Smakprofil: lägg till verbal descriptor ("fylligt, mörkfruktigt, mjukt")
+- [ ] Crowd/Expert bars: mer kompakt, tydligare labels
+- [ ] Hero: testa snabbingångar direkt ("Bäst till fredagstacos", "Röda under 120kr")
+- [ ] Minska luft i hero — snabbare till action
+- [ ] "Gillar du X? Testa även" — bygg ut som kärnfunktion (retention)
+- [ ] Poängskala: tydligare vad 78 vs 83 betyder i praktiken
+- [ ] CTA starkare visuellt — sök/filter/klick bör sticka ut mer
+
 ## Nästa prioritet
 - [ ] Fredags-nyhetsbrev "Veckans fynd" via Substack (smakfynd.substack.com)
 - [ ] SEO-content: Substack-inlägg som rankar på Google ("bästa röda under 100 kr systembolaget")
