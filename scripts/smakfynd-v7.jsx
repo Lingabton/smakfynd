@@ -186,7 +186,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
   const s100 = p.smakfynd_score;
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
-  const sbUrl = `https://www.systembolaget.se/produkt/${p.nr}`;
+  const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   
   // Rank badges
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
@@ -521,35 +521,32 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
               <div style={{ marginBottom: 0 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {similar.map((w, i) => {
-                    const [wLabel, wCol] = getScoreInfo(w.smakfynd_score);
-                    return (
-                      <a key={i} href={`https://www.systembolaget.se/produkt/${w.nr}`} target="_blank" rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s" }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
-                      >
-                        <svg width="34" height="34" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
-                          <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
-                          <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
-                          <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
-                            strokeDasharray={`${w.smakfynd_score * 1.38} 138`} strokeLinecap="round"
-                            transform="rotate(-90 25 25)" />
-                          <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
-                            fontSize="16" fontWeight="900" fill="#2d6b3f">{w.smakfynd_score}</text>
-                        </svg>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
-                          <div style={{ fontSize: 10, color: t.txL }}>{w.sub} · {w.country}</div>
-                          <div style={{ fontSize: 10, color: t.green, marginTop: 2, fontWeight: 500 }}>{w._reason}</div>
-                        </div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: t.tx, flexShrink: 0, fontFamily: "'Instrument Serif', serif" }}>
-                          {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
-                        </div>
-                      </a>
-                    );
-                  })}
+                  {similar.map((w, i) => (
+                    <a key={i} href={`https://www.systembolaget.se/produkt/vin/${w.nr}`} target="_blank" rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
+                    >
+                      <svg width="34" height="34" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
+                        <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+                        <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
+                        <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
+                          strokeDasharray={`${w.smakfynd_score * 1.38} 138`} strokeLinecap="round"
+                          transform="rotate(-90 25 25)" />
+                        <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                          fontSize="16" fontWeight="900" fill="#2d6b3f">{w.smakfynd_score}</text>
+                      </svg>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
+                        <div style={{ fontSize: 10, color: t.txL }}>{w.sub} · {w.country}</div>
+                        <div style={{ fontSize: 10, color: t.green, marginTop: 2, fontWeight: 500 }}>{w._reason}</div>
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: t.tx, flexShrink: 0, fontFamily: "'Instrument Serif', serif" }}>
+                        {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
+                      </div>
+                    </a>
+                  ))}
                 </div>
               </div>
             );
@@ -609,7 +606,7 @@ function matchWinesForCourses(courses, products) {
 function WineResult({ m }) {
   const [_lbl, col] = getScoreInfo(m.smakfynd_score);
   return (
-    <a href={`https://www.systembolaget.se/produkt/${m.nr}`} target="_blank" rel="noopener noreferrer"
+    <a href={`https://www.systembolaget.se/produkt/vin/${m.nr}`} target="_blank" rel="noopener noreferrer"
       onClick={e => e.stopPropagation()}
       style={{ padding: "12px 14px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdrL}`, textDecoration: "none", display: "flex", alignItems: "center", gap: 12, transition: "border-color 0.2s" }}
       onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
@@ -743,7 +740,15 @@ function FoodMatch({ products }) {
                 }}>{course.dish}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 5, paddingLeft: 12 }}>
-                {course.wines.map((m, i) => <WineResult key={i} m={m} />)}
+                {course.wines.map((m, i) => {
+                  const matchedP = products.find(pr => String(pr.nr) === String(m.nr));
+                  return matchedP
+                    ? <div key={i}>
+                        {m._why && <div style={{ fontSize: 10, color: t.txM, marginBottom: 3, fontStyle: "italic" }}>{m._why}</div>}
+                        <Card p={matchedP} rank={i + 1} delay={0} allProducts={products} />
+                      </div>
+                    : <WineResult key={i} m={m} />;
+                })}
               </div>
             </div>
           ))}
@@ -1256,64 +1261,31 @@ function SmakfyndApp() {
                 <span style={{ fontSize: 10, color: t.txL, transition: "transform 0.2s", display: "inline-block", transform: tipsOpen ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
               </button>
               {tipsOpen && (
-                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
                   {GABRIELS_PICKS.map((pick, i) => {
-                    const [_l, col] = getScoreInfo(pick.smakfynd_score);
+                    const mp = products.find(pr => String(pr.nr) === String(pick.nr));
+                    const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
                     return (
-                      <div key={i} style={{
-                        padding: "16px 18px", borderRadius: 14,
-                        background: t.card, border: `1px solid ${t.bdr}`,
-                      }}>
-                        {/* Header: score + name + price */}
-                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                          <div style={{
-                            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                            background: `${col}12`, border: `2px solid ${col}30`,
-                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                          }}>
-                            <span style={{ fontSize: 18, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{pick.smakfynd_score}</span>
-                          </div>
+                      <div key={i} style={{ padding: "14px 16px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default" }}
+                        onClick={() => mp && setSearch(mp.name)}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{pick.verdict}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <svg width="40" height="40" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
+                            <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+                            <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
+                            <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
+                              strokeDasharray={`${pick.smakfynd_score * 1.38} 138`} strokeLinecap="round"
+                              transform="rotate(-90 25 25)" />
+                            <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                              fontSize="17" fontWeight="900" fill="#2d6b3f">{pick.smakfynd_score}</text>
+                          </svg>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 17, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
-                            <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{pick.sub}</div>
-                          </div>
-                          <div style={{ textAlign: "right", flexShrink: 0 }}>
-                            <div style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{pick.price}</div>
+                            <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx }}>{pick.name}</div>
+                            <div style={{ fontSize: 11, color: t.txL }}>{pick.sub} · {pick.price}</div>
                           </div>
                         </div>
-
-                        {/* Verdict badge */}
-                        {pick.verdict && (
-                          <div style={{ fontSize: 11, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
-                            {pick.verdict}
-                          </div>
-                        )}
-
-                        {/* Note */}
-                        <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.65, margin: "0 0 12px" }}>
-                          {pick.note}
-                        </p>
-
-                        {/* Food + buy */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: `1px solid ${t.bdrL}` }}>
-                          {pick.food && (
-                            <div style={{ fontSize: 11, color: t.txL }}>
-                              Passar till: <span style={{ color: t.txM }}>{pick.food}</span>
-                            </div>
-                          )}
-                          <a href={`https://www.systembolaget.se/produkt/${pick.nr}`} target="_blank" rel="noopener noreferrer"
-                            style={{
-                              display: "inline-flex", alignItems: "center", gap: 4,
-                              padding: "6px 14px", borderRadius: 8,
-                              background: t.tx, color: "#faf6f0",
-                              fontSize: 11, fontWeight: 600, textDecoration: "none",
-                              transition: "opacity 0.2s", flexShrink: 0,
-                            }}
-                            onClick={e => e.stopPropagation()}
-                            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                          >Köp på Systembolaget ↗</a>
-                        </div>
+                        <p style={{ fontSize: 12, color: t.txM, lineHeight: 1.5, margin: "8px 0 0", fontStyle: "italic" }}>{pick.note}</p>
+                        {mp && <div style={{ fontSize: 10, color: t.wine, marginTop: 6 }}>Klicka för att se fullständig profil →</div>}
                       </div>
                     );
                   })}
