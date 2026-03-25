@@ -32,13 +32,14 @@ Svara ALLTID med exakt detta JSON-format, inget annat:
 }
 
 Regler:
-- ALLTID börja med en "course" som heter "Hela måltiden" med 1 vinförslag som funkar till allt
-- Sedan en course per rätt som användaren nämner (förrätt, huvud, dessert etc)
-- Varje course har 1-2 criteria (vintyper)
+- Om användaren nämner FLERA rätter (förrätt + huvud, eller förrätt + huvud + dessert):
+  börja med en course "Hela måltiden" (1 vin som funkar till allt), sedan en course per rätt
+- Om användaren bara nämner EN rätt eller ett tillfälle (t.ex. "ost och chark", "grillat kött", "fredagstacos"):
+  ge BARA EN course med det namnet, INTE "Hela måltiden" separat
+- Varje course har 2-3 criteria (olika vintyper för variation)
 - keywords ska vara druvor (Pinot Noir, Chardonnay), stilar (Friskt, Fruktigt, Kryddigt) eller regioner
 - body mappar till taste_body: light=1-4, medium=5-8, full=9-12
 - Tänk på smaker, fett, syra, kryddighet
-- Om bara en rätt nämns: ge "Hela måltiden" + den rätten med 2 criteria vardera
 - Svara BARA med JSON, ingen annan text`;
 
 export default {
