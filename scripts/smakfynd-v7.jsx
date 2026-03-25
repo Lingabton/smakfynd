@@ -95,11 +95,12 @@ function rescale(raw) {
 }
 
 function getScoreInfo(s100) {
-  if (s100 >= 90) return ["Fantastiskt fynd", "#1a7a2e", "🏆"];
-  if (s100 >= 75) return ["Utmärkt värde", t.green, "⭐"];
-  if (s100 >= 60) return ["Bra fynd", "#5a7542", ""];
-  if (s100 >= 40) return ["Godkänt", "#7a7054", ""];
-  return ["Medel", "#8a7a6a", ""];
+  if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
+  if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
+  if (s100 >= 70) return ["Starkt fynd", "#5a7542", ""];
+  if (s100 >= 60) return ["Bra köp", "#7a7054", ""];
+  if (s100 >= 50) return ["Okej värde", "#8a7a6a", ""];
+  return ["Svagt värde", "#8a7a6a", ""];
 }
 
 function MiniBar({ label, value, max = 10, color }) {
@@ -257,7 +258,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 </div>
               )}
               </div>
-              <div style={{ fontSize: 9, color: "#998877", marginTop: 3 }}>Smak för pengarna</div>
+              <div style={{ fontSize: 9, fontWeight: 600, color: col, marginTop: 3 }}>{label}</div>
             </div>
           </div>
 
@@ -279,17 +280,23 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
           </div>
 
           {/* Row 4: Human-readable verdict */}
-          <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4 }}>
+          <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
             {(() => {
-              const reasons = [];
-              if (p.crowd_score >= 8.0) reasons.push("Publikfavorit");
-              else if (p.crowd_score >= 7.0 && p.crowd_reviews >= 10000) reasons.push("Många gillar det");
-              if (p.expert_score >= 7.5) reasons.push("experterna håller med");
-              else if (p.expert_score) reasons.push("godkänt av kritiker");
-              if (p.price_score >= 9) reasons.push("extremt prisvärt");
-              else if (p.price_score >= 8) reasons.push("starkt pris för kvaliteten");
-              else if (p.price_score >= 6) reasons.push("rimligt pris");
-              return reasons.length > 0 ? reasons.join(" · ") : null;
+              const c = p.crowd_score || 0, e = p.expert_score || 0, pr = p.price_score || 0;
+              const rev = p.crowd_reviews || 0;
+              // Generate a natural, specific verdict
+              if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
+              if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
+              if (c >= 8.0) return "Mycket omtyckt bland vindrickare";
+              if (e >= 8.0 && pr >= 8) return "Kritikerfavorit till överraskande lågt pris";
+              if (e >= 7.5 && pr >= 8) return "Bra expertbetyg och mer smak än prislappen antyder";
+              if (e >= 7.5 && c >= 7.0) return "Uppskattat av både publik och kritiker";
+              if (pr >= 9 && c >= 7.0) return "Mycket vin för pengarna — svårslaget i prisklassen";
+              if (pr >= 8 && c >= 7.0) return "Bra köp för priset — bred uppskattning";
+              if (pr >= 8) return "Prisvärt val med rimligt betyg";
+              if (c >= 7.5 && rev >= 5000) return "Tryggt och populärt — många har provat och gillar";
+              if (c >= 7.0) return "Solitt val med god crowd-uppskattning";
+              return null;
             })()}
           </div>
         </div>
@@ -488,7 +495,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
             </div>
           )}
 
-          {/* Similar wines */}
+          {/* Similar wines with reasons */}
           {allProducts && (() => {
             const similar = allProducts
               .filter(w => w.category === p.category && w.package === p.package
@@ -497,22 +504,33 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 && (w.nr || w.id) !== (p.nr || p.id)
                 && w.smakfynd_score >= p.smakfynd_score - 5)
               .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
-              .slice(0, 3);
+              .slice(0, 3)
+              .map(w => {
+                // Generate reason WHY this is recommended
+                let reason = "";
+                if (w.price < p.price - 10) reason = `${p.price - w.price}kr billigare`;
+                else if (w.smakfynd_score > p.smakfynd_score) reason = "Högre fyndpoäng";
+                if ((w.expert_score || 0) > (p.expert_score || 0)) reason += (reason ? " · " : "") + "Starkare expertstöd";
+                else if ((w.crowd_score || 0) > (p.crowd_score || 0) + 0.3) reason += (reason ? " · " : "") + "Högre crowd-betyg";
+                if (w.grape && p.grape && w.grape === p.grape) reason += (reason ? " · " : "") + "Samma druva";
+                if (!reason) reason = "Liknande stil och prisklass";
+                return { ...w, _reason: reason };
+              });
             if (similar.length === 0) return null;
             return (
               <div style={{ marginBottom: 0 }}>
-                <div style={{ fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {similar.map((w, i) => {
-                    const [_wl, wCol] = getScoreInfo(w.smakfynd_score);
+                    const [wLabel, wCol] = getScoreInfo(w.smakfynd_score);
                     return (
                       <a key={i} href={`https://www.systembolaget.se/produkt/${w.nr}`} target="_blank" rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
-                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 10, background: t.bg, textDecoration: "none", transition: "background 0.2s" }}
-                        onMouseEnter={e => e.currentTarget.style.background = t.bdrL}
-                        onMouseLeave={e => e.currentTarget.style.background = t.bg}
+                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
                       >
-                        <svg width="32" height="32" viewBox="0 0 50 50">
+                        <svg width="34" height="34" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
                           <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
                           <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
                           <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
@@ -524,6 +542,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
                           <div style={{ fontSize: 10, color: t.txL }}>{w.sub} · {w.country}</div>
+                          <div style={{ fontSize: 10, color: t.green, marginTop: 2, fontWeight: 500 }}>{w._reason}</div>
                         </div>
                         <div style={{ fontSize: 14, fontWeight: 700, color: t.tx, flexShrink: 0, fontFamily: "'Instrument Serif', serif" }}>
                           {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>

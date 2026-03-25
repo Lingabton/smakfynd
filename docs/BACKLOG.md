@@ -1,6 +1,6 @@
 # Smakfynd Feature Backlog
 
-## UX/Design (feedback från kompis)
+## UX/Design (feedback från kompis, runda 3)
 - [ ] Komprimera detaljvyn — för mycket scroll för lite ny info
 - [ ] Smakprofil: lägg till verbal descriptor ("fylligt, mörkfruktigt, mjukt")
 - [ ] Crowd/Expert bars: mer kompakt, tydligare labels
@@ -9,6 +9,10 @@
 - [ ] "Gillar du X? Testa även" — bygg ut som kärnfunktion (retention)
 - [ ] Poängskala: tydligare vad 78 vs 83 betyder i praktiken
 - [ ] CTA starkare visuellt — sök/filter/klick bör sticka ut mer
+- [ ] Detaljvy: tydligare hierarki (1. Vad är det? 2. Varför bra köp? 3. Smak/mat 4. Alternativ)
+- [ ] Kontrast: fortfarande lite blekt på boxar, linjer, smakprofil, etiketter
+- [ ] Kort: varje vin borde visa situationspassning ("Fynd till lamm", "Tryggt middagsvin")
+- [ ] Minska luft ovanför first action på startsidan
 
 ## Nästa prioritet
 - [ ] Fredags-nyhetsbrev "Veckans fynd" via Substack (smakfynd.substack.com)
