@@ -1214,7 +1214,10 @@ function SmakfyndApp() {
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 4 }}>Gabriel Linton, grundare</div>
               <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
-                Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan (Örebro universitet). Besöker regelbundet vingårdar i Italien och Sydeuropa. Smakfynd föddes ur frustrationen att behöva gissa sig fram bland tusentals viner — och insikten att all data redan fanns, men ingen hade kopplat ihop den åt konsumenten.
+                Forskare i innovation och entreprenörskap (PhD, Örebro universitet). Førsteamanuensis vid Universitetet i Innlandet, Norge. Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan. MBA, Cleveland State University.
+              </p>
+              <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: "8px 0 0" }}>
+                Smakfynd startade med mitt eget problem: jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data — inte magkänsla. All information fanns redan, men ingen hade kopplat ihop den på ett enkelt sätt. Och jag fick ofta känslan att billigare viner smakade nästan lika bra som betydligt dyrare. Därför byggde jag ett system som väger in priset i omdömet — systematiskt.
               </p>
             </div>
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
