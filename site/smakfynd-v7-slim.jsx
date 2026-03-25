@@ -178,7 +178,7 @@ function useSaved() {
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
 
-function Card({ p, rank, delay, totalInCategory }) {
+function Card({ p, rank, delay, totalInCategory, allProducts }) {
   const [open, setOpen] = useState(false);
   const sv = React.useContext(SavedContext);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾" })[p.category] || "✦";
@@ -482,6 +482,54 @@ function Card({ p, rank, delay, totalInCategory }) {
             </div>
           )}
 
+          {/* Similar wines */}
+          {allProducts && (() => {
+            const similar = allProducts
+              .filter(w => w.category === p.category && w.package === p.package
+                && w.assortment === "Fast sortiment"
+                && Math.abs(w.price - p.price) <= 50
+                && (w.nr || w.id) !== (p.nr || p.id)
+                && w.smakfynd_score >= p.smakfynd_score - 5)
+              .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
+              .slice(0, 3);
+            if (similar.length === 0) return null;
+            return (
+              <div style={{ marginBottom: 0 }}>
+                <div style={{ fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {similar.map((w, i) => {
+                    const [_wl, wCol] = getScoreInfo(w.smakfynd_score);
+                    return (
+                      <a key={i} href={`https://www.systembolaget.se/produkt/${w.nr}`} target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 10, background: t.bg, textDecoration: "none", transition: "background 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = t.bdrL}
+                        onMouseLeave={e => e.currentTarget.style.background = t.bg}
+                      >
+                        <svg width="32" height="32" viewBox="0 0 50 50">
+                          <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+                          <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
+                          <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
+                            strokeDasharray={`${w.smakfynd_score * 1.38} 138`} strokeLinecap="round"
+                            transform="rotate(-90 25 25)" />
+                          <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                            fontSize="16" fontWeight="900" fill="#2d6b3f">{w.smakfynd_score}</text>
+                        </svg>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
+                          <div style={{ fontSize: 10, color: t.txL }}>{w.sub} · {w.country}</div>
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: t.tx, flexShrink: 0, fontFamily: "'Instrument Serif', serif" }}>
+                          {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
         </div>
       )}
     </div>
@@ -632,8 +680,15 @@ function FoodMatch({ products }) {
           }}>{loading ? "Tänker..." : "Hitta vin"}</button>
       </div>
 
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-        {["Fredagstacos", "Lax med citronsås", "Grillat kött", "Pizza", "Skaldjur", "Ost och chark"].map(s => (
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
+        {[["🥂", "Dejt"], ["🔥", "Grillkväll"], ["👨‍👩‍👧‍👦", "Svärföräldrar på middag"], ["🍿", "Fredagsmys"], ["🧺", "Picknick"], ["🎉", "Fest"]].map(([icon, s]) => (
+          <button key={s} onClick={() => setMeal(s)}
+            style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.wine}20`, background: `${t.wine}06`, color: t.wine, fontSize: 11, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 3 }}
+          ><span style={{ fontSize: 12 }}>{icon}</span> {s}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}>
+        {["Fredagstacos", "Lax", "Grillat kött", "Pizza", "Skaldjur", "Ost och chark", "Pasta bolognese"].map(s => (
           <button key={s} onClick={() => setMeal(s)}
             style={{ padding: "4px 10px", borderRadius: 100, border: `1px solid ${t.bdrL}`, background: "transparent", color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
           >{s}</button>
@@ -1149,7 +1204,7 @@ function SmakfyndApp() {
               <p style={{ fontSize: 14, color: t.txM, fontStyle: "italic" }}>Inga sparade viner ännu. Tryck ♡ på ett vin för att spara det.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {savedWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} />)}
+                {savedWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
               </div>
             )}
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
@@ -1400,7 +1455,7 @@ function SmakfyndApp() {
                 <div key={title}>
                   <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} />)}
+                    {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
                   </div>
                 </div>
               );
@@ -1408,7 +1463,7 @@ function SmakfyndApp() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {filtered.slice(0, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={Math.min(i * 0.04, 0.4)} />)}
+            {filtered.slice(0, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={Math.min(i * 0.04, 0.4)} allProducts={products} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
                 Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
