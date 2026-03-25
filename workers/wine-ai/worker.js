@@ -1,89 +1,132 @@
 /**
- * Smakfynd AI Wine Matcher — Cloudflare Worker
- *
- * Two-mode sommelier:
- * - Clear input → direct recommendations (2-3 wines)
- * - Vague input → 1-2 clarifying questions first
+ * Smakfynd AI Wine Matcher — Two-step architecture
+ * Step 1: Classify input (Haiku — fast, cheap)
+ * Step 2: Generate response within chosen strategy (Sonnet — better Swedish)
  */
 
-const SYSTEM_PROMPT = `Du är en vinrådgivare som hjälper användare hitta rätt vin till mat och tillfälle. Du låter som en kunnig svensk kompis — inte en AI, inte en vinskribent, inte en listgenerator.
+// Step 1: Classification prompt (Haiku)
+const CLASSIFY_PROMPT = `Klassificera denna vinförfrågan. Svara BARA med JSON.
 
-STEG 1: Klassificera inputen
-
-A. EN RÄTT (t.ex. "pasta carbonara", "grillad lax")
-→ Ge 2-3 vinförslag direkt
-
-B. FLERA RÄTTER / HEL MENY (t.ex. "toast skagen, sedan entrecôte, rabarberpaj")
-→ Var ärlig: om rätterna drar åt olika håll, säg det. Föreslå 2 viner eller fråga vad som ska prioriteras. Låtsas INTE att ett vin löser allt.
-
-C. BRED KATEGORI (t.ex. "ost & chark", "pasta", "skaldjur")
-→ Ställ 1-2 korta följdfrågor först
-
-D. STÄMNING/TILLFÄLLE (t.ex. "dejt", "fest")
-→ Ställ 1 enkel fråga: "Vad ska ni äta?"
-
-STEG 2: JSON-format
-
-Om du STÄLLER FRÅGOR:
 {
-  "mode": "question",
-  "reasoning": "1-2 meningar, rådgivande ton",
-  "questions": ["Fråga 1?"],
-  "quick_options": [["Alt A", "Alt B", "Alt C"]]
+  "input_type": "single_dish|multi_course|broad_category|mood_occasion",
+  "dishes": ["lista av rätter/tillfällen användaren nämner"],
+  "conflicts": true/false,
+  "conflict_note": "kort not om varför rätterna kräver olika vin, eller null",
+  "needs_followup": true/false,
+  "followup_reason": "varför följdfråga behövs, eller null",
+  "recommended_strategy": "ask_followup|recommend_main|recommend_two_bottles|recommend_direct",
+  "suggested_followup": "föreslagen följdfråga på svenska, eller null",
+  "suggested_options": ["klickbara alternativ"] eller null
 }
 
-Om du GER REKOMMENDATIONER:
+Regler:
+- single_dish: en tydlig rätt → recommend_direct
+- multi_course med dessert som kräver annat vin → needs_followup=true, strategy=ask_followup
+- multi_course utan konflikt → recommend_direct eller recommend_two_bottles
+- broad_category (pasta, ost, skaldjur) → needs_followup=true
+- mood_occasion (dejt, fest) → needs_followup=true
+- Om dessert + huvudrätt med olika karaktär: ALLTID needs_followup=true`;
+
+// Step 2: Recommendation prompt (Sonnet)
+const RECOMMEND_PROMPT = `Du är en kunnig svensk vinrådgivare. Ge vinrekommendationer inom den valda strategin.
+
+STRATEGI: {strategy}
+KONTEXT: {context}
+
+Svara med JSON:
 {
   "mode": "recommend",
-  "reasoning": "2-3 meningar om hur du tänker. Var ärlig om kompromisser.",
+  "reasoning": "2-3 meningar. Naturlig svenska. Var ärlig om kompromisser.",
   "courses": [
     {
-      "dish": "Naturligt namn på svenska — INTE interna etiketter",
+      "dish": "Naturligt namn",
       "criteria": [
         {
           "type": "Rött|Vitt|Rosé|Mousserande",
           "body": "light|medium|full",
-          "keywords": ["druva eller stil-ord"],
-          "why": "Kort, UNIK motivering på naturlig svenska",
+          "keywords": ["druvor, stilar"],
+          "why": "Max 1 mening. Unik. Konkret kopplad till maten.",
           "label": "Tryggt val|Mest prisvärt|Lite roligare"
         }
       ]
     }
   ],
-  "followup": "Kort fråga för förfining"
+  "followup": "Kort fråga för förfining, eller null"
 }
 
-SPRÅKREGLER (VIKTIGT):
-- Skriv ALLTID på naturlig, idiomatisk svenska
-- Korta meningar, vardaglig men kunnig ton
-- ALDRIG poetiska omskrivningar eller översatta vinskribent-fraser
-- ALDRIG direktöversättningar från engelska
-- ALDRIG "rensar munnen mellan tuggor", "grillmark", "aromatiskt" (slentrianmässigt)
-- ALDRIG visa interna labels ("Frukost", "Kategori") om de inte passar
-- Om du inte kan formulera det elegant: välj en enkel, korrekt mening istället
-- Hellre "friskt och lätt" än "syrligt med aromatisk karaktär"
-- Varje "why" ska vara UNIK — aldrig upprepa samma fras mellan viner
+HÅRDA REGLER:
+- Max 2 criteria per course. Max 3 totalt i hela svaret.
+- Varje "why" max 1 mening, unik, aldrig samma fras
+- strategy=recommend_main → 2 viner till huvudrätten, nämn att dessert kräver separat
+- strategy=recommend_two_bottles → 1 vin per rätt, max 2 totalt
+- strategy=recommend_direct → 2-3 viner
+- Var ärlig: "Det här är en kompromiss" om det är det
 
-BRA EXEMPEL:
-"Till grillat kött hade jag valt ett rött med bra syra och inte för tung stil."
-"Den här menyn drar åt olika håll, så bäst träff får du med två flaskor."
-"Efterrätten passar bättre med något separat."
+SPRÅK (ABSOLUTA REGLER):
+- Naturlig, idiomatisk svenska. Korta meningar.
+- FÖRBJUDNA uttryck: "rensar munnen", "grillmark", "mäta armen", "öppnar för", "karaktär" (generiskt), "klarar både X och Y" (om tveksamt)
+- Om osäker på formulering: "Bra syra gör att det passar till den här rätten."
+- Hellre enkelt och rätt än avancerat och konstigt
+- Låt som en kunnig kompis, inte en vinskribent`;
 
-DÅLIGA EXEMPEL (skriv ALDRIG så här):
-"klarar både grillmark och rabarberns syrliga karaktär"
-"aromatiskt och syrligt som rensar munnen mellan tuggor"
-"ett vin som öppnar för nya smaker"
+// Question prompt (when follow-up needed)
+const QUESTION_PROMPT = `Du är en kunnig svensk vinrådgivare. Ställ en kort följdfråga.
 
-PRODUKTREGLER:
-- Max 2-3 criteria per course (= max 2-3 viner)
-- Ge varje vin en "label": "Tryggt val", "Mest prisvärt", "Lite roligare"
-- Signalera osäkerhet: "brukar passa", "ofta bäst" — inte "perfekt match"
-- Om en meny kräver olika vintyper: var ärlig, föreslå 2 flaskor eller prioritera
-- questions: max 2, korta och naturliga
-- quick_options: klickbara alternativ
-- keywords: druvor, stilar (Friskt, Fruktigt, Kryddigt), regioner
-- body: light=1-4, medium=5-8, full=9-12
-- Svara BARA med JSON`;
+KONTEXT: {context}
+ANLEDNING: {reason}
+
+Svara med JSON:
+{
+  "mode": "question",
+  "reasoning": "1-2 meningar, rådgivande ton, naturlig svenska",
+  "questions": ["1 fråga, max 2"],
+  "quick_options": [["Alt A", "Alt B", "Alt C"]]
+}
+
+REGLER:
+- Max 1-2 frågor, korta
+- Quick options ska vara naturliga val, inte interna kategorier
+- Naturlig svenska, kort, varm ton`;
+
+async function callClaude(apiKey, model, system, userMessage, context) {
+  const messages = [];
+  if (context && Array.isArray(context)) {
+    for (const msg of context) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+  messages.push({ role: "user", content: userMessage });
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1024,
+      system,
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Claude API ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.content?.[0]?.text || "";
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error("Could not parse AI response");
+  }
+}
 
 export default {
   async fetch(request, env) {
@@ -97,130 +140,110 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
-
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "POST only" }), {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     try {
       const body = await request.json();
       const url = new URL(request.url);
-
-      // Expert estimation endpoint
-      if (url.pathname === "/expert" && body.wines) {
-        const expertPrompt = `Du är en erfaren vinkritiker. Uppskatta kvalitetspoäng (80-100, Wine Spectator-skala) för varje vin.
-
-Basera din bedömning på: producent/varumärke, druva, region, prispositionering.
-- 80-84: Enkel/vardaglig kvalitet
-- 85-87: Bra kvalitet, välgjort
-- 88-90: Mycket bra, utmärkt producent eller region
-- 91-93: Exceptionellt, toppproducent
-- 94+: Världsklass
-
-Var realistisk. De flesta viner under 150kr hamnar 82-87. Var inte för generös.
-Svara BARA med JSON-array: [{"name": "...", "points": 88}, ...]
-
-Viner:
-` + JSON.stringify(body.wines);
-
-        const resp = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": env.ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 4096,
-            messages: [{ role: "user", content: expertPrompt }],
-          }),
-        });
-        const data = await resp.json();
-        const text = data.content?.[0]?.text || "";
-        const match = text.match(/\[[\s\S]*\]/);
-        const parsed = match ? JSON.parse(match[0]) : [];
-        return new Response(JSON.stringify(parsed), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Wine matching endpoint
-      const { meal, context } = body;
-      if (!meal || meal.length < 2 || meal.length > 500) {
-        return new Response(JSON.stringify({ error: "Beskriv din måltid (2-500 tecken)" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       const apiKey = env.ANTHROPIC_API_KEY;
-      if (!apiKey) {
-        return new Response(JSON.stringify({ error: "API key not configured" }), {
-          status: 500,
+
+      // Expert endpoint (unchanged)
+      if (url.pathname === "/expert" && body.wines) {
+        const expertPrompt = `Uppskatta kvalitetspoäng (80-100) för varje vin. Var realistisk. Svara BARA med JSON-array: [{"name":"...","points":88},...]\n\nViner:\n` + JSON.stringify(body.wines);
+        const result = await callClaude(apiKey, "claude-haiku-4-5-20251001", expertPrompt, "Bedöm dessa viner", []);
+        return new Response(JSON.stringify(result), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Build messages — support conversation context for follow-ups
-      const messages = [];
-      if (context && Array.isArray(context)) {
-        for (const msg of context) {
-          messages.push({ role: msg.role, content: msg.content });
-        }
+      // Wine matching
+      const { meal, context } = body;
+      if (!meal || meal.length < 2) {
+        return new Response(JSON.stringify({ error: "Beskriv din måltid" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
-      messages.push({ role: "user", content: meal });
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1024,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
-      });
+      // STEP 1: Classify with Haiku (fast, cheap)
+      const classification = await callClaude(
+        apiKey,
+        "claude-haiku-4-5-20251001",
+        CLASSIFY_PROMPT,
+        meal,
+        context || []
+      );
 
-      if (!response.ok) {
-        const err = await response.text();
-        console.error("Claude API error:", err);
-        return new Response(JSON.stringify({ error: "AI-tjänsten svarade inte" }), {
-          status: 502,
+      // STEP 2: Rule-based decision
+      const strategy = classification.recommended_strategy || "recommend_direct";
+      const needsFollowup = classification.needs_followup === true;
+
+      // Hard-coded overrides
+      const hasDesert = (classification.dishes || []).some(d =>
+        /dessert|paj|pudding|glass|kaka|tårta|choklad|crème/i.test(d)
+      );
+      const hasMainAndDessert = (classification.dishes || []).length >= 2 && hasDesert;
+
+      // Force follow-up for complex menus with dessert
+      if (hasMainAndDessert && !context?.length) {
+        const questionPrompt = QUESTION_PROMPT
+          .replace("{context}", meal)
+          .replace("{reason}", classification.conflict_note || "Menyn innehåller rätter som kräver olika vintyper");
+
+        const question = await callClaude(
+          apiKey,
+          "claude-sonnet-4-6",
+          questionPrompt,
+          meal,
+          context || []
+        );
+
+        return new Response(JSON.stringify(question), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const data = await response.json();
-      const text = data.content?.[0]?.text || "";
+      // Follow-up for broad/vague input
+      if (needsFollowup && !context?.length) {
+        const questionPrompt = QUESTION_PROMPT
+          .replace("{context}", meal)
+          .replace("{reason}", classification.followup_reason || "Inputen är bred");
 
-      let parsed;
-      try {
-        parsed = JSON.parse(text);
-      } catch (e) {
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-          parsed = JSON.parse(match[0]);
-        } else {
-          return new Response(JSON.stringify({ error: "Kunde inte tolka AI-svaret" }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+        const question = await callClaude(
+          apiKey,
+          "claude-sonnet-4-6",
+          questionPrompt,
+          meal,
+          context || []
+        );
+
+        return new Response(JSON.stringify(question), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
-      return new Response(JSON.stringify(parsed), {
+      // STEP 3: Generate recommendation with Sonnet
+      const recPrompt = RECOMMEND_PROMPT
+        .replace("{strategy}", strategy)
+        .replace("{context}", `Användaren sa: "${meal}". Klassificering: ${JSON.stringify(classification)}`);
+
+      const recommendation = await callClaude(
+        apiKey,
+        "claude-sonnet-4-6",
+        recPrompt,
+        context?.length ? meal : `Rekommendera vin till: ${meal}`,
+        context || []
+      );
+
+      return new Response(JSON.stringify(recommendation), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+
     } catch (e) {
-      console.error("Worker error:", e.message, e.stack);
+      console.error("Worker error:", e.message);
       return new Response(JSON.stringify({ error: "Något gick fel: " + e.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
