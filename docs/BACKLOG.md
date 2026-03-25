@@ -34,6 +34,7 @@
 - [ ] "Vet ingenting om vin"-läge: enkel guide utan pretention
 
 ## Data & teknik
+- [ ] Separera data från kod: wines.json separat fil, ladda async (bättre cachning, snabbare builds)
 - [ ] Fräschare expertdata: scrapa Wine Enthusiast direkt (Kaggle-data är från 2017)
 - [ ] Prishistorik: spara veckovis prissnapshots för att visa prisändringar
 - [ ] Vinpriser.se deep scrape: 594 prissänkta viner, kräver paginering/filter-klick (bara 3 i hero laddas)
@@ -47,6 +48,8 @@
 - [ ] Google Analytics eller Plausible som komplement?
 
 ## Content & distribution
+- [ ] "Gabriels val" — månatlig landningssida med handplockade viner + texter, länka från huvudsidan (SEO + personligt innehåll)
+- [ ] Blogpost-liknande format: "Viner i mars — test och rekommendationer"
 - [ ] Instagram @smakfynd
 - [ ] Reddit/Flashback/Facebook vingrupper (organisk reach)
 - [ ] Substack SEO-artiklar per segment
