@@ -563,13 +563,12 @@ const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
 function matchWinesForCourses(courses, products) {
   if (!courses || !courses.length) return [];
   const bodyRange = { light: [0, 4], medium: [5, 8], full: [9, 12] };
-  const priceTiers = [[0, 110, "Budget"], [110, 200, "Mellan"], [200, 99999, "Fint"]];
-  const tierColors = { "Budget": "#5a8a5a", "Mellan": "#7a6a4a", "Fint": "#8a5a6a" };
   const usedNrs = new Set();
 
   return courses.map(course => {
     const wines = [];
     for (const c of (course.criteria || [])) {
+      if (wines.length >= 3) break; // Max 3 wines per course
       const typeMap = { "Rött": "Rött", "Vitt": "Vitt", "Rosé": "Rosé", "Mousserande": "Mousserande" };
       const wineType = typeMap[c.type] || c.type;
       const [bMin, bMax] = bodyRange[c.body] || [0, 12];
@@ -584,17 +583,15 @@ function matchWinesForCourses(courses, products) {
           else if (Math.abs(body - (bMin + bMax) / 2) <= 3) fit += 1;
           const haystack = [p.name, p.sub, p.grape, p.style, p.cat3, ...(p.food_pairings || [])].join(" ").toLowerCase();
           for (const k of kw) { if (haystack.includes(k)) fit += 2; }
-          return { ...p, _fit: fit, _why: c.why };
+          return { ...p, _fit: fit, _why: c.why, _label: c.label || "" };
         })
-        .filter(p => p._fit >= 2)
+        .filter(p => p._fit >= 2 && !usedNrs.has(p.nr))
         .sort((a, b) => (b._fit * 10 + b.smakfynd_score) - (a._fit * 10 + a.smakfynd_score));
 
-      for (const [lo, hi, tierLabel] of priceTiers) {
-        const pick = scored.find(p => p.price >= lo && p.price < hi && !usedNrs.has(p.nr));
-        if (pick) {
-          usedNrs.add(pick.nr);
-          wines.push({ ...pick, _tier: tierLabel, _tierCol: tierColors[tierLabel] });
-        }
+      // Pick best match for this criterion
+      if (scored.length > 0) {
+        usedNrs.add(scored[0].nr);
+        wines.push(scored[0]);
       }
     }
     return { dish: course.dish, wines };
@@ -640,13 +637,11 @@ function FoodMatch({ products }) {
   const [aiResult, setAiResult] = useState(null);
   const [courseResults, setCourseResults] = useState([]);
   const [error, setError] = useState(null);
+  const [conversation, setConversation] = useState([]); // conversation history for follow-ups
 
-  const handleSubmit = async () => {
-    if (!meal.trim() || meal.length < 3) return;
+  const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
     setError(null);
-    setAiResult(null);
-    setCourseResults([]);
 
     try {
       let data;
@@ -654,7 +649,10 @@ function FoodMatch({ products }) {
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ meal: meal.trim() }),
+          body: JSON.stringify({
+            meal: userMessage,
+            context: existingContext || [],
+          }),
         });
         data = await res.json();
         if (!data.error) break;
@@ -663,16 +661,39 @@ function FoodMatch({ products }) {
       if (data.error) throw new Error(data.error);
 
       setAiResult(data);
-      // Support both old (criteria) and new (courses) format
-      if (data.courses) {
+
+      if (data.mode === "recommend" && data.courses) {
+        setCourseResults(matchWinesForCourses(data.courses, products));
+      } else if (data.courses) {
         setCourseResults(matchWinesForCourses(data.courses, products));
       } else if (data.criteria) {
-        setCourseResults(matchWinesForCourses([{ dish: "Hela måltiden", criteria: data.criteria }], products));
+        setCourseResults(matchWinesForCourses([{ dish: meal, criteria: data.criteria }], products));
       }
     } catch (e) {
       setError("Kunde inte hämta vinförslag just nu. Försök igen.");
     }
     setLoading(false);
+  };
+
+  const handleSubmit = async () => {
+    if (!meal.trim() || meal.length < 2) return;
+    setConversation([]);
+    setCourseResults([]);
+    setAiResult(null);
+    await sendToAI(meal.trim(), []);
+  };
+
+  const handleFollowup = async (answer) => {
+    // Build conversation context
+    const newConv = [
+      ...conversation,
+      { role: "user", content: meal },
+      { role: "assistant", content: JSON.stringify(aiResult) },
+    ];
+    setConversation(newConv);
+    setCourseResults([]);
+    setAiResult(null);
+    await sendToAI(answer, newConv);
   };
 
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
@@ -723,37 +744,85 @@ function FoodMatch({ products }) {
 
       {aiResult && !loading && (
         <div style={{ marginTop: 14 }}>
-          <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 14px", fontStyle: "italic" }}>
+          <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 12px" }}>
             {aiResult.reasoning}
           </p>
 
-          {courseResults.map((course, ci) => (
-            <div key={ci} style={{ marginBottom: ci < courseResults.length - 1 ? 16 : 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <div style={{
-                  width: 4, height: 18, borderRadius: 2,
-                  background: dishColors[ci % dishColors.length],
-                }} />
-                <span style={{
-                  fontSize: 13, fontWeight: 600, color: dishColors[ci % dishColors.length],
-                  fontFamily: "'Instrument Serif', Georgia, serif",
-                }}>{course.dish}</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5, paddingLeft: 12 }}>
-                {course.wines.map((m, i) => {
-                  const matchedP = products.find(pr => String(pr.nr) === String(m.nr));
-                  return matchedP
-                    ? <div key={i}>
-                        {m._why && <div style={{ fontSize: 10, color: t.txM, marginBottom: 3, fontStyle: "italic" }}>{m._why}</div>}
-                        <Card p={matchedP} rank={i + 1} delay={0} allProducts={products} />
+          {/* MODE: Question — AI needs more info */}
+          {aiResult.mode === "question" && (() => {
+            const [freetext, setFreetext] = useState("");
+            return (
+              <div>
+                {(aiResult.questions || []).map((q, qi) => (
+                  <div key={qi} style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, color: t.tx, fontWeight: 500, marginBottom: 6 }}>{q}</div>
+                    {aiResult.quick_options && aiResult.quick_options[qi] && (
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {aiResult.quick_options[qi].map((opt, oi) => (
+                          <button key={oi} onClick={() => handleFollowup(opt)}
+                            style={{
+                              padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.wine}30`,
+                              background: t.card, color: t.wine, fontSize: 13, fontWeight: 500,
+                              cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = t.wine; e.currentTarget.style.color = "#fff"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = t.card; e.currentTarget.style.color = t.wine; }}
+                          >{opt}</button>
+                        ))}
                       </div>
-                    : <WineResult key={i} m={m} />;
-                })}
+                    )}
+                  </div>
+                ))}
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <input type="text" value={freetext} onChange={e => setFreetext(e.target.value)}
+                    placeholder="Eller skriv eget svar..."
+                    onKeyDown={e => e.key === "Enter" && freetext.trim() && handleFollowup(freetext.trim())}
+                    style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 13, color: t.tx, outline: "none", boxSizing: "border-box" }}
+                  />
+                  <button onClick={() => freetext.trim() && handleFollowup(freetext.trim())}
+                    disabled={!freetext.trim()}
+                    style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: t.wine, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", opacity: freetext.trim() ? 1 : 0.4 }}
+                  >Skicka</button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })()}
 
-          {courseResults.length === 0 && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar i fast sortiment. Prova en annan beskrivning.</p>}
+          {/* MODE: Recommend — show wines */}
+          {(aiResult.mode === "recommend" || courseResults.length > 0) && (
+            <div>
+              {courseResults.map((course, ci) => (
+                <div key={ci} style={{ marginBottom: ci < courseResults.length - 1 ? 16 : 0 }}>
+                  {courseResults.length > 1 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <div style={{ width: 4, height: 18, borderRadius: 2, background: dishColors[ci % dishColors.length] }} />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: dishColors[ci % dishColors.length], fontFamily: "'Instrument Serif', Georgia, serif" }}>{course.dish}</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    {course.wines.map((m, i) => {
+                      const matchedP = products.find(pr => String(pr.nr) === String(m.nr));
+                      return matchedP
+                        ? <div key={i}>
+                            {m._why && <div style={{ fontSize: 10, color: t.txM, marginBottom: 3, fontStyle: "italic" }}>{m._why}</div>}
+                            <Card p={matchedP} rank={i + 1} delay={0} allProducts={products} />
+                          </div>
+                        : <WineResult key={i} m={m} />;
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Follow-up suggestion */}
+              {aiResult.followup && (
+                <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: t.bg, fontSize: 12, color: t.txM, lineHeight: 1.5 }}>
+                  {aiResult.followup}
+                </div>
+              )}
+
+              {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
+            </div>
+          )}
         </div>
       )}
     </div>
