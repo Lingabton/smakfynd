@@ -350,10 +350,10 @@ def main():
             page = browser.pages[0] if browser.pages else browser.new_page()
             page.goto('https://www.wine-searcher.com/login')
             print("Logga in i browsern. Stäng fönstret när du är klar.")
-            for _ in range(600):
-                time.sleep(1)
-                if not browser.contexts:
-                    break
+            try:
+                page.wait_for_event('close', timeout=600_000)
+            except:
+                pass
             try:
                 browser.close()
             except:
@@ -391,10 +391,12 @@ def main():
 
         # Verify login
         page.goto('https://www.wine-searcher.com')
-        time.sleep(3)
+        time.sleep(5)
         wait_captcha(page)
-        if 'PRO' not in page.inner_text('body'):
-            print("Inte inloggad som PRO! Kör --login först.")
+        body = page.inner_text('body')
+        if 'Gabriel' not in body and 'PRO' not in body and 'Account' not in body and 'Log Out' not in body:
+            print("Inte inloggad! Kör --login först.")
+            print(f"  (page snippet: {body[:200]})")
             browser.close()
             return
 

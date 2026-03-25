@@ -37,7 +37,8 @@ for w in wines[:20]:
     price = w.get('price', 0)
     score = w.get('smakfynd_score', 0)
     grape = w.get('grape', '')
-    noscript_wines += f'<li><strong>{name}</strong> — {sub} · {country} · {grape} · {price} kr · Smakfynd-poäng: {score}/100</li>\n'
+    nr = w.get('nr', '')
+    noscript_wines += f'<li><a href="https://www.systembolaget.se/produkt/vin/{nr}"><strong>{name}</strong> — {sub}</a> · {country} · {grape} · {price} kr · Smakfynd-poäng: {score}/100</li>\n'
 
 # Build JSON-LD structured data
 json_ld = json.dumps({
@@ -93,6 +94,24 @@ for w in wines[:10]:
 
 wine_ld_json = json.dumps(wine_ld, ensure_ascii=False)
 
+# FAQPage structured data (enables rich snippets in Google)
+faq_ld = json.dumps({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {"@type": "Question", "name": "Hur beräknas Smakfynd-poängen?",
+         "acceptedAnswer": {"@type": "Answer", "text": "Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Hög kvalitet till lågt pris = hög poäng. Poängen visas på en skala 1–100."}},
+        {"@type": "Question", "name": "Var kommer betygen ifrån?",
+         "acceptedAnswer": {"@type": "Answer", "text": "Crowd-betyg kommer från hundratusentals vindrickare världen över. Expertbetyg hämtas från erkända vinkritiker som James Suckling, Falstaff, Decanter och Wine Enthusiast. Prisvärdet beräknar vi själva genom att jämföra literpriset mot medianen i samma kategori — rött jämförs med rött, bubbel med bubbel."}},
+        {"@type": "Question", "name": "Hur fungerar AI-vinmatcharen?",
+         "acceptedAnswer": {"@type": "Answer", "text": "Beskriv vad du ska äta — till exempel 'grillad lax med potatisgratäng' eller 'toast skagen, sedan entrecôte'. Vår AI analyserar måltiden och föreslår viner för varje rätt i olika prisklasser, direkt från Systembolagets sortiment."}},
+        {"@type": "Question", "name": "Säljer Smakfynd alkohol?",
+         "acceptedAnswer": {"@type": "Answer", "text": "Nej. Smakfynd är en helt oberoende informationstjänst som drivs av Olav Innovation AB. Vi har ingen koppling till Systembolaget. Alla köp gör du via Systembolaget.se."}},
+        {"@type": "Question", "name": "Hur ofta uppdateras sajten?",
+         "acceptedAnswer": {"@type": "Answer", "text": "Varje vecka. Vi hämtar hela Systembolagets sortiment, uppdaterar betyg och räknar om poängen. Prishistoriken uppdateras samtidigt."}},
+    ]
+}, ensure_ascii=False)
+
 num_wines = len(all_wines) if os.path.exists(DATA_PATH) else 800
 num_countries = len(set(w.get('country','') for w in all_wines if w.get('country'))) if os.path.exists(DATA_PATH) else 18
 
@@ -103,7 +122,14 @@ html = f"""<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smakfynd — Hitta bästa vinerna på Systembolaget</title>
   <meta name="description" content="Smakfynd rankar {num_wines} viner från {num_countries} länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Hitta ditt nästa favoritvin.">
+  <meta name="author" content="Gabriel Linton">
+  <meta name="theme-color" content="#7a2332">
   <link rel="canonical" href="https://smakfynd.se">
+
+  <!-- Preconnect for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://product-cdn.systembolaget.se">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Smakfynd — Hitta bästa vinerna på Systembolaget">
@@ -123,6 +149,7 @@ html = f"""<!DOCTYPE html>
   <!-- Structured Data -->
   <script type="application/ld+json">{json_ld}</script>
   <script type="application/ld+json">{wine_ld_json}</script>
+  <script type="application/ld+json">{faq_ld}</script>
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>

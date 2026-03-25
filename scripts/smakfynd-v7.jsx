@@ -1542,19 +1542,16 @@ function SmakfyndApp() {
           <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Nyhetsbrev</div>
           <h3 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Veckans bästa köp</h3>
           <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.5 }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
-          <div style={{ display: "flex", gap: 8, maxWidth: 380, margin: "0 auto" }}>
-            <input type="email" placeholder="din@email.se"
-              style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.bg, fontSize: 14, color: t.tx, outline: "none" }} />
-            <button style={{
-              padding: "12px 20px", borderRadius: 12, border: "none", cursor: "pointer",
+          <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
+            style={{
+              display: "inline-block", padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer",
               background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#fff", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap",
+              color: "#fff", fontSize: 14, fontWeight: 600, textDecoration: "none",
               boxShadow: `0 2px 8px ${t.wine}25`, transition: "opacity 0.2s",
             }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-              onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-            >Prenumerera</button>
-          </div>
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          >Prenumerera på Substack ↗</a>
           <p style={{ fontSize: 11, color: t.txL, margin: "10px 0 0" }}>Gratis. Avsluta när du vill.</p>
         </div>
 
