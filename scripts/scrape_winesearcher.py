@@ -365,13 +365,22 @@ def main():
     wines = [p for p in sb if p.get('cat1') == 'Vin' and p.get('assortment') == 'Fast sortiment']
     print(f"Fast sortiment: {len(wines)} viner")
 
-    # Sort by Smakfynd ranking so top wines get scraped first
+    # Sort by impact: highest crowd-score wines without expert data first
     ranked_file = DATA_DIR / "smakfynd_ranked_v2.json"
+    expert_file = DATA_DIR / "expert_cache.json"
     if ranked_file.exists():
         ranked = json.load(open(ranked_file))
-        rank_order = {str(p.get('nr','')): i for i, p in enumerate(ranked)}
-        wines.sort(key=lambda p: rank_order.get(str(p.get('nr','')), 99999))
-        print("Sorted by Smakfynd rank (top wines first)")
+        ranked_map = {str(p.get('nr','')): p for p in ranked}
+        expert_nrs = set(json.load(open(expert_file)).keys()) if expert_file.exists() else set()
+        def sort_key(p):
+            nr = str(p.get('nr',''))
+            rw = ranked_map.get(nr, {})
+            crowd = rw.get('crowd_score', 0) or 0
+            has_expert = nr in expert_nrs or rw.get('expert_score')
+            # Prioritize: high crowd, no expert
+            return -(crowd * 10 + (0 if has_expert else 50))
+        wines.sort(key=sort_key)
+        print("Sorted by impact (high crowd without expert first)")
 
     cache = load_cache()
     print(f"Cache: {len(cache)} entries")
