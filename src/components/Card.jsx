@@ -343,7 +343,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
               .filter(w => w.category === p.category && w.package === p.package
                 && w.assortment === "Fast sortiment"
                 && (w.nr || w.id) !== (p.nr || p.id)
-                && w.smakfynd_score >= 65)
+)
               .map(w => {
                 // Calculate similarity score
                 let sim = 0;
@@ -354,8 +354,8 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 if (w.country && p.country && w.country === p.country) sim += 5; // same country
                 if (w.region && p.region && w.region === p.region) sim += 10; // same region
                 if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
-                // Strong bonus for better value (the whole point of Smakfynd)
-                sim += Math.min(25, Math.max(0, (w.smakfynd_score - p.smakfynd_score) * 3));
+                // Score matters: bonus for better, penalty for worse
+                sim += (w.smakfynd_score - p.smakfynd_score) * 2;
                 return { ...w, _sim: sim, _taste: taste };
               })
               .filter(w => w._sim >= 20) // minimum similarity threshold
