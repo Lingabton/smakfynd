@@ -6,4 +6,4 @@ compatibility_date = "2024-01-01"
 binding = "AI"
 
 [vars]
-ALLOWED_ORIGIN = "*"
+ALLOWED_ORIGIN = "https://smakfynd.se"

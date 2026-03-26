@@ -8,4 +8,4 @@ database_name = "smakfynd-analytics"
 database_id = "ad773eba-86d1-40f0-9091-634662b5b13e"
 
 [vars]
-ALLOWED_ORIGIN = "*"
+ALLOWED_ORIGIN = "https://smakfynd.se"

@@ -92,8 +92,8 @@ mini = []
 for p in slim:
     m = {
         "nr": p.get("nr", ""),
-        "name": p.get("name", ""),
-        "sub": p.get("sub", ""),
+        "name": (p.get("name", "") or "").strip().rstrip(" —-–"),
+        "sub": (p.get("sub", "") or "").strip().rstrip(" —-–"),
         "price": p.get("price", 0),
         "vol": p.get("vol", 750),
         "type": p.get("type", ""),
@@ -151,6 +151,35 @@ jsx = jsx.replace(
     'const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL',
     'const SAMPLE_PRODUCTS = []; // Data loaded async from wines.json'
 )
+
+# QA: clean data before publishing
+cleaned = []
+qa_issues = 0
+for m in mini:
+    # Skip wines with no name
+    if not m.get("name") or len(m["name"]) < 2:
+        qa_issues += 1
+        continue
+    # Skip wines with no score
+    if not m.get("smakfynd_score"):
+        qa_issues += 1
+        continue
+    # Skip wines with no price
+    if not m.get("price"):
+        qa_issues += 1
+        continue
+    # Clean trailing dashes/whitespace in all string fields
+    for k in ["name", "sub", "country", "grape"]:
+        if m.get(k):
+            m[k] = m[k].strip().rstrip(" —-–·")
+    # Remove empty string fields
+    for k in list(m.keys()):
+        if m[k] == "" or m[k] is None:
+            del m[k]
+    cleaned.append(m)
+if qa_issues:
+    print(f"QA: removed {qa_issues} incomplete wines")
+mini = cleaned
 
 os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
 open(OUTPUT, 'w').write(jsx)

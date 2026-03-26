@@ -44,12 +44,12 @@ export default {
     try {
       // POST /login — create or find user, return token + saved wines
       if (request.method === "POST" && url.pathname === "/login") {
-        const { email, name } = await request.json();
+        const body = await request.json();
+        const { email, name, newsletter } = body;
         if (!email || !email.includes("@")) {
           return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
         }
         const cleanEmail = email.toLowerCase().trim();
-        const { newsletter } = await request.json().catch(() => ({}));
 
         // Find or create user
         let user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
@@ -219,8 +219,12 @@ export default {
         return new Response(JSON.stringify({ ok: true, message: "Konto och all data raderad" }), { headers });
       }
 
-      // GET /subscribers — list newsletter subscribers (admin)
+      // GET /subscribers — list newsletter subscribers (admin, requires secret)
       if (request.method === "GET" && url.pathname === "/subscribers") {
+        const adminKey = request.headers.get("X-Admin-Key");
+        if (!adminKey || adminKey !== env.ADMIN_KEY) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+        }
         const result = await env.DB.prepare(
           "SELECT email, newsletter_consent_at FROM users WHERE newsletter = 1 ORDER BY newsletter_consent_at DESC"
         ).all();

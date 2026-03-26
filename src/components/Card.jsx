@@ -105,6 +105,15 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
             <ScoreBars p={p} />
           </div>
 
+          {/* Row 3b: Why-chips — explain why this wine ranks high */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 5 }}>
+            {p.expert_score >= 7.5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>Expertbetyg</span>}
+            {p.price_score >= 8 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.greenL, color: t.green }}>Prisvärt</span>}
+            {(p.crowd_reviews || 0) >= 5000 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#6b8cce10", color: "#6b8cce" }}>Populärt</span>}
+            {p.organic && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#2d7a3e10", color: "#2d7a3e" }}>Eko</span>}
+            {p.price_vs_launch_pct > 5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.dealL, color: t.deal }}>Prissänkt</span>}
+          </div>
+
           {/* Row 4: Human-readable verdict */}
           <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
             {(() => {

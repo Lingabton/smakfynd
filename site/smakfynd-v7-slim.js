@@ -800,6 +800,53 @@ function Card({
     p: p
   })), /*#__PURE__*/React.createElement("div", {
     style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      marginTop: 5
+    }
+  }, p.expert_score >= 7.5 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#b07d3b10",
+      color: "#b07d3b"
+    }
+  }, "Expertbetyg"), p.price_score >= 8 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: t.greenL,
+      color: t.green
+    }
+  }, "Prisv\xE4rt"), (p.crowd_reviews || 0) >= 5000 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#6b8cce10",
+      color: "#6b8cce"
+    }
+  }, "Popul\xE4rt"), p.organic && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#2d7a3e10",
+      color: "#2d7a3e"
+    }
+  }, "Eko"), p.price_vs_launch_pct > 5 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: t.dealL,
+      color: t.deal
+    }
+  }, "Priss\xE4nkt")), /*#__PURE__*/React.createElement("div", {
+    style: {
       marginTop: 5,
       fontSize: 11,
       color: t.txM,
@@ -4453,7 +4500,10 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 4px"
     }
-  }, "Uppdaterad mars 2026 \xB7 Produktdata fr\xE5n Systembolagets \xF6ppna sortiment"), /*#__PURE__*/React.createElement("p", {
+  }, "Uppdaterad ", new Date().toLocaleDateString("sv-SE", {
+    month: "long",
+    year: "numeric"
+  }), " \xB7 ", products.length, " viner \xB7 Data fr\xE5n Systembolagets sortiment"), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0
     }

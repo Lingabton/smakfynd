@@ -418,6 +418,15 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
             <ScoreBars p={p} />
           </div>
 
+          {/* Row 3b: Why-chips — explain why this wine ranks high */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 5 }}>
+            {p.expert_score >= 7.5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>Expertbetyg</span>}
+            {p.price_score >= 8 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.greenL, color: t.green }}>Prisvärt</span>}
+            {(p.crowd_reviews || 0) >= 5000 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#6b8cce10", color: "#6b8cce" }}>Populärt</span>}
+            {p.organic && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#2d7a3e10", color: "#2d7a3e" }}>Eko</span>}
+            {p.price_vs_launch_pct > 5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.dealL, color: t.deal }}>Prissänkt</span>}
+          </div>
+
           {/* Row 4: Human-readable verdict */}
           <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
             {(() => {
@@ -2171,7 +2180,7 @@ function SmakfyndApp() {
             </a>
           </div>
           <div style={{ fontSize: 10, color: t.txF, margin: "0 0 10px", lineHeight: 1.7 }}>
-            <p style={{ margin: "0 0 4px" }}>Uppdaterad mars 2026 · Produktdata från Systembolagets öppna sortiment</p>
+            <p style={{ margin: "0 0 4px" }}>Uppdaterad {new Date().toLocaleDateString("sv-SE", { month: "long", year: "numeric" })} · {products.length} viner · Data från Systembolagets sortiment</p>
             <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol.</p>
             <p style={{ margin: "4px 0 0" }}><a href="/integritet/" style={{ color: t.txF, textDecoration: "none" }}>Integritetspolicy</a></p>
           </div>

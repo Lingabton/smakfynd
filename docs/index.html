@@ -99,9 +99,9 @@
 <li><a href="https://www.systembolaget.se/produkt/vin/5246801"><strong>Dominio Alto</strong> — Reserva</a> · Spanien ·  · 99.0 kr · Smakfynd-poäng: 80/100</li>
 <li><a href="https://www.systembolaget.se/produkt/vin/5580401"><strong>Tissot & Potel La Sixième Côte</strong> — Pinot noir</a> · Frankrike · Pinot noir · 145.0 kr · Smakfynd-poäng: 80/100</li>
 <li><a href="https://www.systembolaget.se/produkt/vin/633901"><strong>Gardo & Morris</strong> — Organic Sauvignon Blanc</a> · Nya Zeeland · Sauvignon blanc · 119.0 kr · Smakfynd-poäng: 80/100</li>
+<li><a href="https://www.systembolaget.se/produkt/vin/280111"><strong>Ruppertsberger</strong> — Imperial Cuvée Organic</a> · Tyskland · Pinot blanc · 87.0 kr · Smakfynd-poäng: 80/100</li>
 <li><a href="https://www.systembolaget.se/produkt/vin/7304501"><strong>MZ Chardonnay</strong> — By Måns Zelmerlöw</a> · Frankrike · Chardonnay · 69.0 kr · Smakfynd-poäng: 80/100</li>
 <li><a href="https://www.systembolaget.se/produkt/vin/770801"><strong>Gardo & Morris</strong> — Brut Sauvignon Blanc</a> · Nya Zeeland · Sauvignon blanc · 135.0 kr · Smakfynd-poäng: 80/100</li>
-<li><a href="https://www.systembolaget.se/produkt/vin/216701"><strong>Terre de Mistral Reserve</strong> — Côtes du Rhône Organic</a> · Frankrike · Carignan · 99.0 kr · Smakfynd-poäng: 79/100</li>
 
       </ol>
 
@@ -918,6 +918,53 @@ function Card({
   }, /*#__PURE__*/React.createElement(ScoreBars, {
     p: p
   })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      marginTop: 5
+    }
+  }, p.expert_score >= 7.5 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#b07d3b10",
+      color: "#b07d3b"
+    }
+  }, "Expertbetyg"), p.price_score >= 8 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: t.greenL,
+      color: t.green
+    }
+  }, "Prisv\xE4rt"), (p.crowd_reviews || 0) >= 5000 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#6b8cce10",
+      color: "#6b8cce"
+    }
+  }, "Popul\xE4rt"), p.organic && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#2d7a3e10",
+      color: "#2d7a3e"
+    }
+  }, "Eko"), p.price_vs_launch_pct > 5 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: t.dealL,
+      color: t.deal
+    }
+  }, "Priss\xE4nkt")), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 5,
       fontSize: 11,
@@ -4572,7 +4619,10 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 4px"
     }
-  }, "Uppdaterad mars 2026 \xB7 Produktdata fr\xE5n Systembolagets \xF6ppna sortiment"), /*#__PURE__*/React.createElement("p", {
+  }, "Uppdaterad ", new Date().toLocaleDateString("sv-SE", {
+    month: "long",
+    year: "numeric"
+  }), " \xB7 ", products.length, " viner \xB7 Data fr\xE5n Systembolagets sortiment"), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0
     }
