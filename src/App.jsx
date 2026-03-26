@@ -212,10 +212,10 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Smakfynd hjälper dig hitta viner som ger mest smak för pengarna. Vi följer <strong>11 500+ viner</strong> på Systembolaget och kombinerar crowd-betyg, expertrecensioner och prisjämförelse för att lyfta fram de bästa fynden.
+              Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>crowd-betyg</strong> från hundratusentals vindrickare, <strong>expertrecensioner</strong> från internationella kritiker och <strong>prisjämförelse</strong> inom varje kategori.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
-              Resultatet är en enda poäng — <strong>Smakfynd-poängen</strong> — som visar kvalitet per krona. Vi har även en AI-vinmatchare som föreslår viner baserat på vad du ska äta.
+              Resultatet: <strong>en enda poäng</strong> som visar kvalitet per krona. Inte det "bästa" vinet — utan det bästa <em>köpet</em>.
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 4 }}>Gabriel Linton, grundare</div>
@@ -223,7 +223,7 @@ function SmakfyndApp() {
                 Forskare i innovation och entreprenörskap (PhD, Örebro universitet). Førsteamanuensis vid Universitetet i Innlandet, Norge. Utbildad i dryckeskunskap vid Restaurang- och hotellhögskolan i Grythyttan. MBA, Cleveland State University.
               </p>
               <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: "8px 0 0" }}>
-                Smakfynd startade med mitt eget problem: jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data — inte magkänsla. All information fanns redan, men ingen hade kopplat ihop den på ett enkelt sätt. Och jag fick ofta känslan att billigare viner smakade nästan lika bra som betydligt dyrare. Därför byggde jag ett system som väger in priset i omdömet — systematiskt.
+                Jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data — inte magkänsla. All information fanns redan, men ingen hade kopplat ihop den åt vanliga konsumenter. Och jag märkte att billigare viner ofta smakade nästan lika bra som betydligt dyrare. Så jag byggde Smakfynd — ett system som väger in priset i omdömet, systematiskt.
               </p>
             </div>
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>

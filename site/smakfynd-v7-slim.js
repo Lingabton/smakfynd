@@ -3543,14 +3543,14 @@ function SmakfyndApp() {
       lineHeight: 1.7,
       margin: "0 0 12px"
     }
-  }, "Smakfynd hj\xE4lper dig hitta viner som ger mest smak f\xF6r pengarna. Vi f\xF6ljer ", /*#__PURE__*/React.createElement("strong", null, "11 500+ viner"), " p\xE5 Systembolaget och kombinerar crowd-betyg, expertrecensioner och prisj\xE4mf\xF6relse f\xF6r att lyfta fram de b\xE4sta fynden."), /*#__PURE__*/React.createElement("p", {
+  }, "Systembolaget har tusentals viner. Vi hj\xE4lper dig hitta de som faktiskt \xE4r v\xE4rda pengarna. Vi kombinerar ", /*#__PURE__*/React.createElement("strong", null, "crowd-betyg"), " fr\xE5n hundratusentals vindrickare, ", /*#__PURE__*/React.createElement("strong", null, "expertrecensioner"), " fr\xE5n internationella kritiker och ", /*#__PURE__*/React.createElement("strong", null, "prisj\xE4mf\xF6relse"), " inom varje kategori."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 14,
       color: t.txM,
       lineHeight: 1.7,
       margin: "0 0 14px"
     }
-  }, "Resultatet \xE4r en enda po\xE4ng \u2014 ", /*#__PURE__*/React.createElement("strong", null, "Smakfynd-po\xE4ngen"), " \u2014 som visar kvalitet per krona. Vi har \xE4ven en AI-vinmatchare som f\xF6resl\xE5r viner baserat p\xE5 vad du ska \xE4ta."), /*#__PURE__*/React.createElement("div", {
+  }, "Resultatet: ", /*#__PURE__*/React.createElement("strong", null, "en enda po\xE4ng"), " som visar kvalitet per krona. Inte det \"b\xE4sta\" vinet \u2014 utan det b\xE4sta ", /*#__PURE__*/React.createElement("em", null, "k\xF6pet"), "."), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 16,
       borderRadius: 12,
@@ -3578,7 +3578,7 @@ function SmakfyndApp() {
       lineHeight: 1.6,
       margin: "8px 0 0"
     }
-  }, "Smakfynd startade med mitt eget problem: jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data \u2014 inte magk\xE4nsla. All information fanns redan, men ingen hade kopplat ihop den p\xE5 ett enkelt s\xE4tt. Och jag fick ofta k\xE4nslan att billigare viner smakade n\xE4stan lika bra som betydligt dyrare. D\xE4rf\xF6r byggde jag ett system som v\xE4ger in priset i omd\xF6met \u2014 systematiskt.")), /*#__PURE__*/React.createElement("p", {
+  }, "Jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data \u2014 inte magk\xE4nsla. All information fanns redan, men ingen hade kopplat ihop den \xE5t vanliga konsumenter. Och jag m\xE4rkte att billigare viner ofta smakade n\xE4stan lika bra som betydligt dyrare. S\xE5 jag byggde Smakfynd \u2014 ett system som v\xE4ger in priset i omd\xF6met, systematiskt.")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txL,
