@@ -52,7 +52,8 @@ REGLER:
 - Varje "why" max 1 mening, unik
 - Naturlig svenska. Korta meningar. Som en kunnig kompis.
 - FÖRBJUDET: "rensar munnen", "karaktär" (generiskt), "klarar både X och Y"
-- Keywords MÅSTE vara på svenska: druvor (Malbec, Cabernet, Riesling) och svenska smakord (kryddigt, fruktigt, fylligt, fräscht, torrt)`;
+- Keywords MÅSTE vara på svenska: druvor (Malbec, Cabernet, Riesling) och svenska smakord (kryddigt, fruktigt, fylligt, fräscht, torrt)
+- Skriv ALLTID på svenska. Aldrig engelska ord som "perhaps", "light", "full-bodied". Säg "vitt vin" inte "vitvin".`;
 
 const QUESTION_PROMPT = `Du är en kunnig svensk vinrådgivare. Ställ en kort följdfråga. Svara BARA med giltig JSON.
 
@@ -66,7 +67,8 @@ Svarsformat:
 
 REGLER:
 - Max 1 fråga, kort och naturlig
-- Quick options ska vara konkreta val`;
+- Quick options ska vara konkreta val
+- Skriv ALLTID på svenska, aldrig engelska ord`;
 
 async function callAI(ai, system, userMessage, context) {
   const messages = [];

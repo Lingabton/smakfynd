@@ -674,7 +674,39 @@ function Card({
     style: {
       fontWeight: sv.isSaved(p.nr || p.id) ? 600 : 400
     }
-  }, sv.isSaved(p.nr || p.id) ? "Sparad" : "Spara"))), /*#__PURE__*/React.createElement("span", {
+  }, sv.isSaved(p.nr || p.id) ? "Sparad" : "Spara")), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      const url = `https://smakfynd.se/#vin/${p.nr}`;
+      const text = `${p.name} ${p.sub || ''} — ${p.smakfynd_score}/100 på Smakfynd (${p.price}kr)`;
+      if (navigator.share) {
+        navigator.share({
+          title: p.name,
+          text,
+          url
+        }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(`${text}\n${url}`);
+      }
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 12,
+      color: t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "2px 0",
+      fontFamily: "inherit"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      lineHeight: 1
+    }
+  }, "\u2197"), " Dela")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: t.txF,
@@ -1235,6 +1267,252 @@ function Card({
     }, "kr"))))));
   })()));
 }
+function AIQuestion({
+  aiResult,
+  onFollowup
+}) {
+  const [freetext, setFreetext] = useState("");
+  return /*#__PURE__*/React.createElement("div", null, (aiResult.questions || []).map((q, qi) => /*#__PURE__*/React.createElement("div", {
+    key: qi,
+    style: {
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: t.tx,
+      fontWeight: 500,
+      marginBottom: 6
+    }
+  }, q), aiResult.quick_options && aiResult.quick_options[qi] && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, aiResult.quick_options[qi].map((opt, oi) => /*#__PURE__*/React.createElement("button", {
+    key: oi,
+    onClick: () => onFollowup(opt),
+    style: {
+      padding: "8px 16px",
+      borderRadius: 100,
+      border: `1px solid ${t.wine}30`,
+      background: t.card,
+      color: t.wine,
+      fontSize: 13,
+      fontWeight: 500,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      transition: "all 0.2s"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.background = t.wine;
+      e.currentTarget.style.color = "#fff";
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.background = t.card;
+      e.currentTarget.style.color = t.wine;
+    }
+  }, opt))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: freetext,
+    onChange: e => setFreetext(e.target.value),
+    placeholder: "Eller skriv eget svar...",
+    onKeyDown: e => e.key === "Enter" && freetext.trim() && onFollowup(freetext.trim()),
+    style: {
+      flex: 1,
+      padding: "10px 14px",
+      borderRadius: 10,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      fontSize: 13,
+      color: t.tx,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => freetext.trim() && onFollowup(freetext.trim()),
+    disabled: !freetext.trim(),
+    style: {
+      padding: "10px 16px",
+      borderRadius: 10,
+      border: "none",
+      background: t.wine,
+      color: "#fff",
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      opacity: freetext.trim() ? 1 : 0.4
+    }
+  }, "Skicka")));
+}
+function EditorsPicks({
+  products,
+  onSelect
+}) {
+  const [open, setOpen] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setOpen(!open),
+    style: {
+      width: "100%",
+      padding: "12px 16px",
+      borderRadius: 12,
+      background: t.card,
+      border: `1px solid ${t.bdr}`,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      textAlign: "left",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, "\uD83C\uDF77"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: t.tx
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontFamily: "'Instrument Serif', serif",
+      fontWeight: 400
+    }
+  }, "Redaktionens val"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: t.txL
+    }
+  }, " \u2014 3 utvalda fynd vi testat och gillar"))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      transition: "transform 0.2s",
+      display: "inline-block",
+      transform: open ? "rotate(180deg)" : "rotate(0)"
+    }
+  }, "\u25BC")), open && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, GABRIELS_PICKS.map((pick, i) => {
+    const mp = products.find(pr => String(pr.nr) === String(pick.nr));
+    const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        padding: "14px 16px",
+        borderRadius: 12,
+        background: t.card,
+        border: `1px solid ${t.bdr}`,
+        cursor: mp ? "pointer" : "default"
+      },
+      onClick: () => mp && onSelect(mp.name)
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        fontWeight: 700,
+        color: t.wine,
+        textTransform: "uppercase",
+        letterSpacing: "0.06em",
+        marginBottom: 6
+      }
+    }, pick.verdict), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("svg", {
+      width: "40",
+      height: "40",
+      viewBox: "0 0 50 50",
+      style: {
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "25",
+      cy: "25",
+      r: "22",
+      fill: "#e8f0e4"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "25",
+      cy: "25",
+      r: "22",
+      fill: "none",
+      stroke: "#d4ddd0",
+      strokeWidth: "2.5"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "25",
+      cy: "25",
+      r: "22",
+      fill: "none",
+      stroke: "#2d6b3f",
+      strokeWidth: "2.5",
+      strokeDasharray: `${pick.smakfynd_score * 1.38} 138`,
+      strokeLinecap: "round",
+      transform: "rotate(-90 25 25)"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: "25",
+      y: "30",
+      textAnchor: "middle",
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontSize: "17",
+      fontWeight: "900",
+      fill: "#2d6b3f"
+    }, pick.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 15,
+        fontFamily: "'Instrument Serif', serif",
+        color: t.tx
+      }
+    }, pick.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: t.txL
+      }
+    }, pick.sub, " \xB7 ", pick.price))), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 12,
+        color: t.txM,
+        lineHeight: 1.5,
+        margin: "8px 0 0",
+        fontStyle: "italic"
+      }
+    }, pick.note), mp && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: t.wine,
+        marginTop: 6
+      }
+    }, "Klicka f\xF6r att se fullst\xE4ndig profil \u2192"));
+  })));
+}
 const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
 function matchWinesForCourses(courses, products) {
   if (!courses || !courses.length) return [];
@@ -1284,7 +1562,6 @@ function matchWinesForCourses(courses, products) {
       wines
     };
   }).filter(c => c.wines.length > 0);
-  return results;
 }
 function WineResult({
   m
@@ -1589,89 +1866,10 @@ function FoodMatch({
       lineHeight: 1.5,
       margin: "0 0 12px"
     }
-  }, aiResult.reasoning), aiResult.mode === "question" && (() => {
-    const [freetext, setFreetext] = useState("");
-    return /*#__PURE__*/React.createElement("div", null, (aiResult.questions || []).map((q, qi) => /*#__PURE__*/React.createElement("div", {
-      key: qi,
-      style: {
-        marginBottom: 10
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: t.tx,
-        fontWeight: 500,
-        marginBottom: 6
-      }
-    }, q), aiResult.quick_options && aiResult.quick_options[qi] && /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 6,
-        flexWrap: "wrap"
-      }
-    }, aiResult.quick_options[qi].map((opt, oi) => /*#__PURE__*/React.createElement("button", {
-      key: oi,
-      onClick: () => handleFollowup(opt),
-      style: {
-        padding: "8px 16px",
-        borderRadius: 100,
-        border: `1px solid ${t.wine}30`,
-        background: t.card,
-        color: t.wine,
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        transition: "all 0.2s"
-      },
-      onMouseEnter: e => {
-        e.currentTarget.style.background = t.wine;
-        e.currentTarget.style.color = "#fff";
-      },
-      onMouseLeave: e => {
-        e.currentTarget.style.background = t.card;
-        e.currentTarget.style.color = t.wine;
-      }
-    }, opt))))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 8,
-        marginTop: 8
-      }
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      value: freetext,
-      onChange: e => setFreetext(e.target.value),
-      placeholder: "Eller skriv eget svar...",
-      onKeyDown: e => e.key === "Enter" && freetext.trim() && handleFollowup(freetext.trim()),
-      style: {
-        flex: 1,
-        padding: "10px 14px",
-        borderRadius: 10,
-        border: `1px solid ${t.bdr}`,
-        background: t.card,
-        fontSize: 13,
-        color: t.tx,
-        outline: "none",
-        boxSizing: "border-box"
-      }
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => freetext.trim() && handleFollowup(freetext.trim()),
-      disabled: !freetext.trim(),
-      style: {
-        padding: "10px 16px",
-        borderRadius: 10,
-        border: "none",
-        background: t.wine,
-        color: "#fff",
-        fontSize: 12,
-        fontWeight: 600,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        opacity: freetext.trim() ? 1 : 0.4
-      }
-    }, "Skicka")));
-  })(), (aiResult.mode === "recommend" || courseResults.length > 0) && /*#__PURE__*/React.createElement("div", null, courseResults.map((course, ci) => /*#__PURE__*/React.createElement("div", {
+  }, aiResult.reasoning), aiResult.mode === "question" && /*#__PURE__*/React.createElement(AIQuestion, {
+    aiResult: aiResult,
+    onFollowup: handleFollowup
+  }), (aiResult.mode === "recommend" || courseResults.length > 0) && /*#__PURE__*/React.createElement("div", null, courseResults.map((course, ci) => /*#__PURE__*/React.createElement("div", {
     key: ci,
     style: {
       marginBottom: ci < courseResults.length - 1 ? 16 : 0
@@ -1754,18 +1952,20 @@ function StoreMode({
     if (q.length < 2) return null;
     const query = q.toLowerCase().trim();
 
-    // Search by article number or name
-    const match = products.find(p => String(p.nr) === query || p.name?.toLowerCase().includes(query) || p.sub && p.sub.toLowerCase().includes(query));
-    if (!match) return {
+    // Search by article number or name — show multiple matches
+    const matches = products.filter(p => String(p.nr) === query || p.name?.toLowerCase().includes(query) || p.sub && p.sub.toLowerCase().includes(query)).slice(0, 5);
+    if (!matches.length) return {
       match: null,
       alternatives: []
     };
+    const match = matches[0];
 
     // Find better alternatives in same type within ±40kr
     const alts = products.filter(p => p.category === match.category && p.package === match.package && p.assortment === "Fast sortiment" && Math.abs(p.price - match.price) <= 40 && p.nr !== match.nr && p.smakfynd_score > match.smakfynd_score).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 3);
     return {
       match,
-      alternatives: alts
+      alternatives: alts,
+      otherMatches: matches.slice(1)
     };
   }, [q, products]);
   const WineRow = ({
@@ -2026,7 +2226,23 @@ function StoreMode({
       color: t.txM,
       marginTop: 2
     }
-  }, "Det h\xE4r \xE4r bland de b\xE4sta i sin prisklass."))), result && !result.match && q.length >= 2 && /*#__PURE__*/React.createElement("div", {
+  }, "Det h\xE4r \xE4r bland de b\xE4sta i sin prisklass.")), result.otherMatches && result.otherMatches.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 8
+    }
+  }, "Matchade \xE4ven"), result.otherMatches.map((p, i) => /*#__PURE__*/React.createElement(WineRow, {
+    key: i,
+    p: p,
+    isCurrent: false
+  })))), result && !result.match && q.length >= 2 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "40px 20px",
@@ -2745,163 +2961,10 @@ function SmakfyndApp() {
     }
   }, "St\xE4ng")), /*#__PURE__*/React.createElement(FoodMatch, {
     products: products
-  }), (() => {
-    const [tipsOpen, setTipsOpen] = useState(false);
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 16
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setTipsOpen(!tipsOpen),
-      style: {
-        width: "100%",
-        padding: "12px 16px",
-        borderRadius: 12,
-        background: t.card,
-        border: `1px solid ${t.bdr}`,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        textAlign: "left",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 8
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14
-      }
-    }, "\uD83C\uDF77"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 13,
-        color: t.tx
-      }
-    }, /*#__PURE__*/React.createElement("strong", {
-      style: {
-        fontFamily: "'Instrument Serif', serif",
-        fontWeight: 400
-      }
-    }, "Redaktionens val"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: t.txL
-      }
-    }, " \u2014 3 utvalda fynd vi testat och gillar"))), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: t.txL,
-        transition: "transform 0.2s",
-        display: "inline-block",
-        transform: tipsOpen ? "rotate(180deg)" : "rotate(0)"
-      }
-    }, "\u25BC")), tipsOpen && /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8
-      }
-    }, GABRIELS_PICKS.map((pick, i) => {
-      const mp = products.find(pr => String(pr.nr) === String(pick.nr));
-      const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
-      return /*#__PURE__*/React.createElement("div", {
-        key: i,
-        style: {
-          padding: "14px 16px",
-          borderRadius: 12,
-          background: t.card,
-          border: `1px solid ${t.bdr}`,
-          cursor: mp ? "pointer" : "default"
-        },
-        onClick: () => mp && setSearch(mp.name)
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 10,
-          fontWeight: 700,
-          color: t.wine,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          marginBottom: 6
-        }
-      }, pick.verdict), /*#__PURE__*/React.createElement("div", {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          gap: 12
-        }
-      }, /*#__PURE__*/React.createElement("svg", {
-        width: "40",
-        height: "40",
-        viewBox: "0 0 50 50",
-        style: {
-          flexShrink: 0
-        }
-      }, /*#__PURE__*/React.createElement("circle", {
-        cx: "25",
-        cy: "25",
-        r: "22",
-        fill: "#e8f0e4"
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: "25",
-        cy: "25",
-        r: "22",
-        fill: "none",
-        stroke: "#d4ddd0",
-        strokeWidth: "2.5"
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: "25",
-        cy: "25",
-        r: "22",
-        fill: "none",
-        stroke: "#2d6b3f",
-        strokeWidth: "2.5",
-        strokeDasharray: `${pick.smakfynd_score * 1.38} 138`,
-        strokeLinecap: "round",
-        transform: "rotate(-90 25 25)"
-      }), /*#__PURE__*/React.createElement("text", {
-        x: "25",
-        y: "30",
-        textAnchor: "middle",
-        fontFamily: "'Instrument Serif', Georgia, serif",
-        fontSize: "17",
-        fontWeight: "900",
-        fill: "#2d6b3f"
-      }, pick.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
-        style: {
-          flex: 1
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 15,
-          fontFamily: "'Instrument Serif', serif",
-          color: t.tx
-        }
-      }, pick.name), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 11,
-          color: t.txL
-        }
-      }, pick.sub, " \xB7 ", pick.price))), /*#__PURE__*/React.createElement("p", {
-        style: {
-          fontSize: 12,
-          color: t.txM,
-          lineHeight: 1.5,
-          margin: "8px 0 0",
-          fontStyle: "italic"
-        }
-      }, pick.note), mp && /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 10,
-          color: t.wine,
-          marginTop: 6
-        }
-      }, "Klicka f\xF6r att se fullst\xE4ndig profil \u2192"));
-    })));
-  })(), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement(EditorsPicks, {
+    products: products,
+    onSelect: name => setSearch(name)
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,

@@ -199,12 +199,34 @@ def render_wine_row(w, rank):
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">{price} kr</span>
     <a href="https://www.systembolaget.se/produkt/vin/{nr}" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
+    <a href="https://smakfynd.se/#vin/{nr}"
+       style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>'''
 
-def render_page(page):
+def get_cross_links(current_slug, all_pages):
+    """Get 4-5 related landing pages for cross-linking."""
+    links = []
+    for p in all_pages:
+        if p['slug'] != current_slug and p.get('wines'):
+            links.append(p)
+    # Show max 5
+    return links[:5]
+
+def render_page(page, all_pages=None):
     wines_html = '\n'.join(render_wine_row(w, i+1) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
+
+    # Cross-links
+    cross = get_cross_links(page['slug'], all_pages or [])
+    cross_html = ""
+    if cross:
+        cross_links = ' · '.join(f'<a href="/{p["slug"]}/" style="color:#8b2332;text-decoration:none">{p["title"].split(" — ")[0].split(" på ")[0]}</a>' for p in cross)
+        cross_html = f'''
+    <div style="margin-top:24px;padding:16px 20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
+      <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:6px">Se även</div>
+      <div style="font-size:13px;color:#4a4238;line-height:2">{cross_links}</div>
+    </div>'''
 
     # JSON-LD for the wine list
     items_ld = []
@@ -304,6 +326,8 @@ def render_page(page):
       </a>
     </div>
 
+    {cross_html}
+
     <footer style="margin-top:40px;padding-top:20px;border-top:1px solid #e6ddd0;text-align:center;font-size:11px;color:#a89e8e">
       <p>Smakfynd — skapad av Gabriel Linton · Olav Innovation AB</p>
       <p>Oberoende tjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
@@ -354,7 +378,7 @@ def main():
         os.makedirs(page_dir, exist_ok=True)
 
         # Write HTML
-        html = render_page(page)
+        html = render_page(page, all_pages=pages)
         out_path = os.path.join(page_dir, 'index.html')
         with open(out_path, 'w') as f:
             f.write(html)
