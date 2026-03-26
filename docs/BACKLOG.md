@@ -52,6 +52,12 @@
 - [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
 - [ ] Vinpriser.se deep scrape (594 prissänkta viner)
 
+## Att konfigurera (AKUT)
+- [ ] Deploya workers med CORS-fix: `cd ~/smakfynd/workers/auth && npx wrangler deploy`
+- [ ] Deploya analytics: `cd ~/smakfynd/workers/analytics && npx wrangler deploy`
+- [ ] Deploya wine-ai: `cd ~/smakfynd/workers/wine-ai && npx wrangler deploy`
+- [ ] Sätt ADMIN_KEY: `cd ~/smakfynd/workers/auth && npx wrangler secret put ADMIN_KEY`
+
 ## Att konfigurera
 - [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no` (Dashboard → smakfynd.se → Email → Email Routing)
 - [ ] Fyll i organisationsnummer i `/integritet/` (`[ORG-NR]`)
