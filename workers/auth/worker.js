@@ -26,6 +26,13 @@ async function getUserByToken(db, token) {
   return row;
 }
 
+function getToken(request, url) {
+  // Prefer Authorization header, fall back to query param
+  const auth = request.headers.get("Authorization");
+  if (auth && auth.startsWith("Bearer ")) return auth.slice(7);
+  return url.searchParams.get("token");
+}
+
 export default {
   async fetch(request, env) {
     const cors = {
@@ -42,51 +49,80 @@ export default {
     const url = new URL(request.url);
 
     try {
-      // POST /login — create or find user, return token + saved wines
+      // POST /login — Step 1: send verification code
       if (request.method === "POST" && url.pathname === "/login") {
         const body = await request.json();
-        const { email, name, newsletter } = body;
+        const { email, name, newsletter, code } = body;
         if (!email || !email.includes("@")) {
           return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
         }
         const cleanEmail = email.toLowerCase().trim();
 
-        // Find or create user
-        let user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
-        if (!user) {
-          await env.DB.prepare(
-            "INSERT INTO users (email, name, newsletter, newsletter_consent_at) VALUES (?, ?, ?, ?)"
-          ).bind(cleanEmail, name || null, newsletter ? 1 : 0, newsletter ? new Date().toISOString() : null).run();
-          user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
-        } else {
-          await env.DB.prepare("UPDATE users SET last_login = datetime('now') WHERE id = ?").bind(user.id).run();
-          if (newsletter) {
-            await env.DB.prepare("UPDATE users SET newsletter = 1, newsletter_consent_at = ? WHERE id = ? AND newsletter = 0")
-              .bind(new Date().toISOString(), user.id).run();
+        // Step 2: verify code and complete login
+        if (code) {
+          const pending = await env.DB.prepare(
+            "SELECT * FROM verification_codes WHERE email = ? AND code = ? AND expires_at > datetime('now')"
+          ).bind(cleanEmail, code).first();
+
+          if (!pending) {
+            return new Response(JSON.stringify({ error: "Felaktig eller utgången kod" }), { status: 401, headers });
           }
+
+          // Delete used code
+          await env.DB.prepare("DELETE FROM verification_codes WHERE email = ?").bind(cleanEmail).run();
+
+          // Find or create user
+          let user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
+          if (!user) {
+            await env.DB.prepare(
+              "INSERT INTO users (email, name, newsletter, newsletter_consent_at) VALUES (?, ?, ?, ?)"
+            ).bind(cleanEmail, name || null, newsletter ? 1 : 0, newsletter ? new Date().toISOString() : null).run();
+            user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
+          } else {
+            await env.DB.prepare("UPDATE users SET last_login = datetime('now') WHERE id = ?").bind(user.id).run();
+            if (newsletter) {
+              await env.DB.prepare("UPDATE users SET newsletter = 1, newsletter_consent_at = ? WHERE id = ? AND newsletter = 0")
+                .bind(new Date().toISOString(), user.id).run();
+            }
+          }
+
+          // Create session token
+          const token = generateToken();
+          await env.DB.prepare(
+            "INSERT INTO user_tokens (token, user_id, expires_at) VALUES (?, ?, datetime('now', '+90 days'))"
+          ).bind(token, user.id).run();
+
+          // Get saved wines
+          const wineRows = await env.DB.prepare(
+            "SELECT wine_nr, list FROM saved_wines WHERE user_id = ?"
+          ).bind(user.id).all();
+          const wines = {};
+          for (const row of wineRows.results) {
+            if (!wines[row.wine_nr]) wines[row.wine_nr] = [];
+            wines[row.wine_nr].push(row.list);
+          }
+
+          return new Response(JSON.stringify({
+            token,
+            user: { id: user.id, email: user.email, name: user.name },
+            wines,
+          }), { headers });
         }
 
-        // Create token (valid 90 days)
-        const token = generateToken();
+        // Step 1: generate and store 6-digit code
+        const verifyCode = String(Math.floor(100000 + Math.random() * 900000));
+        await env.DB.prepare("DELETE FROM verification_codes WHERE email = ?").bind(cleanEmail).run();
         await env.DB.prepare(
-          "INSERT INTO user_tokens (token, user_id, expires_at) VALUES (?, ?, datetime('now', '+90 days'))"
-        ).bind(token, user.id).run();
+          "INSERT INTO verification_codes (email, code, expires_at) VALUES (?, ?, datetime('now', '+10 minutes'))"
+        ).bind(cleanEmail, verifyCode).run();
 
-        // Get saved wines
-        const wineRows = await env.DB.prepare(
-          "SELECT wine_nr, list FROM saved_wines WHERE user_id = ?"
-        ).bind(user.id).all();
-
-        const wines = {};
-        for (const row of wineRows.results) {
-          if (!wines[row.wine_nr]) wines[row.wine_nr] = [];
-          wines[row.wine_nr].push(row.list);
-        }
-
+        // TODO: Send code via email (Resend/SES). For now, return it in response for testing.
+        // In production, remove code from response and send via email only.
         return new Response(JSON.stringify({
-          token,
-          user: { id: user.id, email: user.email, name: user.name },
-          wines,
+          status: "code_sent",
+          message: "En verifieringskod har skickats till din email",
+          // TEMP: include code until email sending is set up
+          _dev_code: verifyCode,
         }), { headers });
       }
 
@@ -118,7 +154,7 @@ export default {
 
       // GET /wines — get all saved wines
       if (request.method === "GET" && url.pathname === "/wines") {
-        const token = url.searchParams.get("token");
+        const token = getToken(request, url);
         const user = await getUserByToken(env.DB, token);
         if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
 
@@ -171,7 +207,7 @@ export default {
 
       // GET /profile
       if (request.method === "GET" && url.pathname === "/profile") {
-        const token = url.searchParams.get("token");
+        const token = getToken(request, url);
         const user = await getUserByToken(env.DB, token);
         if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
         return new Response(JSON.stringify({ user: { id: user.id, email: user.email, name: user.name, created_at: user.created_at } }), { headers });

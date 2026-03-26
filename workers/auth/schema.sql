@@ -29,6 +29,14 @@ CREATE TABLE IF NOT EXISTS user_tokens (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS verification_codes (
+  email TEXT NOT NULL,
+  code TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_verify_email ON verification_codes(email);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_saved_user ON saved_wines(user_id);
 CREATE INDEX IF NOT EXISTS idx_tokens_user ON user_tokens(user_id);

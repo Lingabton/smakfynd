@@ -19,9 +19,12 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
 
   return (
     <div
+      role="button" tabIndex={0} aria-expanded={open}
+      aria-label={`${p.name} ${p.sub || ''} — ${s100} poäng, ${p.price} kr`}
       onClick={handleOpen}
+      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
       style={{
-        background: t.card, borderRadius: 14,
+        background: t.card, borderRadius: 14, outline: "none",
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
         boxShadow: open ? t.sh3 : t.sh1,
         transition: "all 0.25s ease", overflow: "hidden",

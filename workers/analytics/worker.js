@@ -4,6 +4,21 @@
  * Free tier: 5M rows read/day, 100k rows written/day
  */
 
+// Simple in-memory rate limiter (resets on Worker restart)
+const rateLimits = new Map();
+function checkRateLimit(ip, limit = 100, windowMs = 60000) {
+  const now = Date.now();
+  const key = ip || "unknown";
+  const entry = rateLimits.get(key);
+  if (!entry || now - entry.start > windowMs) {
+    rateLimits.set(key, { start: now, count: 1 });
+    return true;
+  }
+  entry.count++;
+  if (entry.count > limit) return false;
+  return true;
+}
+
 export default {
   async fetch(request, env) {
     const cors = {
@@ -18,6 +33,12 @@ export default {
 
     const url = new URL(request.url);
     const headers = { ...cors, "Content-Type": "application/json" };
+
+    // Rate limit POST requests
+    const clientIP = request.headers.get("CF-Connecting-IP");
+    if (request.method === "POST" && !checkRateLimit(clientIP, 60)) {
+      return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers });
+    }
 
     try {
       // POST /event — log a user event

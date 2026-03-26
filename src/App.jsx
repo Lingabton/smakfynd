@@ -186,6 +186,10 @@ function SmakfyndApp() {
         a { transition: color 0.15s ease; }
         button { transition: all 0.15s ease; }
         img { transition: opacity 0.3s ease; }
+        [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible {
+          outline: 2px solid ${t.wine}60;
+          outline-offset: 2px;
+        }
       `}</style>
 
       {/* ═══ HERO — compact ═══ */}
