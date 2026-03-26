@@ -1,0 +1,54 @@
+name: Monthly Content Generation
+
+on:
+  schedule:
+    - cron: '0 8 1 * *'  # 1st of every month at 08:00 UTC
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate monthly content
+        run: python3 scripts/generate_monthly_content.py
+
+      - name: Generate Gabriels val page
+        run: python3 scripts/gabriels_val.py || echo "Gabriels val needs manual PICKS update"
+
+      - name: Create PR with suggestions
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Monthly content: Gabriels val + Substack draft"
+          title: "📝 Månadens innehåll — granska och godkänn"
+          body: |
+            ## Automatiskt genererat månadsinnehåll
+
+            ### Gabriels val
+            Föreslagna viner baserat på senaste data. Granska `content/picks-*.json`.
+
+            ### Substack-artikel
+            Utkast i `content/substack-*.md`. Redigera och publicera på smakfynd.substack.com.
+
+            ### Att göra:
+            - [ ] Granska vinvalen — byt ut om du vill
+            - [ ] Skriv personliga noter (ersätt "[REDIGERA]" i picks-filen)
+            - [ ] Uppdatera `scripts/gabriels_val.py` med dina noter
+            - [ ] Granska Substack-artikeln
+            - [ ] Merga PR → sidan uppdateras automatiskt
+            - [ ] Publicera artikeln på Substack
+
+            🤖 Genererat automatiskt av GitHub Actions
+          branch: monthly-content
+          delete-branch: true

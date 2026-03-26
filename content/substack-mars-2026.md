@@ -1,40 +1,56 @@
-# Bästa vinköpen på Systembolaget just nu — mars 2026
+# Bästa vinköpen på Systembolaget — mars 2026
 
 *Av Gabriel Linton, grundare av [Smakfynd](https://smakfynd.se)*
 
-Varje vecka analyserar vi tusentals viner på Systembolaget och rankar dem efter kvalitet per krona. Här är månadens bästa fynd.
+Varje vecka analyserar vi 11619 viner på Systembolaget och rankar dem efter kvalitet per krona. Här är marss bästa fynd.
 
-## 🏆 Månadens bästa köp: Lavista Malbec Reserve — 79 kr
+## Bästa köp under 100 kr: Lavista Malbec Reserve — 79.0 kr
 
-En argentinsk Malbec till under 80 kronor som slår viner i dubbla prisklassen. Fyllig, fruktig och med en fin vaniljton från ekfat. Crowd-betyg: 7.2/10 från 2 591 omdömen. Expertbetyg: 8.2/10.
+Smakfynd-poäng: **83/100**
 
-**Perfekt till:** Pasta med köttfärssås, burgare, ost.
-[Se mer på Smakfynd →](https://smakfynd.se/#vin/471101)
+En Malbec från Argentina till 79.0 kr. Crowd-betyg: 7.2/10 från 2591 omdömen. Expert: 8.2/10.
 
----
-
-## Under 100 kr — 3 fynd du inte visste om
-
-### 1. Alto Pina Reserva — 89 kr
-Portugisiskt rött med mogna mörka bär. Över 2 000 omdömen och ett av de bästa köpen under hundralappen.
-
-### 2. Chianti Castelsina — 89 kr
-Klassisk Chianti med körsbär och kryddighet. Funkar till all italiensk mat.
-
-### 3. Heartwood Organic Zinfandel — 99 kr
-Ekologisk Zinfandel från Italien. Smakrik och kryddigt. Bra val om du vill ha eko utan att betala extra.
+[Se detaljer →](https://smakfynd.se/#vin/471101)
 
 ---
 
-## Veckans AI-tipps
+## Bäst i mellanklass: Tissot & Potel La Sixième Côte Pinot noir — 145.0 kr
 
-Visste du att Smakfynd har en AI-vinmatchare? Beskriv vad du ska äta så föreslår vi vin:
+Smakfynd-poäng: **80/100**
 
-- "Fredagstacos" → Mucho Mas Grenache (99 kr)
-- "Grillad lax" → Leitz Eins Zwei Dry Riesling (107 kr)
-- "Entrecôte med bearnaise" → Salt & Pepper Cabernet Sauvignon (99 kr)
+Pinot noir från Frankrike, Jura. Experterna ger 8.2/10 och crowd 7.2/10.
 
-[Prova AI-matcharen →](https://smakfynd.se)
+[Se detaljer →](https://smakfynd.se/#vin/5580401)
+
+---
+
+## Bästa vita just nu: Amber One Catarratto — 134.0 kr
+
+Smakfynd-poäng: **82/100**
+
+Catarratto från Italien till 134.0 kr. Smakprofil: Något kryddig smak med liten strävhet, inslag av vinteräpplen, torkade örter, mi.
+
+[Se detaljer →](https://smakfynd.se/#vin/7851401)
+
+---
+
+## Bubbel-favorit: La Belle Extra Brut Blanc de Blancs — 149.0 kr
+
+Smakfynd-poäng: **85/100**
+
+Från Argentina till 149.0 kr. 550 har betygsatt den.
+
+[Se detaljer →](https://smakfynd.se/#vin/2018001)
+
+---
+
+## Dold pärla: Salt & Pepper Double Reserve Cabernet Sauvignon — 99.0 kr
+
+Smakfynd-poäng: **83/100**
+
+Salt & Pepper Double Reserve Cabernet Sauvignon — Cabernet sauvignon från Frankrike, 99.0 kr. Få har hittat den ännu (352 omdömen) men poängen talar för sig.
+
+[Se detaljer →](https://smakfynd.se/#vin/7598201)
 
 ---
 
@@ -45,6 +61,6 @@ Jag har också handplockat 5 viner jag personligen testat och gillar.
 
 ---
 
-*Smakfynd rankar 11 500+ viner efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = en enda poäng.*
+*Smakfynd rankar 11619 viner efter kvalitet per krona.*
 
-[Besök Smakfynd →](https://smakfynd.se) | [Alla viner under 100 kr →](https://smakfynd.se/vin-under-100-kr/)
+[Besök Smakfynd →](https://smakfynd.se) | [Under 100 kr →](https://smakfynd.se/vin-under-100-kr/)

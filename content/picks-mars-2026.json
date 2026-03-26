@@ -1,0 +1,73 @@
+{
+  "month": "mars",
+  "year": 2026,
+  "picks": [
+    {
+      "nr": "471101",
+      "category": "Bästa köp under 100 kr",
+      "note": "En Malbec från Argentina till 79.0 kr. Crowd-betyg: 7.2/10 från 2591 omdömen. Expert: 8.2/10. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "5580401",
+      "category": "Bäst i mellanklass",
+      "note": "Pinot noir från Frankrike, Jura. Experterna ger 8.2/10 och crowd 7.2/10. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "7851401",
+      "category": "Bästa vita just nu",
+      "note": "Catarratto från Italien till 134.0 kr. Smakprofil: Något kryddig smak med liten strävhet, inslag av vinteräpplen, torkade örter, mi. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "2018001",
+      "category": "Bubbel-favorit",
+      "note": "Från Argentina till 149.0 kr. 550 har betygsatt den. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "7598201",
+      "category": "Dold pärla",
+      "note": "Salt & Pepper Double Reserve Cabernet Sauvignon — Cabernet sauvignon från Frankrike, 99.0 kr. Få har hittat den ännu (352 omdömen) men poängen talar för sig. [REDIGERA: Lägg till din personliga kommentar här]"
+    }
+  ],
+  "wines": {
+    "471101": {
+      "name": "Lavista",
+      "sub": "Malbec Reserve",
+      "price": 79.0,
+      "score": 83,
+      "country": "Argentina",
+      "grape": "Malbec"
+    },
+    "5580401": {
+      "name": "Tissot & Potel La Sixième Côte",
+      "sub": "Pinot noir",
+      "price": 145.0,
+      "score": 80,
+      "country": "Frankrike",
+      "grape": "Pinot noir"
+    },
+    "7851401": {
+      "name": "Amber One",
+      "sub": "Catarratto",
+      "price": 134.0,
+      "score": 82,
+      "country": "Italien",
+      "grape": "Catarratto"
+    },
+    "2018001": {
+      "name": "La Belle",
+      "sub": "Extra Brut Blanc de Blancs",
+      "price": 149.0,
+      "score": 85,
+      "country": "Argentina",
+      "grape": "Chardonnay"
+    },
+    "7598201": {
+      "name": "Salt & Pepper",
+      "sub": "Double Reserve Cabernet Sauvignon",
+      "price": 99.0,
+      "score": 83,
+      "country": "Frankrike",
+      "grape": "Cabernet sauvignon"
+    }
+  }
+}
