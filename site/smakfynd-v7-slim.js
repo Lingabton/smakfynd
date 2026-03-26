@@ -1353,7 +1353,7 @@ function Card({
       }
       return count > 0 ? score / count : 0;
     };
-    const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id)).map(w => {
+    const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id) && w.smakfynd_score >= 65).map(w => {
       // Calculate similarity score
       let sim = 0;
       const taste = tasteSim(w, p);
