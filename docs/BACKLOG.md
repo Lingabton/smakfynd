@@ -18,6 +18,13 @@
 - [ ] CTA på landningssidor → AI-matchern
 - [ ] Kort: visa situationspassning ("Fynd till lamm", "Tryggt middagsvin")
 
+## Kritiker-data
+- [ ] Visa individuella kritiker-scores per vin (Suckling: 91, Decanter: 88, Falstaff: 90)
+- [ ] Scoring-bonus för konsensus (alla kritiker överens = högre tillit)
+- [ ] Visa "7 av 7 kritiker ger 85+" som socialt bevis
+- [ ] Spridningsanalys: konsensus vs kontroversiellt vin
+- [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
+
 ## UX — medel insats
 - [ ] Sorteringsval: expert-score, crowd-score, pris
 - [ ] Budget-input till AI-matchern (snabbpills: under 100, 100-200, 200+)
