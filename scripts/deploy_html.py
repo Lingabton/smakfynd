@@ -163,6 +163,19 @@ html = f"""<!DOCTYPE html>
   <script type="application/ld+json">{wine_ld_json}</script>
   <script type="application/ld+json">{faq_ld}</script>
 
+  <style>
+    :root {{
+      --bg: #f7f3ec; --surface: #fefcf8; --card: #ffffff;
+      --bdr: #e6ddd0; --bdr-light: #efe8dc;
+      --wine: #8b2332; --wine-dark: #6b1a27;
+      --tx: #1e1710; --tx-mid: #4a4238; --tx-light: #7a7060; --tx-faint: #a89e8e;
+      --green: #3d7a3e; --deal: #c44020; --gold: #b08d40;
+      --radius-card: 16px; --radius-pill: 100px; --radius-input: 14px;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, sans-serif;
+    }}
+    body {{ margin: 0; background: var(--bg); font-family: var(--font-sans); color: var(--tx); }}
+  </style>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>

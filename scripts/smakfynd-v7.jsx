@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════════════
+// constants.jsx
+// ════════════════════════════════════════════════════════════
+// src/constants.jsx
 // ═══════════════════════════════════════════════════════════════
 // SMAKFYND v7 — Real Data + Package Filter
 // Smartare vinval på Systembolaget
@@ -51,6 +55,10 @@ const FAQS = [
   {q:"Hur ofta uppdateras sajten?",a:"Varje vecka. Vi hämtar hela Systembolagets sortiment, uppdaterar betyg och räknar om poängen. Prishistoriken uppdateras samtidigt."},
 ];
 
+// ════════════════════════════════════════════════════════════
+// theme.jsx
+// ════════════════════════════════════════════════════════════
+// src/theme.jsx
 // ── Color system ──
 const t = {
   bg: "#f7f3ec",
@@ -84,6 +92,11 @@ const pill = (active, accent = t.wine) => ({
 
 // Rescale raw score to 1-100 for display
 // Uses piecewise mapping so scores spread across full range
+
+// ════════════════════════════════════════════════════════════
+// utils.jsx
+// ════════════════════════════════════════════════════════════
+// src/utils.jsx
 function rescale(raw) {
   if (raw >= 16) return Math.min(99, 90 + Math.round((raw - 16) * 5));
   if (raw >= 14) return Math.round(75 + (raw - 14) * 7.5);
@@ -102,6 +115,10 @@ function getScoreInfo(s100) {
   return ["Svagt värde", "#8a7a6a", ""];
 }
 
+// ════════════════════════════════════════════════════════════
+// components/ScoreBars.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/ScoreBars.jsx
 function MiniBar({ label, value, max = 10, color }) {
   const pct = value ? Math.min(100, (value / max) * 100) : 0;
   return (
@@ -125,6 +142,11 @@ function ScoreBars({ p }) {
 }
 
 // Product image URL from Systembolaget CDN
+
+// ════════════════════════════════════════════════════════════
+// components/ProductImage.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/ProductImage.jsx
 function getImageUrl(p, size = 200) {
   if (p.image_url) return p.image_url;
   if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
@@ -172,6 +194,10 @@ const LISTS = [
   { k: "fest", l: "Fest", i: "🎉" },
 ];
 
+// ════════════════════════════════════════════════════════════
+// hooks.jsx
+// ════════════════════════════════════════════════════════════
+// src/hooks.jsx
 function useSaved() {
   const [data, setData] = useState(() => {
     try {
@@ -219,6 +245,10 @@ function useSaved() {
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
 
+// ════════════════════════════════════════════════════════════
+// components/Card.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/Card.jsx
 function Card({ p, rank, delay, totalInCategory, allProducts }) {
   const [open, setOpen] = useState(false);
   const sv = React.useContext(SavedContext);
@@ -604,6 +634,10 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/SaveButton.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/SaveButton.jsx
 function SaveButton({ nr, sv }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const saved = sv.isSaved(nr);
@@ -653,6 +687,10 @@ function SaveButton({ nr, sv }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/AIQuestion.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/AIQuestion.jsx
 function AIQuestion({ aiResult, onFollowup }) {
   const [freetext, setFreetext] = useState("");
   return (
@@ -692,6 +730,10 @@ function AIQuestion({ aiResult, onFollowup }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/EditorsPicks.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/EditorsPicks.jsx
 function EditorsPicks({ products, onSelect }) {
   const [open, setOpen] = useState(false);
   return (
@@ -747,6 +789,10 @@ function EditorsPicks({ products, onSelect }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/FoodMatch.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/FoodMatch.jsx
 const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
 
 function matchWinesForCourses(courses, products) {
@@ -979,6 +1025,10 @@ function FoodMatch({ products }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/StoreMode.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/StoreMode.jsx
 function StoreMode({ products, onClose }) {
   const [q, setQ] = useState("");
   const sv = React.useContext(SavedContext);
@@ -1146,6 +1196,10 @@ function StoreMode({ products, onClose }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/AgeGate.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/AgeGate.jsx
 function AgeGate({ onConfirm }) {
   return (
     <div style={{
@@ -1178,6 +1232,10 @@ function AgeGate({ onConfirm }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// App.jsx
+// ════════════════════════════════════════════════════════════
+// src/App.jsx
 function Smakfynd() {
   const [ageOk, setAgeOk] = useState(() => {
     try { return localStorage.getItem("smakfynd_age") === "ok"; } catch(e) { return false; }
@@ -1216,35 +1274,37 @@ function SmakfyndApp() {
   const [pkg, setPkg] = useState("Flaska");
   const [allData, setAllData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
 
-  // Load data from storage or embedded
+  // Load data with retry
   useEffect(() => {
-    async function loadData() {
-      try {
-        // Try persistent storage first
-        const stored = await window.storage?.get('smakfynd-products');
-        if (stored?.value) {
-          const parsed = JSON.parse(stored.value);
-          setAllData(parsed);
-          setLoading(false);
-          return;
-        }
-      } catch(e) {}
-      
+    async function loadData(attempt = 1) {
       // Try fetching from URL
       if (DATA_URL) {
         try {
           const res = await fetch(DATA_URL);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
+          if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
           setAllData(data);
           setLoading(false);
+          setLoadError(null);
           return;
-        } catch(e) {}
+        } catch(e) {
+          if (attempt < 3) {
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+            return loadData(attempt + 1);
+          }
+          setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
+        }
       }
-      
-      // Fallback to sample data
-      setAllData(SAMPLE_PRODUCTS);
+
+      // Fallback to embedded sample data
+      if (SAMPLE_PRODUCTS.length > 0) {
+        setAllData(SAMPLE_PRODUCTS);
+        setLoadError(null);
+      }
       setLoading(false);
     }
     loadData();
@@ -1646,10 +1706,19 @@ function SmakfyndApp() {
           <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Rankade efter kvalitet i förhållande till pris — inte "bästa vinet", utan bästa värdet i sin kategori.</div>
         </div>
 
-        {loading ? (
+        {loadError && !loading && allData.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 20px" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>📡</div>
+            <p style={{ fontSize: 15, color: t.deal, marginBottom: 8 }}>{loadError}</p>
+            <button onClick={() => { setLoading(true); setLoadError(null); window.location.reload(); }}
+              style={{ padding: "10px 20px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 13, color: t.txM }}>
+              Försök igen
+            </button>
+          </div>
+        ) : loading ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
-            <p style={{ fontSize: 15, color: t.txM }}>Laddar...</p>
+            <p style={{ fontSize: 15, color: t.txM }}>Laddar viner...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>

@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════════════
+// constants.jsx
+// ════════════════════════════════════════════════════════════
+// src/constants.jsx
 // ═══════════════════════════════════════════════════════════════
 // SMAKFYND v7 — Real Data + Package Filter
 // Smartare vinval på Systembolaget
@@ -127,6 +131,10 @@ const FAQS = [{
   a: "Varje vecka. Vi hämtar hela Systembolagets sortiment, uppdaterar betyg och räknar om poängen. Prishistoriken uppdateras samtidigt."
 }];
 
+// ════════════════════════════════════════════════════════════
+// theme.jsx
+// ════════════════════════════════════════════════════════════
+// src/theme.jsx
 // ── Color system ──
 const t = {
   bg: "#f7f3ec",
@@ -165,6 +173,11 @@ const pill = (active, accent = t.wine) => ({
 
 // Rescale raw score to 1-100 for display
 // Uses piecewise mapping so scores spread across full range
+
+// ════════════════════════════════════════════════════════════
+// utils.jsx
+// ════════════════════════════════════════════════════════════
+// src/utils.jsx
 function rescale(raw) {
   if (raw >= 16) return Math.min(99, 90 + Math.round((raw - 16) * 5));
   if (raw >= 14) return Math.round(75 + (raw - 14) * 7.5);
@@ -181,6 +194,11 @@ function getScoreInfo(s100) {
   if (s100 >= 50) return ["Okej värde", "#8a7a6a", ""];
   return ["Svagt värde", "#8a7a6a", ""];
 }
+
+// ════════════════════════════════════════════════════════════
+// components/ScoreBars.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/ScoreBars.jsx
 function MiniBar({
   label,
   value,
@@ -249,6 +267,11 @@ function ScoreBars({
 }
 
 // Product image URL from Systembolaget CDN
+
+// ════════════════════════════════════════════════════════════
+// components/ProductImage.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/ProductImage.jsx
 function getImageUrl(p, size = 200) {
   if (p.image_url) return p.image_url;
   if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
@@ -335,6 +358,11 @@ const LISTS = [{
   l: "Fest",
   i: "🎉"
 }];
+
+// ════════════════════════════════════════════════════════════
+// hooks.jsx
+// ════════════════════════════════════════════════════════════
+// src/hooks.jsx
 function useSaved() {
   const [data, setData] = useState(() => {
     try {
@@ -393,6 +421,11 @@ function useSaved() {
 
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
+
+// ════════════════════════════════════════════════════════════
+// components/Card.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/Card.jsx
 function Card({
   p,
   rank,
@@ -1301,6 +1334,11 @@ function Card({
     }, "kr"))))));
   })()));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/SaveButton.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/SaveButton.jsx
 function SaveButton({
   nr,
   sv
@@ -1426,6 +1464,11 @@ function SaveButton({
     }
   }, "St\xE4ng")));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/AIQuestion.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/AIQuestion.jsx
 function AIQuestion({
   aiResult,
   onFollowup
@@ -1512,6 +1555,11 @@ function AIQuestion({
     }
   }, "Skicka")));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/EditorsPicks.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/EditorsPicks.jsx
 function EditorsPicks({
   products,
   onSelect
@@ -1672,6 +1720,11 @@ function EditorsPicks({
     }, "Klicka f\xF6r att se fullst\xE4ndig profil \u2192"));
   })));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/FoodMatch.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/FoodMatch.jsx
 const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
 function matchWinesForCourses(courses, products) {
   if (!courses || !courses.length) return [];
@@ -2097,6 +2150,11 @@ function FoodMatch({
     }
   }, "Hittade inga matchningar. Prova en annan beskrivning."))));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/StoreMode.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/StoreMode.jsx
 function StoreMode({
   products,
   onClose
@@ -2450,6 +2508,11 @@ function StoreMode({
     }
   }, "Skriv in vinets namn eller artikelnummer.", /*#__PURE__*/React.createElement("br", null), "Vi visar po\xE4ngen och om det finns b\xE4ttre alternativ.")));
 }
+
+// ════════════════════════════════════════════════════════════
+// components/AgeGate.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/AgeGate.jsx
 function AgeGate({
   onConfirm
 }) {
@@ -2523,6 +2586,11 @@ function AgeGate({
     }
   }, "Smakfynd \xE4r en oberoende informationstj\xE4nst fr\xE5n Olav Innovation AB.", /*#__PURE__*/React.createElement("br", null), "Ingen koppling till Systembolaget. Vi s\xE4ljer inte alkohol.")));
 }
+
+// ════════════════════════════════════════════════════════════
+// App.jsx
+// ════════════════════════════════════════════════════════════
+// src/App.jsx
 function Smakfynd() {
   const [ageOk, setAgeOk] = useState(() => {
     try {
@@ -2579,35 +2647,37 @@ function SmakfyndApp() {
   const [pkg, setPkg] = useState("Flaska");
   const [allData, setAllData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
 
-  // Load data from storage or embedded
+  // Load data with retry
   useEffect(() => {
-    async function loadData() {
-      try {
-        // Try persistent storage first
-        const stored = await window.storage?.get('smakfynd-products');
-        if (stored?.value) {
-          const parsed = JSON.parse(stored.value);
-          setAllData(parsed);
-          setLoading(false);
-          return;
-        }
-      } catch (e) {}
-
+    async function loadData(attempt = 1) {
       // Try fetching from URL
       if (DATA_URL) {
         try {
           const res = await fetch(DATA_URL);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
+          if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
           setAllData(data);
           setLoading(false);
+          setLoadError(null);
           return;
-        } catch (e) {}
+        } catch (e) {
+          if (attempt < 3) {
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+            return loadData(attempt + 1);
+          }
+          setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
+        }
       }
 
-      // Fallback to sample data
-      setAllData(SAMPLE_PRODUCTS);
+      // Fallback to embedded sample data
+      if (SAMPLE_PRODUCTS.length > 0) {
+        setAllData(SAMPLE_PRODUCTS);
+        setLoadError(null);
+      }
       setLoading(false);
     }
     loadData();
@@ -3435,7 +3505,39 @@ function SmakfyndApp() {
       color: t.txF,
       marginTop: 3
     }
-  }, "Rankade efter kvalitet i f\xF6rh\xE5llande till pris \u2014 inte \"b\xE4sta vinet\", utan b\xE4sta v\xE4rdet i sin kategori.")), loading ? /*#__PURE__*/React.createElement("div", {
+  }, "Rankade efter kvalitet i f\xF6rh\xE5llande till pris \u2014 inte \"b\xE4sta vinet\", utan b\xE4sta v\xE4rdet i sin kategori.")), loadError && !loading && allData.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "48px 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      marginBottom: 12
+    }
+  }, "\uD83D\uDCE1"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 15,
+      color: t.deal,
+      marginBottom: 8
+    }
+  }, loadError), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setLoading(true);
+      setLoadError(null);
+      window.location.reload();
+    },
+    style: {
+      padding: "10px 20px",
+      borderRadius: 10,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 13,
+      color: t.txM
+    }
+  }, "F\xF6rs\xF6k igen")) : loading ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "48px 20px",
@@ -3451,7 +3553,7 @@ function SmakfyndApp() {
       fontSize: 15,
       color: t.txM
     }
-  }, "Laddar...")) : filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Laddar viner...")) : filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "48px 20px",

@@ -1,0 +1,57 @@
+name: Validate & Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Babel
+        run: npm ci
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build app (concat src → JSX)
+        run: python3 scripts/build_app.py
+
+      - name: Build slim (if data exists)
+        run: |
+          if [ -f data/smakfynd_ranked_v2.json ]; then
+            python3 scripts/build_slim.py
+          else
+            echo "No data file — skipping slim build"
+          fi
+
+      - name: Transpile JSX → JS
+        run: npx babel --presets @babel/preset-react site/smakfynd-v7-slim.jsx -o site/smakfynd-v7-slim.js 2>/dev/null || npx babel --presets @babel/preset-react scripts/smakfynd-v7.jsx -o /tmp/test.js
+
+      - name: Run scoring tests
+        run: node tests/test_scoring.js
+
+      - name: Validate wines.json
+        run: |
+          if [ -f docs/wines.json ]; then
+            node tests/test_data.js
+          else
+            echo "No wines.json — skipping data validation"
+          fi
+
+      - name: Validate data schema (Python)
+        run: |
+          if [ -f docs/wines.json ]; then
+            python3 scripts/validate_data.py docs/wines.json
+          fi
