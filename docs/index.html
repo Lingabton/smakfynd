@@ -463,8 +463,15 @@ function ScoreBars({
 // ════════════════════════════════════════════════════════════
 // src/components/ProductImage.jsx
 function getImageUrl(p, size = 200) {
+  // Try SB image URL - use direct URL (works in most browsers)
   if (p.image_url) return p.image_url;
   if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
+  return null;
+}
+
+// Fallback: try Systembolaget's other image CDN
+function getImageUrlFallback(p) {
+  if (p.nr) return `https://sb-product-media-prod.azureedge.net/productimages/${p.nr}/${p.nr}_100.png`;
   return null;
 }
 function ProductImage({
@@ -513,9 +520,16 @@ function ProductImage({
   }, /*#__PURE__*/React.createElement("img", {
     src: url,
     alt: p.name,
-    referrerPolicy: "no-referrer",
     loading: "lazy",
-    onError: () => setErr(true),
+    onError: e => {
+      // Try fallback CDN before giving up
+      const fallback = getImageUrlFallback(p);
+      if (fallback && e.target.src !== fallback) {
+        e.target.src = fallback;
+      } else {
+        setErr(true);
+      }
+    },
     style: {
       maxWidth: "90%",
       maxHeight: "90%",
