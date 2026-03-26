@@ -2160,10 +2160,8 @@ function TrustBox() {
 function WeeklyPick({
   products
 }) {
-  // Auto-select best value wine: highest score, under 150kr, fast sortiment
   const pick = useMemo(() => {
     const candidates = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price && p.price <= 150 && p.smakfynd_score >= 75).sort((a, b) => {
-      // Prefer wines with both crowd + expert, then highest score
       const aBonus = a.crowd_score && a.expert_score ? 5 : 0;
       const bBonus = b.crowd_score && b.expert_score ? 5 : 0;
       return b.smakfynd_score + bBonus - (a.smakfynd_score + aBonus);
@@ -2171,157 +2169,25 @@ function WeeklyPick({
     return candidates[0] || null;
   }, [products]);
   if (!pick) return null;
-  const [_label, col] = getScoreInfo(pick.smakfynd_score);
-  const sbUrl = `https://www.systembolaget.se/produkt/vin/${pick.nr}`;
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 18px",
-      borderRadius: 14,
-      marginBottom: 16,
-      background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}03)`,
-      border: `1px solid ${t.wine}18`
+      marginBottom: 20
     }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 4,
-      marginBottom: 10
-    }
-  }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       fontWeight: 700,
       color: t.wine,
       textTransform: "uppercase",
-      letterSpacing: "0.1em"
+      letterSpacing: "0.1em",
+      marginBottom: 8
     }
-  }, "Veckans fynd")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 14,
-      alignItems: "center"
-    }
-  }, /*#__PURE__*/React.createElement(ProductImage, {
+  }, "Veckans fynd"), /*#__PURE__*/React.createElement(Card, {
     p: pick,
-    size: 56
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 17,
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      color: t.tx,
-      lineHeight: 1.2
-    }
-  }, pick.name), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      marginTop: 2
-    }
-  }, pick.sub, " \xB7 ", pick.country), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "baseline",
-      gap: 8,
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 18,
-      fontWeight: 700,
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      color: t.tx
-    }
-  }, pick.price, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 400,
-      color: t.txL
-    }
-  }, "kr")), pick.crowd_score && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: "#6b8cce",
-      background: "#6b8cce10",
-      padding: "2px 6px",
-      borderRadius: 100
-    }
-  }, "Crowd ", pick.crowd_score.toFixed(1)), pick.expert_score && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: "#b07d3b",
-      background: "#b07d3b10",
-      padding: "2px 6px",
-      borderRadius: 100
-    }
-  }, "Expert ", pick.expert_score.toFixed(1)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "48",
-    height: "48",
-    viewBox: "0 0 50 50"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "25",
-    r: "22",
-    fill: "#e8f0e4"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "25",
-    r: "22",
-    fill: "none",
-    stroke: "#2d6b3f",
-    strokeWidth: "2.5",
-    strokeDasharray: `${pick.smakfynd_score * 1.38} 138`,
-    strokeLinecap: "round",
-    transform: "rotate(-90 25 25)"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "25",
-    y: "30",
-    textAnchor: "middle",
-    fontFamily: "'Instrument Serif', Georgia, serif",
-    fontSize: "18",
-    fontWeight: "900",
-    fill: "#2d6b3f"
-  }, pick.smakfynd_score)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      marginTop: 10
-    }
-  }, /*#__PURE__*/React.createElement("a", {
-    href: sbUrl,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    onClick: e => {
-      e.stopPropagation();
-      track("sb_click", {
-        nr: pick.nr,
-        source: "weekly_pick"
-      });
-    },
-    style: {
-      fontSize: 12,
-      color: t.wine,
-      textDecoration: "none",
-      fontWeight: 500
-    }
-  }, "K\xF6p p\xE5 Systembolaget \u2192"), /*#__PURE__*/React.createElement("a", {
-    href: `#vin/${pick.nr}`,
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      textDecoration: "none"
-    }
-  }, "Se detaljer")));
+    rank: 1,
+    delay: 0,
+    allProducts: products
+  }));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -3733,7 +3599,7 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txL
     }
-  }, [["about", "Om"], ["method", "Metod"], ["faq", "FAQ"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
+  }, [["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`], ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
     key: k,
     onClick: () => {
       if (k === "login") {
@@ -3742,6 +3608,14 @@ function SmakfyndApp() {
       }
       if (k === "profile") {
         auth.logout();
+        return;
+      }
+      if (k === "weekly" || k === "food" || k === "picks") {
+        const el = document.getElementById("section-" + k);
+        if (el) el.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
         return;
       }
       setPanel(panel === k ? null : k);
@@ -4522,14 +4396,20 @@ function SmakfyndApp() {
       color: t.txL,
       fontSize: 13
     }
-  }, "Visar topp 50 av ", filtered.length, ". Anv\xE4nd filter f\xF6r att hitta fler.")), /*#__PURE__*/React.createElement(WeeklyPick, {
+  }, "Visar topp 50 av ", filtered.length, ". Anv\xE4nd filter f\xF6r att hitta fler.")), /*#__PURE__*/React.createElement("div", {
+    id: "section-weekly"
+  }, /*#__PURE__*/React.createElement(WeeklyPick, {
     products: products
-  }), /*#__PURE__*/React.createElement(FoodMatch, {
+  })), /*#__PURE__*/React.createElement("div", {
+    id: "section-food"
+  }, /*#__PURE__*/React.createElement(FoodMatch, {
     products: products
-  }), /*#__PURE__*/React.createElement(EditorsPicks, {
+  })), /*#__PURE__*/React.createElement("div", {
+    id: "section-picks"
+  }, /*#__PURE__*/React.createElement(EditorsPicks, {
     products: products,
     onSelect: name => setSearch(name)
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 40,
       padding: "28px 24px",

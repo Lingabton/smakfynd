@@ -181,11 +181,16 @@ function SmakfyndApp() {
             <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
           </div>
           <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
-            {[["about", "Om"], ["method", "Metod"], ["faq", "FAQ"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
-              [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
+            {[["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
+              ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }
                   if (k === "profile") { auth.logout(); return; }
+                  if (k === "weekly" || k === "food" || k === "picks") {
+                    const el = document.getElementById("section-" + k);
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    return;
+                  }
                   setPanel(panel === k ? null : k);
                 }}
                 style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400 }}
@@ -515,13 +520,13 @@ function SmakfyndApp() {
         )}
 
         {/* ═══ VECKANS FYND (below wine list) ═══ */}
-        <WeeklyPick products={products} />
+        <div id="section-weekly"><WeeklyPick products={products} /></div>
 
         {/* ═══ AI FOOD MATCH ═══ */}
-        <FoodMatch products={products} />
+        <div id="section-food"><FoodMatch products={products} /></div>
 
         {/* ═══ REDAKTIONENS VAL ═══ */}
-        <EditorsPicks products={products} onSelect={name => setSearch(name)} />
+        <div id="section-picks"><EditorsPicks products={products} onSelect={name => setSearch(name)} /></div>
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{
