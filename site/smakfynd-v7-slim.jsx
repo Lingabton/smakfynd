@@ -667,8 +667,8 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 if (w.country && p.country && w.country === p.country) sim += 5; // same country
                 if (w.region && p.region && w.region === p.region) sim += 10; // same region
                 if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
-                // Bonus for higher score (prefer better wines)
-                sim += Math.min(10, Math.max(0, w.smakfynd_score - p.smakfynd_score + 5));
+                // Strong bonus for better value (the whole point of Smakfynd)
+                sim += Math.min(25, Math.max(0, (w.smakfynd_score - p.smakfynd_score) * 3));
                 return { ...w, _sim: sim, _taste: taste };
               })
               .filter(w => w._sim >= 20) // minimum similarity threshold
@@ -682,7 +682,8 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 if (w.cat3 && p.cat3 && w.cat3 === p.cat3 && !reasons.length) reasons.push("Samma stil");
                 if (w.region && p.region && w.region === p.region) reasons.push("Samma region");
                 if (w.price < p.price - 10) reasons.push(`${Math.round(p.price - w.price)}kr billigare`);
-                if (w.smakfynd_score > p.smakfynd_score) reasons.push("Högre poäng");
+                if (w.smakfynd_score > p.smakfynd_score + 2) reasons.push("Bättre värde per krona");
+                else if (w.smakfynd_score > p.smakfynd_score) reasons.push("Högre poäng");
                 if ((w.expert_score || 0) > (p.expert_score || 0) + 0.5) reasons.push("Starkare expertstöd");
                 return { ...w, _reason: reasons.slice(0, 2).join(" · ") || "Liknande stil och prisklass" };
               });
