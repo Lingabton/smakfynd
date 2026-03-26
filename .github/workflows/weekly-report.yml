@@ -1,0 +1,48 @@
+name: Weekly Analytics Report
+
+on:
+  schedule:
+    - cron: '0 8 * * 5'  # Every Friday at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate report
+        id: report
+        run: |
+          python3 scripts/weekly_report.py > /tmp/report.txt 2>&1
+          echo "report<<REPORT_EOF" >> $GITHUB_OUTPUT
+          cat /tmp/report.txt >> $GITHUB_OUTPUT
+          echo "REPORT_EOF" >> $GITHUB_OUTPUT
+
+      - name: Create issue with report
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: 1
+          body: |
+            ## Veckorapport ${{ github.event.repository.name }}
+            ```
+            ${{ steps.report.outputs.report }}
+            ```
+        continue-on-error: true
+
+      - name: Create issue if first time
+        if: failure()
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "📊 Veckorapport — ${{ github.run_id }}"
+          content-filepath: /tmp/report.txt
+          labels: report

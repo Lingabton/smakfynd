@@ -1,0 +1,63 @@
+name: Weekly Data Update & Deploy
+
+# Runs every Monday at 06:00 UTC — fresh data for the week
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Babel
+        run: npm ci
+
+      - name: Rebuild scores & site
+        run: |
+          # Score wines (uses existing data caches)
+          python3 scripts/score_wines_v2.py
+
+          # Build app
+          python3 scripts/build_app.py
+          python3 scripts/build_slim.py
+          python3 scripts/deploy_html.py
+          python3 scripts/generate_landing_pages.py
+
+          # Validate
+          python3 scripts/validate_data.py
+          node tests/test_scoring.js
+          node tests/test_data.js
+
+          # Snapshot prices
+          python3 scripts/snapshot_prices.py || echo "No price snapshot (missing data)"
+
+          # Generate Gabriels val (with existing picks)
+          python3 scripts/gabriels_val.py || echo "Gabriels val skipped"
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "Smakfynd Bot"
+          git config user.email "bot@smakfynd.se"
+          git add docs/ site/
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Weekly update: fresh scores & landing pages [auto]"
+            git push
+          fi
