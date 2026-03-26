@@ -535,9 +535,10 @@ function Card({
   rank,
   delay,
   totalInCategory,
-  allProducts
+  allProducts,
+  autoOpen
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!autoOpen);
   const handleOpen = () => {
     const next = !open;
     setOpen(next);
@@ -3467,6 +3468,7 @@ function SmakfyndApp() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
+  const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
 
   // Load data with retry
   useEffect(() => {
@@ -3537,6 +3539,7 @@ function SmakfyndApp() {
         if (wine) {
           setSearch(wine.name);
           setCat("all");
+          setAutoOpenNr(h.openWine);
         }
       }
     };
@@ -4464,8 +4467,9 @@ function SmakfyndApp() {
     p: p,
     rank: 1,
     delay: 0,
-    allProducts: products
-  }), /*#__PURE__*/React.createElement("div", {
+    allProducts: products,
+    autoOpen: String(p.nr) === String(autoOpenNr)
+  }), !autoOpenNr && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       fontSize: 11,
@@ -4478,7 +4482,8 @@ function SmakfyndApp() {
     p: p,
     rank: i + 2,
     delay: Math.min((i + 1) * 0.04, 0.4),
-    allProducts: products
+    allProducts: products,
+    autoOpen: String(p.nr) === String(autoOpenNr)
   })), filtered.length > 50 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",

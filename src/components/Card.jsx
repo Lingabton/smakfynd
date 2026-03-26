@@ -1,6 +1,6 @@
 // src/components/Card.jsx
-function Card({ p, rank, delay, totalInCategory, allProducts }) {
-  const [open, setOpen] = useState(false);
+function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
+  const [open, setOpen] = useState(!!autoOpen);
   const handleOpen = () => {
     const next = !open;
     setOpen(next);

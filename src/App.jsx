@@ -41,6 +41,7 @@ function SmakfyndApp() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
+  const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
 
   // Load data with retry
   useEffect(() => {
@@ -113,6 +114,7 @@ function SmakfyndApp() {
         if (wine) {
           setSearch(wine.name);
           setCat("all");
+          setAutoOpenNr(h.openWine);
         }
       }
     };
@@ -526,11 +528,11 @@ function SmakfyndApp() {
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.slice(0, 1).map((p, i) => (
               <div key={p.id || i}>
-                <Card p={p} rank={1} delay={0} allProducts={products} />
-                <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>
+                <Card p={p} rank={1} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} />
+                {!autoOpenNr && <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>}
               </div>
             ))}
-            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} />)}
+            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
                 Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
