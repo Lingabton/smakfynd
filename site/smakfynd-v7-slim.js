@@ -1670,6 +1670,7 @@ function LoginModal({
   onLogin
 }) {
   const [email, setEmail] = useState("");
+  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const handleLogin = async () => {
@@ -1686,7 +1687,8 @@ function LoginModal({
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          email
+          email,
+          newsletter
         })
       });
       const data = await res.json();
@@ -1758,7 +1760,29 @@ function LoginModal({
       boxSizing: "border-box",
       marginBottom: 12
     }
-  }), error && /*#__PURE__*/React.createElement("p", {
+  }), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start",
+      marginBottom: 12,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: newsletter,
+    onChange: e => setNewsletter(e.target.checked),
+    style: {
+      marginTop: 3,
+      accentColor: t.wine
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: t.txM,
+      lineHeight: 1.5
+    }
+  }, "Ja, jag vill f\xE5 veckans b\xE4sta vink\xF6p via email")), error && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.deal,
@@ -1788,7 +1812,13 @@ function LoginModal({
       textAlign: "center",
       lineHeight: 1.5
     }
-  }, "Vi sparar bara din email och dina vinlistor. Inga l\xF6senord, ingen spam."), /*#__PURE__*/React.createElement("button", {
+  }, "Genom att logga in godk\xE4nner du v\xE5r ", /*#__PURE__*/React.createElement("a", {
+    href: "/integritet/",
+    target: "_blank",
+    style: {
+      color: t.txL
+    }
+  }, "integritetspolicy"), ". Vi sparar bara din email och dina vinlistor."), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     style: {
       display: "block",
@@ -4162,7 +4192,17 @@ function SmakfyndApp() {
     style: {
       margin: 0
     }
-  }, "Smakfynd \xE4r en oberoende tj\xE4nst och har ingen koppling till, och \xE4r inte godk\xE4nd av, Systembolaget. Vi s\xE4ljer inte alkohol.")), /*#__PURE__*/React.createElement("p", {
+  }, "Smakfynd \xE4r en oberoende tj\xE4nst och har ingen koppling till, och \xE4r inte godk\xE4nd av, Systembolaget. Vi s\xE4ljer inte alkohol."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "4px 0 0"
+    }
+  }, /*#__PURE__*/React.createElement("a", {
+    href: "/integritet/",
+    style: {
+      color: t.txF,
+      textDecoration: "none"
+    }
+  }, "Integritetspolicy"))), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 10,
       color: t.txF,

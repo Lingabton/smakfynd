@@ -3,6 +3,7 @@ const AUTH_URL = "https://smakfynd-auth.smakfynd.workers.dev";
 
 function LoginModal({ onClose, onLogin }) {
   const [email, setEmail] = useState("");
+  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,7 +15,7 @@ function LoginModal({ onClose, onLogin }) {
       const res = await fetch(AUTH_URL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, newsletter }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -51,6 +52,14 @@ function LoginModal({ onClose, onLogin }) {
           }}
         />
 
+        <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 12, cursor: "pointer" }}>
+          <input type="checkbox" checked={newsletter} onChange={e => setNewsletter(e.target.checked)}
+            style={{ marginTop: 3, accentColor: t.wine }} />
+          <span style={{ fontSize: 12, color: t.txM, lineHeight: 1.5 }}>
+            Ja, jag vill få veckans bästa vinköp via email
+          </span>
+        </label>
+
         {error && <p style={{ fontSize: 12, color: t.deal, margin: "0 0 10px" }}>{error}</p>}
 
         <button onClick={handleLogin} disabled={loading}
@@ -64,7 +73,8 @@ function LoginModal({ onClose, onLogin }) {
         </button>
 
         <p style={{ fontSize: 10, color: t.txF, margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>
-          Vi sparar bara din email och dina vinlistor. Inga lösenord, ingen spam.
+          Genom att logga in godkänner du vår <a href="/integritet/" target="_blank" style={{ color: t.txL }}>integritetspolicy</a>.
+          Vi sparar bara din email och dina vinlistor.
         </p>
 
         <button onClick={onClose} style={{

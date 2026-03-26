@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,
   name TEXT,
+  newsletter INTEGER DEFAULT 0,  -- 0=no, 1=yes
+  newsletter_consent_at TEXT,    -- when they opted in (GDPR)
   created_at TEXT DEFAULT (datetime('now')),
   last_login TEXT DEFAULT (datetime('now')),
   preferences TEXT  -- JSON: taste prefs, favorite categories, etc.

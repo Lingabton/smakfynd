@@ -49,16 +49,21 @@ export default {
           return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
         }
         const cleanEmail = email.toLowerCase().trim();
+        const { newsletter } = await request.json().catch(() => ({}));
 
         // Find or create user
         let user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
         if (!user) {
           await env.DB.prepare(
-            "INSERT INTO users (email, name) VALUES (?, ?)"
-          ).bind(cleanEmail, name || null).run();
+            "INSERT INTO users (email, name, newsletter, newsletter_consent_at) VALUES (?, ?, ?, ?)"
+          ).bind(cleanEmail, name || null, newsletter ? 1 : 0, newsletter ? new Date().toISOString() : null).run();
           user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(cleanEmail).first();
         } else {
           await env.DB.prepare("UPDATE users SET last_login = datetime('now') WHERE id = ?").bind(user.id).run();
+          if (newsletter) {
+            await env.DB.prepare("UPDATE users SET newsletter = 1, newsletter_consent_at = ? WHERE id = ? AND newsletter = 0")
+              .bind(new Date().toISOString(), user.id).run();
+          }
         }
 
         // Create token (valid 90 days)
@@ -170,6 +175,56 @@ export default {
         const user = await getUserByToken(env.DB, token);
         if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
         return new Response(JSON.stringify({ user: { id: user.id, email: user.email, name: user.name, created_at: user.created_at } }), { headers });
+      }
+
+      // POST /unsubscribe — opt out of newsletter
+      if (request.method === "POST" && url.pathname === "/unsubscribe") {
+        const { token, email } = await request.json();
+        // Allow unsubscribe by token or email (for email links)
+        let user = token ? await getUserByToken(env.DB, token) : null;
+        if (!user && email) {
+          user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email.toLowerCase().trim()).first();
+        }
+        if (!user) return new Response(JSON.stringify({ error: "Användare hittades inte" }), { status: 404, headers });
+
+        await env.DB.prepare("UPDATE users SET newsletter = 0 WHERE id = ?").bind(user.id).run();
+        return new Response(JSON.stringify({ ok: true, message: "Avregistrerad från nyhetsbrev" }), { headers });
+      }
+
+      // GET /unsubscribe?email=X — simple link for email footers
+      if (request.method === "GET" && url.pathname === "/unsubscribe") {
+        const email = url.searchParams.get("email");
+        if (email) {
+          await env.DB.prepare("UPDATE users SET newsletter = 0 WHERE email = ?").bind(email.toLowerCase().trim()).run();
+        }
+        return new Response(
+          '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Avregistrerad</h2><p>Du kommer inte längre få nyhetsbrev från Smakfynd.</p><a href="https://smakfynd.se">Tillbaka till Smakfynd</a></body></html>',
+          { headers: { ...cors, "Content-Type": "text/html" } }
+        );
+      }
+
+      // POST /delete-account — GDPR: delete all user data
+      if (request.method === "POST" && url.pathname === "/delete-account") {
+        const { token } = await request.json();
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+
+        // Delete everything
+        await env.DB.batch([
+          env.DB.prepare("DELETE FROM saved_wines WHERE user_id = ?").bind(user.id),
+          env.DB.prepare("DELETE FROM user_tokens WHERE user_id = ?").bind(user.id),
+          env.DB.prepare("DELETE FROM users WHERE id = ?").bind(user.id),
+        ]);
+
+        return new Response(JSON.stringify({ ok: true, message: "Konto och all data raderad" }), { headers });
+      }
+
+      // GET /subscribers — list newsletter subscribers (admin)
+      if (request.method === "GET" && url.pathname === "/subscribers") {
+        const result = await env.DB.prepare(
+          "SELECT email, newsletter_consent_at FROM users WHERE newsletter = 1 ORDER BY newsletter_consent_at DESC"
+        ).all();
+        return new Response(JSON.stringify({ count: result.results.length, subscribers: result.results }), { headers });
       }
 
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });

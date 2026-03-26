@@ -566,6 +566,7 @@ function SmakfyndApp() {
           <div style={{ fontSize: 10, color: t.txF, margin: "0 0 10px", lineHeight: 1.7 }}>
             <p style={{ margin: "0 0 4px" }}>Uppdaterad mars 2026 · Produktdata från Systembolagets öppna sortiment</p>
             <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol.</p>
+            <p style={{ margin: "4px 0 0" }}><a href="/integritet/" style={{ color: t.txF, textDecoration: "none" }}>Integritetspolicy</a></p>
           </div>
           <p style={{ fontSize: 10, color: t.txF, fontStyle: "italic" }}>Njut med måtta.</p>
           <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
