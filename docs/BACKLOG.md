@@ -55,6 +55,7 @@
 - [ ] Prissegmentering på landningssidor (budget, mellanklass, premium)
 
 ### Hög insats
+- [ ] Inloggningssystem (enkel auth — email/Google) för att samla användardata, spara viner cross-device, e-postutskick
 - [ ] Streckkods-scanner i butikläge
 - [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
 - [ ] Årgångsinformation på vinkort
