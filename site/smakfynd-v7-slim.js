@@ -1661,6 +1661,240 @@ function AIQuestion({
 }
 
 // ════════════════════════════════════════════════════════════
+// components/LoginModal.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/LoginModal.jsx
+const AUTH_URL = "https://smakfynd-auth.smakfynd.workers.dev";
+function LoginModal({
+  onClose,
+  onLogin
+}) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const handleLogin = async () => {
+    if (!email.includes("@")) {
+      setError("Ange en giltig email");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(AUTH_URL + "/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      // Save token
+      try {
+        localStorage.setItem("sf_token", data.token);
+        localStorage.setItem("sf_user", JSON.stringify(data.user));
+      } catch (e) {}
+      onLogin(data);
+    } catch (e) {
+      setError(e.message || "Kunde inte logga in");
+    }
+    setLoading(false);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(30,23,16,0.5)",
+      zIndex: 1000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20
+    },
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      background: t.card,
+      borderRadius: 20,
+      padding: "32px 28px",
+      maxWidth: 380,
+      width: "100%",
+      boxShadow: "0 20px 60px rgba(30,23,16,0.2)",
+      animation: "scaleIn 0.2s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: "0 0 6px",
+      fontSize: 22,
+      fontFamily: "'Instrument Serif', serif",
+      fontWeight: 400,
+      color: t.tx
+    }
+  }, "Logga in"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 16px",
+      fontSize: 13,
+      color: t.txL,
+      lineHeight: 1.5
+    }
+  }, "Spara dina viner och synka mellan enheter. Inget l\xF6senord \u2014 bara din email."), /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    placeholder: "din@email.se",
+    onKeyDown: e => e.key === "Enter" && handleLogin(),
+    style: {
+      width: "100%",
+      padding: "14px 16px",
+      borderRadius: 12,
+      border: `1px solid ${t.bdr}`,
+      background: t.bg,
+      fontSize: 14,
+      color: t.tx,
+      outline: "none",
+      boxSizing: "border-box",
+      marginBottom: 12
+    }
+  }), error && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: t.deal,
+      margin: "0 0 10px"
+    }
+  }, error), /*#__PURE__*/React.createElement("button", {
+    onClick: handleLogin,
+    disabled: loading,
+    style: {
+      width: "100%",
+      padding: "14px",
+      borderRadius: 12,
+      border: "none",
+      background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: 600,
+      cursor: loading ? "wait" : "pointer",
+      fontFamily: "inherit",
+      opacity: loading ? 0.7 : 1
+    }
+  }, loading ? "Loggar in..." : "Logga in"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 10,
+      color: t.txF,
+      margin: "12px 0 0",
+      textAlign: "center",
+      lineHeight: 1.5
+    }
+  }, "Vi sparar bara din email och dina vinlistor. Inga l\xF6senord, ingen spam."), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      display: "block",
+      margin: "12px auto 0",
+      fontSize: 12,
+      color: t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      textDecoration: "underline"
+    }
+  }, "Avbryt")));
+}
+function useAuth() {
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("sf_user"));
+    } catch (e) {
+      return null;
+    }
+  });
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem("sf_token");
+    } catch (e) {
+      return null;
+    }
+  });
+  const login = data => {
+    setUser(data.user);
+    setToken(data.token);
+  };
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    try {
+      localStorage.removeItem("sf_token");
+      localStorage.removeItem("sf_user");
+    } catch (e) {}
+  };
+
+  // Sync saved wines on login
+  const syncWines = async localWines => {
+    if (!token) return localWines;
+    try {
+      const res = await fetch(AUTH_URL + "/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          token,
+          wines: localWines
+        })
+      });
+      const data = await res.json();
+      if (data.wines) return data.wines;
+    } catch (e) {}
+    return localWines;
+  };
+
+  // Save wine to server
+  const saveToServer = (nr, list) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        list
+      }),
+      keepalive: true
+    }).catch(() => {});
+  };
+
+  // Remove wine from server
+  const removeFromServer = (nr, list) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/remove", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        list
+      }),
+      keepalive: true
+    }).catch(() => {});
+  };
+  return {
+    user,
+    token,
+    login,
+    logout,
+    syncWines,
+    saveToServer,
+    removeFromServer
+  };
+}
+
+// ════════════════════════════════════════════════════════════
 // components/TrustBox.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/TrustBox.jsx
@@ -2820,6 +3054,8 @@ function parseHash() {
 }
 function SmakfyndApp() {
   const sv = useSaved();
+  const auth = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
   const [storeMode, setStoreMode] = useState(false);
@@ -3030,15 +3266,25 @@ function SmakfyndApp() {
       color: t.txL,
       marginBottom: 6
     }
-  }, [["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
+  }, [["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`], [auth.user ? "profile" : "login", auth.user ? auth.user.email.split("@")[0] : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
     key: k,
-    onClick: () => setPanel(panel === k ? null : k),
+    onClick: () => {
+      if (k === "login") {
+        setShowLogin(true);
+        return;
+      }
+      if (k === "profile") {
+        auth.logout();
+        return;
+      }
+      setPanel(panel === k ? null : k);
+    },
     style: {
       cursor: "pointer",
       borderBottom: panel === k ? `1.5px solid ${t.wine}` : "1.5px solid transparent",
       paddingBottom: 2,
       transition: "all 0.2s",
-      color: panel === k ? t.wine : t.txL
+      color: panel === k ? t.wine : k === "login" ? t.wine : t.txL
     }
   }, l)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3938,5 +4184,26 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txM
     }
-  }, "\u2191 Tillbaka till toppen")))));
+  }, "\u2191 Tillbaka till toppen")))), showLogin && /*#__PURE__*/React.createElement(LoginModal, {
+    onClose: () => setShowLogin(false),
+    onLogin: data => {
+      auth.login(data);
+      setShowLogin(false);
+      // Sync local wines to server
+      if (data.wines && Object.keys(data.wines).length > 0) {
+        // Server has wines — merge into local
+        const merged = {
+          ...sv.data
+        };
+        for (const [nr, lists] of Object.entries(data.wines)) {
+          merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
+        }
+        try {
+          localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged));
+        } catch (e) {}
+      }
+      // Sync local to server
+      auth.syncWines(sv.data);
+    }
+  }));
 }

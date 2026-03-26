@@ -1,0 +1,11 @@
+name = "smakfynd-auth"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "smakfynd-users"
+database_id = "" # npx wrangler d1 create smakfynd-users
+
+[vars]
+ALLOWED_ORIGIN = "*"

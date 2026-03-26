@@ -24,6 +24,8 @@ function parseHash() {
 
 function SmakfyndApp() {
   const sv = useSaved();
+  const auth = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
   const [storeMode, setStoreMode] = useState(false);
@@ -192,9 +194,14 @@ function SmakfyndApp() {
 
         {/* Nav links */}
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
-          {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`]].map(([k, l]) => (
-            <span key={k} onClick={() => setPanel(panel === k ? null : k)}
-              style={{ cursor: "pointer", borderBottom: panel === k ? `1.5px solid ${t.wine}` : "1.5px solid transparent", paddingBottom: 2, transition: "all 0.2s", color: panel === k ? t.wine : t.txL }}
+          {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`],
+            [auth.user ? "profile" : "login", auth.user ? auth.user.email.split("@")[0] : "Logga in"]].map(([k, l]) => (
+            <span key={k} onClick={() => {
+                if (k === "login") { setShowLogin(true); return; }
+                if (k === "profile") { auth.logout(); return; }
+                setPanel(panel === k ? null : k);
+              }}
+              style={{ cursor: "pointer", borderBottom: panel === k ? `1.5px solid ${t.wine}` : "1.5px solid transparent", paddingBottom: 2, transition: "all 0.2s", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL) }}
             >{l}</span>
           ))}
         </div>
@@ -568,6 +575,21 @@ function SmakfyndApp() {
         </footer>
       </div>
     </div>
+    {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={(data) => {
+      auth.login(data);
+      setShowLogin(false);
+      // Sync local wines to server
+      if (data.wines && Object.keys(data.wines).length > 0) {
+        // Server has wines — merge into local
+        const merged = { ...sv.data };
+        for (const [nr, lists] of Object.entries(data.wines)) {
+          merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
+        }
+        try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged)); } catch(e) {}
+      }
+      // Sync local to server
+      auth.syncWines(sv.data);
+    }} />}
     </SavedContext.Provider>
   );
 }
