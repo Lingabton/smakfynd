@@ -163,16 +163,57 @@ function ProductImage({ p, size = 52, style: extraStyle = {} }) {
 }
 
 // Saved wines hook
+const LISTS = [
+  { k: "favoriter", l: "Favoriter", i: "♥" },
+  { k: "att-testa", l: "Att testa", i: "🔖" },
+  { k: "budget", l: "Bra köp", i: "💰" },
+  { k: "middag", l: "Middag", i: "🍽" },
+  { k: "helg", l: "Helg", i: "🥂" },
+  { k: "fest", l: "Fest", i: "🎉" },
+];
+
 function useSaved() {
-  const [saved, setSaved] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("smakfynd_saved") || "[]"); } catch(e) { return []; }
+  const [data, setData] = useState(() => {
+    try {
+      const raw = localStorage.getItem("smakfynd_saved_v2");
+      if (raw) return JSON.parse(raw);
+      // Migrate from old format (flat array → favoriter list)
+      const old = JSON.parse(localStorage.getItem("smakfynd_saved") || "[]");
+      if (old.length) {
+        const migrated = {};
+        old.forEach(nr => { migrated[nr] = ["favoriter"]; });
+        return migrated;
+      }
+      return {};
+    } catch(e) { return {}; }
   });
-  const toggle = (nr) => {
-    const next = saved.includes(nr) ? saved.filter(x => x !== nr) : [...saved, nr];
-    setSaved(next);
-    try { localStorage.setItem("smakfynd_saved", JSON.stringify(next)); } catch(e) {}
+
+  const save = (next) => {
+    setData(next);
+    try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(next)); } catch(e) {}
   };
-  return { saved, toggle, isSaved: (nr) => saved.includes(nr), count: saved.length };
+
+  const toggle = (nr, list = "favoriter") => {
+    const next = { ...data };
+    const lists = next[nr] || [];
+    if (lists.includes(list)) {
+      const filtered = lists.filter(l => l !== list);
+      if (filtered.length === 0) delete next[nr];
+      else next[nr] = filtered;
+    } else {
+      next[nr] = [...lists, list];
+    }
+    save(next);
+  };
+
+  const isSaved = (nr) => !!(data[nr] && data[nr].length > 0);
+  const isInList = (nr, list) => (data[nr] || []).includes(list);
+  const getLists = (nr) => data[nr] || [];
+  const allSaved = Object.keys(data).filter(nr => data[nr] && data[nr].length > 0);
+  const inList = (list) => Object.keys(data).filter(nr => (data[nr] || []).includes(list));
+  const count = allSaved.length;
+
+  return { data, toggle, isSaved, isInList, getLists, allSaved, inList, count };
 }
 
 // Global saved state (shared between components)
@@ -317,18 +358,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
           >
             Systembolaget <span style={{ fontSize: 9 }}>↗</span>
           </a>
-          {sv && (
-            <button onClick={e => { e.stopPropagation(); sv.toggle(p.nr || p.id); }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                fontSize: 12, color: sv.isSaved(p.nr || p.id) ? t.wine : t.txL,
-                background: "none", border: "none", cursor: "pointer", padding: "2px 0",
-                fontFamily: "inherit", transition: "all 0.2s",
-              }}>
-              <span style={{ fontSize: 15, lineHeight: 1 }}>{sv.isSaved(p.nr || p.id) ? "♥" : "♡"}</span>
-              <span style={{ fontWeight: sv.isSaved(p.nr || p.id) ? 600 : 400 }}>{sv.isSaved(p.nr || p.id) ? "Sparad" : "Spara"}</span>
-            </button>
-          )}
+          {sv && <SaveButton nr={p.nr || p.id} sv={sv} />}
           <button onClick={e => {
               e.stopPropagation();
               const url = `https://smakfynd.se/#vin/${p.nr}`;
@@ -568,6 +598,55 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
             );
           })()}
 
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SaveButton({ nr, sv }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const saved = sv.isSaved(nr);
+  const lists = sv.getLists(nr);
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); } }}
+        onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: 4,
+          fontSize: 12, color: saved ? t.wine : t.txL,
+          background: "none", border: "none", cursor: "pointer", padding: "2px 0",
+          fontFamily: "inherit", transition: "all 0.2s",
+        }}>
+        <span style={{ fontSize: 15, lineHeight: 1 }}>{saved ? "♥" : "♡"}</span>
+        <span style={{ fontWeight: saved ? 600 : 400 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
+      </button>
+      {menuOpen && (
+        <div onClick={e => e.stopPropagation()} style={{
+          position: "absolute", bottom: "100%", left: 0, marginBottom: 6,
+          background: t.card, border: `1px solid ${t.bdr}`, borderRadius: 12,
+          boxShadow: "0 8px 24px rgba(30,23,16,0.12)", padding: "6px 0",
+          zIndex: 100, minWidth: 160,
+        }}>
+          <div style={{ padding: "6px 14px 4px", fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.08em" }}>Spara till</div>
+          {LISTS.map(list => (
+            <button key={list.k} onClick={e => { e.stopPropagation(); sv.toggle(nr, list.k); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 8, width: "100%",
+                padding: "8px 14px", border: "none", background: sv.isInList(nr, list.k) ? t.wineL : "transparent",
+                cursor: "pointer", fontFamily: "inherit", fontSize: 13,
+                color: sv.isInList(nr, list.k) ? t.wine : t.txM, textAlign: "left",
+              }}>
+              <span style={{ fontSize: 14, width: 20, textAlign: "center" }}>{list.i}</span>
+              <span>{list.l}</span>
+              {sv.isInList(nr, list.k) && <span style={{ marginLeft: "auto", fontSize: 12 }}>✓</span>}
+            </button>
+          ))}
+          <div style={{ borderTop: `1px solid ${t.bdrL}`, margin: "4px 0" }} />
+          <button onClick={e => { e.stopPropagation(); setMenuOpen(false); }}
+            style={{ width: "100%", padding: "6px 14px", border: "none", background: "transparent", cursor: "pointer", fontFamily: "inherit", fontSize: 11, color: t.txL, textAlign: "center" }}>
+            Stäng
+          </button>
         </div>
       )}
     </div>
@@ -1239,8 +1318,9 @@ function SmakfyndApp() {
   const clearAll = () => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); setSelCountry(null); setSelFoods([]); setShowBest(false); };
 
   const savedWines = useMemo(() => {
-    return products.filter(p => sv.saved.includes(p.nr || p.id)).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
-  }, [products, sv.saved]);
+    return products.filter(p => sv.isSaved(p.nr || p.id)).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
+  }, [products, sv.data]);
+  const [savedListFilter, setSavedListFilter] = useState("all");
 
   return (
     <SavedContext.Provider value={sv}>
@@ -1302,7 +1382,7 @@ function SmakfyndApp() {
 
         {/* Nav links */}
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
-          {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Min lista (${sv.count})`]].map(([k, l]) => (
+          {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`]].map(([k, l]) => (
             <span key={k} onClick={() => setPanel(panel === k ? null : k)}
               style={{ cursor: "pointer", borderBottom: panel === k ? `1.5px solid ${t.wine}` : "1.5px solid transparent", paddingBottom: 2, transition: "all 0.2s", color: panel === k ? t.wine : t.txL }}
             >{l}</span>
@@ -1406,13 +1486,34 @@ function SmakfyndApp() {
 
         {panel === "saved" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
-            <h2 style={{ margin: "0 0 4px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Sparade viner</h2>
-            <p style={{ margin: "0 0 14px", fontSize: 12, color: t.txL }}>Dina favoriter sparas i den här webbläsaren.</p>
+            <h2 style={{ margin: "0 0 4px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Mina viner</h2>
+            <p style={{ margin: "0 0 12px", fontSize: 12, color: t.txL }}>Sparas i webbläsaren. Logga in (kommer snart) för att synka.</p>
+
+            {/* List tabs */}
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 14 }}>
+              <button onClick={() => setSavedListFilter("all")}
+                style={{ ...pill(savedListFilter === "all", t.wine), fontSize: 12, padding: "6px 12px" }}>
+                Alla ({sv.count})
+              </button>
+              {LISTS.map(list => {
+                const cnt = sv.inList(list.k).length;
+                if (cnt === 0) return null;
+                return (
+                  <button key={list.k} onClick={() => setSavedListFilter(list.k)}
+                    style={{ ...pill(savedListFilter === list.k, t.wine), fontSize: 12, padding: "6px 12px" }}>
+                    {list.i} {list.l} ({cnt})
+                  </button>
+                );
+              })}
+            </div>
+
             {savedWines.length === 0 ? (
               <p style={{ fontSize: 14, color: t.txM, fontStyle: "italic" }}>Inga sparade viner ännu. Tryck ♡ på ett vin för att spara det.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {savedWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
+                {savedWines
+                  .filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter))
+                  .map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
               </div>
             )}
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>

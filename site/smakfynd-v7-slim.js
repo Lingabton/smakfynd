@@ -310,26 +310,84 @@ function ProductImage({
 }
 
 // Saved wines hook
+const LISTS = [{
+  k: "favoriter",
+  l: "Favoriter",
+  i: "♥"
+}, {
+  k: "att-testa",
+  l: "Att testa",
+  i: "🔖"
+}, {
+  k: "budget",
+  l: "Bra köp",
+  i: "💰"
+}, {
+  k: "middag",
+  l: "Middag",
+  i: "🍽"
+}, {
+  k: "helg",
+  l: "Helg",
+  i: "🥂"
+}, {
+  k: "fest",
+  l: "Fest",
+  i: "🎉"
+}];
 function useSaved() {
-  const [saved, setSaved] = useState(() => {
+  const [data, setData] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("smakfynd_saved") || "[]");
+      const raw = localStorage.getItem("smakfynd_saved_v2");
+      if (raw) return JSON.parse(raw);
+      // Migrate from old format (flat array → favoriter list)
+      const old = JSON.parse(localStorage.getItem("smakfynd_saved") || "[]");
+      if (old.length) {
+        const migrated = {};
+        old.forEach(nr => {
+          migrated[nr] = ["favoriter"];
+        });
+        return migrated;
+      }
+      return {};
     } catch (e) {
-      return [];
+      return {};
     }
   });
-  const toggle = nr => {
-    const next = saved.includes(nr) ? saved.filter(x => x !== nr) : [...saved, nr];
-    setSaved(next);
+  const save = next => {
+    setData(next);
     try {
-      localStorage.setItem("smakfynd_saved", JSON.stringify(next));
+      localStorage.setItem("smakfynd_saved_v2", JSON.stringify(next));
     } catch (e) {}
   };
+  const toggle = (nr, list = "favoriter") => {
+    const next = {
+      ...data
+    };
+    const lists = next[nr] || [];
+    if (lists.includes(list)) {
+      const filtered = lists.filter(l => l !== list);
+      if (filtered.length === 0) delete next[nr];else next[nr] = filtered;
+    } else {
+      next[nr] = [...lists, list];
+    }
+    save(next);
+  };
+  const isSaved = nr => !!(data[nr] && data[nr].length > 0);
+  const isInList = (nr, list) => (data[nr] || []).includes(list);
+  const getLists = nr => data[nr] || [];
+  const allSaved = Object.keys(data).filter(nr => data[nr] && data[nr].length > 0);
+  const inList = list => Object.keys(data).filter(nr => (data[nr] || []).includes(list));
+  const count = allSaved.length;
   return {
-    saved,
+    data,
     toggle,
-    isSaved: nr => saved.includes(nr),
-    count: saved.length
+    isSaved,
+    isInList,
+    getLists,
+    allSaved,
+    inList,
+    count
   };
 }
 
@@ -647,34 +705,10 @@ function Card({
     style: {
       fontSize: 9
     }
-  }, "\u2197")), sv && /*#__PURE__*/React.createElement("button", {
-    onClick: e => {
-      e.stopPropagation();
-      sv.toggle(p.nr || p.id);
-    },
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
-      fontSize: 12,
-      color: sv.isSaved(p.nr || p.id) ? t.wine : t.txL,
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: "2px 0",
-      fontFamily: "inherit",
-      transition: "all 0.2s"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 15,
-      lineHeight: 1
-    }
-  }, sv.isSaved(p.nr || p.id) ? "♥" : "♡"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: sv.isSaved(p.nr || p.id) ? 600 : 400
-    }
-  }, sv.isSaved(p.nr || p.id) ? "Sparad" : "Spara")), /*#__PURE__*/React.createElement("button", {
+  }, "\u2197")), sv && /*#__PURE__*/React.createElement(SaveButton, {
+    nr: p.nr || p.id,
+    sv: sv
+  }), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       const url = `https://smakfynd.se/#vin/${p.nr}`;
@@ -1266,6 +1300,131 @@ function Card({
       }
     }, "kr"))))));
   })()));
+}
+function SaveButton({
+  nr,
+  sv
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const saved = sv.isSaved(nr);
+  const lists = sv.getLists(nr);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      display: "inline-block"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      if (saved) {
+        setMenuOpen(!menuOpen);
+      } else {
+        sv.toggle(nr, "favoriter");
+      }
+    },
+    onContextMenu: e => {
+      e.preventDefault();
+      e.stopPropagation();
+      setMenuOpen(!menuOpen);
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 12,
+      color: saved ? t.wine : t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "2px 0",
+      fontFamily: "inherit",
+      transition: "all 0.2s"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      lineHeight: 1
+    }
+  }, saved ? "♥" : "♡"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: saved ? 600 : 400
+    }
+  }, saved ? lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor` : "Spara")), menuOpen && /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      position: "absolute",
+      bottom: "100%",
+      left: 0,
+      marginBottom: 6,
+      background: t.card,
+      border: `1px solid ${t.bdr}`,
+      borderRadius: 12,
+      boxShadow: "0 8px 24px rgba(30,23,16,0.12)",
+      padding: "6px 0",
+      zIndex: 100,
+      minWidth: 160
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "6px 14px 4px",
+      fontSize: 10,
+      color: t.txL,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Spara till"), LISTS.map(list => /*#__PURE__*/React.createElement("button", {
+    key: list.k,
+    onClick: e => {
+      e.stopPropagation();
+      sv.toggle(nr, list.k);
+    },
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      width: "100%",
+      padding: "8px 14px",
+      border: "none",
+      background: sv.isInList(nr, list.k) ? t.wineL : "transparent",
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 13,
+      color: sv.isInList(nr, list.k) ? t.wine : t.txM,
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      width: 20,
+      textAlign: "center"
+    }
+  }, list.i), /*#__PURE__*/React.createElement("span", null, list.l), sv.isInList(nr, list.k) && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: "auto",
+      fontSize: 12
+    }
+  }, "\u2713"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `1px solid ${t.bdrL}`,
+      margin: "4px 0"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      setMenuOpen(false);
+    },
+    style: {
+      width: "100%",
+      padding: "6px 14px",
+      border: "none",
+      background: "transparent",
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 11,
+      color: t.txL,
+      textAlign: "center"
+    }
+  }, "St\xE4ng")));
 }
 function AIQuestion({
   aiResult,
@@ -2536,8 +2695,9 @@ function SmakfyndApp() {
     setShowBest(false);
   };
   const savedWines = useMemo(() => {
-    return products.filter(p => sv.saved.includes(p.nr || p.id)).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
-  }, [products, sv.saved]);
+    return products.filter(p => sv.isSaved(p.nr || p.id)).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
+  }, [products, sv.data]);
+  const [savedListFilter, setSavedListFilter] = useState("all");
   return /*#__PURE__*/React.createElement(SavedContext.Provider, {
     value: sv
   }, /*#__PURE__*/React.createElement("link", {
@@ -2655,7 +2815,7 @@ function SmakfyndApp() {
       color: t.txL,
       marginBottom: 6
     }
-  }, [["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Min lista (${sv.count})`]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
+  }, [["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
     key: k,
     onClick: () => setPanel(panel === k ? null : k),
     style: {
@@ -2924,13 +3084,39 @@ function SmakfyndApp() {
       fontWeight: 400,
       color: t.tx
     }
-  }, "Sparade viner"), /*#__PURE__*/React.createElement("p", {
+  }, "Mina viner"), /*#__PURE__*/React.createElement("p", {
     style: {
-      margin: "0 0 14px",
+      margin: "0 0 12px",
       fontSize: 12,
       color: t.txL
     }
-  }, "Dina favoriter sparas i den h\xE4r webbl\xE4saren."), savedWines.length === 0 ? /*#__PURE__*/React.createElement("p", {
+  }, "Sparas i webbl\xE4saren. Logga in (kommer snart) f\xF6r att synka."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSavedListFilter("all"),
+    style: {
+      ...pill(savedListFilter === "all", t.wine),
+      fontSize: 12,
+      padding: "6px 12px"
+    }
+  }, "Alla (", sv.count, ")"), LISTS.map(list => {
+    const cnt = sv.inList(list.k).length;
+    if (cnt === 0) return null;
+    return /*#__PURE__*/React.createElement("button", {
+      key: list.k,
+      onClick: () => setSavedListFilter(list.k),
+      style: {
+        ...pill(savedListFilter === list.k, t.wine),
+        fontSize: 12,
+        padding: "6px 12px"
+      }
+    }, list.i, " ", list.l, " (", cnt, ")");
+  })), savedWines.length === 0 ? /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 14,
       color: t.txM,
@@ -2942,7 +3128,7 @@ function SmakfyndApp() {
       flexDirection: "column",
       gap: 8
     }
-  }, savedWines.map((p, i) => /*#__PURE__*/React.createElement(Card, {
+  }, savedWines.filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter)).map((p, i) => /*#__PURE__*/React.createElement(Card, {
     key: p.id || i,
     p: p,
     rank: i + 1,
