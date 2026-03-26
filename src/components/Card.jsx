@@ -380,9 +380,9 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                 <div style={{ fontSize: 11, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {similar.map((w, i) => (
-                    <a key={i} href={`https://www.systembolaget.se/produkt/vin/${w.nr}`} target="_blank" rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s" }}
+                    <div key={i}
+                      onClick={e => { e.stopPropagation(); window.location.hash = `vin/${w.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s", cursor: "pointer" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
                       onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
                     >
@@ -403,7 +403,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
                       <div style={{ fontSize: 14, fontWeight: 700, color: t.tx, flexShrink: 0, fontFamily: "'Instrument Serif', serif" }}>
                         {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </div>
               </div>

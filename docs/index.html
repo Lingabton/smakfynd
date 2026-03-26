@@ -1523,12 +1523,16 @@ function Card({
         flexDirection: "column",
         gap: 6
       }
-    }, similar.map((w, i) => /*#__PURE__*/React.createElement("a", {
+    }, similar.map((w, i) => /*#__PURE__*/React.createElement("div", {
       key: i,
-      href: `https://www.systembolaget.se/produkt/vin/${w.nr}`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-      onClick: e => e.stopPropagation(),
+      onClick: e => {
+        e.stopPropagation();
+        window.location.hash = `vin/${w.nr}`;
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      },
       style: {
         display: "flex",
         alignItems: "center",
@@ -1538,7 +1542,8 @@ function Card({
         background: t.bg,
         border: `1px solid ${t.bdrL}`,
         textDecoration: "none",
-        transition: "border-color 0.2s"
+        transition: "border-color 0.2s",
+        cursor: "pointer"
       },
       onMouseEnter: e => e.currentTarget.style.borderColor = t.wine + "40",
       onMouseLeave: e => e.currentTarget.style.borderColor = t.bdrL
@@ -3496,6 +3501,22 @@ function SmakfyndApp() {
       setOpenWineNr(null);
     }
   }, [openWineNr, products]);
+
+  // Listen for hash changes (from similar wine clicks)
+  useEffect(() => {
+    const onHash = () => {
+      const h = parseHash();
+      if (h.openWine && products.length > 0) {
+        const wine = products.find(p => String(p.nr) === String(h.openWine));
+        if (wine) {
+          setSearch(wine.name);
+          setCat("all");
+        }
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [products]);
 
   // Update hash on category change
   useEffect(() => {

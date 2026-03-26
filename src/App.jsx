@@ -104,6 +104,22 @@ function SmakfyndApp() {
     }
   }, [openWineNr, products]);
 
+  // Listen for hash changes (from similar wine clicks)
+  useEffect(() => {
+    const onHash = () => {
+      const h = parseHash();
+      if (h.openWine && products.length > 0) {
+        const wine = products.find(p => String(p.nr) === String(h.openWine));
+        if (wine) {
+          setSearch(wine.name);
+          setCat("all");
+        }
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [products]);
+
   // Update hash on category change
   useEffect(() => {
     const catMap = { Rött: 'rott', Vitt: 'vitt', Rosé: 'rose', Mousserande: 'bubbel', all: 'alla' };
