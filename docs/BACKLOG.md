@@ -45,6 +45,11 @@
 - [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
 - [ ] Vinpriser.se deep scrape (594 prissänkta viner)
 
+## Att konfigurera
+- [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no` (Dashboard → smakfynd.se → Email → Email Routing)
+- [ ] Fyll i organisationsnummer i `/integritet/` (`[ORG-NR]`)
+- [ ] Deploya auth worker: `cd workers/auth && npx wrangler d1 create smakfynd-users` → fyll i ID → `npx wrangler d1 execute smakfynd-users --remote --file=schema.sql && npx wrangler deploy`
+
 ## Data — rutiner
 - [ ] Kör `python3 scripts/scrape_winesearcher.py --retry-errors` efter varje skrapningssession
 - [ ] Kör `python3 scripts/find_gaps.py` veckovis
