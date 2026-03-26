@@ -11,6 +11,45 @@
 // Data: loaded async from wines.json, or embedded at build time as fallback
 const DATA_URL = "wines.json";
 
+// Analytics
+const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+const _sid = (() => {
+  try {
+    let s = sessionStorage.getItem("sf_sid");
+    if (!s) { s = Math.random().toString(36).slice(2); sessionStorage.setItem("sf_sid", s); }
+    return s;
+  } catch(e) { return "anon"; }
+})();
+function track(event, data) {
+  try {
+    const device = window.innerWidth < 768 ? "mobile" : "desktop";
+    fetch(ANALYTICS_URL + "/event", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, event, wine_nr: data?.nr, data, page: location.hash || "/", device, referrer: document.referrer }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+function trackSearch(query, count, clickedNr) {
+  try {
+    fetch(ANALYTICS_URL + "/search", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, query, results_count: count, clicked_nr: clickedNr }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+function trackAI(meal, response, latencyMs) {
+  try {
+    const wines = (response?.courses || []).flatMap(c => c.wines || []).map(w => w.nr).filter(Boolean).join(",");
+    fetch(ANALYTICS_URL + "/ai", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, meal, response, mode: response?.mode, wines_suggested: wines, latency_ms: latencyMs, model: "llama-3.1-70b" }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 const SAMPLE_PRODUCTS = []; // Data loaded async from wines.json
 
 const CATS = [
@@ -251,6 +290,11 @@ const SavedContext = React.createContext(null);
 // src/components/Card.jsx
 function Card({ p, rank, delay, totalInCategory, allProducts }) {
   const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    const next = !open;
+    setOpen(next);
+    if (next) track("click", { nr: p.nr, name: p.name, score: p.smakfynd_score, rank });
+  };
   const sv = React.useContext(SavedContext);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾" })[p.category] || "✦";
   const s100 = p.smakfynd_score;
@@ -264,7 +308,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
 
   return (
     <div
-      onClick={() => setOpen(!open)}
+      onClick={handleOpen}
       style={{
         background: t.card, borderRadius: 16,
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
@@ -377,7 +421,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
         padding: "0 18px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
             style={{
               display: "inline-flex", alignItems: "center", gap: 4,
               fontSize: 11, color: t.txM, textDecoration: "none",
@@ -391,6 +435,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} />}
           <button onClick={e => {
               e.stopPropagation();
+              track("share", { nr: p.nr, name: p.name });
               const url = `https://smakfynd.se/#vin/${p.nr}`;
               const text = `${p.name} ${p.sub || ''} — ${p.smakfynd_score}/100 på Smakfynd (${p.price}kr)`;
               if (navigator.share) {
@@ -644,7 +689,7 @@ function SaveButton({ nr, sv }) {
   const lists = sv.getLists(nr);
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); } }}
+      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
           display: "inline-flex", alignItems: "center", gap: 4,
@@ -875,6 +920,7 @@ function FoodMatch({ products }) {
   const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
     setError(null);
+    const t0 = Date.now();
 
     try {
       let data;
@@ -894,6 +940,7 @@ function FoodMatch({ products }) {
       if (data.error) throw new Error(data.error);
 
       setAiResult(data);
+      trackAI(userMessage, data, Date.now() - t0);
 
       if (data.mode === "recommend" && data.courses) {
         setCourseResults(matchWinesForCourses(data.courses, products));
@@ -1347,6 +1394,13 @@ function SmakfyndApp() {
     }
   }, [cat]);
 
+  // Track searches (debounced)
+  useEffect(() => {
+    if (!search || search.length < 2) return;
+    const timer = setTimeout(() => trackSearch(search, filtered?.length || 0), 1500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -1630,7 +1684,7 @@ function SmakfyndApp() {
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
           {CATS.map(ct => (
-            <button key={ct.k} onClick={() => setCat(ct.k)} style={{
+            <button key={ct.k} onClick={() => { setCat(ct.k); track("filter", { type: "category", value: ct.k }); }} style={{
               ...pill(cat === ct.k),
               display: "flex", alignItems: "center", gap: 5,
             }}>

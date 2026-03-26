@@ -1,6 +1,11 @@
 // src/components/Card.jsx
 function Card({ p, rank, delay, totalInCategory, allProducts }) {
   const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    const next = !open;
+    setOpen(next);
+    if (next) track("click", { nr: p.nr, name: p.name, score: p.smakfynd_score, rank });
+  };
   const sv = React.useContext(SavedContext);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾" })[p.category] || "✦";
   const s100 = p.smakfynd_score;
@@ -14,7 +19,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
 
   return (
     <div
-      onClick={() => setOpen(!open)}
+      onClick={handleOpen}
       style={{
         background: t.card, borderRadius: 16,
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
@@ -127,7 +132,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
         padding: "0 18px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
             style={{
               display: "inline-flex", alignItems: "center", gap: 4,
               fontSize: 11, color: t.txM, textDecoration: "none",
@@ -141,6 +146,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} />}
           <button onClick={e => {
               e.stopPropagation();
+              track("share", { nr: p.nr, name: p.name });
               const url = `https://smakfynd.se/#vin/${p.nr}`;
               const text = `${p.name} ${p.sub || ''} — ${p.smakfynd_score}/100 på Smakfynd (${p.price}kr)`;
               if (navigator.share) {

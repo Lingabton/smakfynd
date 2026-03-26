@@ -110,6 +110,13 @@ function SmakfyndApp() {
     }
   }, [cat]);
 
+  // Track searches (debounced)
+  useEffect(() => {
+    if (!search || search.length < 2) return;
+    const timer = setTimeout(() => trackSearch(search, filtered?.length || 0), 1500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -393,7 +400,7 @@ function SmakfyndApp() {
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
           {CATS.map(ct => (
-            <button key={ct.k} onClick={() => setCat(ct.k)} style={{
+            <button key={ct.k} onClick={() => { setCat(ct.k); track("filter", { type: "category", value: ct.k }); }} style={{
               ...pill(cat === ct.k),
               display: "flex", alignItems: "center", gap: 5,
             }}>

@@ -5,7 +5,7 @@ function SaveButton({ nr, sv }) {
   const lists = sv.getLists(nr);
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); } }}
+      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
           display: "inline-flex", alignItems: "center", gap: 4,

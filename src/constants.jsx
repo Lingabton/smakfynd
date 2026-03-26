@@ -8,6 +8,45 @@
 // Data: loaded async from wines.json, or embedded at build time as fallback
 const DATA_URL = "wines.json";
 
+// Analytics
+const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+const _sid = (() => {
+  try {
+    let s = sessionStorage.getItem("sf_sid");
+    if (!s) { s = Math.random().toString(36).slice(2); sessionStorage.setItem("sf_sid", s); }
+    return s;
+  } catch(e) { return "anon"; }
+})();
+function track(event, data) {
+  try {
+    const device = window.innerWidth < 768 ? "mobile" : "desktop";
+    fetch(ANALYTICS_URL + "/event", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, event, wine_nr: data?.nr, data, page: location.hash || "/", device, referrer: document.referrer }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+function trackSearch(query, count, clickedNr) {
+  try {
+    fetch(ANALYTICS_URL + "/search", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, query, results_count: count, clicked_nr: clickedNr }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+function trackAI(meal, response, latencyMs) {
+  try {
+    const wines = (response?.courses || []).flatMap(c => c.wines || []).map(w => w.nr).filter(Boolean).join(",");
+    fetch(ANALYTICS_URL + "/ai", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, meal, response, mode: response?.mode, wines_suggested: wines, latency_ms: latencyMs, model: "llama-3.1-70b" }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL
 
 const CATS = [

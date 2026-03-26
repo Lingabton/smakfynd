@@ -81,6 +81,7 @@ function FoodMatch({ products }) {
   const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
     setError(null);
+    const t0 = Date.now();
 
     try {
       let data;
@@ -100,6 +101,7 @@ function FoodMatch({ products }) {
       if (data.error) throw new Error(data.error);
 
       setAiResult(data);
+      trackAI(userMessage, data, Date.now() - t0);
 
       if (data.mode === "recommend" && data.courses) {
         setCourseResults(matchWinesForCourses(data.courses, products));
