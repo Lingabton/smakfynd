@@ -343,7 +343,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
               .filter(w => w.category === p.category && w.package === p.package
                 && w.assortment === "Fast sortiment"
                 && (w.nr || w.id) !== (p.nr || p.id)
-                && w.smakfynd_score >= Math.max(60, p.smakfynd_score - 10))
+)
               .map(w => {
                 // Calculate similarity score
                 let sim = 0;
