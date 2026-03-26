@@ -733,7 +733,12 @@ function Card({
       fontWeight: 400,
       color: t.txL
     }
-  }, "kr")), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "kr")), p.vol && p.price && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txF
+    }
+  }, Math.round(p.price / (p.vol / 1000)), " kr/l"), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: t.txL,
@@ -1653,6 +1658,86 @@ function AIQuestion({
       opacity: freetext.trim() ? 1 : 0.4
     }
   }, "Skicka")));
+}
+
+// ════════════════════════════════════════════════════════════
+// components/TrustBox.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/TrustBox.jsx
+function TrustBox() {
+  const isMobile = window.innerWidth < 768;
+  const [open, setOpen] = useState(!isMobile);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: open ? "14px 20px" : "10px 16px",
+      borderRadius: 14,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      marginBottom: 20,
+      textAlign: "left",
+      cursor: isMobile ? "pointer" : "default"
+    },
+    onClick: () => isMobile && setOpen(!open)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: t.tx
+    }
+  }, "S\xE5 funkar Smakfynd"), !open && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      marginLeft: 6
+    }
+  }, "\u2014 baserat p\xE5 data, inte magk\xE4nsla")), isMobile && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txL
+    }
+  }, open ? "▲" : "▼")), open && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: t.txM,
+      marginBottom: 8,
+      lineHeight: 1.4
+    }
+  }, "B\xE4sta k\xF6p i varje stil och prisklass."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, [["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"], ["⚖️", "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde"], ["📊", "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre"], ["🤝", "Vi säljer inte vin — vi hjälper dig välja bättre"]].map(([icon, text], i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      lineHeight: 1.4,
+      flexShrink: 0
+    }
+  }, icon), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: t.txM,
+      lineHeight: 1.5
+    }
+  }, text))))));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2936,55 +3021,7 @@ function SmakfyndApp() {
       maxWidth: 440,
       fontWeight: 300
     }
-  }, "Vi j\xE4mf\xF6r 11 500+ viner mot r\xE4tt kategori \u2014 inte hela hyllan. H\xE4r hittar du fynden."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "14px 20px",
-      borderRadius: 14,
-      border: `1px solid ${t.bdr}`,
-      background: t.card,
-      marginBottom: 20,
-      textAlign: "left"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: t.tx,
-      marginBottom: 4
-    }
-  }, "S\xE5 funkar Smakfynd"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: t.txM,
-      marginBottom: 8,
-      lineHeight: 1.4
-    }
-  }, "B\xE4sta k\xF6p i varje stil och prisklass \u2014 baserat p\xE5 data, inte magk\xE4nsla."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 6
-    }
-  }, [["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"], ["⚖️", "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde"], ["📊", "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre"], ["🤝", "Vi säljer inte vin — vi hjälper dig välja bättre"]].map(([icon, text], i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      lineHeight: 1.4,
-      flexShrink: 0
-    }
-  }, icon), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: t.txM,
-      lineHeight: 1.5
-    }
-  }, text))))), /*#__PURE__*/React.createElement("div", {
+  }, "Vi j\xE4mf\xF6r 11 500+ viner mot r\xE4tt kategori \u2014 inte hela hyllan. H\xE4r hittar du fynden."), /*#__PURE__*/React.createElement(TrustBox, null), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
@@ -3470,9 +3507,15 @@ function SmakfyndApp() {
       flexWrap: "wrap",
       marginBottom: 10
     }
-  }, [["0-99", "Under 100 kr"], ["100-150", "100–150 kr"], ["151-200", "150–200 kr"], ["201-9999", "200+ kr"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+  }, [["0-79", "Under 80 kr"], ["80-119", "80–119 kr"], ["120-199", "120–199 kr"], ["200-999", "200+ kr"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
     key: k,
-    onClick: () => setPrice(price === k ? "all" : k),
+    onClick: () => {
+      setPrice(price === k ? "all" : k);
+      track("filter", {
+        type: "price",
+        value: k
+      });
+    },
     style: pill(price === k)
   }, l)), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowEco(!showEco),
@@ -3738,11 +3781,26 @@ function SmakfyndApp() {
       flexDirection: "column",
       gap: 10
     }
-  }, filtered.slice(0, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
+  }, filtered.slice(0, 1).map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: p.id || i
+  }, /*#__PURE__*/React.createElement(Card, {
+    p: p,
+    rank: 1,
+    delay: 0,
+    allProducts: products
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      fontSize: 11,
+      color: t.txL,
+      margin: "-4px 0 6px",
+      animation: "fadeIn 1s ease 0.5s both"
+    }
+  }, "\u2191 Tryck p\xE5 ett vin f\xF6r att se mer"))), filtered.slice(1, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
     key: p.id || i,
     p: p,
-    rank: i + 1,
-    delay: Math.min(i * 0.04, 0.4),
+    rank: i + 2,
+    delay: Math.min((i + 1) * 0.04, 0.4),
     allProducts: products
   })), filtered.length > 50 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3864,5 +3922,21 @@ function SmakfyndApp() {
       color: t.txF,
       fontStyle: "italic"
     }
-  }, "Njut med m\xE5tta.")))));
+  }, "Njut med m\xE5tta."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    }),
+    style: {
+      marginTop: 12,
+      padding: "10px 20px",
+      borderRadius: 10,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 12,
+      color: t.txM
+    }
+  }, "\u2191 Tillbaka till toppen")))));
 }

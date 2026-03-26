@@ -90,6 +90,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
           {/* Row 2: Price + grape + food */}
           <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
+            {p.vol && p.price && <span style={{ fontSize: 10, color: t.txF }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
             {p.launch_price && p.price_vs_launch_pct > 0 && (
               <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
             )}

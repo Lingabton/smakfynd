@@ -91,7 +91,7 @@ def make_pages():
             "h1": f"Bästa vinerna till grillat — {DATE_STR}",
             "intro": "Grillat kött kräver vin med lite kropp och smak. Här är de bästa alternativen — från budget till premium.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
-                           and any('kött' in (f or '').lower() or 'grillat' in (f or '').lower() or 'nöt' in (f or '').lower()
+                           and any(k in (f or '').lower() for k in ['kött', 'grillat', 'nöt', 'lamm', 'biff', 'vilt', 'fläsk']
                                    for f in (w.get('food_pairings') or []))],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },

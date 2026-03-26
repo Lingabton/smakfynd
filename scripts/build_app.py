@@ -22,6 +22,7 @@ FILES = [
     "components/Card.jsx",
     "components/SaveButton.jsx",
     "components/AIQuestion.jsx",
+    "components/TrustBox.jsx",
     "components/EditorsPicks.jsx",
     "components/FoodMatch.jsx",
     "components/StoreMode.jsx",

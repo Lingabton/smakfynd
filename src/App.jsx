@@ -187,28 +187,8 @@ function SmakfyndApp() {
           Vi jämför 11 500+ viner mot rätt kategori — inte hela hyllan. Här hittar du fynden.
         </p>
 
-        {/* Trust module — concrete promises */}
-        <div style={{
-          padding: "14px 20px", borderRadius: 14,
-          border: `1px solid ${t.bdr}`, background: t.card, marginBottom: 20,
-          textAlign: "left",
-        }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Så funkar Smakfynd</div>
-          <div style={{ fontSize: 11, color: t.txM, marginBottom: 8, lineHeight: 1.4 }}>Bästa köp i varje stil och prisklass — baserat på data, inte magkänsla.</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {[
-              ["🍷", "Vi jämför bara med liknande viner — rött mot rött, bubbel mot bubbel"],
-              ["⚖️", "Vi väger ihop crowd-betyg, expertrecensioner och prisvärde"],
-              ["📊", "Fler omdömen ger säkrare signal — viner med få betyg rankas lägre"],
-              ["🤝", "Vi säljer inte vin — vi hjälper dig välja bättre"],
-            ].map(([icon, text], i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 13, lineHeight: 1.4, flexShrink: 0 }}>{icon}</span>
-                <span style={{ fontSize: 12, color: t.txM, lineHeight: 1.5 }}>{text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Trust module — collapsible on mobile */}
+        <TrustBox />
 
         {/* Nav links */}
         <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
@@ -411,8 +391,8 @@ function SmakfyndApp() {
 
         {/* ═══ PRICE PILLS + EKO ═══ */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-          {[["0-99", "Under 100 kr"], ["100-150", "100–150 kr"], ["151-200", "150–200 kr"], ["201-9999", "200+ kr"]].map(([k, l]) => (
-            <button key={k} onClick={() => setPrice(price === k ? "all" : k)} style={pill(price === k)}>{l}</button>
+          {[["0-79", "Under 80 kr"], ["80-119", "80–119 kr"], ["120-199", "120–199 kr"], ["200-999", "200+ kr"]].map(([k, l]) => (
+            <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
           ))}
           <button onClick={() => setShowEco(!showEco)} style={{ ...pill(showEco, t.green), display: "flex", alignItems: "center", gap: 4 }}>
             <span style={{ fontSize: 12 }}>🌿</span> Ekologiskt
@@ -525,7 +505,13 @@ function SmakfyndApp() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {filtered.slice(0, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={Math.min(i * 0.04, 0.4)} allProducts={products} />)}
+            {filtered.slice(0, 1).map((p, i) => (
+              <div key={p.id || i}>
+                <Card p={p} rank={1} delay={0} allProducts={products} />
+                <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>
+              </div>
+            ))}
+            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
                 Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
@@ -575,6 +561,10 @@ function SmakfyndApp() {
             <p style={{ margin: 0 }}>Smakfynd är en oberoende tjänst och har ingen koppling till, och är inte godkänd av, Systembolaget. Vi säljer inte alkohol.</p>
           </div>
           <p style={{ fontSize: 10, color: t.txF, fontStyle: "italic" }}>Njut med måtta.</p>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{ marginTop: 12, padding: "10px 20px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: t.txM }}>
+            ↑ Tillbaka till toppen
+          </button>
         </footer>
       </div>
     </div>
