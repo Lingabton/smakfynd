@@ -81,7 +81,8 @@ def validate(path):
     return errors, warnings
 
 if __name__ == "__main__":
-    path = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/smakfynd/docs/wines.json")
+    default = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "wines.json")
+    path = sys.argv[1] if len(sys.argv) > 1 else default
     errors, warnings = validate(path)
 
     for w in warnings:

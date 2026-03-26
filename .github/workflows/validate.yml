@@ -37,7 +37,7 @@ jobs:
           fi
 
       - name: Transpile JSX → JS
-        run: npx babel --presets @babel/preset-react site/smakfynd-v7-slim.jsx -o site/smakfynd-v7-slim.js 2>/dev/null || npx babel --presets @babel/preset-react scripts/smakfynd-v7.jsx -o /tmp/test.js
+        run: npx babel --presets @babel/preset-react scripts/smakfynd-v7.jsx -o /tmp/test.js
 
       - name: Run scoring tests
         run: node tests/test_scoring.js

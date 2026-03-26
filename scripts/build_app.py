@@ -6,9 +6,10 @@ Order matters — dependencies must come before dependents.
 
 import os
 
-BASE = os.path.expanduser("~/smakfynd")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(SCRIPT_DIR)
 SRC = os.path.join(BASE, "src")
-OUTPUT = os.path.join(BASE, "scripts", "smakfynd-v7.jsx")
+OUTPUT = os.path.join(SCRIPT_DIR, "smakfynd-v7.jsx")
 
 # Concatenation order (dependencies first)
 FILES = [
