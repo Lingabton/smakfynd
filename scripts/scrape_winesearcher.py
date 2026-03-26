@@ -339,6 +339,7 @@ def main():
     parser.add_argument('--test', type=int, default=0)
     parser.add_argument('--offset', type=int, default=0)
     parser.add_argument('--login', action='store_true', help='Just open browser for login')
+    parser.add_argument('--retry-errors', action='store_true', help='Only retry wines that previously errored')
     args = parser.parse_args()
 
     if args.login:
@@ -413,11 +414,22 @@ def main():
 
         matched = skipped = no_score = errors = 0
 
+        consecutive_errors = 0
+
         for i, wine in enumerate(wines):
             nr = str(wine.get('nr', ''))
-            if nr in cache and cache[nr].get('aggregate_score') is not None:
-                skipped += 1
-                continue
+
+            # Skip logic
+            if args.retry_errors:
+                # Only retry wines that previously errored
+                if nr not in cache or not cache[nr].get('_error'):
+                    skipped += 1
+                    continue
+            else:
+                # Skip wines with data (score or confirmed no-score)
+                if nr in cache and not cache[nr].get('_error'):
+                    skipped += 1
+                    continue
 
             name = wine.get('name', '')
             print(f"[{i+1}/{len(wines)}] {name[:35]}...", end=" ", flush=True)
@@ -428,17 +440,29 @@ def main():
                     rec = [c for c in result.get('critics', []) if c.get('recognized')]
                     cache[nr] = {**result, 'sb_name': name}
                     matched += 1
+                    consecutive_errors = 0
                     print(f"✓ {result['aggregate_score']}/100 ({len(rec)} recognized critics)")
                 elif result:
                     cache[nr] = {**result, 'sb_name': name}
                     no_score += 1
+                    consecutive_errors = 0
                     print("– no scores")
                 else:
+                    cache[nr] = {'_error': True, 'sb_name': name}
                     errors += 1
+                    consecutive_errors += 1
                     print("✗ error")
             except Exception as e:
+                cache[nr] = {'_error': True, 'sb_name': name}
                 errors += 1
+                consecutive_errors += 1
                 print(f"✗ {str(e)[:60]}")
+
+            # If too many consecutive errors, pause and wait for CAPTCHA to cool down
+            if consecutive_errors >= 5:
+                print(f"\n  {consecutive_errors} errors i rad — pausar 60s...", flush=True)
+                time.sleep(60)
+                consecutive_errors = 0
 
             if (matched + no_score + errors) % 10 == 0 and (matched + no_score + errors) > 0:
                 save_cache(cache)
