@@ -75,6 +75,10 @@
 - [ ] "Jag gillar X, vad mer?": rekommendationer baserat på liknande vin
 - [ ] "Vet ingenting om vin"-läge: enkel guide utan pretention
 
+## Data & teknik — rutiner
+- [ ] Kör `python3 scripts/scrape_winesearcher.py --retry-errors` efter varje skrapningssession
+- [ ] Kör `python3 scripts/find_gaps.py` veckovis för att se vad som saknas
+
 ## Data & teknik
 - [ ] Separera data från kod: wines.json separat fil, ladda async (bättre cachning, snabbare builds)
 - [ ] Fräschare expertdata: scrapa Wine Enthusiast direkt (Kaggle-data är från 2017)
