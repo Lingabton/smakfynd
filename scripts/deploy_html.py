@@ -165,16 +165,19 @@ html = f"""<!DOCTYPE html>
 
   <style>
     :root {{
-      --bg: #f7f3ec; --surface: #fefcf8; --card: #ffffff;
-      --bdr: #e6ddd0; --bdr-light: #efe8dc;
+      --bg: #f5f1ea; --surface: #fdfbf7; --card: #ffffff;
+      --bdr: #e2d8c8; --bdr-light: #ede6da;
       --wine: #8b2332; --wine-dark: #6b1a27;
-      --tx: #1e1710; --tx-mid: #4a4238; --tx-light: #7a7060; --tx-faint: #a89e8e;
-      --green: #3d7a3e; --deal: #c44020; --gold: #b08d40;
-      --radius-card: 16px; --radius-pill: 100px; --radius-input: 14px;
+      --tx: #1a1510; --tx-mid: #3d3830; --tx-light: #6b6355; --tx-faint: #9e9588;
+      --green: #2d7a3e; --deal: #c44020; --gold: #b08d40;
+      --radius-card: 14px; --radius-pill: 100px; --radius-input: 12px;
       --font-serif: 'Instrument Serif', Georgia, serif;
       --font-sans: 'DM Sans', -apple-system, sans-serif;
+      --sh-sm: 0 1px 3px rgba(26,21,16,0.04);
+      --sh-md: 0 4px 12px rgba(26,21,16,0.06);
+      --sh-lg: 0 8px 24px rgba(26,21,16,0.08);
     }}
-    body {{ margin: 0; background: var(--bg); font-family: var(--font-sans); color: var(--tx); }}
+    body {{ margin: 0; background: var(--bg); font-family: var(--font-sans); color: var(--tx); -webkit-font-smoothing: antialiased; }}
   </style>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">

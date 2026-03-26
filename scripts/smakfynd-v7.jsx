@@ -98,25 +98,35 @@ const FAQS = [
 // theme.jsx
 // ════════════════════════════════════════════════════════════
 // src/theme.jsx
-// ── Color system ──
+// ── Design system ──
 const t = {
-  bg: "#f7f3ec",
-  surface: "#fefcf8",
+  // Backgrounds
+  bg: "#f5f1ea",       // warmer, slightly darker
+  surface: "#fdfbf7",
   card: "#ffffff",
-  bdr: "#e6ddd0",
-  bdrL: "#efe8dc",
+  // Borders
+  bdr: "#e2d8c8",      // warmer border
+  bdrL: "#ede6da",
+  // Brand
   wine: "#8b2332",
   wineD: "#6b1a27",
-  wineL: "#8b233212",
-  tx: "#1e1710",
-  txM: "#4a4238",
-  txL: "#7a7060",
-  txF: "#a89e8e",
-  green: "#3d7a3e",
-  greenL: "#3d7a3e10",
+  wineL: "#8b233210",
+  // Text
+  tx: "#1a1510",       // slightly darker for better contrast
+  txM: "#3d3830",      // darker mid-text
+  txL: "#6b6355",      // darker light text
+  txF: "#9e9588",
+  // Semantic
+  green: "#2d7a3e",    // slightly cooler green
+  greenL: "#2d7a3e10",
   deal: "#c44020",
   dealL: "#c4402010",
   gold: "#b08d40",
+  // Shadows
+  sh1: "0 1px 3px rgba(26,21,16,0.04)",
+  sh2: "0 4px 12px rgba(26,21,16,0.06)",
+  sh3: "0 8px 24px rgba(26,21,16,0.08)",
+  shHover: "0 8px 28px rgba(26,21,16,0.10)",
 };
 
 // ── Shared styles ──
@@ -127,10 +137,8 @@ const pill = (active, accent = t.wine) => ({
   border: active ? `1.5px solid ${accent}` : `1px solid ${t.bdr}`,
   background: active ? accent + "0c" : "transparent",
   color: active ? accent : t.txM,
+  boxShadow: active ? `0 0 0 3px ${accent}08` : "none",
 });
-
-// Rescale raw score to 1-100 for display
-// Uses piecewise mapping so scores spread across full range
 
 // ════════════════════════════════════════════════════════════
 // utils.jsx
@@ -326,11 +334,11 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
     <div
       onClick={handleOpen}
       style={{
-        background: t.card, borderRadius: 16,
+        background: t.card, borderRadius: 14,
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
-        boxShadow: open ? "0 12px 40px rgba(30,23,16,0.08)" : "0 1px 3px rgba(30,23,16,0.03)",
-        transition: "all 0.3s ease", overflow: "hidden",
-        animation: `slideUp 0.4s ease ${delay}s both`,
+        boxShadow: open ? t.sh3 : t.sh1,
+        transition: "all 0.25s ease", overflow: "hidden",
+        animation: `slideUp 0.35s ease ${delay}s both`,
         cursor: "pointer",
       }}
     >
@@ -980,6 +988,107 @@ function TrustBox() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+// components/WeeklyPick.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/WeeklyPick.jsx
+function WeeklyPick({ products }) {
+  // Auto-select best value wine: highest score, under 150kr, fast sortiment
+  const pick = useMemo(() => {
+    const candidates = products
+      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price && p.price <= 150 && p.smakfynd_score >= 75)
+      .sort((a, b) => {
+        // Prefer wines with both crowd + expert, then highest score
+        const aBonus = (a.crowd_score && a.expert_score) ? 5 : 0;
+        const bBonus = (b.crowd_score && b.expert_score) ? 5 : 0;
+        return (b.smakfynd_score + bBonus) - (a.smakfynd_score + aBonus);
+      });
+    return candidates[0] || null;
+  }, [products]);
+
+  if (!pick) return null;
+
+  const [_label, col] = getScoreInfo(pick.smakfynd_score);
+  const sbUrl = `https://www.systembolaget.se/produkt/vin/${pick.nr}`;
+
+  return (
+    <div style={{
+      padding: "16px 18px", borderRadius: 14, marginBottom: 16,
+      background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}03)`,
+      border: `1px solid ${t.wine}18`,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 10 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.1em" }}>Veckans fynd</span>
+      </div>
+      <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+        <ProductImage p={pick} size={56} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 17, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
+          <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{pick.sub} · {pick.country}</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+            <span style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>{pick.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
+            {pick.crowd_score && <span style={{ fontSize: 10, color: "#6b8cce", background: "#6b8cce10", padding: "2px 6px", borderRadius: 100 }}>Crowd {pick.crowd_score.toFixed(1)}</span>}
+            {pick.expert_score && <span style={{ fontSize: 10, color: "#b07d3b", background: "#b07d3b10", padding: "2px 6px", borderRadius: 100 }}>Expert {pick.expert_score.toFixed(1)}</span>}
+          </div>
+        </div>
+        <div style={{ textAlign: "center", flexShrink: 0 }}>
+          <svg width="48" height="48" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+            <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
+              strokeDasharray={`${pick.smakfynd_score * 1.38} 138`} strokeLinecap="round"
+              transform="rotate(-90 25 25)" />
+            <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+              fontSize="18" fontWeight="900" fill="#2d6b3f">{pick.smakfynd_score}</text>
+          </svg>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+        <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: pick.nr, source: "weekly_pick" }); }}
+          style={{ fontSize: 12, color: t.wine, textDecoration: "none", fontWeight: 500 }}>Köp på Systembolaget →</a>
+        <a href={`#vin/${pick.nr}`} style={{ fontSize: 12, color: t.txL, textDecoration: "none" }}>Se detaljer</a>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+// components/QuickFilters.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/QuickFilters.jsx
+function QuickFilters({ onFilter }) {
+  const presets = [
+    { label: "Topp under 100 kr", icon: "💰", action: { cat: "all", price: "0-99", showBest: false } },
+    { label: "Bästa röda just nu", icon: "🍷", action: { cat: "Rött", price: "all", showBest: false } },
+    { label: "Expertfavoriter", icon: "🏆", action: { cat: "all", price: "all", showBest: true } },
+    { label: "Ekologiskt & prisvärt", icon: "🌿", action: { cat: "all", price: "all", showEco: true } },
+    { label: "Bubbel till fest", icon: "🍾", action: { cat: "Mousserande", price: "all", showBest: false } },
+  ];
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Snabbval</div>
+      <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+        {presets.map((p, i) => (
+          <button key={i} onClick={() => { onFilter(p.action); track("filter", { type: "quickfilter", value: p.label }); }}
+            style={{
+              padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`,
+              background: t.card, cursor: "pointer", fontFamily: "inherit",
+              fontSize: 12, color: t.txM, whiteSpace: "nowrap",
+              display: "flex", alignItems: "center", gap: 5,
+              transition: "all 0.2s", boxShadow: "0 1px 3px rgba(30,23,16,0.04)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; e.currentTarget.style.boxShadow = "0 2px 8px rgba(30,23,16,0.08)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; e.currentTarget.style.boxShadow = "0 1px 3px rgba(30,23,16,0.04)"; }}
+          >
+            <span style={{ fontSize: 14 }}>{p.icon}</span>
+            {p.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -1653,33 +1762,40 @@ function SmakfyndApp() {
     {storeMode && <StoreMode products={products} onClose={() => setStoreMode(false)} />}
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif", display: storeMode ? "none" : "block" }}>
       <style>{`
-        @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-        @keyframes scaleIn { from { opacity:0; transform:scale(0.96) } to { opacity:1; transform:scale(1) } }
-        ::selection { background: ${t.wine}22 }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.97) } to { opacity:1; transform:scale(1) } }
+        ::selection { background: ${t.wine}20 }
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
-        * { scrollbar-width: none }
+        * { scrollbar-width: none; box-sizing: border-box; }
+        a { transition: color 0.15s ease; }
+        button { transition: all 0.15s ease; }
+        img { transition: opacity 0.3s ease; }
       `}</style>
 
       {/* ═══ HERO ═══ */}
-      <header style={{ padding: "44px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.6s ease" }}>
-        {/* Logo — wordmark */}
-        <div style={{ marginBottom: 20 }} dangerouslySetInnerHTML={{ __html: `<svg width="160" height="36" viewBox="0 0 200 44"><text x="0" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="400" fill="#7a2332" letter-spacing="0.3">Smakfynd</text><line x1="0" y1="37" x2="178" y2="37" stroke="#c9a84c" stroke-width="1.2" opacity="0.7"/></svg>` }} />
+      <header style={{ padding: "36px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.5s ease" }}>
+        {/* Logo */}
+        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
+          <svg width="28" height="28" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
+          <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 26, color: t.wine, letterSpacing: "0.02em" }}>Smakfynd</span>
+        </div>
 
         {/* Headline */}
         <h1 style={{
-          margin: "0 0 12px", fontSize: 36, lineHeight: 1.1,
+          margin: "0 0 10px", fontSize: 34, lineHeight: 1.15,
           fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: t.tx,
+          letterSpacing: "-0.01em",
         }}>
-          Mindre hype,<br />bättre <em style={{ color: t.wine }}>vinköp</em>
+          Mindre hype,<br />bättre <em style={{ color: t.wine, fontStyle: "normal" }}>vinköp</em>
         </h1>
 
         <p style={{
-          margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
-          maxWidth: 440, fontWeight: 300,
+          margin: "0 auto 16px", fontSize: 15, color: t.txM, lineHeight: 1.6,
+          maxWidth: 420, fontWeight: 300,
         }}>
-          Vi jämför 11 500+ viner mot rätt kategori — inte hela hyllan. Här hittar du fynden.
+          Vi jämför {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : "tusentals"} viner mot rätt kategori — inte hela hyllan.
         </p>
 
         {/* Trust module — collapsible on mobile */}
@@ -1830,6 +1946,9 @@ function SmakfyndApp() {
           </div>
         )}
 
+        {/* ═══ VECKANS FYND ═══ */}
+        <WeeklyPick products={products} />
+
         {/* ═══ FOOD MATCH ═══ */}
         <FoodMatch products={products} />
 
@@ -1876,6 +1995,14 @@ function SmakfyndApp() {
             ))}
           </div>
         </div>
+
+        {/* ═══ QUICK FILTER PRESETS ═══ */}
+        <QuickFilters onFilter={({ cat: c, price: p, showBest: b, showEco: e }) => {
+          if (c) setCat(c);
+          if (p) setPrice(p);
+          if (b !== undefined) setShowBest(b);
+          if (e) setShowEco(e);
+        }} />
 
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>

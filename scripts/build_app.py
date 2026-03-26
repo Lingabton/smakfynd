@@ -24,6 +24,8 @@ FILES = [
     "components/AIQuestion.jsx",
     "components/LoginModal.jsx",
     "components/TrustBox.jsx",
+    "components/WeeklyPick.jsx",
+    "components/QuickFilters.jsx",
     "components/EditorsPicks.jsx",
     "components/FoodMatch.jsx",
     "components/StoreMode.jsx",

@@ -160,33 +160,40 @@ function SmakfyndApp() {
     {storeMode && <StoreMode products={products} onClose={() => setStoreMode(false)} />}
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif", display: storeMode ? "none" : "block" }}>
       <style>{`
-        @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-        @keyframes scaleIn { from { opacity:0; transform:scale(0.96) } to { opacity:1; transform:scale(1) } }
-        ::selection { background: ${t.wine}22 }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.97) } to { opacity:1; transform:scale(1) } }
+        ::selection { background: ${t.wine}20 }
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
-        * { scrollbar-width: none }
+        * { scrollbar-width: none; box-sizing: border-box; }
+        a { transition: color 0.15s ease; }
+        button { transition: all 0.15s ease; }
+        img { transition: opacity 0.3s ease; }
       `}</style>
 
       {/* ═══ HERO ═══ */}
-      <header style={{ padding: "44px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.6s ease" }}>
-        {/* Logo — wordmark */}
-        <div style={{ marginBottom: 20 }} dangerouslySetInnerHTML={{ __html: `<svg width="160" height="36" viewBox="0 0 200 44"><text x="0" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="400" fill="#7a2332" letter-spacing="0.3">Smakfynd</text><line x1="0" y1="37" x2="178" y2="37" stroke="#c9a84c" stroke-width="1.2" opacity="0.7"/></svg>` }} />
+      <header style={{ padding: "36px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.5s ease" }}>
+        {/* Logo */}
+        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
+          <svg width="28" height="28" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
+          <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 26, color: t.wine, letterSpacing: "0.02em" }}>Smakfynd</span>
+        </div>
 
         {/* Headline */}
         <h1 style={{
-          margin: "0 0 12px", fontSize: 36, lineHeight: 1.1,
+          margin: "0 0 10px", fontSize: 34, lineHeight: 1.15,
           fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: t.tx,
+          letterSpacing: "-0.01em",
         }}>
-          Mindre hype,<br />bättre <em style={{ color: t.wine }}>vinköp</em>
+          Mindre hype,<br />bättre <em style={{ color: t.wine, fontStyle: "normal" }}>vinköp</em>
         </h1>
 
         <p style={{
-          margin: "0 auto 20px", fontSize: 15, color: t.txM, lineHeight: 1.6,
-          maxWidth: 440, fontWeight: 300,
+          margin: "0 auto 16px", fontSize: 15, color: t.txM, lineHeight: 1.6,
+          maxWidth: 420, fontWeight: 300,
         }}>
-          Vi jämför 11 500+ viner mot rätt kategori — inte hela hyllan. Här hittar du fynden.
+          Vi jämför {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : "tusentals"} viner mot rätt kategori — inte hela hyllan.
         </p>
 
         {/* Trust module — collapsible on mobile */}
@@ -337,6 +344,9 @@ function SmakfyndApp() {
           </div>
         )}
 
+        {/* ═══ VECKANS FYND ═══ */}
+        <WeeklyPick products={products} />
+
         {/* ═══ FOOD MATCH ═══ */}
         <FoodMatch products={products} />
 
@@ -383,6 +393,14 @@ function SmakfyndApp() {
             ))}
           </div>
         </div>
+
+        {/* ═══ QUICK FILTER PRESETS ═══ */}
+        <QuickFilters onFilter={({ cat: c, price: p, showBest: b, showEco: e }) => {
+          if (c) setCat(c);
+          if (p) setPrice(p);
+          if (b !== undefined) setShowBest(b);
+          if (e) setShowEco(e);
+        }} />
 
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>

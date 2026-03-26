@@ -21,11 +21,11 @@ function Card({ p, rank, delay, totalInCategory, allProducts }) {
     <div
       onClick={handleOpen}
       style={{
-        background: t.card, borderRadius: 16,
+        background: t.card, borderRadius: 14,
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
-        boxShadow: open ? "0 12px 40px rgba(30,23,16,0.08)" : "0 1px 3px rgba(30,23,16,0.03)",
-        transition: "all 0.3s ease", overflow: "hidden",
-        animation: `slideUp 0.4s ease ${delay}s both`,
+        boxShadow: open ? t.sh3 : t.sh1,
+        transition: "all 0.25s ease", overflow: "hidden",
+        animation: `slideUp 0.35s ease ${delay}s both`,
         cursor: "pointer",
       }}
     >
