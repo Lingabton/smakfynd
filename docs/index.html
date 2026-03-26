@@ -1454,16 +1454,55 @@ function Card({
       lineHeight: 1.5
     }
   }, "Lanserades f\xF6r ", /*#__PURE__*/React.createElement("strong", null, p.launch_price, " kr"), " \u2014 nu ", p.price, " kr. Du sparar ", p.launch_price - p.price, " kr per flaska."), allProducts && (() => {
-    const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && Math.abs(w.price - p.price) <= 50 && (w.nr || w.id) !== (p.nr || p.id) && w.smakfynd_score >= p.smakfynd_score - 5).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 3).map(w => {
-      // Generate reason WHY this is recommended
-      let reason = "";
-      if (w.price < p.price - 10) reason = `${p.price - w.price}kr billigare`;else if (w.smakfynd_score > p.smakfynd_score) reason = "Högre fyndpoäng";
-      if ((w.expert_score || 0) > (p.expert_score || 0)) reason += (reason ? " · " : "") + "Starkare expertstöd";else if ((w.crowd_score || 0) > (p.crowd_score || 0) + 0.3) reason += (reason ? " · " : "") + "Högre crowd-betyg";
-      if (w.grape && p.grape && w.grape === p.grape) reason += (reason ? " · " : "") + "Samma druva";
-      if (!reason) reason = "Liknande stil och prisklass";
+    // Taste similarity: how close are body, fruit, sweet profiles?
+    const tasteSim = (a, b) => {
+      let score = 0,
+        count = 0;
+      if (a.taste_body && b.taste_body) {
+        score += 1 - Math.abs(a.taste_body - b.taste_body) / 12;
+        count++;
+      }
+      if (a.taste_fruit && b.taste_fruit) {
+        score += 1 - Math.abs(a.taste_fruit - b.taste_fruit) / 12;
+        count++;
+      }
+      if (a.taste_sweet != null && b.taste_sweet != null) {
+        score += 1 - Math.abs(a.taste_sweet - b.taste_sweet) / 12;
+        count++;
+      }
+      return count > 0 ? score / count : 0;
+    };
+    const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id) && w.smakfynd_score >= Math.max(60, p.smakfynd_score - 10)).map(w => {
+      // Calculate similarity score
+      let sim = 0;
+      const taste = tasteSim(w, p);
+      sim += taste * 40; // taste profile most important (0-40)
+      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20; // same grape
+      if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15; // same style (e.g. "Fruktigt & Smakrikt")
+      if (w.country && p.country && w.country === p.country) sim += 5; // same country
+      if (w.region && p.region && w.region === p.region) sim += 10; // same region
+      if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
+      // Bonus for higher score (prefer better wines)
+      sim += Math.min(10, Math.max(0, w.smakfynd_score - p.smakfynd_score + 5));
       return {
         ...w,
-        _reason: reason
+        _sim: sim,
+        _taste: taste
+      };
+    }).filter(w => w._sim >= 20) // minimum similarity threshold
+    .sort((a, b) => b._sim - a._sim).slice(0, 3).map(w => {
+      // Generate reason WHY this is recommended
+      const reasons = [];
+      if (w._taste >= 0.8) reasons.push("Liknande smakprofil");
+      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) reasons.push("Samma druva");
+      if (w.cat3 && p.cat3 && w.cat3 === p.cat3 && !reasons.length) reasons.push("Samma stil");
+      if (w.region && p.region && w.region === p.region) reasons.push("Samma region");
+      if (w.price < p.price - 10) reasons.push(`${Math.round(p.price - w.price)}kr billigare`);
+      if (w.smakfynd_score > p.smakfynd_score) reasons.push("Högre poäng");
+      if ((w.expert_score || 0) > (p.expert_score || 0) + 0.5) reasons.push("Starkare expertstöd");
+      return {
+        ...w,
+        _reason: reasons.slice(0, 2).join(" · ") || "Liknande stil och prisklass"
       };
     });
     if (similar.length === 0) return null;
