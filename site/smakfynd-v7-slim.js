@@ -397,6 +397,8 @@ function ProductImage({
   }, /*#__PURE__*/React.createElement("img", {
     src: url,
     alt: p.name,
+    referrerPolicy: "no-referrer",
+    loading: "lazy",
     onError: () => setErr(true),
     style: {
       maxWidth: "90%",

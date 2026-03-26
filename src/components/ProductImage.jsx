@@ -29,6 +29,8 @@ function ProductImage({ p, size = 52, style: extraStyle = {} }) {
       <img
         src={url}
         alt={p.name}
+        referrerPolicy="no-referrer"
+        loading="lazy"
         onError={() => setErr(true)}
         style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }}
       />
