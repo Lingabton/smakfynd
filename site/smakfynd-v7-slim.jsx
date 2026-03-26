@@ -1774,46 +1774,32 @@ function SmakfyndApp() {
         img { transition: opacity 0.3s ease; }
       `}</style>
 
-      {/* ═══ HERO ═══ */}
-      <header style={{ padding: "36px 20px 0", maxWidth: 580, margin: "0 auto", textAlign: "center", animation: "fadeIn 0.5s ease" }}>
-        {/* Logo */}
-        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
-          <svg width="28" height="28" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
-          <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 26, color: t.wine, letterSpacing: "0.02em" }}>Smakfynd</span>
+      {/* ═══ HERO — compact ═══ */}
+      <header style={{ padding: "16px 20px 0", maxWidth: 580, margin: "0 auto", animation: "fadeIn 0.4s ease" }}>
+        {/* Top bar: Logo + nav */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
+            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
+          </div>
+          <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
+            {[["about", "Om"], ["method", "Metod"], ["faq", "FAQ"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
+              [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
+              <span key={k} onClick={() => {
+                  if (k === "login") { setShowLogin(true); return; }
+                  if (k === "profile") { auth.logout(); return; }
+                  setPanel(panel === k ? null : k);
+                }}
+                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400 }}
+              >{l}</span>
+            ))}
+          </div>
         </div>
 
-        {/* Headline */}
-        <h1 style={{
-          margin: "0 0 10px", fontSize: 34, lineHeight: 1.15,
-          fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: t.tx,
-          letterSpacing: "-0.01em",
-        }}>
-          Mindre hype,<br />bättre <em style={{ color: t.wine, fontStyle: "normal" }}>vinköp</em>
-        </h1>
-
-        <p style={{
-          margin: "0 auto 16px", fontSize: 15, color: t.txM, lineHeight: 1.6,
-          maxWidth: 420, fontWeight: 300,
-        }}>
-          Vi jämför {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : "tusentals"} viner mot rätt kategori — inte hela hyllan.
+        {/* Tagline — one line */}
+        <p style={{ margin: "0 0 10px", fontSize: 13, color: t.txM, textAlign: "center" }}>
+          {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner rankade efter kvalitet per krona
         </p>
-
-        {/* Trust module — collapsible on mobile */}
-        <TrustBox />
-
-        {/* Nav links */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 20, fontSize: 13, color: t.txL, marginBottom: 6 }}>
-          {[["about", "Om Smakfynd"], ["method", "Metoden"], ["faq", "Vanliga frågor"], ["saved", `♥ Mina viner${sv.count ? ` (${sv.count})` : ""}`],
-            [auth.user ? "profile" : "login", auth.user ? auth.user.email.split("@")[0] : "Logga in"]].map(([k, l]) => (
-            <span key={k} onClick={() => {
-                if (k === "login") { setShowLogin(true); return; }
-                if (k === "profile") { auth.logout(); return; }
-                setPanel(panel === k ? null : k);
-              }}
-              style={{ cursor: "pointer", borderBottom: panel === k ? `1.5px solid ${t.wine}` : "1.5px solid transparent", paddingBottom: 2, transition: "all 0.2s", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL) }}
-            >{l}</span>
-          ))}
-        </div>
       </header>
 
       <div style={{ maxWidth: 580, margin: "0 auto", padding: "24px 16px 80px" }}>
@@ -1946,15 +1932,6 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ VECKANS FYND ═══ */}
-        <WeeklyPick products={products} />
-
-        {/* ═══ FOOD MATCH ═══ */}
-        <FoodMatch products={products} />
-
-        {/* ═══ MÅNADENS TIPS ═══ */}
-        <EditorsPicks products={products} onSelect={name => setSearch(name)} />
-
         {/* ═══ SEARCH + STORE MODE ═══ */}
         <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           <div style={{ position: "relative", flex: 1 }}>
@@ -1995,14 +1972,6 @@ function SmakfyndApp() {
             ))}
           </div>
         </div>
-
-        {/* ═══ QUICK FILTER PRESETS ═══ */}
-        <QuickFilters onFilter={({ cat: c, price: p, showBest: b, showEco: e }) => {
-          if (c) setCat(c);
-          if (p) setPrice(p);
-          if (b !== undefined) setShowBest(b);
-          if (e) setShowEco(e);
-        }} />
 
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
@@ -2146,6 +2115,15 @@ function SmakfyndApp() {
             )}
           </div>
         )}
+
+        {/* ═══ VECKANS FYND (below wine list) ═══ */}
+        <WeeklyPick products={products} />
+
+        {/* ═══ AI FOOD MATCH ═══ */}
+        <FoodMatch products={products} />
+
+        {/* ═══ REDAKTIONENS VAL ═══ */}
+        <EditorsPicks products={products} onSelect={name => setSearch(name)} />
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{
