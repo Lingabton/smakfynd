@@ -26,7 +26,7 @@ function EditorsPicks({ products, onSelect }) {
             const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
             return (
               <div key={i} style={{ padding: "14px 16px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default" }}
-                onClick={() => mp && onSelect(mp.name)}>
+                onClick={() => mp && onSelect(mp.nr || pick.nr)}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{pick.verdict}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <svg width="40" height="40" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>

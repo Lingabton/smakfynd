@@ -857,7 +857,15 @@ function Card({
       background: t.dealL,
       color: t.deal
     }
-  }, "Priss\xE4nkt")), /*#__PURE__*/React.createElement("div", {
+  }, "Priss\xE4nkt"), p.critics && p.critics.length >= 3 && p.critics.every(cr => cr.s >= 85) && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 100,
+      background: "#b07d3b10",
+      color: "#b07d3b"
+    }
+  }, p.critics.length, " av ", p.num_critics || p.critics.length, " kritiker ger 85+")), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 5,
       fontSize: 11,
@@ -1278,7 +1286,29 @@ function Card({
       borderRadius: 2,
       background: "#b07d3b"
     }
-  })), /*#__PURE__*/React.createElement("div", {
+  })), p.critics && p.critics.length > 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      marginTop: 4
+    }
+  }, p.critics.map((cr, ci) => /*#__PURE__*/React.createElement("span", {
+    key: ci,
+    style: {
+      fontSize: 9,
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: "#b07d3b10",
+      color: "#b07d3b"
+    }
+  }, cr.c, ": ", cr.s)), p.num_critics > (p.critics || []).length && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 6px",
+      color: t.txL
+    }
+  }, "+", p.num_critics - p.critics.length, " till")) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txL
@@ -1552,10 +1582,18 @@ function Card({
       }
     }, w._reason)), /*#__PURE__*/React.createElement("div", {
       style: {
+        flexShrink: 0,
+        textAlign: "right",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        gap: 3
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
         fontSize: 14,
         fontWeight: 700,
         color: t.tx,
-        flexShrink: 0,
         fontFamily: "'Instrument Serif', serif"
       }
     }, w.price, /*#__PURE__*/React.createElement("span", {
@@ -1564,7 +1602,17 @@ function Card({
         fontWeight: 400,
         color: t.txL
       }
-    }, "kr"))))));
+    }, "kr")), /*#__PURE__*/React.createElement("a", {
+      href: `https://www.systembolaget.se/produkt/vin/${w.nr}`,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      onClick: e => e.stopPropagation(),
+      style: {
+        fontSize: 9,
+        color: t.txL,
+        textDecoration: "none"
+      }
+    }, "SB \u2197"))))));
   })()));
 }
 
@@ -2450,7 +2498,7 @@ function EditorsPicks({
         border: `1px solid ${t.bdr}`,
         cursor: mp ? "pointer" : "default"
       },
-      onClick: () => mp && onSelect(mp.name)
+      onClick: () => mp && onSelect(mp.nr || pick.nr)
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
@@ -2838,6 +2886,30 @@ function FoodMatch({
       gap: 5,
       flexWrap: "wrap",
       marginTop: 8
+    }
+  }, [["Under 100 kr", "0-100"], ["100–200 kr", "100-200"], ["200+ kr", "200-999"]].map(([l, k]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => {
+      const cur = meal.replace(/\s*\(budget:.*?\)\s*/g, "").trim();
+      setMeal(cur ? `${cur} (budget: ${k} kr)` : "");
+    },
+    style: {
+      padding: "5px 10px",
+      borderRadius: 100,
+      border: `1px solid ${t.green}40`,
+      background: `${t.green}08`,
+      color: t.green,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: 600
+    }
+  }, l))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap",
+      marginTop: 5
     }
   }, ["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => /*#__PURE__*/React.createElement("button", {
     key: s,
@@ -3567,11 +3639,22 @@ function SmakfyndApp() {
     const timer = setTimeout(() => trackSearch(search, filtered?.length || 0), 1500);
     return () => clearTimeout(timer);
   }, [search]);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 800);
+    window.addEventListener("scroll", onScroll, {
+      passive: true
+    });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selCountry, setSelCountry] = useState(null);
   const [selFoods, setSelFoods] = useState([]);
+  const [sortBy, setSortBy] = useState("smakfynd");
+  const [selRegion, setSelRegion] = useState(null);
+  const [selTaste, setSelTaste] = useState(null);
   const toggleFood = f => setSelFoods(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   const filtered = useMemo(() => {
     let r = [...products];
@@ -3591,12 +3674,23 @@ function SmakfyndApp() {
     if (showEco) r = r.filter(p => p.organic);
     if (selCountry) r = r.filter(p => p.country === selCountry);
     if (selFoods.length > 0) r = r.filter(p => selFoods.some(f => (p.food_pairings || []).some(fp => fp.toLowerCase().includes(f.toLowerCase()))));
+    if (selRegion) r = r.filter(p => p.region === selRegion);
+    if (selTaste) {
+      const tasteFilters = {
+        "Fylligt": p => (p.taste_body || 0) >= 8,
+        "Lätt": p => (p.taste_body || 12) <= 5,
+        "Fruktigt": p => (p.taste_fruit || 0) >= 8,
+        "Torrt": p => (p.taste_sweet || 12) <= 3
+      };
+      if (tasteFilters[selTaste]) r = r.filter(tasteFilters[selTaste]);
+    }
+    if (sortBy === "expert") r.sort((a, b) => (b.expert_score || 0) - (a.expert_score || 0));else if (sortBy === "crowd") r.sort((a, b) => (b.crowd_score || 0) - (a.crowd_score || 0));else if (sortBy === "price_asc") r.sort((a, b) => (a.price || 0) - (b.price || 0));else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
   const newN = products.filter(p => p.is_new).length;
   const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
   const ecoN = products.filter(p => p.organic).length;
-  const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0;
+  const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd";
   const clearAll = () => {
     setSearch("");
     setCat("all");
@@ -3607,6 +3701,9 @@ function SmakfyndApp() {
     setSelCountry(null);
     setSelFoods([]);
     setShowBest(false);
+    setSelRegion(null);
+    setSelTaste(null);
+    setSortBy("smakfynd");
   };
   const savedWines = useMemo(() => {
     return products.filter(p => sv.isSaved(p.nr || p.id)).sort((a, b) => b.smakfynd_score - a.smakfynd_score);
@@ -4187,7 +4284,10 @@ function SmakfyndApp() {
       flexWrap: "wrap",
       marginBottom: 10
     }
-  }, [["0-79", "Under 80 kr"], ["80-119", "80–119 kr"], ["120-199", "120–199 kr"], ["200-999", "200+ kr"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+  }, PRICES.filter(p => p.k !== "all").map(({
+    k,
+    l
+  }) => /*#__PURE__*/React.createElement("button", {
     key: k,
     onClick: () => {
       setPrice(price === k ? "all" : k);
@@ -4209,7 +4309,7 @@ function SmakfyndApp() {
     style: {
       fontSize: 12
     }
-  }, "\uD83C\uDF3F"), " Ekologiskt")), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83C\uDF3F"), " Ekologiskt (", ecoN, ")")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -4293,7 +4393,7 @@ function SmakfyndApp() {
       gap: 6,
       flexWrap: "wrap"
     }
-  }, [["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"], ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"], ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"]].map(([c, flag]) => /*#__PURE__*/React.createElement("button", {
+  }, [["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"], ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"], ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"], ["Argentina", "\ud83c\udde6\ud83c\uddf7"], ["Nya Zeeland", "\ud83c\uddf3\ud83c\uddff"], ["\u00d6sterrike", "\ud83c\udde6\ud83c\uddf9"]].map(([c, flag]) => /*#__PURE__*/React.createElement("button", {
     key: c,
     onClick: () => setSelCountry(selCountry === c ? null : c),
     style: pill(selCountry === c)
@@ -4311,11 +4411,65 @@ function SmakfyndApp() {
       gap: 6,
       flexWrap: "wrap"
     }
-  }, ["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt"].map(f => /*#__PURE__*/React.createElement("button", {
+  }, ["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => /*#__PURE__*/React.createElement("button", {
     key: f,
     onClick: () => toggleFood(f),
     style: pill(selFoods.includes(f))
-  }, f))))), /*#__PURE__*/React.createElement("div", {
+  }, f)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Smak"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, ["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => /*#__PURE__*/React.createElement("button", {
+    key: ts,
+    onClick: () => setSelTaste(selTaste === ts ? null : ts),
+    style: pill(selTaste === ts)
+  }, ts)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Region"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, ["Bordeaux", "Toscana", "Rioja", "Piemonte", "Bourgogne", "Rhonedalen", "Champagne", "Kalifornien"].map(rg => /*#__PURE__*/React.createElement("button", {
+    key: rg,
+    onClick: () => setSelRegion(selRegion === rg ? null : rg),
+    style: pill(selRegion === rg)
+  }, rg)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Sortera"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, [["smakfynd", "Smakfynd-poäng"], ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => setSortBy(k),
+    style: pill(sortBy === k)
+  }, l))))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "0 4px"
@@ -4336,7 +4490,13 @@ function SmakfyndApp() {
       fontSize: 11,
       color: t.txF
     }
-  }, "Mest smak f\xF6r pengarna")), /*#__PURE__*/React.createElement("div", {
+  }, {
+    smakfynd: "Mest smak för pengarna",
+    expert: "Sorterat efter expertbetyg",
+    crowd: "Sorterat efter crowd-betyg",
+    price_asc: "Lägst pris först",
+    price_desc: "Högst pris först"
+  }[sortBy])), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txF,
@@ -4376,21 +4536,69 @@ function SmakfyndApp() {
     }
   }, "F\xF6rs\xF6k igen")) : loading ? /*#__PURE__*/React.createElement("div", {
     style: {
-      textAlign: "center",
-      padding: "48px 20px",
-      color: t.txL
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, [0, 1, 2, 3, 4].map(i => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      padding: "16px 18px",
+      borderRadius: 14,
+      background: t.card,
+      border: `1px solid ${t.bdrL}`,
+      display: "flex",
+      gap: 14,
+      alignItems: "flex-start",
+      animation: `fadeIn 0.3s ease ${i * 0.08}s both`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 36,
-      marginBottom: 12
+      width: 52,
+      height: 52,
+      borderRadius: 10,
+      background: t.bdr,
+      opacity: 0.4
     }
-  }, "\u23F3"), /*#__PURE__*/React.createElement("p", {
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 15,
-      color: t.txM
+      flex: 1
     }
-  }, "Laddar viner...")) : filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "60%",
+      height: 16,
+      borderRadius: 4,
+      background: t.bdr,
+      opacity: 0.3,
+      marginBottom: 6
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "40%",
+      height: 12,
+      borderRadius: 4,
+      background: t.bdr,
+      opacity: 0.2,
+      marginBottom: 8
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "80%",
+      height: 4,
+      borderRadius: 2,
+      background: t.bdr,
+      opacity: 0.2
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 50,
+      height: 50,
+      borderRadius: 12,
+      background: t.bdr,
+      opacity: 0.3
+    }
+  })))) : filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "48px 20px",
@@ -4503,7 +4711,13 @@ function SmakfyndApp() {
     id: "section-picks"
   }, /*#__PURE__*/React.createElement(EditorsPicks, {
     products: products,
-    onSelect: name => setSearch(name)
+    onSelect: nr => {
+      window.location.hash = `vin/${nr}`;
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 40,
@@ -4646,7 +4860,33 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txM
     }
-  }, "\u2191 Tillbaka till toppen")))), showLogin && /*#__PURE__*/React.createElement(LoginModal, {
+  }, "\u2191 Tillbaka till toppen"))), showBackToTop && /*#__PURE__*/React.createElement("button", {
+    onClick: () => window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    }),
+    "aria-label": "Tillbaka till toppen",
+    style: {
+      position: "fixed",
+      bottom: 24,
+      right: 24,
+      zIndex: 100,
+      width: 44,
+      height: 44,
+      borderRadius: "50%",
+      background: t.card,
+      border: `1px solid ${t.bdr}`,
+      boxShadow: t.sh3,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 18,
+      color: t.txM,
+      fontFamily: "inherit",
+      animation: "fadeIn 0.2s ease"
+    }
+  }, "\u2191")), showLogin && /*#__PURE__*/React.createElement(LoginModal, {
     onClose: () => setShowLogin(false),
     onLogin: data => {
       auth.login(data);

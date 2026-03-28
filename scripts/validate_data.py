@@ -21,7 +21,8 @@ OPTIONAL_FIELDS = {
     "taste_fruit": (int, float), "taste_bitter": (int, float),
     "style": str, "region": str, "expert_source": str,
     "launch_price": (int, float), "price_vs_launch_pct": (int, float),
-    "is_new": bool,
+    "is_new": bool, "critics": list, "num_critics": (int, float),
+    "critic_spread": (int, float), "critic_consensus": str,
 }
 
 def validate(path):

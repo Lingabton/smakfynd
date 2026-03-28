@@ -1,41 +1,29 @@
 # Smakfynd Feature Backlog
-*Uppdaterad 2026-03-26*
+*Uppdaterad 2026-03-28*
 
-## Buggar
-- [ ] Prisfilter-inkonsekvens: PRICES-arrayen vs renderade pills har olika intervall
-- [ ] Redaktionens val: klick borde scrolla till kortet, inte söka vinnamnet
-- [ ] "Gillar du X"-länkar borde öppna profil i appen, inte bara SB-länk
+## Att konfigurera (AKUT)
+- [x] ~~Deploya workers med CORS-fix~~ (2026-03-28)
+- [x] ~~Deploya analytics~~ (2026-03-28)
+- [x] ~~Deploya wine-ai~~ (2026-03-28)
+- [x] ~~Sätt ADMIN_KEY~~ (2026-03-28)
 
 ## UX — låg insats
-- [ ] Visa kr/liter på alla kort (spec. BiB/Storpack)
-- [ ] Visa "Under 80 kr"-filter (finns i data, dolt i UI)
-- [ ] Minska hero-höjd på mobil — kollapsa trust-box som default
-- [ ] "Tillbaka till toppen"-knapp
-- [ ] "Tryck på ett vin för att se mer"-hint på första kortet
-- [ ] Utöka food-matching keywords: lamm, biff, entrecôte, BBQ, marinerat
-- [ ] Visa eko-antal på filterpill ("Ekologiskt (342)")
-- [ ] Lägg till fler länder i filter: Argentina, Nya Zeeland, Österrike
-- [ ] CTA på landningssidor → AI-matchern
-- [ ] Kort: visa situationspassning ("Fynd till lamm", "Tryggt middagsvin")
+- [x] ~~Visa kr/liter på alla kort~~ (2026-03-28)
+- [x] ~~Minska hero-höjd på mobil~~ (2026-03-28)
+- [x] ~~"Tryck på ett vin för att se mer"-hint~~ (redan implementerad)
+- [x] ~~CTA på landningssidor → AI-matchern~~ (2026-03-28, 13 sidor)
+- [x] ~~Kort: visa situationspassning~~ (2026-03-28)
 
 ## Kritiker-data
-- [ ] Visa individuella kritiker-scores per vin (Suckling: 91, Decanter: 88, Falstaff: 90)
-- [ ] Scoring-bonus för konsensus (alla kritiker överens = högre tillit)
-- [ ] Visa "7 av 7 kritiker ger 85+" som socialt bevis
-- [ ] Spridningsanalys: konsensus vs kontroversiellt vin
+- [x] ~~Scoring-bonus för konsensus~~ (2026-03-28, 54 stark konsensus, 17 konsensus)
+- [x] ~~Spridningsanalys: konsensus vs kontroversiellt vin~~ (2026-03-28, 144 med spread-data)
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
 
 ## UX — medel insats
-- [ ] Sorteringsval: expert-score, crowd-score, pris
-- [ ] Budget-input till AI-matchern (snabbpills: under 100, 100-200, 200+)
-- [ ] Smakpreferens-filter (fruktigt, torrt, lätt, fylligt)
-- [ ] Visa individuella expert-källor per vin (Suckling: 91, Decanter: 88)
-- [ ] Region-filter (Bordeaux, Toscana, Rioja, Barolo)
-- [ ] Loading skeleton istället för "Laddar..."
-- [ ] Prisfilter premium: 200-300, 300-500, 500+
-- [ ] Prissegmentering på landningssidor (budget, mellanklass, premium)
-- [ ] Komprimera detaljvyn — tydligare hierarki
-- [ ] Smakprofil: verbal descriptor ("fylligt, mörkfruktigt, mjukt")
+- [x] ~~Prisfilter premium: 200-300, 300-500, 500+~~ (2026-03-28)
+- [x] ~~Prissegmentering på landningssidor (budget, mellanklass, premium)~~ (2026-03-28)
+- [x] ~~Komprimera detaljvyn — tydligare hierarki~~ (2026-03-28)
+- [x] ~~Smakprofil: verbal descriptor~~ (2026-03-28)
 
 ## Stora features
 - [ ] Inloggningssystem (email/Google) — synka sparade viner, e-postutskick, personalisering
@@ -51,12 +39,6 @@
 - [ ] Fräschare Wine Enthusiast-data (Kaggle är från 2017)
 - [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
 - [ ] Vinpriser.se deep scrape (594 prissänkta viner)
-
-## Att konfigurera (AKUT)
-- [ ] Deploya workers med CORS-fix: `cd ~/smakfynd/workers/auth && npx wrangler deploy`
-- [ ] Deploya analytics: `cd ~/smakfynd/workers/analytics && npx wrangler deploy`
-- [ ] Deploya wine-ai: `cd ~/smakfynd/workers/wine-ai && npx wrangler deploy`
-- [ ] Sätt ADMIN_KEY: `cd ~/smakfynd/workers/auth && npx wrangler secret put ADMIN_KEY`
 
 ## Att konfigurera
 - [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no` (Dashboard → smakfynd.se → Email → Email Routing)
@@ -75,6 +57,23 @@
 - [ ] "Gabriels val" blogpost: "Viner i mars — test"
 - [ ] Instagram @smakfynd
 - [ ] Reddit/Flashback/Facebook vingrupper
+
+## Klart (session 4 — 2026-03-28)
+- [x] Bugg: prisfilter använder nu PRICES-konstanten istället för hårdkodad array
+- [x] Bugg: Redaktionens val scrollar till #vin/{nr} istället för att söka
+- [x] Bugg: "Gillar du X" har SB ↗-länk till Systembolaget
+- [x] Kritiker: individuella scores visas per vin (pipeline end-to-end)
+- [x] Kritiker: "N av N kritiker ger 85+" social proof-chip
+- [x] UX: eko-antal på filterpill ("Ekologiskt (342)")
+- [x] UX: flytande "tillbaka till toppen"-knapp
+- [x] UX: fler länder i filter (Argentina, Nya Zeeland, Österrike)
+- [x] UX: fler food-keywords (Pasta, Lamm)
+- [x] UX: sorteringsval (expert, crowd, pris ↑↓)
+- [x] UX: budget-pills i AI-matchern (under 100, 100-200, 200+)
+- [x] UX: smakpreferens-filter (Fylligt, Lätt, Fruktigt, Torrt)
+- [x] UX: region-filter (Bordeaux, Toscana, Rioja, m.fl.)
+- [x] UX: loading skeleton istället för spinner
+- [x] Data: validators uppdaterad för critics/num_critics
 
 ## Klart (session 3 — 2026-03-25/26)
 - [x] Babel borta — pre-transpilera vid build (-1.2 MB)

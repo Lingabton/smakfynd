@@ -125,6 +125,11 @@ for p in slim:
     if p.get("style"): m["style"] = p["style"]
     if p.get("region"): m["region"] = p["region"]
     if p.get("expert_source"): m["expert_source"] = p["expert_source"]
+    if p.get("critics"):
+        m["critics"] = [{"c": c["critic"], "s": c["score"]} for c in p["critics"][:6]]
+    if p.get("num_critics"): m["num_critics"] = p["num_critics"]
+    if p.get("critic_spread") is not None: m["critic_spread"] = p["critic_spread"]
+    if p.get("critic_consensus"): m["critic_consensus"] = p["critic_consensus"]
     if p.get("launch_price"): m["launch_price"] = p["launch_price"]
     if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
     mini.append(m)

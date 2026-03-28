@@ -165,6 +165,16 @@ function FoodMatch({ products }) {
       </div>
 
       <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
+        {[["Under 100 kr", "0-100"], ["100–200 kr", "100-200"], ["200+ kr", "200-999"]].map(([l, k]) => (
+          <button key={k} onClick={() => {
+            const cur = meal.replace(/\s*\(budget:.*?\)\s*/g, "").trim();
+            setMeal(cur ? `${cur} (budget: ${k} kr)` : "");
+          }}
+            style={{ padding: "5px 10px", borderRadius: 100, border: `1px solid ${t.green}40`, background: `${t.green}08`, color: t.green, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
+          >{l}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}>
         {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => (
           <button key={s} onClick={() => setMeal(s)}
             style={{ padding: "5px 12px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
