@@ -1,0 +1,13 @@
+name = "smakfynd-report"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "smakfynd-analytics"
+database_id = "ad773eba-86d1-40f0-9091-634662b5b13e"
+
+[triggers]
+crons = ["0 7 * * 1"]  # Every Monday at 07:00 UTC (09:00 CET)
+
+# Set RESEND_API_KEY and REPORT_EMAIL via wrangler secret

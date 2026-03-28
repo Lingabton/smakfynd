@@ -59,7 +59,8 @@ const CATS = [
 ];
 const PRICES = [
   { k:"all", l:"Alla priser" }, { k:"0-79", l:"Under 80 kr" },
-  { k:"80-119", l:"80 – 119 kr" }, { k:"120-199", l:"120 – 199 kr" }, { k:"200-999", l:"200 kr +" },
+  { k:"80-119", l:"80 – 119 kr" }, { k:"120-199", l:"120 – 199 kr" },
+  { k:"200-299", l:"200 – 299 kr" }, { k:"300-499", l:"300 – 499 kr" }, { k:"500-9999", l:"500 kr +" },
 ];
 
 const GABRIELS_PICKS = [
@@ -403,10 +404,10 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
             </div>
           </div>
 
-          {/* Row 2: Price + grape + food */}
+          {/* Row 2: Price + kr/l + grape + food */}
           <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
-            {p.vol && p.price && <span style={{ fontSize: 10, color: t.txF }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
+            {p.vol && p.price && <span style={{ fontSize: 11, fontWeight: 600, color: t.txM, background: t.bg, padding: "1px 6px", borderRadius: 4 }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
             {p.launch_price && p.price_vs_launch_pct > 0 && (
               <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
             )}
@@ -429,7 +430,24 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
             {p.organic && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#2d7a3e10", color: "#2d7a3e" }}>Eko</span>}
             {p.price_vs_launch_pct > 5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.dealL, color: t.deal }}>Prissänkt</span>}
             {p.critics && p.critics.length >= 3 && p.critics.every(cr => cr.s >= 85) && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>{p.critics.length} av {p.num_critics || p.critics.length} kritiker ger 85+</span>}
+            {p.critic_consensus === "stark konsensus" && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>Stark konsensus</span>}
+            {p.critic_consensus === "kontroversiellt" && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#ce6b6b10", color: "#ce6b6b" }}>Delade meningar</span>}
           </div>
+
+          {/* Row 3c: Situation chips */}
+          {(() => {
+            const chips = [];
+            if (p.food_pairings?.some(f => /lamm|grillat|kött/i.test(f)) && p.taste_body >= 7) chips.push("Fynd till grillat");
+            else if (p.food_pairings?.some(f => /fisk|skaldjur/i.test(f)) && p.category === "Vitt") chips.push("Perfekt till fisk");
+            if (p.price <= 100 && p.smakfynd_score >= 70) chips.push("Tryggt vardagsvin");
+            if (p.crowd_reviews >= 10000 && p.crowd_score >= 7.5) chips.push("Tryggt middagsvin");
+            if (p.price >= 200 && p.expert_score >= 8) chips.push("Imponera på middagen");
+            return chips.length > 0 ? (
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 3 }}>
+                {chips.slice(0, 2).map(c => <span key={c} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: `${t.wine}08`, color: t.wine, fontWeight: 500 }}>{c}</span>)}
+              </div>
+            ) : null;
+          })()}
 
           {/* Row 4: Human-readable verdict */}
           <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
@@ -510,32 +528,39 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
           {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 10, lineHeight: 1.5 }}>{p.style}</div>}
 
           <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
-            <ProductImage p={p} size={72} style={{ borderRadius: 10, background: "#faf7f2" }} />
+            <ProductImage p={p} size={56} style={{ borderRadius: 10, background: "#faf7f2" }} />
             <div style={{ flex: 1 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 6 }}>
-                {[["Druva", p.grape], ["Alkohol", p.alc ? `${p.alc}%` : null], ["Volym", `${p.vol} ml`], ["Land", `${p.country}${p.region ? `, ${p.region}` : ""}`]].filter(([_l, v]) => v).map(([l, v], i) => (
-                  <div key={i}>
-                    <div style={{ fontSize: 8, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 1 }}>{l}</div>
-                    <div style={{ fontSize: 12, color: t.txM, fontWeight: 500 }}>{v}</div>
-                  </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", fontSize: 11, color: t.txM, marginBottom: 6 }}>
+                {[p.grape, p.alc ? `${p.alc}%` : null, `${p.vol} ml`, `${p.country}${p.region ? `, ${p.region}` : ""}`].filter(Boolean).map((v, i, arr) => (
+                  <span key={i}>{v}{i < arr.length - 1 ? <span style={{ color: t.bdr, margin: "0 2px" }}>·</span> : ""}</span>
                 ))}
               </div>
               {p.food_pairings?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Passar till</div>
-                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    {p.food_pairings.map((f, i) => <span key={i} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 100, background: t.bg, color: t.txM, border: `1px solid ${t.bdrL}` }}>{f}</span>)}
-                  </div>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {p.food_pairings.map((f, i) => <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 100, background: t.bg, color: t.txM, border: `1px solid ${t.bdrL}` }}>{f}</span>)}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Taste profile */}
+          {/* Taste profile — compact with verbal descriptor */}
           {(p.taste_body || p.taste_fruit || p.taste_sweet != null) && (
             <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 10, background: t.bg }}>
-              <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Smakprofil</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                <span style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em" }}>Smakprofil</span>
+                <span style={{ fontSize: 11, color: t.txM, fontStyle: "italic" }}>{(() => {
+                  const words = [];
+                  if (p.taste_body >= 9) words.push("fylligt");
+                  else if (p.taste_body >= 6) words.push("medelkroppad");
+                  else if (p.taste_body && p.taste_body <= 4) words.push("lätt");
+                  if (p.taste_fruit >= 9) words.push("fruktigt");
+                  else if (p.taste_fruit && p.taste_fruit <= 3) words.push("stramt");
+                  if (p.taste_sweet != null && p.taste_sweet <= 2) words.push("torrt");
+                  else if (p.taste_sweet >= 8) words.push("sött");
+                  return words.length > 0 ? words.join(", ") : null;
+                })()}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
                   ["Lätt", "Fylligt", p.taste_body, 12],
                   ["Stram", "Fruktigt", p.taste_fruit, 12],
@@ -607,6 +632,11 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
                           ))}
                           {p.num_critics > (p.critics || []).length && (
                             <span style={{ fontSize: 9, padding: "2px 6px", color: t.txL }}>+{p.num_critics - p.critics.length} till</span>
+                          )}
+                          {p.critic_spread != null && (
+                            <span style={{ fontSize: 9, padding: "2px 6px", color: p.critic_spread <= 4 ? t.green : p.critic_spread >= 12 ? "#ce6b6b" : t.txL }}>
+                              Spridning: {p.critic_spread}p
+                            </span>
                           )}
                         </div>
                       ) : (
@@ -1893,9 +1923,12 @@ function SmakfyndApp() {
           outline: 2px solid ${t.wine}60;
           outline-offset: 2px;
         }
+        @media (max-width: 480px) {
+          header { padding: 10px 16px 0 !important; }
+        }
       `}</style>
 
-      {/* ═══ HERO — compact ═══ */}
+      {/* ═══ HERO — compact, collapsible on mobile ═══ */}
       <header style={{ padding: "16px 20px 0", maxWidth: 580, margin: "0 auto", animation: "fadeIn 0.4s ease" }}>
         {/* Top bar: Logo + nav */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -2245,8 +2278,9 @@ function SmakfyndApp() {
               ["Bästa röda fynden", "Rött", null, null],
               ["Bästa vita just nu", "Vitt", null, null],
               ["Mest prisvärda bubbel", "Mousserande", null, null],
-              ["Trygga köp under 100 kr", null, 0, 100],
-              ["Mest smak för pengarna 100–200 kr", null, 100, 200],
+              ["Budget: bästa under 100 kr", null, 0, 100],
+              ["Mellanklass: 100–200 kr", null, 100, 200],
+              ["Premium: 200–500 kr", null, 200, 500],
             ].map(([title, catFilter, pLo, pHi]) => {
               const sectionWines = filtered
                 .filter(p => (!catFilter || p.category === catFilter) && (!pLo && !pHi || (p.price >= (pLo||0) && p.price < (pHi||99999))))
@@ -2261,6 +2295,15 @@ function SmakfyndApp() {
                 </div>
               );
             })}
+            {/* CTA → AI matcher */}
+            <div style={{ textAlign: "center", padding: "20px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
+              <div style={{ fontSize: 14, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 6 }}>Vet du vad du ska äta?</div>
+              <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Vår AI matchar rätt vin till din middag.</p>
+              <button onClick={() => { const el = document.getElementById("section-food"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
+                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                Prova AI-matchern ↓
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
