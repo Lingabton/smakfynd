@@ -68,6 +68,7 @@ const known = new Set([
   'organic', 'cat3', 'food_pairings', 'taste_body', 'taste_sweet',
   'taste_fruit', 'taste_bitter', 'style', 'region', 'expert_source',
   'launch_price', 'price_vs_launch_pct', 'is_new',
+  'critics', 'num_critics', 'critic_spread', 'critic_consensus',
 ]);
 const unknownFields = new Set();
 wines.forEach(w => Object.keys(w).forEach(k => { if (!known.has(k)) unknownFields.add(k); }));

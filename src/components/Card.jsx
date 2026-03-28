@@ -1,5 +1,5 @@
 // src/components/Card.jsx
-function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
+function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) {
   const [open, setOpen] = useState(!!autoOpen);
   const handleOpen = () => {
     const next = !open;
@@ -174,7 +174,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
           >
             Systembolaget <span style={{ fontSize: 9 }}>↗</span>
           </a>
-          {sv && <SaveButton nr={p.nr || p.id} sv={sv} />}
+          {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {
               e.stopPropagation();
               track("share", { nr: p.nr, name: p.name });

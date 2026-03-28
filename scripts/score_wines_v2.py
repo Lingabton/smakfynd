@@ -77,6 +77,39 @@ def compute_price_scores(wines):
         # Steeper curve: a wine at half median price → 8.0, at median → 5.5, at double → 1.0
         w['_price_score'] = round(max(1.0, min(10.0, 10.5 - ratio * 5.0)), 1)
 
+# Critic reliability weights based on correlation with crowd scores
+# Higher weight = more aligned with crowd opinion = more trustworthy for value scoring
+CRITIC_WEIGHTS = {
+    "Revista Adega": 1.3,           # r=0.70, strong crowd alignment
+    "Gismondi on Wine": 1.2,        # r=0.62, good alignment
+    "Gilbert & Gaillard": 1.1,      # r=0.50, moderate alignment
+    "Wine Enthusiast": 1.0,         # r=0.33, baseline (largest sample)
+    "James Suckling": 1.0,          # baseline
+    "Falstaff": 1.0,                # baseline
+    "Wine Spectator": 1.0,          # baseline
+    "Decanter": 0.95,               # slight inverse
+    "Decanter World Wine Awards": 0.9,  # r=-0.03, independent
+    "Patricio Tapia - Descorchados": 0.85,  # r=-0.15, inverse
+    "Gambero Rosso": 0.8,           # r=-0.81, strongly inverse
+}
+
+def weighted_expert_score(critics):
+    """Calculate weighted expert score from individual critics."""
+    recognized = [c for c in critics if c.get('recognized') and c.get('score')]
+    if not recognized:
+        return None
+    # Deduplicate by critic name
+    deduped = list({c['critic']: c for c in recognized}.values())
+    if not deduped:
+        return None
+    weighted_sum = 0
+    weight_total = 0
+    for c in deduped:
+        w = CRITIC_WEIGHTS.get(c['critic'], 1.0)
+        weighted_sum += c['score'] * w
+        weight_total += w
+    return weighted_sum / weight_total if weight_total > 0 else None
+
 def critic_consensus(critics):
     """Analyze critic score spread. Returns (bonus, spread, label)."""
     recognized = [c for c in critics if c.get('recognized')]
@@ -179,8 +212,16 @@ def main():
         ws_pts = ws_scores.get(nr)
         we = expert.get(nr, {})
         we_pts = we.get('expert_score')
+        wine_critics = ws_critics.get(nr, [])
 
-        if ws_pts:
+        # Use weighted expert score from individual critics when available
+        ws_weighted = weighted_expert_score(wine_critics) if wine_critics else None
+
+        if ws_weighted:
+            e_pts = ws_weighted
+            e_source = 'Wine-Searcher'
+            n_ws += 1
+        elif ws_pts:
             e_pts = ws_pts
             e_source = 'Wine-Searcher'
             n_ws += 1
@@ -200,7 +241,6 @@ def main():
             continue
 
         # Critic consensus analysis
-        wine_critics = ws_critics.get(nr, [])
         c_bonus, c_spread, c_label = critic_consensus(wine_critics)
 
         sf = smakfynd_score(c10, e10, p10, organic=p.get('organic', False), consensus_bonus=c_bonus)

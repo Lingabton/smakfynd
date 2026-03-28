@@ -20,15 +20,17 @@ function useSaved() {
     try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(next)); } catch(e) {}
   };
 
-  const toggle = (nr, list = "favoriter") => {
+  const toggle = (nr, list = "favoriter", auth) => {
     const next = { ...data };
     const lists = next[nr] || [];
     if (lists.includes(list)) {
       const filtered = lists.filter(l => l !== list);
       if (filtered.length === 0) delete next[nr];
       else next[nr] = filtered;
+      if (auth) auth.removeFromServer(nr, list);
     } else {
       next[nr] = [...lists, list];
+      if (auth) auth.saveToServer(nr, list);
     }
     save(next);
   };

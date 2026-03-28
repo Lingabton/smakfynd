@@ -235,6 +235,29 @@ function FoodMatch({ products }) {
               )}
 
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
+
+              {/* Share wine list */}
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
+                <button onClick={() => {
+                  const lines = courseResults.flatMap(c => {
+                    const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+                    return [...header, ...c.wines.filter(m => m.nr).map(m => {
+                      const p = products.find(pr => String(pr.nr) === String(m.nr));
+                      return p ? `  ${p.name} ${p.sub || ""} — ${p.price}kr (${p.smakfynd_score}/100)` : null;
+                    }).filter(Boolean)];
+                  });
+                  const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;
+                  if (navigator.share) {
+                    navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
+                  } else {
+                    navigator.clipboard?.writeText(text);
+                  }
+                  track("share", { type: "ai_list", meal });
+                }}
+                  style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: t.txM }}>
+                  <span style={{ fontSize: 14 }}>↗</span> Dela vinlista
+                </button>
+              )}
             </div>
           )}
         </div>

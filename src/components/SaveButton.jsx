@@ -1,11 +1,11 @@
 // src/components/SaveButton.jsx
-function SaveButton({ nr, sv }) {
+function SaveButton({ nr, sv, auth }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const saved = sv.isSaved(nr);
   const lists = sv.getLists(nr);
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); track("save", { nr, list: "favoriter" }); } }}
+      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter", auth); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
           display: "inline-flex", alignItems: "center", gap: 4,
@@ -25,7 +25,7 @@ function SaveButton({ nr, sv }) {
         }}>
           <div style={{ padding: "6px 14px 4px", fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.08em" }}>Spara till</div>
           {LISTS.map(list => (
-            <button key={list.k} onClick={e => { e.stopPropagation(); sv.toggle(nr, list.k); }}
+            <button key={list.k} onClick={e => { e.stopPropagation(); sv.toggle(nr, list.k, auth); }}
               style={{
                 display: "flex", alignItems: "center", gap: 8, width: "100%",
                 padding: "8px 14px", border: "none", background: sv.isInList(nr, list.k) ? t.wineL : "transparent",

@@ -116,13 +116,35 @@ export default {
           "INSERT INTO verification_codes (email, code, expires_at) VALUES (?, ?, datetime('now', '+10 minutes'))"
         ).bind(cleanEmail, verifyCode).run();
 
-        // TODO: Send code via email (Resend/SES). For now, return it in response for testing.
-        // In production, remove code from response and send via email only.
+        // Send code via Resend
+        if (env.RESEND_API_KEY) {
+          try {
+            await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: env.FROM_EMAIL || "Smakfynd <onboarding@resend.dev>",
+                to: [cleanEmail],
+                subject: `${verifyCode} — din Smakfynd-kod`,
+                html: `<div style="font-family:-apple-system,sans-serif;max-width:400px;margin:0 auto;padding:24px">
+                  <div style="font-family:Georgia,serif;font-size:22px;color:#7a2332;margin-bottom:16px">Smakfynd</div>
+                  <p style="font-size:14px;color:#4a4238;margin:0 0 16px">Här är din verifieringskod:</p>
+                  <div style="font-size:32px;font-weight:700;letter-spacing:0.3em;text-align:center;padding:16px;background:#f7f3ec;border-radius:12px;color:#1e1710;font-family:monospace">${verifyCode}</div>
+                  <p style="font-size:12px;color:#7a7060;margin:16px 0 0">Koden gäller i 10 minuter. Om du inte försökte logga in kan du ignorera detta mail.</p>
+                </div>`,
+              }),
+            });
+          } catch(e) {
+            console.error("Email send failed:", e);
+          }
+        }
+
         return new Response(JSON.stringify({
           status: "code_sent",
           message: "En verifieringskod har skickats till din email",
-          // TEMP: include code until email sending is set up
-          _dev_code: verifyCode,
         }), { headers });
       }
 
