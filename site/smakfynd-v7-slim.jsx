@@ -283,15 +283,17 @@ function useSaved() {
     try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(next)); } catch(e) {}
   };
 
-  const toggle = (nr, list = "favoriter") => {
+  const toggle = (nr, list = "favoriter", auth) => {
     const next = { ...data };
     const lists = next[nr] || [];
     if (lists.includes(list)) {
       const filtered = lists.filter(l => l !== list);
       if (filtered.length === 0) delete next[nr];
       else next[nr] = filtered;
+      if (auth) auth.removeFromServer(nr, list);
     } else {
       next[nr] = [...lists, list];
+      if (auth) auth.saveToServer(nr, list);
     }
     save(next);
   };
@@ -313,7 +315,7 @@ const SavedContext = React.createContext(null);
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/Card.jsx
-function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
+function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) {
   const [open, setOpen] = useState(!!autoOpen);
   const handleOpen = () => {
     const next = !open;
@@ -488,7 +490,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
           >
             Systembolaget <span style={{ fontSize: 9 }}>↗</span>
           </a>
-          {sv && <SaveButton nr={p.nr || p.id} sv={sv} />}
+          {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {
               e.stopPropagation();
               track("share", { nr: p.nr, name: p.name });
@@ -792,13 +794,13 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen }) {
 // components/SaveButton.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/SaveButton.jsx
-function SaveButton({ nr, sv }) {
+function SaveButton({ nr, sv, auth }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const saved = sv.isSaved(nr);
   const lists = sv.getLists(nr);
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter"); track("save", { nr, list: "favoriter" }); } }}
+      <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter", auth); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
           display: "inline-flex", alignItems: "center", gap: 4,
@@ -818,7 +820,7 @@ function SaveButton({ nr, sv }) {
         }}>
           <div style={{ padding: "6px 14px 4px", fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.08em" }}>Spara till</div>
           {LISTS.map(list => (
-            <button key={list.k} onClick={e => { e.stopPropagation(); sv.toggle(nr, list.k); }}
+            <button key={list.k} onClick={e => { e.stopPropagation(); sv.toggle(nr, list.k, auth); }}
               style={{
                 display: "flex", alignItems: "center", gap: 8, width: "100%",
                 padding: "8px 14px", border: "none", background: sv.isInList(nr, list.k) ? t.wineL : "transparent",
@@ -1492,6 +1494,29 @@ function FoodMatch({ products }) {
               )}
 
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
+
+              {/* Share wine list */}
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
+                <button onClick={() => {
+                  const lines = courseResults.flatMap(c => {
+                    const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+                    return [...header, ...c.wines.filter(m => m.nr).map(m => {
+                      const p = products.find(pr => String(pr.nr) === String(m.nr));
+                      return p ? `  ${p.name} ${p.sub || ""} — ${p.price}kr (${p.smakfynd_score}/100)` : null;
+                    }).filter(Boolean)];
+                  });
+                  const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;
+                  if (navigator.share) {
+                    navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
+                  } else {
+                    navigator.clipboard?.writeText(text);
+                  }
+                  track("share", { type: "ai_list", meal });
+                }}
+                  style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: t.txM }}>
+                  <span style={{ fontSize: 14 }}>↗</span> Dela vinlista
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -2084,7 +2109,7 @@ function SmakfyndApp() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {savedWines
                   .filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter))
-                  .map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
+                  .map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
               </div>
             )}
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
@@ -2290,7 +2315,7 @@ function SmakfyndApp() {
                 <div key={title}>
                   <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} />)}
+                    {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
                   </div>
                 </div>
               );
@@ -2309,11 +2334,11 @@ function SmakfyndApp() {
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.slice(0, 1).map((p, i) => (
               <div key={p.id || i}>
-                <Card p={p} rank={1} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} />
+                <Card p={p} rank={1} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />
                 {!autoOpenNr && <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>}
               </div>
             ))}
-            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} />)}
+            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
                 Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
@@ -2330,6 +2355,127 @@ function SmakfyndApp() {
 
         {/* ═══ REDAKTIONENS VAL ═══ */}
         <div id="section-picks"><EditorsPicks products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} /></div>
+
+        {/* ═══ SÄSONGSINNEHÅLL ═══ */}
+        {(() => {
+          const month = new Date().getMonth(); // 0-11
+          const season = month >= 4 && month <= 8 ? "sommar" : month >= 2 && month <= 4 ? "vår" : month >= 9 && month <= 10 ? "höst" : "vinter";
+          const seasonConfig = {
+            vår: { title: "Vårviner", sub: "Lätta, friska viner för ljusare kvällar", emoji: "🌸", filter: p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 7 },
+            sommar: { title: "Sommarviner", sub: "Kylda favoriter till grillkvällar och picknick", emoji: "☀️", filter: p => (p.category === "Vitt" || p.category === "Rosé" || p.category === "Mousserande") && p.price <= 200 },
+            höst: { title: "Höstviner", sub: "Fylliga röda till mörka kvällar", emoji: "🍂", filter: p => p.category === "Rött" && (p.taste_body || 0) >= 7 },
+            vinter: { title: "Vinterviner", sub: "Värmande röda och festliga bubbel", emoji: "❄️", filter: p => (p.category === "Rött" && (p.taste_body || 0) >= 8) || p.category === "Mousserande" },
+          };
+          const cfg = seasonConfig[season];
+          const seasonWines = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && cfg.filter(p)).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 4);
+          if (seasonWines.length === 0) return null;
+          return (
+            <div style={{ marginTop: 40 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 20 }}>{cfg.emoji}</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{cfg.title}</h3>
+                  <p style={{ margin: 0, fontSize: 12, color: t.txL }}>{cfg.sub}</p>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {seasonWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ═══ SITUATIONER ═══ */}
+        <div style={{ marginTop: 40 }}>
+          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Hitta vin till tillfället</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {[
+              ["Dejt", "Romantisk middag", "🕯️", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
+              ["Grillkväll", "Sommar & BBQ", "🔥", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
+              ["Svärföräldrarna", "Tryggt & imponerande", "🎩", p => p.expert_score >= 7.5 && p.crowd_score >= 7 && p.price >= 150],
+              ["Fredagsmys", "Under 120 kr", "🍕", p => p.price <= 120 && p.smakfynd_score >= 70],
+              ["Picknick", "Lätt & friskt", "🧺", p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 6],
+              ["After work", "Bubbel & lättviner", "🥂", p => p.category === "Mousserande" || ((p.taste_body || 12) <= 5 && p.category === "Vitt")],
+            ].map(([title, sub, emoji, filterFn]) => {
+              const matches = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && filterFn(p)).slice(0, 3);
+              return (
+                <button key={title} onClick={() => { setSearch(""); setCat("all"); setShowAdvanced(false);
+                  const best = matches[0]; if (best) { window.location.hash = `vin/${best.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }
+                }}
+                  style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = t.bdr}
+                >
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>{emoji}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{title}</div>
+                  <div style={{ fontSize: 11, color: t.txL }}>{sub}</div>
+                  <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>{matches.length} viner</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ═══ PRESENT-SEKTION ═══ */}
+        <div style={{ marginTop: 40 }}>
+          <h3 style={{ margin: "0 0 6px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Ge bort vin</h3>
+          <p style={{ margin: "0 0 14px", fontSize: 12, color: t.txL }}>Kurerade val per budget — trygga presenter.</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              ["Under 100 kr", 0, 100, "Trevlig gest"],
+              ["100–200 kr", 100, 200, "Uppskattad present"],
+              ["200–400 kr", 200, 400, "Lyxig gåva"],
+            ].map(([label, lo, hi, desc]) => {
+              const picks = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.expert_score >= 7).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 3);
+              if (picks.length === 0) return null;
+              return (
+                <div key={label} style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{label}</span>
+                    <span style={{ fontSize: 11, color: t.txL }}>{desc}</span>
+                  </div>
+                  {picks.map((p, i) => (
+                    <div key={i} onClick={() => { window.location.hash = `vin/${p.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", cursor: "pointer", borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none" }}>
+                      <span style={{ fontSize: 13, color: t.txM }}>{p.name} <span style={{ color: t.txL }}>{p.sub}</span></span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{p.price}kr</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ═══ NYBÖRJARGUIDE ═══ */}
+        <div style={{ marginTop: 40, padding: "24px 20px", borderRadius: 18, background: t.card, border: `1px solid ${t.bdr}` }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Ny på vin?</div>
+          <h3 style={{ margin: "0 0 8px", fontSize: 20, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Börja här</h3>
+          <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.6 }}>
+            Du behöver inte kunna något om vin. Smakfynd har redan gjort jobbet — vi har analyserat tusentals viner och rankat dem efter kvalitet per krona. Högst poäng = mest smak för pengarna.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              ["1. Börja med ett rött under 100 kr", "Rött", 0, 100, "Tryggt och prisvärt — de flesta gillar dessa."],
+              ["2. Testa ett vitt till fisk eller kyckling", "Vitt", 0, 150, "Fräscht och enkelt — passar till vardagsmiddag."],
+              ["3. Prova bubbel till fredagen", "Mousserande", 0, 200, "Inte bara för fest — perfekt till fredagsmys."],
+            ].map(([title, cat, lo, hi, tip]) => {
+              const pick = products.find(p => p.category === cat && p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.smakfynd_score >= 70);
+              return (
+                <div key={title} style={{ padding: "12px 14px", borderRadius: 12, background: t.bg }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: t.tx, marginBottom: 4 }}>{title}</div>
+                  <p style={{ fontSize: 12, color: t.txL, margin: "0 0 6px" }}>{tip}</p>
+                  {pick && (
+                    <div onClick={() => { window.location.hash = `vin/${pick.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      style={{ fontSize: 12, color: t.wine, cursor: "pointer", fontWeight: 600 }}>
+                      Vårt tips: {pick.name} ({pick.price}kr, {pick.smakfynd_score}/100) →
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{

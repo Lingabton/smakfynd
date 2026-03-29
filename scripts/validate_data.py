@@ -23,6 +23,7 @@ OPTIONAL_FIELDS = {
     "launch_price": (int, float), "price_vs_launch_pct": (int, float),
     "is_new": bool, "critics": list, "num_critics": (int, float),
     "critic_spread": (int, float), "critic_consensus": str,
+    "insight": str,
 }
 
 def validate(path):

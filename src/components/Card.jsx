@@ -135,12 +135,16 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             ) : null;
           })()}
 
-          {/* Row 4: Human-readable verdict */}
-          <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
+          {/* Row 4: Contextual insight + verdict */}
+          {p.insight && (
+            <div style={{ marginTop: 5, fontSize: 11, color: t.wine, lineHeight: 1.4, fontWeight: 500 }}>
+              {p.insight}
+            </div>
+          )}
+          <div style={{ marginTop: p.insight ? 2 : 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
             {(() => {
               const c = p.crowd_score || 0, e = p.expert_score || 0, pr = p.price_score || 0;
               const rev = p.crowd_reviews || 0;
-              // Generate a natural, specific verdict
               if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
               if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
               if (c >= 8.0) return "Mycket omtyckt bland vindrickare";

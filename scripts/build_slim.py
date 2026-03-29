@@ -134,6 +134,103 @@ for p in slim:
     if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
     mini.append(m)
 
+# ── Generate contextual insights ──
+# Group by category for comparisons
+by_cat = {}
+for m in mini:
+    cat = m.get("type", "")
+    by_cat.setdefault(cat, []).append(m)
+
+# Sort each category by score descending
+for cat in by_cat:
+    by_cat[cat].sort(key=lambda x: -x.get("smakfynd_score", 0))
+
+# Pre-compute rankings
+by_country_cat = {}
+for m in mini:
+    key = (m.get("country", ""), m.get("type", ""))
+    by_country_cat.setdefault(key, []).append(m)
+for key in by_country_cat:
+    by_country_cat[key].sort(key=lambda x: -x.get("smakfynd_score", 0))
+
+# Reviews ranking
+by_reviews = sorted([m for m in mini if m.get("crowd_reviews")], key=lambda x: -x.get("crowd_reviews", 0))
+top_reviewed_nrs = set(m["nr"] for m in by_reviews[:20])
+
+n_insights = 0
+for m in mini:
+    if m.get("assortment") != "Fast sortiment":
+        continue
+    cat = m.get("type", "")
+    price = m.get("price", 0)
+    crowd = m.get("crowd_score", 0)
+    expert = m.get("expert_score", 0)
+    score = m.get("smakfynd_score", 0)
+    reviews = m.get("crowd_reviews", 0)
+    country = m.get("country", "")
+
+    insights = []
+
+    # 1. Price comparison — find expensive wine with similar/lower crowd score
+    if crowd and crowd >= 7.0 and price <= 200:
+        cat_wines = by_cat.get(cat, [])
+        expensive_match = None
+        for w in cat_wines:
+            if w["nr"] == m["nr"]:
+                continue
+            wp = w.get("price", 0)
+            wc = w.get("crowd_score", 0)
+            if wp >= price * 3 and wc and wc <= crowd + 0.3 and wc >= crowd - 0.5 and wp >= 300:
+                expensive_match = w
+                break
+        if expensive_match:
+            insights.append(f'Crowd ger {crowd}/10 — jämförbart med {expensive_match["name"]} ({int(expensive_match["price"])} kr)')
+
+    # 2. Category rank in price bracket
+    if price < 100:
+        bracket = [w for w in by_cat.get(cat, []) if w.get("price", 0) < 100 and w.get("assortment") == "Fast sortiment"]
+    elif price < 200:
+        bracket = [w for w in by_cat.get(cat, []) if 100 <= w.get("price", 0) < 200 and w.get("assortment") == "Fast sortiment"]
+    elif price < 300:
+        bracket = [w for w in by_cat.get(cat, []) if 200 <= w.get("price", 0) < 300 and w.get("assortment") == "Fast sortiment"]
+    else:
+        bracket = []
+    if bracket:
+        rank = next((i for i, w in enumerate(bracket) if w["nr"] == m["nr"]), None)
+        if rank is not None and rank == 0:
+            cat_names = {"Rött": "röda", "Vitt": "vita", "Rosé": "rosé", "Mousserande": "bubbel"}
+            price_label = "under 100 kr" if price < 100 else "100–200 kr" if price < 200 else "200–300 kr"
+            cn = cat_names.get(cat, "viner")
+            insights.append(f"Bästa {cn} {price_label}")
+
+    # 3. Country champion
+    country_key = (country, cat)
+    country_wines = by_country_cat.get(country_key, [])
+    fast_country = [w for w in country_wines if w.get("assortment") == "Fast sortiment"]
+    if fast_country and fast_country[0]["nr"] == m["nr"] and len(fast_country) >= 3:
+        cat_names = {"Rött": "röda", "Vitt": "vita", "Rosé": "rosé", "Mousserande": "bubbel"}
+        cn = cat_names.get(cat, "")
+        if cn:
+            insights.append(f"Bästa {country.lower()}ska {cn} i sortimentet")
+
+    # 4. Top reviewed
+    if m["nr"] in top_reviewed_nrs:
+        r_str = f"{reviews // 1000}k" if reviews >= 1000 else str(reviews)
+        insights.append(f"{r_str} omdömen — bland de mest testade på SB")
+
+    # 5. Expert vs crowd divergence
+    if expert and crowd:
+        if expert >= crowd + 1.0:
+            insights.append("Experterna värderar det högre än crowd")
+        elif crowd >= expert + 1.5:
+            insights.append("Populärare bland vanliga drickare än hos kritiker")
+
+    if insights:
+        m["insight"] = insights[0]  # Keep the most relevant one
+        n_insights += 1
+
+print(f"Insights: {n_insights} wines got contextual insights")
+
 # Remove None values to save space
 for m in mini:
     for k in list(m.keys()):
