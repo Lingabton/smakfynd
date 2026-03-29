@@ -243,9 +243,12 @@ function SmakfyndApp() {
           </div>
         </div>
 
-        {/* Tagline — one line */}
-        <p style={{ margin: "0 0 10px", fontSize: 13, color: t.txM, textAlign: "center" }}>
+        {/* Tagline */}
+        <p style={{ margin: "0 0 4px", fontSize: 13, color: t.txM, textAlign: "center" }}>
           {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner rankade efter kvalitet per krona
+        </p>
+        <p style={{ margin: "0 0 10px", fontSize: 11, color: t.txL, textAlign: "center", lineHeight: 1.5 }}>
+          Vi kombinerar betyg från hundratusentals vindrickare och erkända kritiker med priset — så du hittar vinerna som ger mest smak för pengarna.
         </p>
       </header>
 
