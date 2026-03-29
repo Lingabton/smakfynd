@@ -451,12 +451,16 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             ) : null;
           })()}
 
-          {/* Row 4: Human-readable verdict */}
-          <div style={{ marginTop: 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
+          {/* Row 4: Contextual insight + verdict */}
+          {p.insight && (
+            <div style={{ marginTop: 5, fontSize: 11, color: t.wine, lineHeight: 1.4, fontWeight: 500 }}>
+              {p.insight}
+            </div>
+          )}
+          <div style={{ marginTop: p.insight ? 2 : 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
             {(() => {
               const c = p.crowd_score || 0, e = p.expert_score || 0, pr = p.price_score || 0;
               const rev = p.crowd_reviews || 0;
-              // Generate a natural, specific verdict
               if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
               if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
               if (c >= 8.0) return "Mycket omtyckt bland vindrickare";
@@ -1149,10 +1153,101 @@ function WeeklyPick({ products }) {
 
   if (!pick) return null;
 
+  const [_label, scoreCol] = getScoreInfo(pick.smakfynd_score);
+  const foodStr = (pick.food_pairings || []).slice(0, 3).join(", ");
+  const sbUrl = `https://www.systembolaget.se/produkt/vin/${pick.nr}`;
+
   return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Veckans fynd</div>
-      <Card p={pick} rank={1} delay={0} allProducts={products} />
+    <div style={{
+      margin: "0 -16px 24px", padding: "32px 28px",
+      background: "linear-gradient(165deg, #1a1510 0%, #2a2118 40%, #1e1814 100%)",
+      borderRadius: 20, position: "relative", overflow: "hidden",
+    }}>
+      {/* Subtle wine-colored glow */}
+      <div style={{
+        position: "absolute", top: -40, right: -40, width: 160, height: 160,
+        borderRadius: "50%", background: `radial-gradient(circle, ${t.wine}18, transparent 70%)`,
+        pointerEvents: "none",
+      }} />
+
+      {/* Label */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, position: "relative" }}>
+        <div style={{ width: 3, height: 18, borderRadius: 2, background: t.gold }} />
+        <span style={{ fontSize: 10, fontWeight: 800, color: t.gold, textTransform: "uppercase", letterSpacing: "0.16em" }}>Veckans fynd</span>
+      </div>
+
+      {/* Main content */}
+      <div style={{ display: "flex", gap: 20, alignItems: "flex-start", position: "relative" }}>
+        {/* Large product image */}
+        <ProductImage p={pick} size={100} style={{ borderRadius: 14, background: "#2a2520", border: "1px solid rgba(255,255,255,0.06)" }} />
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3 style={{
+            margin: 0, fontSize: 24, fontFamily: "'Instrument Serif', Georgia, serif",
+            fontWeight: 400, color: "#f5ede3", lineHeight: 1.15,
+          }}>{pick.name}</h3>
+          <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9e9588" }}>
+            {pick.sub} · {pick.country}{pick.region ? `, ${pick.region}` : ""}
+          </p>
+
+          {/* Price + score side by side */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 12 }}>
+            <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: "#f5ede3" }}>
+              {pick.price}<span style={{ fontSize: 14, fontWeight: 400, color: "#9e9588" }}>kr</span>
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="38" height="38" viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+                <circle cx="25" cy="25" r="22" fill="none" stroke="#b08d40" strokeWidth="2.5"
+                  strokeDasharray={`${pick.smakfynd_score * 1.38} 138`} strokeLinecap="round"
+                  transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 1s ease" }} />
+                <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                  fontSize="17" fontWeight="900" fill="#b08d40">{pick.smakfynd_score}</text>
+              </svg>
+            </div>
+          </div>
+
+          {/* Score bars — inverted colors */}
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
+            {pick.crowd_score && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 10, color: "#6b6355", width: 44, textAlign: "right" }}>Crowd</span>
+                <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                  <div style={{ width: `${pick.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce", animation: "fillBar 1s ease 0.3s both" }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#6b8cce", minWidth: 24, textAlign: "right" }}>{pick.crowd_score.toFixed(1)}</span>
+              </div>
+            )}
+            {pick.expert_score && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 10, color: "#6b6355", width: 44, textAlign: "right" }}>Expert</span>
+                <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                  <div style={{ width: `${pick.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b", animation: "fillBar 1s ease 0.5s both" }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#b07d3b", minWidth: 24, textAlign: "right" }}>{pick.expert_score.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Food + reason */}
+          {foodStr && <p style={{ margin: "10px 0 0", fontSize: 11, color: "#6b6355" }}>Passar till {foodStr}</p>}
+
+          {/* CTA */}
+          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+            <a href={sbUrl} target="_blank" rel="noopener noreferrer"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "8px 16px", borderRadius: 8,
+                background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
+                color: "#f5ede3", fontSize: 12, fontWeight: 600, textDecoration: "none",
+                boxShadow: `0 2px 8px ${t.wine}30`,
+              }}>
+              Köp på Systembolaget <span style={{ fontSize: 10 }}>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1202,34 +1297,50 @@ function QuickFilters({ onFilter }) {
 function EditorsPicks({ products, onSelect }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 20 }}>
       <button onClick={() => setOpen(!open)}
         style={{
-          width: "100%", padding: "12px 16px", borderRadius: 12,
+          width: "100%", padding: "16px 20px", borderRadius: 16,
           background: t.card, border: `1px solid ${t.bdr}`,
           cursor: "pointer", fontFamily: "inherit", textAlign: "left",
           display: "flex", alignItems: "center", justifyContent: "space-between",
+          boxShadow: open ? t.sh2 : t.sh1,
+          transition: "all 0.25s ease",
         }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 14 }}>🍷</span>
-          <span style={{ fontSize: 13, color: t.tx }}>
-            <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}>Redaktionens val</strong>
-            <span style={{ color: t.txL }}> — 3 utvalda fynd vi testat och gillar</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: `linear-gradient(135deg, ${t.wine}18, ${t.wine}08)`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 15,
+          }}>🍷</div>
+          <span style={{ fontSize: 14, color: t.tx }}>
+            <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic" }}>Gabriels val</strong>
+            <span style={{ color: t.txL, fontSize: 12 }}> — utvalda fynd vi testat</span>
           </span>
         </div>
         <span style={{ fontSize: 10, color: t.txL, transition: "transform 0.2s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
       </button>
       {open && (
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
           {GABRIELS_PICKS.map((pick, i) => {
             const mp = products.find(pr => String(pr.nr) === String(pick.nr));
             const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
             return (
-              <div key={i} style={{ padding: "14px 16px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default" }}
+              <div key={i}
+                style={{
+                  padding: "20px 20px", borderRadius: 16, background: t.card,
+                  border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default",
+                  position: "relative", overflow: "hidden",
+                  animation: `slideUp 0.3s ease ${i * 0.1}s both`,
+                }}
                 onClick={() => mp && onSelect(mp.nr || pick.nr)}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{pick.verdict}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <svg width="40" height="40" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
+                {/* Accent line */}
+                <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", background: `linear-gradient(180deg, ${t.wine}, ${t.wine}40)`, borderRadius: "4px 0 0 4px" }} />
+
+                <div style={{ fontSize: 9, fontWeight: 800, color: t.wine, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>{pick.verdict}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <svg width="48" height="48" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
                     <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
                     <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
                     <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
@@ -1239,12 +1350,18 @@ function EditorsPicks({ products, onSelect }) {
                       fontSize="17" fontWeight="900" fill="#2d6b3f">{pick.smakfynd_score}</text>
                   </svg>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx }}>{pick.name}</div>
-                    <div style={{ fontSize: 11, color: t.txL }}>{pick.sub} · {pick.price}</div>
+                    <div style={{ fontSize: 18, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
+                    <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{pick.sub} · {pick.price}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 12, color: t.txM, lineHeight: 1.5, margin: "8px 0 0", fontStyle: "italic" }}>{pick.note}</p>
-                {mp && <div style={{ fontSize: 10, color: t.wine, marginTop: 6 }}>Klicka för att se fullständig profil →</div>}
+                {/* Pull-quote style note */}
+                <p style={{
+                  fontSize: 13, color: t.txM, lineHeight: 1.6, margin: "12px 0 0",
+                  fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic",
+                  paddingLeft: 14, borderLeft: `2px solid ${t.bdrL}`,
+                }}>"{pick.note}"</p>
+                {pick.food && <div style={{ fontSize: 11, color: t.txL, marginTop: 8 }}>Passar till: {pick.food}</div>}
+                {mp && <div style={{ fontSize: 11, color: t.wine, marginTop: 8, fontWeight: 500 }}>Se fullständig profil →</div>}
               </div>
             );
           })}
@@ -1399,12 +1516,22 @@ function FoodMatch({ products }) {
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
 
   return (
-    <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 18 }}>🍽</span>
+    <div style={{
+      padding: "28px 24px", borderRadius: 20, marginBottom: 24,
+      background: "linear-gradient(160deg, #fdfbf7 0%, #f8f0e8 50%, #f5ede3 100%)",
+      border: `1px solid ${t.bdr}`,
+      boxShadow: "0 4px 20px rgba(139,35,50,0.04)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 12,
+          background: `linear-gradient(135deg, ${t.wine}15, ${t.wine}08)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 20,
+        }}>🍽</div>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>Kvällens middag?</div>
-          <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta — vi föreslår vinet.</div>
+          <div style={{ fontSize: 18, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", color: t.tx }}>Kvällens middag?</div>
+          <div style={{ fontSize: 12, color: t.txL }}>Beskriv din måltid — vi matchar vinet.</div>
         </div>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
@@ -1444,9 +1571,13 @@ function FoodMatch({ products }) {
       </div>
 
       {loading && (
-        <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
-          <div style={{ fontSize: 24, marginBottom: 6 }}>🍷</div>
-          <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid...</div>
+        <div style={{ textAlign: "center", padding: "24px 0", color: t.txL }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 10 }}>
+            {["🍷", "🥂", "🍾"].map((glass, i) => (
+              <span key={i} style={{ fontSize: 22, animation: `dotPulse 1.2s ease ${i * 0.3}s infinite` }}>{glass}</span>
+            ))}
+          </div>
+          <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", color: t.txM }}>Analyserar din måltid...</div>
         </div>
       )}
 
@@ -1937,6 +2068,11 @@ function SmakfyndApp() {
         @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         @keyframes scaleIn { from { opacity:0; transform:scale(0.97) } to { opacity:1; transform:scale(1) } }
+        @keyframes countUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes heroReveal { from { opacity:0; transform:translateY(20px) scale(0.98) } to { opacity:1; transform:translateY(0) scale(1) } }
+        @keyframes glowPulse { 0%,100% { box-shadow: 0 0 20px rgba(139,35,50,0.08) } 50% { box-shadow: 0 0 40px rgba(139,35,50,0.15) } }
+        @keyframes fillBar { from { width: 0% } }
+        @keyframes dotPulse { 0%,100% { opacity:0.3 } 50% { opacity:1 } }
         ::selection { background: ${t.wine}20 }
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
@@ -1948,17 +2084,24 @@ function SmakfyndApp() {
           outline: 2px solid ${t.wine}60;
           outline-offset: 2px;
         }
+        [role="button"]:hover { transform: translateY(-1px); }
         @media (max-width: 480px) {
           header { padding: 10px 16px 0 !important; }
         }
       `}</style>
 
-      {/* ═══ HERO — compact, collapsible on mobile ═══ */}
-      <header style={{ padding: "16px 20px 0", maxWidth: 580, margin: "0 auto", animation: "fadeIn 0.4s ease" }}>
+      {/* ═══ HERO — cinematic header ═══ */}
+      <header style={{
+        padding: "0 20px", maxWidth: 580, margin: "0 auto",
+        animation: "heroReveal 0.6s ease both",
+      }}>
         {/* Top bar: Logo + nav */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0 0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
+            <svg width="28" height="28" viewBox="0 0 40 40" style={{ animation: "fadeIn 0.8s ease 0.2s both" }}>
+              <circle cx="20" cy="20" r="19" fill={t.wine}/>
+              <text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text>
+            </svg>
             <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
           </div>
           <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
@@ -1980,10 +2123,44 @@ function SmakfyndApp() {
           </div>
         </div>
 
-        {/* Tagline — one line */}
-        <p style={{ margin: "0 0 10px", fontSize: 13, color: t.txM, textAlign: "center" }}>
-          {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner rankade efter kvalitet per krona
-        </p>
+        {/* Hero headline */}
+        <div style={{ textAlign: "center", padding: "28px 0 20px" }}>
+          <h1 style={{
+            margin: 0, fontSize: 36, lineHeight: 1.1,
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontWeight: 400, fontStyle: "italic", color: t.tx,
+            animation: "heroReveal 0.7s ease 0.15s both",
+            letterSpacing: "-0.01em",
+          }}>
+            {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner.
+            <br />
+            <span style={{ color: t.wine }}>Vi hittade de bästa köpen.</span>
+          </h1>
+
+          {/* Animated stats row */}
+          <div style={{
+            display: "flex", justifyContent: "center", gap: 24, marginTop: 18,
+            animation: "countUp 0.5s ease 0.4s both",
+          }}>
+            {[
+              [reviewsStr, "omdömen"],
+              [String(countries), "länder"],
+              ["3", "datakällor"],
+            ].map(([num, label], i) => (
+              <div key={i} style={{ textAlign: "center", animation: `countUp 0.4s ease ${0.5 + i * 0.1}s both` }}>
+                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>{num}</div>
+                <div style={{ fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Subtle divider */}
+          <div style={{
+            width: 40, height: 2, borderRadius: 1,
+            background: `linear-gradient(90deg, transparent, ${t.wine}40, transparent)`,
+            margin: "18px auto 0",
+          }} />
+        </div>
       </header>
 
       <div style={{ maxWidth: 580, margin: "0 auto", padding: "24px 16px 80px" }}>
@@ -2313,7 +2490,10 @@ function SmakfyndApp() {
               if (sectionWines.length === 0) return null;
               return (
                 <div key={title}>
-                  <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 12px" }}>
+                    <div style={{ width: 3, height: 20, borderRadius: 2, background: t.wine }} />
+                    <h3 style={{ margin: 0, fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: t.tx }}>{title}</h3>
+                  </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
                   </div>
@@ -2333,7 +2513,13 @@ function SmakfyndApp() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.slice(0, 1).map((p, i) => (
-              <div key={p.id || i}>
+              <div key={p.id || i} style={{ position: "relative" }}>
+                {/* Gold accent for #1 */}
+                <div style={{
+                  position: "absolute", top: 0, left: 20, right: 20, height: 3, zIndex: 1,
+                  borderRadius: "0 0 3px 3px",
+                  background: "linear-gradient(90deg, transparent, #b08d40, #d4a84b, #b08d40, transparent)",
+                }} />
                 <Card p={p} rank={1} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />
                 {!autoOpenNr && <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>}
               </div>
@@ -2386,9 +2572,12 @@ function SmakfyndApp() {
         })()}
 
         {/* ═══ SITUATIONER ═══ */}
-        <div style={{ marginTop: 40 }}>
-          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Hitta vin till tillfället</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        <div style={{ marginTop: 44 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 16px" }}>
+            <div style={{ width: 3, height: 20, borderRadius: 2, background: t.wine }} />
+            <h3 style={{ margin: 0, fontSize: 20, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: t.tx }}>Hitta vin till tillfället</h3>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[
               ["Dejt", "Romantisk middag", "🕯️", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
               ["Grillkväll", "Sommar & BBQ", "🔥", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
@@ -2402,14 +2591,19 @@ function SmakfyndApp() {
                 <button key={title} onClick={() => { setSearch(""); setCat("all"); setShowAdvanced(false);
                   const best = matches[0]; if (best) { window.location.hash = `vin/${best.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }
                 }}
-                  style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = t.bdr}
+                  style={{
+                    padding: "18px 18px", borderRadius: 16, background: t.card,
+                    border: `1px solid ${t.bdrL}`, cursor: "pointer", textAlign: "left",
+                    fontFamily: "inherit", transition: "all 0.25s ease",
+                    boxShadow: t.sh1,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.boxShadow = t.sh2; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.boxShadow = t.sh1; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
-                  <div style={{ fontSize: 20, marginBottom: 4 }}>{emoji}</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{title}</div>
-                  <div style={{ fontSize: 11, color: t.txL }}>{sub}</div>
-                  <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>{matches.length} viner</div>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{emoji}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{title}</div>
+                  <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{sub}</div>
+                  <div style={{ fontSize: 10, color: t.txF, marginTop: 6, fontWeight: 500 }}>{matches.length} viner →</div>
                 </button>
               );
             })}
@@ -2479,24 +2673,32 @@ function SmakfyndApp() {
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{
-          marginTop: 40, padding: "28px 24px", borderRadius: 18,
-          background: t.card, border: `1px solid ${t.bdr}`,
-          textAlign: "center",
+          marginTop: 44, padding: "36px 28px", borderRadius: 20,
+          background: "linear-gradient(165deg, #1a1510 0%, #2a2118 50%, #1e1814 100%)",
+          textAlign: "center", position: "relative", overflow: "hidden",
         }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Nyhetsbrev</div>
-          <h3 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Veckans bästa köp</h3>
-          <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.5 }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
+          {/* Subtle glow */}
+          <div style={{
+            position: "absolute", bottom: -30, left: "50%", transform: "translateX(-50%)",
+            width: 200, height: 100, borderRadius: "50%",
+            background: `radial-gradient(circle, ${t.wine}15, transparent 70%)`,
+            pointerEvents: "none",
+          }} />
+          <div style={{ fontSize: 10, fontWeight: 800, color: t.gold, textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 10, position: "relative" }}>Nyhetsbrev</div>
+          <h3 style={{ margin: "0 0 8px", fontSize: 26, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: "#f5ede3", position: "relative" }}>Veckans bästa köp</h3>
+          <p style={{ fontSize: 13, color: "#9e9588", margin: "0 0 20px", lineHeight: 1.5, position: "relative" }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
           <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
             style={{
-              display: "inline-block", padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer",
+              display: "inline-block", padding: "14px 32px", borderRadius: 12, border: "none", cursor: "pointer",
               background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#fff", fontSize: 14, fontWeight: 600, textDecoration: "none",
-              boxShadow: `0 2px 8px ${t.wine}25`, transition: "opacity 0.2s",
+              color: "#f5ede3", fontSize: 14, fontWeight: 600, textDecoration: "none",
+              boxShadow: `0 4px 16px ${t.wine}40`, transition: "all 0.2s",
+              position: "relative",
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >Prenumerera på Substack ↗</a>
-          <p style={{ fontSize: 11, color: t.txL, margin: "10px 0 0" }}>Gratis. Avsluta när du vill.</p>
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 6px 20px ${t.wine}50`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}40`; }}
+          >Prenumerera gratis ↗</a>
+          <p style={{ fontSize: 11, color: "#6b6355", margin: "12px 0 0", position: "relative" }}>Avsluta när du vill.</p>
         </div>
 
         {/* ═══ FOOTER ═══ */}
