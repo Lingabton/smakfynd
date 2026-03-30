@@ -2086,7 +2086,7 @@ function SmakfyndApp() {
             animation: "heroReveal 0.7s ease 0.15s both",
             letterSpacing: "-0.01em",
           }}>
-            {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner.
+            Hela Systembolagets sortiment.
             <br />
             <span style={{ color: t.wine }}>Vi hittade de bästa köpen.</span>
           </h1>
@@ -2106,7 +2106,7 @@ function SmakfyndApp() {
             {[
               [reviewsStr, "omdömen"],
               [String(countries), "länder"],
-              ["3", "datakällor"],
+              ["100%", "av SB:s sortiment"],
             ].map(([num, label], i) => (
               <div key={i} style={{ textAlign: "center", animation: `countUp 0.4s ease ${0.5 + i * 0.1}s both` }}>
                 <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>{num}</div>

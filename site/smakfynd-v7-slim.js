@@ -4084,7 +4084,7 @@ function SmakfyndApp() {
       animation: "heroReveal 0.7s ease 0.15s both",
       letterSpacing: "-0.01em"
     }
-  }, products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : "", " viner.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+  }, "Hela Systembolagets sortiment.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
     style: {
       color: t.wine
     }
@@ -4104,7 +4104,7 @@ function SmakfyndApp() {
       marginTop: 18,
       animation: "countUp 0.5s ease 0.4s both"
     }
-  }, [[reviewsStr, "omdömen"], [String(countries), "länder"], ["3", "datakällor"]].map(([num, label], i) => /*#__PURE__*/React.createElement("div", {
+  }, [[reviewsStr, "omdömen"], [String(countries), "länder"], ["100%", "av SB:s sortiment"]].map(([num, label], i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       textAlign: "center",
