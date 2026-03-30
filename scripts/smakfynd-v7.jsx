@@ -328,7 +328,30 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
-  const foodIcons = { "Nöt": "🥩", "Lamm": "🐑", "Fläsk": "🥓", "Fisk": "🐟", "Skaldjur": "🦐", "Kyckling": "🍗", "Vilt": "🦌", "Ost": "🧀", "Pasta": "🍝", "Sallad": "🥗", "Grillat": "🔥" };
+  // Systembolaget-style monochrome food SVG icons (18x18)
+  const foodSvg = (type) => {
+    const paths = {
+      "Nöt": "M4 13c0-2 1.5-4 3-5s3.5-1.5 5-1.5 3.5.5 5 1.5 3 3 3 5-1 3-3 3H7c-2 0-3-1-3-3z",
+      "Kött": "M4 13c0-2 1.5-4 3-5s3.5-1.5 5-1.5 3.5.5 5 1.5 3 3 3 5-1 3-3 3H7c-2 0-3-1-3-3z",
+      "Lamm": "M5 14c-.5-1.5 0-3 1-4.5S8 7 9 6.5s2.5-.5 3.5 0 2 1.5 2.5 3 .5 3-.5 4-2.5 2-4 2-3 0-4-.5-1-1-1.5-1z",
+      "Fläsk": "M3 11c0-1.5.5-3 2-4s3.5-1.5 5-1.5 4 .5 5 1.5 2 2.5 2 4-.5 3-2 3.5S12 15 10 15s-4.5-.5-5.5-1S3 12.5 3 11z",
+      "Fisk": "M2 9c1-2 3-3.5 5.5-3.5S12 7 13.5 9c-1.5 2-3.5 3.5-6 3.5S3 11 2 9zm10-1a1 1 0 100 2 1 1 0 000-2zM15 7l2-2m-2 6l2 2",
+      "Skaldjur": "M5 12c0-2 1.5-4 4-5s5-.5 6 1-1 4-3 5-4.5 1-6 0-1-1-1-1zm3-5c-1-2 0-4 2-4s3 2 2 4",
+      "Kyckling": "M6 14c-.5-2 .5-4 2-5.5S11.5 7 13 7.5s2.5 2 2.5 3.5-.5 3-2 3.5-3.5.5-5 0S6.5 13 6 14zm5-8c0-1.5 1-3 2-3s1.5 1.5 1 3",
+      "Fågel": "M6 14c-.5-2 .5-4 2-5.5S11.5 7 13 7.5s2.5 2 2.5 3.5-.5 3-2 3.5-3.5.5-5 0S6.5 13 6 14zm5-8c0-1.5 1-3 2-3s1.5 1.5 1 3",
+      "Vilt": "M7 15c-1-1.5-.5-4 1-5.5S11 8 12 8s2.5 1 3 2.5.5 3-.5 4.5zm2-9l-1-3.5L9.5 5m5-2.5L13 5",
+      "Ost": "M3 14V8l7-4 7 4v6l-7 3-7-3zm0-6l7 3 7-3",
+      "Pasta": "M4 10c0 3 2.5 5 5 5s5-2 5-5M5 6c1 2.5 3 4 4 4s3-1.5 4-4M7 3c.5 1.5 1.5 3 2 3s1.5-1.5 2-3",
+      "Grönsaker": "M9 3c-1 1-1.5 2.5-1 4s2 2.5 3.5 2.5 3-1 3.5-2.5.5-3-.5-4M6 10c-1.5 0-3 1-3 3s1.5 3 3.5 3h5c2 0 3.5-1 3.5-3s-1.5-3-3-3z",
+      "Sallad": "M9 3c-1 1-1.5 2.5-1 4s2 2.5 3.5 2.5 3-1 3.5-2.5.5-3-.5-4M6 10c-1.5 0-3 1-3 3s1.5 3 3.5 3h5c2 0 3.5-1 3.5-3s-1.5-3-3-3z",
+      "Grillat": "M4 13c0-2 1.5-4 3-5s3.5-1.5 5-1.5 3.5.5 5 1.5 3 3 3 5-1 3-3 3H7c-2 0-3-1-3-3z",
+    };
+    const d = Object.entries(paths).find(([k]) => type.toLowerCase().includes(k.toLowerCase()));
+    if (!d) return null;
+    return React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 18 18", style: { flexShrink: 0, opacity: 0.6 } },
+      React.createElement("path", { d: d[1], fill: "none", stroke: t.txM, strokeWidth: 1.2, strokeLinecap: "round", strokeLinejoin: "round" })
+    );
+  };
 
   return (
     <div
@@ -419,12 +442,14 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
           </div>
           <div>
             <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Passar till</div>
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
-              {(p.food_pairings || []).slice(0, 3).map((f, i) => {
-                const icon = Object.entries(foodIcons).find(([k]) => f.toLowerCase().includes(k.toLowerCase()));
-                return <span key={i} style={{ fontSize: 12, color: t.txM }}>{icon ? icon[1] + " " : ""}{f}</span>;
-              })}
-              {(!p.food_pairings || p.food_pairings.length === 0) && <span style={{ fontSize: 12, color: t.txL }}>—</span>}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {(p.food_pairings || []).slice(0, 3).map((f, i) => (
+                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 13, color: t.txM }}>
+                  {foodSvg(f)}
+                  {f}
+                </span>
+              ))}
+              {(!p.food_pairings || p.food_pairings.length === 0) && <span style={{ fontSize: 13, color: t.txL }}>—</span>}
             </div>
           </div>
           <div>
@@ -439,55 +464,62 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
           </div>
         </div>
 
-        {/* ═══ SMAKPROFIL + POÄNG side by side ═══ */}
-        <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
+        {/* ═══ SMAKPROFIL + POÄNG side by side — grouped with bg ═══ */}
+        <div style={{
+          display: "flex", gap: 20, marginTop: 14,
+          padding: "14px 16px", borderRadius: 12,
+          background: t.bg,
+        }}>
           {/* Taste profile (left) */}
           {(p.taste_body || p.taste_fruit) && (
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Smakprofil</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Smakprofil</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
                   ["Lätt", "Fylligt", p.taste_body, 12],
                   ["Stram", "Fruktigt", p.taste_fruit, 12],
                 ].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => (
                   <div key={lo} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 10, color: t.txL, width: 32, textAlign: "right", flexShrink: 0 }}>{lo}</span>
+                    <span style={{ fontSize: 11, color: t.txL, width: 34, textAlign: "right", flexShrink: 0 }}>{lo}</span>
                     <div style={{ flex: 1, height: 2, borderRadius: 1, background: t.bdr, position: "relative" }}>
                       <div style={{
                         position: "absolute", top: "50%", left: `${(val / max) * 100}%`,
-                        width: 8, height: 8, borderRadius: "50%",
-                        background: t.wine, border: `2px solid ${t.card}`,
+                        width: 9, height: 9, borderRadius: "50%",
+                        background: t.wine, border: `2px solid ${t.bg}`,
                         transform: "translate(-50%, -50%)",
                         boxShadow: `0 0 0 1px ${t.wine}30`,
                       }} />
                     </div>
-                    <span style={{ fontSize: 10, color: t.txL, width: 38, flexShrink: 0 }}>{hi}</span>
+                    <span style={{ fontSize: 11, color: t.txL, width: 40, flexShrink: 0 }}>{hi}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Divider */}
+          {(p.taste_body || p.taste_fruit) && <div style={{ width: 1, background: t.bdr, alignSelf: "stretch" }} />}
+
           {/* Score bars (right) */}
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Poäng</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Poäng</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {p.crowd_score && (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 10, color: t.txL, width: 38 }}>Crowd</span>
-                  <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
+                  <span style={{ fontSize: 11, color: t.txL, width: 40 }}>Crowd</span>
+                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
                     <div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce", transition: "width 0.8s ease" }} />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#6b8cce", minWidth: 22, textAlign: "right" }}>{p.crowd_score.toFixed(1)}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#6b8cce", minWidth: 24, textAlign: "right" }}>{p.crowd_score.toFixed(1)}</span>
                 </div>
               )}
               {p.expert_score && (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 10, color: t.txL, width: 38 }}>Expert</span>
-                  <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
+                  <span style={{ fontSize: 11, color: t.txL, width: 40 }}>Expert</span>
+                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
                     <div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b", transition: "width 0.8s ease" }} />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#b07d3b", minWidth: 22, textAlign: "right" }}>{p.expert_score.toFixed(1)}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#b07d3b", minWidth: 24, textAlign: "right" }}>{p.expert_score.toFixed(1)}</span>
                 </div>
               )}
             </div>
@@ -2058,6 +2090,13 @@ function SmakfyndApp() {
             <br />
             <span style={{ color: t.wine }}>Vi hittade de bästa köpen.</span>
           </h1>
+          <p style={{
+            margin: "10px 0 0", fontSize: 14, color: t.txM, lineHeight: 1.5,
+            animation: "countUp 0.5s ease 0.3s both",
+          }}>
+            Vi kombinerar crowd-betyg, expertrecensioner och prisjämförelse<br />
+            för att ranka varje vin efter kvalitet per krona.
+          </p>
 
           {/* Animated stats row */}
           <div style={{
