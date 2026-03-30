@@ -559,21 +559,24 @@ function Card({
     });
   };
   const sv = React.useContext(SavedContext);
-  const icon = {
-    Rött: "🍷",
-    Vitt: "🥂",
-    Rosé: "🌸",
-    Mousserande: "🍾"
-  }[p.category] || "✦";
   const s100 = p.smakfynd_score;
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
-
-  // Rank badges
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
-  // Don't show rank numbers — just show wines as "Topp-viner" when scores are close
-
+  const foodIcons = {
+    "Nöt": "🥩",
+    "Lamm": "🐑",
+    "Fläsk": "🥓",
+    "Fisk": "🐟",
+    "Skaldjur": "🦐",
+    "Kyckling": "🍗",
+    "Vilt": "🦌",
+    "Ost": "🧀",
+    "Pasta": "🍝",
+    "Sallad": "🥗",
+    "Grillat": "🔥"
+  };
   return /*#__PURE__*/React.createElement("div", {
     role: "button",
     tabIndex: 0,
@@ -588,7 +591,7 @@ function Card({
     },
     style: {
       background: t.card,
-      borderRadius: 14,
+      borderRadius: 16,
       outline: "none",
       border: `1px solid ${open ? t.bdr : t.bdrL}`,
       boxShadow: open ? t.sh3 : t.sh1,
@@ -599,9 +602,9 @@ function Card({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 18px",
+      padding: "18px 20px 0",
       display: "flex",
-      gap: 14,
+      gap: 16,
       alignItems: "flex-start"
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -611,15 +614,15 @@ function Card({
     }
   }, /*#__PURE__*/React.createElement(ProductImage, {
     p: p,
-    size: 52
+    size: 56
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
-      top: -4,
-      left: -4,
-      width: 20,
-      height: 20,
-      borderRadius: 6,
+      top: -5,
+      left: -5,
+      width: 22,
+      height: 22,
+      borderRadius: 7,
       background: rank <= 3 ? `linear-gradient(135deg, ${t.wine}, ${t.wineD})` : t.card,
       border: rank <= 3 ? "none" : `1px solid ${t.bdr}`,
       color: rank <= 3 ? "#fff" : t.txM,
@@ -629,57 +632,77 @@ function Card({
       fontSize: 10,
       fontWeight: 800,
       fontFamily: "'Instrument Serif', Georgia, serif",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+      boxShadow: "0 1px 3px rgba(0,0,0,0.12)"
     }
-  }, rank)), /*#__PURE__*/React.createElement("div", {
+  }, rank), badge && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      padding: "2px 6px",
+      borderRadius: 4,
+      textAlign: "center",
+      background: rank === 1 ? t.wine : `${t.wine}15`,
+      color: rank === 1 ? "#fff" : t.wine,
+      fontSize: 7,
+      fontWeight: 800,
+      textTransform: "uppercase",
+      letterSpacing: "0.06em",
+      whiteSpace: "nowrap"
+    }
+  }, badge)), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      gap: 10,
-      alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      minWidth: 0,
-      flex: 1
-    }
   }, /*#__PURE__*/React.createElement("h3", {
     style: {
       margin: 0,
-      fontSize: 17,
+      fontSize: 20,
       fontFamily: "'Instrument Serif', Georgia, serif",
       fontWeight: 400,
       color: t.tx,
-      lineHeight: 1.2,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
+      lineHeight: 1.15
     }
-  }, p.name), /*#__PURE__*/React.createElement("p", {
+  }, p.name), (p.organic || p.price_vs_launch_pct > 0 || p.is_new) && /*#__PURE__*/React.createElement("div", {
     style: {
-      margin: "2px 0 0",
-      fontSize: 12,
-      color: t.txL,
-      letterSpacing: "0.01em"
+      display: "flex",
+      gap: 4,
+      marginTop: 4
     }
-  }, p.sub, " \xB7 ", p.country, p.region ? `, ${p.region}` : "")), /*#__PURE__*/React.createElement("div", {
+  }, p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 8,
+      fontWeight: 800,
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: t.deal,
+      color: "#fff"
+    }
+  }, "\u2212", p.price_vs_launch_pct, "%"), p.organic && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 8,
+      fontWeight: 800,
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: t.green,
+      color: "#fff"
+    }
+  }, "EKO"), p.is_new && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 8,
+      fontWeight: 700,
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: t.wine,
+      color: "#fff"
+    }
+  }, "NY"))), /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       textAlign: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      display: "inline-block"
-    }
   }, /*#__PURE__*/React.createElement("svg", {
-    width: "50",
-    height: "50",
+    width: "52",
+    height: "52",
     viewBox: "0 0 50 50",
     style: {
       display: "block"
@@ -717,281 +740,285 @@ function Card({
     fontSize: "19",
     fontWeight: "900",
     fill: "#2d6b3f"
-  }, s100)), (p.organic || p.price_vs_launch_pct > 0 || p.is_new) && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      top: -6,
-      left: -14,
-      display: "flex",
-      gap: 2
-    }
-  }, p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 8,
-      fontWeight: 800,
-      padding: "2px 5px",
-      borderRadius: 4,
-      background: t.deal,
-      color: "#fff",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.15)"
-    }
-  }, "\u2212", p.price_vs_launch_pct, "%"), p.organic && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 800,
-      padding: "3px 7px",
-      borderRadius: 5,
-      background: t.green,
-      color: "#fff",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-      letterSpacing: "0.05em"
-    }
-  }, "EKO"), p.is_new && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 8,
-      fontWeight: 700,
-      padding: "2px 5px",
-      borderRadius: 4,
-      background: t.wine,
-      color: "#fff",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.15)"
-    }
-  }, "NY"))), /*#__PURE__*/React.createElement("div", {
+  }, s100)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       fontWeight: 600,
       color: col,
-      marginTop: 3
+      marginTop: 2
     }
   }, label))), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 6,
+      padding: "12px 20px 0"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "8px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 2
+    }
+  }, "Druva"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: t.tx
+    }
+  }, p.grape || p.sub || "—")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 2
+    }
+  }, "Land"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: t.tx
+    }
+  }, p.country, p.region ? `, ${p.region}` : "")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 2
+    }
+  }, "Passar till"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap",
+      alignItems: "center"
+    }
+  }, (p.food_pairings || []).slice(0, 3).map((f, i) => {
+    const icon = Object.entries(foodIcons).find(([k]) => f.toLowerCase().includes(k.toLowerCase()));
+    return /*#__PURE__*/React.createElement("span", {
+      key: i,
+      style: {
+        fontSize: 12,
+        color: t.txM
+      }
+    }, icon ? icon[1] + " " : "", f);
+  }), (!p.food_pairings || p.food_pairings.length === 0) && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: t.txL
+    }
+  }, "\u2014"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 2
+    }
+  }, "Pris"), /*#__PURE__*/React.createElement("div", {
+    style: {
       display: "flex",
       alignItems: "baseline",
-      gap: 6,
-      flexWrap: "wrap"
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: 700,
       color: t.tx,
       fontFamily: "'Instrument Serif', Georgia, serif"
     }
-  }, p.price, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 400,
-      color: t.txL
-    }
-  }, "kr")), p.vol && p.price && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: t.txM,
-      background: t.bg,
-      padding: "1px 6px",
-      borderRadius: 4
-    }
-  }, Math.round(p.price / (p.vol / 1000)), " kr/l"), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      textDecoration: "line-through"
-    }
-  }, p.launch_price, "kr"), (p.grape || foodStr) && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr
-    }
-  }, "\xB7"), p.grape && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: t.txM
-    }
-  }, p.grape), p.grape && foodStr && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr
-    }
-  }, "\xB7"), foodStr && /*#__PURE__*/React.createElement("span", {
+  }, p.price, " kr"), p.vol && p.price && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: t.txL
     }
-  }, foodStr)), /*#__PURE__*/React.createElement("div", {
+  }, Math.round(p.price / (p.vol / 1000)), " kr/l")), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
-      marginTop: 8
+      fontSize: 11,
+      color: t.deal,
+      fontWeight: 600
     }
-  }, /*#__PURE__*/React.createElement(ScoreBars, {
-    p: p
-  })), /*#__PURE__*/React.createElement("div", {
+  }, "S\xE4nkt fr\xE5n ", p.launch_price, " kr"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 4,
-      flexWrap: "wrap",
-      marginTop: 5
+      gap: 16,
+      marginTop: 14
     }
-  }, p.expert_score >= 7.5 && /*#__PURE__*/React.createElement("span", {
+  }, (p.taste_body || p.taste_fruit) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 8
     }
-  }, "Expertbetyg"), p.price_score >= 8 && /*#__PURE__*/React.createElement("span", {
+  }, "Smakprofil"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, [["Lätt", "Fylligt", p.taste_body, 12], ["Stram", "Fruktigt", p.taste_fruit, 12]].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => /*#__PURE__*/React.createElement("div", {
+    key: lo,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      width: 32,
+      textAlign: "right",
+      flexShrink: 0
+    }
+  }, lo), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 2,
+      borderRadius: 1,
+      background: t.bdr,
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: "50%",
+      left: `${val / max * 100}%`,
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: t.wine,
+      border: `2px solid ${t.card}`,
+      transform: "translate(-50%, -50%)",
+      boxShadow: `0 0 0 1px ${t.wine}30`
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      width: 38,
+      flexShrink: 0
+    }
+  }, hi))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
+      color: t.txF,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 8
     }
-  }, "Prisv\xE4rt"), (p.crowd_reviews || 0) >= 5000 && /*#__PURE__*/React.createElement("span", {
+  }, "Po\xE4ng"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#6b8cce10",
-      color: "#6b8cce"
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
     }
-  }, "Popul\xE4rt"), p.organic && /*#__PURE__*/React.createElement("span", {
+  }, p.crowd_score && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#2d7a3e10",
-      color: "#2d7a3e"
+      display: "flex",
+      alignItems: "center",
+      gap: 6
     }
-  }, "Eko"), p.price_vs_launch_pct > 5 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.dealL,
-      color: t.deal
+      fontSize: 10,
+      color: t.txL,
+      width: 38
     }
-  }, "Priss\xE4nkt"), p.critics && p.critics.length >= 3 && p.critics.every(cr => cr.s >= 85) && /*#__PURE__*/React.createElement("span", {
+  }, "Crowd"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
+      flex: 1,
+      height: 3,
+      borderRadius: 2,
+      background: t.bdr,
+      overflow: "hidden"
     }
-  }, p.critics.length, " av ", p.num_critics || p.critics.length, " kritiker ger 85+"), p.critic_consensus === "stark konsensus" && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
+      width: `${p.crowd_score * 10}%`,
+      height: "100%",
+      borderRadius: 2,
+      background: "#6b8cce",
+      transition: "width 0.8s ease"
     }
-  }, "Stark konsensus"), p.critic_consensus === "kontroversiellt" && /*#__PURE__*/React.createElement("span", {
+  })), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#ce6b6b10",
-      color: "#ce6b6b"
-    }
-  }, "Delade meningar")), (() => {
-    const chips = [];
-    if (p.food_pairings?.some(f => /lamm|grillat|kött/i.test(f)) && p.taste_body >= 7) chips.push("Fynd till grillat");else if (p.food_pairings?.some(f => /fisk|skaldjur/i.test(f)) && p.category === "Vitt") chips.push("Perfekt till fisk");
-    if (p.price <= 100 && p.smakfynd_score >= 70) chips.push("Tryggt vardagsvin");
-    if (p.crowd_reviews >= 10000 && p.crowd_score >= 7.5) chips.push("Tryggt middagsvin");
-    if (p.price >= 200 && p.expert_score >= 8) chips.push("Imponera på middagen");
-    return chips.length > 0 ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 4,
-        flexWrap: "wrap",
-        marginTop: 3
-      }
-    }, chips.slice(0, 2).map(c => /*#__PURE__*/React.createElement("span", {
-      key: c,
-      style: {
-        fontSize: 9,
-        padding: "2px 7px",
-        borderRadius: 100,
-        background: `${t.wine}08`,
-        color: t.wine,
-        fontWeight: 500
-      }
-    }, c))) : null;
-  })(), p.insight && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 5,
       fontSize: 11,
-      color: t.wine,
-      lineHeight: 1.4,
-      fontWeight: 500
+      fontWeight: 700,
+      color: "#6b8cce",
+      minWidth: 22,
+      textAlign: "right"
     }
-  }, p.insight), /*#__PURE__*/React.createElement("div", {
+  }, p.crowd_score.toFixed(1))), p.expert_score && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: p.insight ? 2 : 5,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      width: 38
+    }
+  }, "Expert"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 3,
+      borderRadius: 2,
+      background: t.bdr,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${p.expert_score * 10}%`,
+      height: "100%",
+      borderRadius: 2,
+      background: "#b07d3b",
+      transition: "width 0.8s ease"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
       fontSize: 11,
-      color: t.txM,
-      lineHeight: 1.4,
-      fontStyle: "italic"
+      fontWeight: 700,
+      color: "#b07d3b",
+      minWidth: 22,
+      textAlign: "right"
     }
-  }, (() => {
-    const c = p.crowd_score || 0,
-      e = p.expert_score || 0,
-      pr = p.price_score || 0;
-    const rev = p.crowd_reviews || 0;
-    if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
-    if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
-    if (c >= 8.0) return "Mycket omtyckt bland vindrickare";
-    if (e >= 8.0 && pr >= 8) return "Kritikerfavorit till överraskande lågt pris";
-    if (e >= 7.5 && pr >= 8) return "Bra expertbetyg och mer smak än prislappen antyder";
-    if (e >= 7.5 && c >= 7.0) return "Uppskattat av både publik och kritiker";
-    if (pr >= 9 && c >= 7.0) return "Mycket vin för pengarna — svårslaget i prisklassen";
-    if (pr >= 8 && c >= 7.0) return "Bra köp för priset — bred uppskattning";
-    if (pr >= 8) return "Prisvärt val med rimligt betyg";
-    if (c >= 7.5 && rev >= 5000) return "Tryggt och populärt — många har provat och gillar";
-    if (c >= 7.0) return "Solitt val med god crowd-uppskattning";
-    return null;
-  })()))), /*#__PURE__*/React.createElement("div", {
+  }, p.expert_score.toFixed(1))))))), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "0 18px 12px",
+      padding: "14px 20px",
+      marginTop: 10,
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "center"
+      alignItems: "center",
+      borderTop: `1px solid ${t.bdrL}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 12
+      gap: 14
     }
-  }, /*#__PURE__*/React.createElement("a", {
-    href: sbUrl,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    onClick: e => {
-      e.stopPropagation();
-      track("sb_click", {
-        nr: p.nr,
-        name: p.name,
-        price: p.price
-      });
-    },
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
-      fontSize: 11,
-      color: t.txM,
-      textDecoration: "none",
-      transition: "color 0.2s"
-    },
-    onMouseEnter: e => e.currentTarget.style.color = t.wine,
-    onMouseLeave: e => e.currentTarget.style.color = t.txM
-  }, "Systembolaget ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9
-    }
-  }, "\u2197")), sv && /*#__PURE__*/React.createElement(SaveButton, {
+  }, sv && /*#__PURE__*/React.createElement(SaveButton, {
     nr: p.nr || p.id,
     sv: sv,
     auth: auth
@@ -1026,408 +1053,222 @@ function Card({
       padding: "2px 0",
       fontFamily: "inherit"
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, "\u2197 Dela"), /*#__PURE__*/React.createElement("a", {
+    href: sbUrl,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    onClick: e => {
+      e.stopPropagation();
+      track("sb_click", {
+        nr: p.nr,
+        name: p.name,
+        price: p.price
+      });
+    },
     style: {
-      fontSize: 13,
-      lineHeight: 1
-    }
-  }, "\u2197"), " Dela")), /*#__PURE__*/React.createElement("span", {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 12,
+      color: t.txL,
+      textDecoration: "none"
+    },
+    onMouseEnter: e => e.currentTarget.style.color = t.wine,
+    onMouseLeave: e => e.currentTarget.style.color = t.txL
+  }, "Se p\xE5 systembolaget")), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 10,
+      fontSize: 11,
       color: t.txF,
       display: "flex",
       alignItems: "center",
-      gap: 3
+      gap: 3,
+      fontWeight: 500
     }
-  }, open ? "Stäng ▲" : "Se varför ▼")), open && /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "0 18px 18px",
-      borderTop: `1px solid ${t.bdrL}`,
-      paddingTop: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 5,
-      flexWrap: "wrap",
-      marginBottom: 10
-    }
-  }, badge && /*#__PURE__*/React.createElement("span", {
+  }, open ? "Dölj information" : "Mer information", " ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9,
-      fontWeight: 800,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`,
-      color: rank === 1 ? "#fff" : t.wine,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em",
-      boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none"
+      transition: "transform 0.2s",
+      display: "inline-block",
+      transform: open ? "rotate(180deg)" : "rotate(0)"
     }
-  }, rank === 1 ? "🏆 " : "", badge), p.confidence === "hög" && /*#__PURE__*/React.createElement("span", {
+  }, "\u25BC"))), open && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      fontWeight: 600,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
+      padding: "0 20px 20px",
+      animation: "scaleIn 0.2s ease both"
     }
-  }, "H\xF6g trygghet"), p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
+  }, p.insight && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      fontWeight: 700,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.dealL,
-      color: t.deal,
-      textTransform: "uppercase"
-    }
-  }, "Priss\xE4nkt \u2212", p.price_vs_launch_pct, "%"), p.organic && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 600,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
-    }
-  }, "Ekologiskt"), p.food_pairings?.length > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
+      marginBottom: 12,
+      fontSize: 12,
+      color: t.wine,
       fontWeight: 500,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.bg,
-      color: t.txM,
-      border: `1px solid ${t.bdrL}`
+      lineHeight: 1.4
     }
-  }, "Passar till ", p.food_pairings.slice(0, 2).join(", "))), p.style && /*#__PURE__*/React.createElement("div", {
+  }, p.insight), p.style && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: t.txM,
       fontStyle: "italic",
-      marginBottom: 10,
+      marginBottom: 14,
       lineHeight: 1.5
     }
   }, p.style), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 12,
-      marginBottom: 10
-    }
-  }, /*#__PURE__*/React.createElement(ProductImage, {
-    p: p,
-    size: 56,
-    style: {
-      borderRadius: 10,
-      background: "#faf7f2"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      flexWrap: "wrap",
-      fontSize: 11,
-      color: t.txM,
-      marginBottom: 6
-    }
-  }, [p.grape, p.alc ? `${p.alc}%` : null, `${p.vol} ml`, `${p.country}${p.region ? `, ${p.region}` : ""}`].filter(Boolean).map((v, i, arr) => /*#__PURE__*/React.createElement("span", {
-    key: i
-  }, v, i < arr.length - 1 ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr,
-      margin: "0 2px"
-    }
-  }, "\xB7") : ""))), p.food_pairings?.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4,
-      flexWrap: "wrap"
-    }
-  }, p.food_pairings.map((f, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    style: {
-      fontSize: 10,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.bg,
-      color: t.txM,
-      border: `1px solid ${t.bdrL}`
-    }
-  }, f))))), (p.taste_body || p.taste_fruit || p.taste_sweet != null) && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14,
-      padding: "12px 14px",
-      borderRadius: 10,
-      background: t.bg
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      color: t.txL,
-      textTransform: "uppercase",
-      letterSpacing: "0.1em"
-    }
-  }, "Smakprofil"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: t.txM,
-      fontStyle: "italic"
-    }
-  }, (() => {
-    const words = [];
-    if (p.taste_body >= 9) words.push("fylligt");else if (p.taste_body >= 6) words.push("medelkroppad");else if (p.taste_body && p.taste_body <= 4) words.push("lätt");
-    if (p.taste_fruit >= 9) words.push("fruktigt");else if (p.taste_fruit && p.taste_fruit <= 3) words.push("stramt");
-    if (p.taste_sweet != null && p.taste_sweet <= 2) words.push("torrt");else if (p.taste_sweet >= 8) words.push("sött");
-    return words.length > 0 ? words.join(", ") : null;
-  })())), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 8
-    }
-  }, [["Lätt", "Fylligt", p.taste_body, 12], ["Stram", "Fruktigt", p.taste_fruit, 12], ["Torrt", "Sött", p.taste_sweet, 12]].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => /*#__PURE__*/React.createElement("div", {
-    key: lo
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      width: 40,
-      textAlign: "right",
-      flexShrink: 0
-    }
-  }, lo), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      height: 3,
-      borderRadius: 2,
-      background: t.bdr,
-      position: "relative"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      top: "50%",
-      left: `${val / max * 100}%`,
-      width: 9,
-      height: 9,
-      borderRadius: "50%",
-      background: t.wine,
-      border: `2px solid ${t.card}`,
-      transform: "translate(-50%, -50%)",
-      boxShadow: `0 0 0 1px ${t.wine}40`
-    }
-  })), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      width: 40,
-      flexShrink: 0
-    }
-  }, hi)))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14,
-      padding: "12px 14px",
-      borderRadius: 10,
-      background: t.bg
+      marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      color: t.txL,
+      color: t.txF,
       textTransform: "uppercase",
       letterSpacing: "0.1em",
-      marginBottom: 10
+      marginBottom: 12,
+      borderTop: `1px solid ${t.bdrL}`,
+      paddingTop: 14
     }
   }, "Po\xE4ngf\xF6rdelning"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
       gap: 12
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      marginBottom: 3
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: "#6b8cce"
-    }
-  }, "Crowd"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: p.crowd_score ? "#6b8cce" : t.txL
-    }
-  }, p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "—")), p.crowd_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 4,
-      borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      padding: "12px 10px",
+      borderRadius: 10,
+      background: t.bg
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: `${p.crowd_score * 10}%`,
+      fontSize: 20,
+      fontWeight: 700,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      color: p.crowd_score ? "#6b8cce" : t.txL
+    }
+  }, p.crowd_score ? p.crowd_score.toFixed(1) : "—", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 400
+    }
+  }, "/10")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: "#6b8cce",
+      marginBottom: 6
+    }
+  }, "Crowd"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 3,
+      borderRadius: 2,
+      background: t.bdr,
+      overflow: "hidden",
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(p.crowd_score || 0) * 10}%`,
       height: "100%",
       borderRadius: 2,
       background: "#6b8cce"
     }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
-      color: t.txL
+      fontSize: 9,
+      color: t.txL,
+      lineHeight: 1.4
     }
-  }, p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : "", p.crowd_reviews >= 50000 && /*#__PURE__*/React.createElement("span", {
+  }, p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : "Omdömen från vindrickare")), /*#__PURE__*/React.createElement("div", {
     style: {
-      color: t.green,
-      fontWeight: 600
-    }
-  }, " \u2014 mycket p\xE5litligt"), p.crowd_reviews >= 10000 && p.crowd_reviews < 50000 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.txM
-    }
-  }, " \u2014 p\xE5litligt")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      marginBottom: 3
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: "#b07d3b"
-    }
-  }, "Expert"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: p.expert_score ? "#b07d3b" : t.txL
-    }
-  }, p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "—")), p.expert_score ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 4,
-      borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      padding: "12px 10px",
+      borderRadius: 10,
+      background: t.bg
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: `${p.expert_score * 10}%`,
+      fontSize: 20,
+      fontWeight: 700,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      color: p.expert_score ? "#b07d3b" : t.txL
+    }
+  }, p.expert_score ? p.expert_score.toFixed(1) : "—", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 400
+    }
+  }, "/10")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: "#b07d3b",
+      marginBottom: 6
+    }
+  }, "Expert"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 3,
+      borderRadius: 2,
+      background: t.bdr,
+      overflow: "hidden",
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(p.expert_score || 0) * 10}%`,
       height: "100%",
       borderRadius: 2,
       background: "#b07d3b"
     }
-  })), p.critics && p.critics.length > 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4,
-      flexWrap: "wrap",
-      marginTop: 4
-    }
-  }, p.critics.map((cr, ci) => /*#__PURE__*/React.createElement("span", {
-    key: ci,
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      padding: "2px 6px",
-      borderRadius: 4,
-      background: "#b07d3b10",
-      color: "#b07d3b"
-    }
-  }, cr.c, ": ", cr.s)), p.num_critics > (p.critics || []).length && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 6px",
-      color: t.txL
-    }
-  }, "+", p.num_critics - p.critics.length, " till"), p.critic_spread != null && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 6px",
-      color: p.critic_spread <= 4 ? t.green : p.critic_spread >= 12 ? "#ce6b6b" : t.txL
-    }
-  }, "Spridning: ", p.critic_spread, "p")) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txL
-    }
-  }, "Snitt fr\xE5n erk\xE4nda vinkritiker")) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
       color: t.txL,
-      fontStyle: "italic"
+      lineHeight: 1.4
     }
-  }, "Inga kritikerrecensioner hittade f\xF6r detta vin")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.critics && p.critics.length > 0 ? `Snitt från ${p.critics.length} erkända vinkritiker` : "Snitt från erkända vinkritiker")), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      marginBottom: 3
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: t.txM
-    }
-  }, "Prisv\xE4rde"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: t.txM
-    }
-  }, p.price_score ? `${p.price_score.toFixed(1)}/10` : "—")), p.price_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 4,
-      borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      padding: "12px 10px",
+      borderRadius: 10,
+      background: t.bg
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: `${p.price_score * 10}%`,
+      fontSize: 20,
+      fontWeight: 700,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      color: p.price_score ? t.txM : t.txL
+    }
+  }, p.price_score ? p.price_score.toFixed(1) : "—", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 400
+    }
+  }, "/10")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: t.txM,
+      marginBottom: 6
+    }
+  }, "Prisv\xE4rde"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 3,
+      borderRadius: 2,
+      background: t.bdr,
+      overflow: "hidden",
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(p.price_score || 0) * 10}%`,
       height: "100%",
       borderRadius: 2,
       background: t.txM
     }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
-      color: t.txL
+      fontSize: 9,
+      color: t.txL,
+      lineHeight: 1.4
     }
   }, (() => {
     const catMedians = {
@@ -1444,47 +1285,29 @@ function Card({
     };
     const median = catMedians[p.category] || 250;
     return `${p.price}kr · Medianen för ${catNames[p.category] || "vin"}: ${median}kr`;
-  })())))), /*#__PURE__*/React.createElement("div", {
+  })()))), p.critics && p.critics.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
-      textAlign: "center",
-      flexShrink: 0,
       display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center"
+      gap: 4,
+      flexWrap: "wrap",
+      marginTop: 8
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 56,
-      height: 56,
-      borderRadius: 14,
-      background: `linear-gradient(135deg, ${col}18, ${col}08)`,
-      border: `2px solid ${col}30`,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 24,
-      fontWeight: 900,
-      color: col,
-      lineHeight: 1,
-      fontFamily: "'Instrument Serif', Georgia, serif"
-    }
-  }, s100)), /*#__PURE__*/React.createElement("span", {
+  }, p.critics.map((cr, ci) => /*#__PURE__*/React.createElement("span", {
+    key: ci,
     style: {
       fontSize: 9,
-      color: t.txL,
-      marginTop: 4
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: "#b07d3b10",
+      color: "#b07d3b"
     }
-  }, "Smak f\xF6r"), /*#__PURE__*/React.createElement("span", {
+  }, cr.c, ": ", cr.s)), p.num_critics > (p.critics || []).length && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9,
+      padding: "2px 6px",
       color: t.txL
     }
-  }, "pengarna")))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "+", p.num_critics - p.critics.length, " till"))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 14px",
       borderRadius: 10,
@@ -1495,7 +1318,6 @@ function Card({
       lineHeight: 1.5
     }
   }, "Lanserades f\xF6r ", /*#__PURE__*/React.createElement("strong", null, p.launch_price, " kr"), " \u2014 nu ", p.price, " kr. Du sparar ", p.launch_price - p.price, " kr per flaska."), allProducts && (() => {
-    // Taste similarity: how close are body, fruit, sweet profiles?
     const tasteSim = (a, b) => {
       let score = 0,
         count = 0;
@@ -1514,25 +1336,21 @@ function Card({
       return count > 0 ? score / count : 0;
     };
     const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id)).map(w => {
-      // Calculate similarity score
       let sim = 0;
       const taste = tasteSim(w, p);
-      sim += taste * 40; // taste profile most important (0-40)
-      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20; // same grape
-      if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15; // same style (e.g. "Fruktigt & Smakrikt")
-      if (w.country && p.country && w.country === p.country) sim += 5; // same country
-      if (w.region && p.region && w.region === p.region) sim += 10; // same region
-      if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
-      // Score matters: bonus for better, penalty for worse
+      sim += taste * 40;
+      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20;
+      if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15;
+      if (w.country && p.country && w.country === p.country) sim += 5;
+      if (w.region && p.region && w.region === p.region) sim += 10;
+      if (Math.abs(w.price - p.price) <= 30) sim += 5;
       sim += (w.smakfynd_score - p.smakfynd_score) * 2;
       return {
         ...w,
         _sim: sim,
         _taste: taste
       };
-    }).filter(w => w._sim >= 20) // minimum similarity threshold
-    .sort((a, b) => b._sim - a._sim).slice(0, 3).map(w => {
-      // Generate reason WHY this is recommended
+    }).filter(w => w._sim >= 20).sort((a, b) => b._sim - a._sim).slice(0, 3).map(w => {
       const reasons = [];
       if (w._taste >= 0.8) reasons.push("Liknande smakprofil");
       if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) reasons.push("Samma druva");
@@ -1543,26 +1361,25 @@ function Card({
       if ((w.expert_score || 0) > (p.expert_score || 0) + 0.5) reasons.push("Starkare expertstöd");
       return {
         ...w,
-        _reason: reasons.slice(0, 2).join(" · ") || "Liknande stil och prisklass"
+        _reason: reasons.slice(0, 2).join(" – ") || "Liknande stil och prisklass"
       };
     });
     if (similar.length === 0) return null;
-    return /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       style: {
-        marginBottom: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        fontWeight: 600,
+        fontSize: 16,
+        fontFamily: "'Instrument Serif', Georgia, serif",
+        fontStyle: "italic",
         color: t.tx,
-        marginBottom: 8
+        marginBottom: 12,
+        borderTop: `1px solid ${t.bdrL}`,
+        paddingTop: 14
       }
-    }, "Gillar du ", p.name, "? Testa \xE4ven"), /*#__PURE__*/React.createElement("div", {
+    }, "H\xE4r \xE4r fler tips om du gillar ", p.name, ":"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
-        gap: 6
+        gap: 8
       }
     }, similar.map((w, i) => /*#__PURE__*/React.createElement("div", {
       key: i,
@@ -1577,20 +1394,25 @@ function Card({
       style: {
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "10px 12px",
-        borderRadius: 10,
+        gap: 12,
+        padding: "12px 14px",
+        borderRadius: 12,
         background: t.bg,
         border: `1px solid ${t.bdrL}`,
-        textDecoration: "none",
-        transition: "border-color 0.2s",
-        cursor: "pointer"
+        cursor: "pointer",
+        transition: "all 0.2s"
       },
-      onMouseEnter: e => e.currentTarget.style.borderColor = t.wine + "40",
-      onMouseLeave: e => e.currentTarget.style.borderColor = t.bdrL
+      onMouseEnter: e => {
+        e.currentTarget.style.borderColor = t.wine + "40";
+        e.currentTarget.style.transform = "translateY(-1px)";
+      },
+      onMouseLeave: e => {
+        e.currentTarget.style.borderColor = t.bdrL;
+        e.currentTarget.style.transform = "translateY(0)";
+      }
     }, /*#__PURE__*/React.createElement("svg", {
-      width: "34",
-      height: "34",
+      width: "38",
+      height: "38",
       viewBox: "0 0 50 50",
       style: {
         flexShrink: 0
@@ -1625,26 +1447,28 @@ function Card({
       fontSize: "16",
       fontWeight: "900",
       fill: "#2d6b3f"
-    }, w.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
+    }, w.smakfynd_score)), /*#__PURE__*/React.createElement(ProductImage, {
+      p: w,
+      size: 36
+    }), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 13,
+        fontSize: 15,
         fontFamily: "'Instrument Serif', serif",
         color: t.tx,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap"
+        lineHeight: 1.2
       }
     }, w.name), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10,
-        color: t.txL
+        fontSize: 11,
+        color: t.txL,
+        marginTop: 2
       }
-    }, w.sub, " \xB7 ", w.country), /*#__PURE__*/React.createElement("div", {
+    }, w.grape || w.sub, ", ", w.country), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: t.green,
@@ -1654,36 +1478,16 @@ function Card({
     }, w._reason)), /*#__PURE__*/React.createElement("div", {
       style: {
         flexShrink: 0,
-        textAlign: "right",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        gap: 3
+        textAlign: "right"
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: 700,
         color: t.tx,
         fontFamily: "'Instrument Serif', serif"
       }
-    }, w.price, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        fontWeight: 400,
-        color: t.txL
-      }
-    }, "kr")), /*#__PURE__*/React.createElement("a", {
-      href: `https://www.systembolaget.se/produkt/vin/${w.nr}`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-      onClick: e => e.stopPropagation(),
-      style: {
-        fontSize: 9,
-        color: t.txL,
-        textDecoration: "none"
-      }
-    }, "SB \u2197"))))));
+    }, w.price, " kr"))))));
   })()));
 }
 
