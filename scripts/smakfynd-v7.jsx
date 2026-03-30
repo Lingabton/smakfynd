@@ -535,7 +535,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
         display: "flex", justifyContent: "space-between", alignItems: "center",
         borderTop: `1px solid ${t.bdrL}`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {
               e.stopPropagation();
@@ -546,18 +546,21 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
               else { navigator.clipboard?.writeText(`${text}\n${url}`); }
             }}
             style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, background: "none", border: "none", cursor: "pointer", padding: "2px 0", fontFamily: "inherit" }}>
-            <span style={{ fontSize: 14, lineHeight: 1 }}>↗</span> Dela
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Dela
           </button>
           <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
             style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, textDecoration: "none" }}
             onMouseEnter={e => e.currentTarget.style.color = t.wine}
             onMouseLeave={e => e.currentTarget.style.color = t.txM}
           >
-            <span style={{ fontSize: 14, lineHeight: 1 }}>⤴</span> Se på systembolaget
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Se på systembolaget
           </a>
         </div>
-        <span style={{ fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 4, fontWeight: 500 }}>
-          {open ? "Dölj information" : "Mer information"} <span style={{ fontSize: 9, transition: "transform 0.2s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+        <span style={{ fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 4, fontWeight: 500, cursor: "pointer" }}>
+          {open ? "Dölj information" : "Mer information"}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0)" }}><polyline points="6 9 12 15 18 9"/></svg>
         </span>
       </div>
 
@@ -768,7 +771,7 @@ function SaveButton({ nr, sv, auth }) {
           background: "none", border: "none", cursor: "pointer", padding: "2px 0",
           fontFamily: "inherit", transition: "all 0.2s", fontWeight: 500,
         }}>
-        <span style={{ fontSize: 15, lineHeight: 1 }}>{saved ? "♥" : "♡"}</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         <span style={{ fontWeight: saved ? 600 : 500 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
       </button>
       {menuOpen && (

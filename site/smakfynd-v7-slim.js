@@ -1103,7 +1103,7 @@ function Card({
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 16
+      gap: 18
     }
   }, sv && /*#__PURE__*/React.createElement(SaveButton, {
     nr: p.nr || p.id,
@@ -1141,12 +1141,25 @@ function Card({
       padding: "2px 0",
       fontFamily: "inherit"
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14,
-      lineHeight: 1
-    }
-  }, "\u2197"), " Dela"), /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "16 6 12 2 8 6"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "2",
+    x2: "12",
+    y2: "15"
+  })), "Dela"), /*#__PURE__*/React.createElement("a", {
     href: sbUrl,
     target: "_blank",
     rel: "noopener noreferrer",
@@ -1169,28 +1182,50 @@ function Card({
     },
     onMouseEnter: e => e.currentTarget.style.color = t.wine,
     onMouseLeave: e => e.currentTarget.style.color = t.txM
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14,
-      lineHeight: 1
-    }
-  }, "\u2934"), " Se p\xE5 systembolaget")), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "15 3 21 3 21 9"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "10",
+    y1: "14",
+    x2: "21",
+    y2: "3"
+  })), "Se p\xE5 systembolaget")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: t.txM,
       display: "flex",
       alignItems: "center",
       gap: 4,
-      fontWeight: 500
+      fontWeight: 500,
+      cursor: "pointer"
     }
-  }, open ? "Dölj information" : "Mer information", " ", /*#__PURE__*/React.createElement("span", {
+  }, open ? "Dölj information" : "Mer information", /*#__PURE__*/React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
     style: {
-      fontSize: 9,
       transition: "transform 0.2s",
-      display: "inline-block",
       transform: open ? "rotate(180deg)" : "rotate(0)"
     }
-  }, "\u25BC"))), open && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "6 9 12 15 18 9"
+  })))), open && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 20px 20px",
       animation: "scaleIn 0.2s ease both"
@@ -1639,12 +1674,18 @@ function SaveButton({
       transition: "all 0.2s",
       fontWeight: 500
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 15,
-      lineHeight: 1
-    }
-  }, saved ? "♥" : "♡"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "15",
+    height: "15",
+    viewBox: "0 0 24 24",
+    fill: saved ? "currentColor" : "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
+  })), /*#__PURE__*/React.createElement("span", {
     style: {
       fontWeight: saved ? 600 : 500
     }
