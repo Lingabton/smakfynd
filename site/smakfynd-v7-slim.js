@@ -1103,7 +1103,7 @@ function Card({
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 14
+      gap: 16
     }
   }, sv && /*#__PURE__*/React.createElement(SaveButton, {
     nr: p.nr || p.id,
@@ -1131,16 +1131,22 @@ function Card({
     style: {
       display: "inline-flex",
       alignItems: "center",
-      gap: 4,
-      fontSize: 12,
-      color: t.txL,
+      gap: 5,
+      fontSize: 13,
+      fontWeight: 500,
+      color: t.txM,
       background: "none",
       border: "none",
       cursor: "pointer",
       padding: "2px 0",
       fontFamily: "inherit"
     }
-  }, "\u2197 Dela"), /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      lineHeight: 1
+    }
+  }, "\u2197"), " Dela"), /*#__PURE__*/React.createElement("a", {
     href: sbUrl,
     target: "_blank",
     rel: "noopener noreferrer",
@@ -1155,20 +1161,26 @@ function Card({
     style: {
       display: "inline-flex",
       alignItems: "center",
-      gap: 4,
-      fontSize: 12,
-      color: t.txL,
+      gap: 5,
+      fontSize: 13,
+      fontWeight: 500,
+      color: t.txM,
       textDecoration: "none"
     },
     onMouseEnter: e => e.currentTarget.style.color = t.wine,
-    onMouseLeave: e => e.currentTarget.style.color = t.txL
-  }, "Se p\xE5 systembolaget")), /*#__PURE__*/React.createElement("span", {
+    onMouseLeave: e => e.currentTarget.style.color = t.txM
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
-      color: t.txF,
+      fontSize: 14,
+      lineHeight: 1
+    }
+  }, "\u2934"), " Se p\xE5 systembolaget")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: t.txM,
       display: "flex",
       alignItems: "center",
-      gap: 3,
+      gap: 4,
       fontWeight: 500
     }
   }, open ? "Dölj information" : "Mer information", " ", /*#__PURE__*/React.createElement("span", {
@@ -1616,15 +1628,16 @@ function SaveButton({
     style: {
       display: "inline-flex",
       alignItems: "center",
-      gap: 4,
-      fontSize: 12,
-      color: saved ? t.wine : t.txL,
+      gap: 5,
+      fontSize: 13,
+      color: saved ? t.wine : t.txM,
       background: "none",
       border: "none",
       cursor: "pointer",
       padding: "2px 0",
       fontFamily: "inherit",
-      transition: "all 0.2s"
+      transition: "all 0.2s",
+      fontWeight: 500
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1633,7 +1646,7 @@ function SaveButton({
     }
   }, saved ? "♥" : "♡"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: saved ? 600 : 400
+      fontWeight: saved ? 600 : 500
     }
   }, saved ? lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor` : "Spara")), menuOpen && /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),

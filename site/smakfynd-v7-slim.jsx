@@ -535,7 +535,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
         display: "flex", justifyContent: "space-between", alignItems: "center",
         borderTop: `1px solid ${t.bdrL}`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {
               e.stopPropagation();
@@ -545,18 +545,18 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
               if (navigator.share) { navigator.share({ title: p.name, text, url }).catch(() => {}); }
               else { navigator.clipboard?.writeText(`${text}\n${url}`); }
             }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", padding: "2px 0", fontFamily: "inherit" }}>
-            ↗ Dela
+            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, background: "none", border: "none", cursor: "pointer", padding: "2px 0", fontFamily: "inherit" }}>
+            <span style={{ fontSize: 14, lineHeight: 1 }}>↗</span> Dela
           </button>
           <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: t.txL, textDecoration: "none" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, textDecoration: "none" }}
             onMouseEnter={e => e.currentTarget.style.color = t.wine}
-            onMouseLeave={e => e.currentTarget.style.color = t.txL}
+            onMouseLeave={e => e.currentTarget.style.color = t.txM}
           >
-            Se på systembolaget
+            <span style={{ fontSize: 14, lineHeight: 1 }}>⤴</span> Se på systembolaget
           </a>
         </div>
-        <span style={{ fontSize: 11, color: t.txF, display: "flex", alignItems: "center", gap: 3, fontWeight: 500 }}>
+        <span style={{ fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 4, fontWeight: 500 }}>
           {open ? "Dölj information" : "Mer information"} <span style={{ fontSize: 9, transition: "transform 0.2s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
         </span>
       </div>
@@ -763,13 +763,13 @@ function SaveButton({ nr, sv, auth }) {
       <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter", auth); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
-          display: "inline-flex", alignItems: "center", gap: 4,
-          fontSize: 12, color: saved ? t.wine : t.txL,
+          display: "inline-flex", alignItems: "center", gap: 5,
+          fontSize: 13, color: saved ? t.wine : t.txM,
           background: "none", border: "none", cursor: "pointer", padding: "2px 0",
-          fontFamily: "inherit", transition: "all 0.2s",
+          fontFamily: "inherit", transition: "all 0.2s", fontWeight: 500,
         }}>
         <span style={{ fontSize: 15, lineHeight: 1 }}>{saved ? "♥" : "♡"}</span>
-        <span style={{ fontWeight: saved ? 600 : 400 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
+        <span style={{ fontWeight: saved ? 600 : 500 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
       </button>
       {menuOpen && (
         <div onClick={e => e.stopPropagation()} style={{
