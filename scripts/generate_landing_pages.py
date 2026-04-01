@@ -68,6 +68,20 @@ def make_pages():
             "meta": f"Topp 20 bästa röda viner på Systembolaget just nu. Rankade efter kvalitet per krona — crowd-betyg, expertrecensioner och prisvärde. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa röda vinerna på Systembolaget — {DATE_STR}",
             "intro": "Vi har analyserat tusentals röda viner och rankat dem efter kvalitet i förhållande till pris. Här är de bästa köpen just nu.",
+            "intro2": "Rött vin från Systembolaget finns i hundratals varianter — från lätta Pinot Noir till tunga Cabernet Sauvignon. Vår ranking väger samman expertbetyg, crowd-recensioner och pris för att hitta de röda viner som verkligen levererar kvalitet per krona.",
+            "guide": {
+                "title": "Hur väljer man rött vin?",
+                "points": [
+                    "Matcha vinets kropp med matens intensitet — lätt vin till lättare rätter, fylligt till grillat och vilt.",
+                    "Kolla smakbeskrivningen: gillar du fruktigt, välj Nya världen. Föredrar du jordigt, satsa på Europa.",
+                    "Under 150 kr hittar du ofta bäst prisvärde bland röda viner från Chile, Argentina och Spanien.",
+                    "Servera rött vin vid 16–18°C. Låt det gärna andas i 15 minuter innan servering.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilket rött vin är bäst för nybörjare?", "Börja med en medelkroppad Malbec eller Merlot — de är fruktiga, lättdruckna och fungerar till de flesta rätter. Sök efter viner med smakfynd-poäng över 75 i prisklassen 90–130 kr."),
+                ("Hur länge håller ett öppnat rött vin?", "Ett öppnat rött vin håller 3–5 dagar i kylen med korken i. Fylligare viner håller längre. Lätta röda som Pinot Noir bör drickas inom 2–3 dagar."),
+            ],
             "wines": sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -77,6 +91,20 @@ def make_pages():
             "meta": f"Topp 20 bästa vita viner på Systembolaget. Rankade efter smak och prisvärde. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa vita vinerna på Systembolaget — {DATE_STR}",
             "intro": "Fräscha, fruktiga eller fyllda — här är de vita vinerna som ger mest smak för pengarna.",
+            "intro2": "Vita viner på Systembolaget spänner från mineraldrivna Chablis till fylliga, fatlagrade Chardonnay. Vi rankar utifrån Vivino-betyg, expertrecensioner och pris per kvalitet så att du enkelt hittar det bästa vita vinet oavsett budget.",
+            "guide": {
+                "title": "Hur väljer man vitt vin?",
+                "points": [
+                    "Till fisk och skaldjur — välj fräscha viner med hög syra som Sauvignon Blanc eller Riesling.",
+                    "Till kyckling och krämiga såser — prova en fylligare Chardonnay eller Viognier.",
+                    "Servera vitt vin vid 8–10°C. Ta ut det ur kylen 10 minuter innan servering.",
+                    "Ekologiska vita viner har blivit markant bättre — de kan vara riktiga fynd.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilken är den bästa vita druvan för nybörjare?", "Sauvignon Blanc är ett bra val — fräsch, fruktig och lätt att tycka om. Riesling är ett annat utmärkt alternativ med balanserad syra och fruktighet."),
+                ("Ska vitt vin alltid serveras kallt?", "Ja, men inte iskallt. 8–10°C är idealt för de flesta vita viner. Riktigt fyllda, fatlagrade vita viner kan serveras lite varmare, runt 10–12°C."),
+            ],
             "wines": sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -86,6 +114,20 @@ def make_pages():
             "meta": f"Topp 20 mousserande viner och champagne på Systembolaget. Rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa bubbel på Systembolaget — {DATE_STR}",
             "intro": "Cava, prosecco, crémant eller champagne? Här är de mousserande vinerna som ger mest fest för pengarna.",
+            "intro2": "Bubbel från Systembolaget inkluderar allt från spansk Cava under hundralappen till prestigefylld champagne. Crémant från Alsace och Loire är ofta de bästa fynden — champagnekvalitet till en bråkdel av priset. Vi jämför betyg och pris åt dig.",
+            "guide": {
+                "title": "Hur väljer man bubbel?",
+                "points": [
+                    "Cava och Crémant ger bäst prisvärdhet — ofta lika bra som champagne till halva priset.",
+                    "Prosecco är lättare och fruktigare, perfekt som aperitif. Välj Prosecco Superiore DOCG för bäst kvalitet.",
+                    "Champagne lönar sig främst i prisklassen 300–400 kr — där finns riktiga kvalitetsfynd.",
+                    "Servera bubbel vid 6–8°C. Lägg flaskan i isbad 20 minuter innan servering.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad är skillnaden mellan Cava, Prosecco och Champagne?", "Champagne kommer från Champagne i Frankrike och jäser i flaskan. Cava är Spaniens motsvarighet med samma metod men lägre pris. Prosecco jäser i tank och blir lättare och fruktigare."),
+                ("Kan man dricka bubbel till mat?", "Absolut! Bubbel med hög syra som Champagne och Crémant passar utmärkt till skaldjur, sushi och lätta förrätter. Även friterad mat funkar förvånansvärt bra."),
+            ],
             "wines": sorted([w for w in fast if w.get('type') == 'Mousserande' and w.get('pkg') == 'Flaska'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -95,6 +137,16 @@ def make_pages():
             "meta": f"Topp 20 roséer på Systembolaget. Rankade efter smak och prisvärde. {DATE_STR}.",
             "h1": f"Bästa rosévinerna på Systembolaget — {DATE_STR}",
             "intro": "Sommar eller vinter — rosé funkar alltid. Här är de som ger mest smak för pengarna.",
+            "intro2": "Roséviner på Systembolaget har exploderat i popularitet. Provence-rosé dominerar, men spanska och italienska roséer erbjuder ofta bättre prisvärdhet. Letar du efter en torr, elegant rosé eller en fruktigare variant? Vår ranking hjälper dig välja rätt.",
+            "guide": {
+                "title": "Hur väljer man rosé?",
+                "points": [
+                    "Provence-rosé är benchmark — ljus, torr och elegant. Men kolla priset, de kan vara överprisade.",
+                    "Spanska och italienska roséer ger ofta samma kvalitet till lägre pris.",
+                    "Servera rosé riktigt kallt, 6–8°C. Perfekt till sommarmat, sallader och grillad fisk.",
+                    "Drick rosé ungt — köp årets årgång eller föregående år för bäst smak.",
+                ]
+            },
             "wines": sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -104,6 +156,20 @@ def make_pages():
             "meta": f"Prisvärda viner under 100 kr. Rankade efter kvalitet — inte bara pris. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa vinerna under 100 kr — {DATE_STR}",
             "intro": "Under hundralappen och ändå riktigt bra? Det finns fler än du tror. Här är de bästa budgetvinerna just nu.",
+            "intro2": "Billigt vin behöver inte vara dåligt vin. Bland Systembolagets viner under 100 kr hittar du överraskande bra kvalitet, särskilt från Chile, Sydafrika och Spanien. Vi filtrerar bort plonket och visar bara de som faktiskt smakar bra.",
+            "guide": {
+                "title": "Hur hittar man bra billigt vin?",
+                "points": [
+                    "Sydamerikanska viner (Chile, Argentina) ger generellt mest kvalitet under 100 kr.",
+                    "Spansk Tempranillo och portugisiska viner är ofta undervärderade i denna prisklass.",
+                    "Bag-in-box kan ge bättre kvalitet per krona, men vår lista fokuserar på flaskor.",
+                    "Undvik att välja enbart efter etikett — kolla betyg och recensioner först.",
+                ]
+            },
+            "faq_visible": [
+                ("Finns det bra vin under 100 kr?", "Ja, absolut. Särskilt från Chile, Argentina och Spanien hittar du viner som fått höga crowd-betyg och goda expertrecensioner. Nyckeln är att kolla kvalitetsrankingar istället för att gissa i hyllan."),
+                ("Vilket är det bästa billiga röda vinet?", "Det varierar, men chilensk Cabernet Sauvignon och argentinsk Malbec brukar dominera i prisklassen under 100 kr. Kolla vår topplista för det senaste."),
+            ],
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -113,6 +179,7 @@ def make_pages():
             "meta": f"Topp 20 viner under 150 kr. Kvalitetsrankade med crowd-betyg och expertrecensioner. {DATE_STR}.",
             "h1": f"Bästa vinerna under 150 kr — {DATE_STR}",
             "intro": "I prisklassen 100–150 kr hittar du ofta de bästa fynden. Här är vinerna som ger mest valuta för pengarna.",
+            "intro2": "Prisklassen 100–150 kr är sweet spot för vin på Systembolaget. Här möts kvalitet och prisvärdhet — du får tillgång till mer komplexa viner från etablerade regioner som Rioja, Toscana och Rhône utan att behöva betala premiumpriser.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -122,6 +189,16 @@ def make_pages():
             "meta": f"Vin till grillat? Här är de bästa valen på Systembolaget — rankade efter smak och prisvärde. {DATE_STR}.",
             "h1": f"Bästa vinerna till grillat — {DATE_STR}",
             "intro": "Grillat kött kräver vin med lite kropp och smak. Här är de bästa alternativen — från budget till premium.",
+            "intro2": "Vin till grillat kött bör ha fyllig kropp, mogna tanniner och gärna en touch av kryddighet. Argentinsk Malbec, australisk Shiraz och spansk Tempranillo är klassiska grillviner. Vi har filtrerat Systembolagets sortiment efter maträtter och rankat efter kvalitet.",
+            "guide": {
+                "title": "Hur väljer man vin till grillat?",
+                "points": [
+                    "Till nötkött och lamm: välj fylliga röda som Malbec, Cabernet Sauvignon eller Shiraz.",
+                    "Till grillad kyckling: en medelkroppad röd som Pinot Noir eller en fyllig rosé fungerar utmärkt.",
+                    "Till grillad fisk: Sauvignon Blanc eller en torr rosé med mineralkänsla.",
+                    "Undvik för lätta eller för tanninstarka viner — de försvinner mot grillade smaker.",
+                ]
+            },
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any(k in (f or '').lower() for k in ['kött', 'grillat', 'nöt', 'lamm', 'biff', 'vilt', 'fläsk']
                                    for f in (w.get('food_pairings') or []))],
@@ -165,6 +242,7 @@ def make_pages():
             "meta": f"Topp Cabernet Sauvignon-viner. Rankade efter kvalitet per krona med crowd-betyg och expertrecensioner. {DATE_STR}.",
             "h1": f"Bästa Cabernet Sauvignon på Systembolaget — {DATE_STR}",
             "intro": "Cabernet Sauvignon — världens mest kända rödvinsdruva. Här är de bästa köpen på Systembolaget.",
+            "intro2": "Cabernet Sauvignon från Systembolaget finns i alla prisklasser — från chilenska budgetviner till prestigefyllda Bordeaux-blandningar. Druvan ger strukturerade viner med svarta vinbär, ceder och ofta fatlagring. Perfekt till kötträtter och grillat.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and 'cabernet sauvignon' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
@@ -196,6 +274,7 @@ def make_pages():
             "meta": f"Topp Pinot Noir-viner på Systembolaget. Bourgogne, Nya Zeeland och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Pinot Noir på Systembolaget — {DATE_STR}",
             "intro": "Pinot Noir är elegant, fruktig och mångsidig. Här är de bästa köpen — från Bourgogne till Nya Zeeland.",
+            "intro2": "Pinot Noir på Systembolaget sträcker sig från eleganta Bourgogne till fruktdrivna Nya Zeeland-varianter. Druvan är känslig och svårodlad, vilket gör prisvärdhet extra viktig. Vi jämför alla Pinot Noir-viner i fast sortiment baserat på smak och pris.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and 'pinot noir' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
@@ -278,6 +357,20 @@ def make_pages():
             "meta": f"Topp 20 italienska viner. Chianti, Barolo, Amarone och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa italienska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Italien producerar fantastiska viner i alla prisklasser. Här är de bästa köpen — från Toscana till Sicilien.",
+            "intro2": "Italienska viner på Systembolaget omfattar klassiker som Chianti, Barolo, Amarone och Primitivo. Italien är världens största vinproducent med över 500 inhemska druvor. Vi har rankat alla italienska viner efter kvalitet per krona för att hitta de bästa fynden.",
+            "guide": {
+                "title": "Hur väljer man italienskt vin?",
+                "points": [
+                    "Chianti Classico (inte bara Chianti) ger genomgående bättre kvalitet — leta efter DOCG-stämpeln.",
+                    "Sicilien och Puglia erbjuder fantastiskt prisvärda viner, ofta under 120 kr med höga betyg.",
+                    "Barolo och Brunello kräver budget (250 kr+) men kan vara otroliga upplevelser.",
+                    "Prova Nero d'Avola och Primitivo för fruktdrivna, generösa viner till bra pris.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad är skillnaden mellan Chianti och Chianti Classico?", "Chianti Classico kommer från det ursprungliga, mindre området i Toscana och har strängare kvalitetskrav. Vanlig Chianti kan komma från ett mycket större område med lägre minimikrav. Classico är nästan alltid bättre."),
+                ("Vilka italienska viner passar till pasta?", "Till tomatsås: Sangiovese (Chianti) eller Montepulciano d'Abruzzo. Till krämig pasta: en fyllig vit som Vermentino. Till pesto: Vermentino eller en lätt Pinot Grigio."),
+            ],
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Italien'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -287,6 +380,20 @@ def make_pages():
             "meta": f"Topp 20 franska viner. Bordeaux, Bourgogne, Rhône och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa franska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Frankrike är vinets hemland. Här är de franska viner som ger mest smak för pengarna.",
+            "intro2": "Franska viner på Systembolaget täcker allt från Bordeaux och Bourgogne till Rhône och Languedoc. Frankrike sätter standarden för vinvärlden, men priserna varierar enormt. Vår ranking avslöjar vilka franska viner som verkligen är prisvärda.",
+            "guide": {
+                "title": "Hur väljer man franskt vin?",
+                "points": [
+                    "Languedoc och Rhône ger bäst prisvärdhet — ofta hälften så dyrt som Bordeaux med lika bra smak.",
+                    "Côtes du Rhône är en trygg favorit till 100–150 kr. Välj Villages för ett steg upp.",
+                    "Bordeaux under 150 kr är ofta tunna — satsa på 180 kr+ för att få riktigt bra kvalitet.",
+                    "Crémant (mousserande) från Alsace eller Loire är Frankrikes bäst bevarade vinhemlighet.",
+                ]
+            },
+            "faq_visible": [
+                ("Är fransk vin alltid bäst?", "Nej, men Frankrike har den bredaste kvaliteten. Problemet är att franskt vin ofta är dyrare. I prisklassen under 120 kr får du ofta mer för pengarna från Chile eller Spanien."),
+                ("Vad betyder AOC och AOP på franska viner?", "AOC (Appellation d'Origine Contrôlée) och AOP (Appellation d'Origine Protégée) är samma sak — en kvalitetsgaranti som säkerställer att vinet kommer från en specifik region och följer lokala regler för druvor och produktion."),
+            ],
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Frankrike'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -296,6 +403,20 @@ def make_pages():
             "meta": f"Topp 20 spanska viner. Rioja, Ribera del Duero, Priorat och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa spanska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Spanien har fantastisk prisvärdhet. Här är de spanska vinerna som ger mest bang for the buck.",
+            "intro2": "Spanska viner är bland de mest prisvärda på Systembolaget. Regioner som Rioja, Ribera del Duero och Priorat levererar världsklass, medan Jumilla och Calatayud erbjuder otroliga budgetfynd. Tempranillo och Garnacha dominerar men det finns mycket mer att upptäcka.",
+            "guide": {
+                "title": "Hur väljer man spanskt vin?",
+                "points": [
+                    "Rioja Crianza (lagrat 1 år i fat) ger ofta bäst prisvärde bland spanska viner.",
+                    "Ribera del Duero har kraftfullare stil — perfekt till grillat kött.",
+                    "Jumilla och Calatayud är underskattade regioner med fantastiska viner under 100 kr.",
+                    "Garnacha (Grenache) från Spanien ger generösa, kryddiga viner med bra prisvärde.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad betyder Crianza, Reserva och Gran Reserva?", "Crianza har lagrats minst 1 år i fat, Reserva minst 3 år (varav 1 i fat), och Gran Reserva minst 5 år (varav 2 i fat). Längre lagring ger mer komplexitet men inte alltid bättre smak — Crianza är ofta fräschast."),
+                ("Vilken spansk vinregion är bäst?", "Rioja är den mest kända och pålitliga. Ribera del Duero ger kraftfullare stil. Priorat är för den som vill ha koncentrerat och komplext. För budgetfynd: kolla Jumilla och Campo de Borja."),
+            ],
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Spanien'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -305,6 +426,7 @@ def make_pages():
             "meta": f"Topp chilenska viner. Carmenère, Cabernet och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa chilenska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Chile levererar fantastisk kvalitet till låga priser. Här är de bästa chilenska fynden.",
+            "intro2": "Chilenska viner dominerar budgetsegmentet på Systembolaget med druvor som Cabernet Sauvignon, Carmenère och Sauvignon Blanc. Vinregionerna sträcker sig från svala Casablanca till varma Maule. Chile är perfekt för dig som vill ha kvalitetsvin utan att betala europapremium.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Chile'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -314,6 +436,7 @@ def make_pages():
             "meta": f"Topp sydafrikanska viner. Pinotage, Chenin Blanc och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa sydafrikanska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Sydafrika är en underskattad vinproducent med fantastisk prisvärdhet. Här är de bästa köpen.",
+            "intro2": "Sydafrikanska viner på Systembolaget är ofta bland de mest prisvärda. Pinotage är landets signaturdruva, men Chenin Blanc, Shiraz och Cabernet ger också utmärkt kvalitet. Vinregionen Stellenbosch producerar Sydafrikas mest ansedda viner.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Sydafrika'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -378,6 +501,16 @@ def make_pages():
             "meta": f"Topp 20 viner under 200 kr. Kvalitetsrankade med crowd-betyg och expertrecensioner. {DATE_STR}.",
             "h1": f"Bästa vinerna under 200 kr — {DATE_STR}",
             "intro": "Under 200 kr finns mängder av fantastiska viner. Här är de som ger mest kvalitet per krona.",
+            "intro2": "Prisklassen under 200 kr ger dig tillgång till de flesta vinregioner i världen. Här hittar du allt från lagrat Rioja till elegant Pinot Noir och kraftfull Shiraz. Majoriteten av Systembolagets bästa köp ligger i just detta prissegment.",
+            "guide": {
+                "title": "Hur hittar man bra vin under 200 kr?",
+                "points": [
+                    "Kolla smakfynd-poängen istället för att gissa — viner med 80+ poäng ger nästan alltid bra upplevelse.",
+                    "Spanska Rioja Crianza och italienska Montepulciano d'Abruzzo är säkra kort under 150 kr.",
+                    "Sydamerikanska viner ger generellt mer smak per krona än europeiska i denna klass.",
+                    "Ekologiska viner i denna prisklass har blivit markant bättre de senaste åren.",
+                ]
+            },
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -387,6 +520,7 @@ def make_pages():
             "meta": f"Topp premiumviner 200-500 kr. Expertbetyg, crowd-betyg och prisjämförelse. {DATE_STR}.",
             "h1": f"Bästa premiumviner 200–500 kr — {DATE_STR}",
             "intro": "I premiumklassen hittar du viner med riktigt höga betyg. Här är de som ger bäst valuta.",
+            "intro2": "Premiumviner mellan 200 och 500 kr på Systembolaget inkluderar lagade Bordeaux, Barolo, topprankade Rhône-viner och exklusiva Nya världen-producenter. Här spelar expertbetyg stor roll — skillnaden mellan bra och fantastiskt syns tydligt i denna prisklass.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 200 and (w.get('price', 0) or 0) <= 500],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
@@ -499,16 +633,78 @@ def render_page(page, all_pages=None):
     wines_html = '\n'.join(render_wine_row(w, i+1) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
 
-    # Cross-links
-    cross = get_cross_links(page['slug'], all_pages or [])
+    # Cross-links — organized by category showing all related pages
+    category_labels = {
+        'typ': 'Vintyper',
+        'druva': 'Druvor',
+        'land': 'Länder',
+        'pris': 'Pris',
+        'mat': 'Tillfällen & mat',
+        'smak': 'Smakprofiler',
+    }
+    category_slugs = {
+        'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
+        'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
+        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
+        'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
+        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling'],
+        'smak': ['fylliga-roda-vin', 'latta-vita-vin'],
+    }
+    slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
+    cross_sections = []
+    for cat_key in ['typ', 'druva', 'land', 'pris', 'mat', 'smak']:
+        cat_pages = [slug_to_page[s] for s in category_slugs[cat_key] if s in slug_to_page and s != page['slug']]
+        if not cat_pages:
+            continue
+        links = ' · '.join(
+            f'<a href="/{p["slug"]}/" style="color:#8b2332;text-decoration:none">{p["title"].split(" — ")[0].split(" på ")[0]}</a>'
+            for p in cat_pages
+        )
+        cross_sections.append(f'<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:#7a7060;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{category_labels[cat_key]}</div><div style="font-size:13px;color:#4a4238;line-height:2">{links}</div></div>')
     cross_html = ""
-    if cross:
-        cross_links = ' · '.join(f'<a href="/{p["slug"]}/" style="color:#8b2332;text-decoration:none">{p["title"].split(" — ")[0].split(" på ")[0]}</a>' for p in cross)
+    if cross_sections:
         cross_html = f'''
     <div style="margin-top:24px;padding:16px 20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
-      <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:6px">Se även</div>
-      <div style="font-size:13px;color:#4a4238;line-height:2">{cross_links}</div>
+      <div style="font-size:14px;font-weight:600;color:#1e1710;margin-bottom:12px">Fler vinlistor</div>
+      {''.join(cross_sections)}
     </div>'''
+
+    # Intro2 — extended intro paragraph
+    intro2_html = ""
+    if page.get('intro2'):
+        intro2_html = f'<p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page["intro2"]}</p>'
+
+    # Guide section — buying advice
+    guide_html = ""
+    if page.get('guide'):
+        guide = page['guide']
+        points_html = ''.join(f'<li style="margin-bottom:8px">{p}</li>' for p in guide['points'])
+        guide_html = f'''
+    <div style="margin-top:32px">
+      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;color:#1e1710">{guide['title']}</h2>
+      <ul style="margin:0;padding:0 0 0 20px;font-size:14px;color:#4a4238;line-height:1.7">
+        {points_html}
+      </ul>
+    </div>'''
+
+    # Visible FAQ section
+    faq_visible_html = ""
+    if page.get('faq_visible'):
+        faq_entries = ''.join(
+            f'<dt style="font-weight:600;font-size:15px;color:#1e1710;margin-bottom:4px">{q}</dt>'
+            f'<dd style="margin:0 0 16px;font-size:14px;color:#4a4238;line-height:1.6">{a}</dd>'
+            for q, a in page['faq_visible']
+        )
+        faq_visible_html = f'''
+    <div style="margin-top:32px">
+      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;color:#1e1710">Vanliga frågor</h2>
+      <dl style="margin:0">
+        {faq_entries}
+      </dl>
+    </div>'''
+
+    # Today's date for article meta
+    today_iso = datetime.now().strftime('%Y-%m-%d')
 
     # JSON-LD for the wine list
     items_ld = []
@@ -592,6 +788,7 @@ def render_page(page, all_pages=None):
   <meta property="og:image" content="https://smakfynd.se/og-image.png">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
+  <meta property="article:modified_time" content="{today_iso}">
 
   <script type="application/ld+json">{ld_json}</script>
   <script type="application/ld+json">{breadcrumb_ld}</script>
@@ -613,6 +810,7 @@ def render_page(page, all_pages=None):
         {page['h1']}
       </h1>
       <p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page['intro']}</p>
+      {intro2_html}
       <p style="margin:0;font-size:12px;color:#7a7060">
         Uppdaterad {DATE_STR} · Baserat på {len(all_wines)} viner · <a href="https://smakfynd.se" style="color:#8b2332">Utforska alla viner →</a>
       </p>
@@ -621,6 +819,10 @@ def render_page(page, all_pages=None):
     <ol style="list-style:none;padding:0;margin:0">
 {wines_html}
     </ol>
+
+    {guide_html}
+
+    {faq_visible_html}
 
     <div style="margin-top:32px;padding:20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
       <h2 style="margin:0 0 8px;font-size:18px;font-family:'Instrument Serif',serif;font-weight:400">Så fungerar Smakfynd-poängen</h2>

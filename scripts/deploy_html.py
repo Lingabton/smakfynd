@@ -127,41 +127,132 @@ faq_ld = json.dumps({
 num_wines = len(all_wines) if os.path.exists(DATA_PATH) else 800
 num_countries = len(set(w.get('country','') for w in all_wines if w.get('country'))) if os.path.exists(DATA_PATH) else 18
 
+from datetime import datetime
+TODAY = datetime.now().strftime('%Y-%m-%d')
+MONTH_SV = ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'][datetime.now().month - 1]
+
+# SameAs links for Organization
+org_ld = json.dumps({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Smakfynd",
+    "alternateName": "Olav Innovation AB",
+    "url": "https://smakfynd.se",
+    "logo": "https://smakfynd.se/og-image.png",
+    "founder": {
+        "@type": "Person",
+        "name": "Gabriel Linton",
+        "jobTitle": "Grundare",
+        "alumniOf": [
+            {"@type": "EducationalOrganization", "name": "Restaurang- och hotellhögskolan, Grythyttan"},
+            {"@type": "EducationalOrganization", "name": "Örebro universitet"},
+            {"@type": "EducationalOrganization", "name": "Cleveland State University"}
+        ]
+    },
+    "sameAs": ["https://smakfynd.substack.com"],
+}, ensure_ascii=False)
+
+# SiteNavigationElement for sitelinks
+nav_ld = json.dumps({
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": "Smakfynd",
+    "hasPart": [
+        {"@type": "WebPage", "name": "Bästa röda viner", "url": "https://smakfynd.se/basta-roda-vin/"},
+        {"@type": "WebPage", "name": "Bästa vita viner", "url": "https://smakfynd.se/basta-vita-vin/"},
+        {"@type": "WebPage", "name": "Bästa bubbel", "url": "https://smakfynd.se/basta-bubbel/"},
+        {"@type": "WebPage", "name": "Vin under 100 kr", "url": "https://smakfynd.se/vin-under-100-kr/"},
+        {"@type": "WebPage", "name": "Ekologiskt vin", "url": "https://smakfynd.se/ekologiskt-vin/"},
+        {"@type": "WebPage", "name": "Vin till grillat", "url": "https://smakfynd.se/vin-till-grillat/"},
+    ]
+}, ensure_ascii=False)
+
+# Generate noscript landing page links for internal linking
+noscript_links = """
+      <h2>Utforska viner per kategori</h2>
+      <h3>Per druva</h3>
+      <ul>
+        <li><a href="/basta-cabernet-sauvignon/">Bästa Cabernet Sauvignon</a></li>
+        <li><a href="/basta-malbec/">Bästa Malbec</a></li>
+        <li><a href="/basta-pinot-noir/">Bästa Pinot Noir</a></li>
+        <li><a href="/basta-syrah-shiraz/">Bästa Syrah &amp; Shiraz</a></li>
+        <li><a href="/basta-tempranillo/">Bästa Tempranillo</a></li>
+        <li><a href="/basta-sangiovese/">Bästa Sangiovese</a></li>
+        <li><a href="/basta-chardonnay/">Bästa Chardonnay</a></li>
+        <li><a href="/basta-riesling/">Bästa Riesling</a></li>
+        <li><a href="/basta-sauvignon-blanc/">Bästa Sauvignon Blanc</a></li>
+      </ul>
+      <h3>Per land</h3>
+      <ul>
+        <li><a href="/basta-italienska-vin/">Bästa italienska viner</a></li>
+        <li><a href="/basta-franska-vin/">Bästa franska viner</a></li>
+        <li><a href="/basta-spanska-vin/">Bästa spanska viner</a></li>
+        <li><a href="/basta-chilenska-vin/">Bästa chilenska viner</a></li>
+        <li><a href="/basta-sydafrikanska-vin/">Bästa sydafrikanska viner</a></li>
+        <li><a href="/basta-australiska-vin/">Bästa australiska viner</a></li>
+        <li><a href="/basta-portugisiska-vin/">Bästa portugisiska viner</a></li>
+      </ul>
+      <h3>Per tillfälle</h3>
+      <ul>
+        <li><a href="/vin-till-grillat/">Vin till grillat</a></li>
+        <li><a href="/vin-till-fisk/">Vin till fisk</a></li>
+        <li><a href="/vin-till-ost/">Vin till ost</a></li>
+        <li><a href="/vin-till-kyckling/">Vin till kyckling</a></li>
+        <li><a href="/vin-till-dejt/">Vin till dejt</a></li>
+        <li><a href="/vin-till-pasta/">Vin till pasta</a></li>
+      </ul>
+      <h3>Per pris</h3>
+      <ul>
+        <li><a href="/vin-under-100-kr/">Bästa viner under 100 kr</a></li>
+        <li><a href="/vin-under-150-kr/">Bästa viner under 150 kr</a></li>
+        <li><a href="/vin-under-200-kr/">Bästa viner under 200 kr</a></li>
+        <li><a href="/basta-premium-vin/">Bästa premiumviner 200-500 kr</a></li>
+        <li><a href="/ekologiskt-vin/">Ekologiska viner</a></li>
+      </ul>
+"""
+
 html = f"""<!DOCTYPE html>
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smakfynd — Hitta bästa vinerna på Systembolaget</title>
-  <meta name="description" content="Smakfynd rankar {num_wines} viner från {num_countries} länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Hitta ditt nästa favoritvin.">
+  <title>Smakfynd — Hitta bästa vinerna på Systembolaget {datetime.now().year}</title>
+  <meta name="description" content="Smakfynd rankar {num_wines} viner från {num_countries} länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Uppdaterad {MONTH_SV} {datetime.now().year}.">
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <link rel="canonical" href="https://smakfynd.se">
 
   <!-- Preconnect for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://product-cdn.systembolaget.se">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Smakfynd — Hitta bästa vinerna på Systembolaget">
-  <meta property="og:description" content="Vi rankar {num_wines} viner efter kvalitet per krona. Crowd-betyg, expertrecensioner och AI-vinmatchning. Gratis.">
+  <meta property="og:title" content="Smakfynd — Bästa vinerna på Systembolaget {datetime.now().year}">
+  <meta property="og:description" content="Vi rankar hela Systembolagets butikssortiment efter kvalitet per krona. Crowd-betyg, expertrecensioner och AI-vinmatchning. Gratis.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://smakfynd.se">
   <meta property="og:image" content="https://smakfynd.se/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
+  <meta property="article:modified_time" content="{TODAY}">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Smakfynd — Smartare vinval på Systembolaget">
-  <meta name="twitter:description" content="Vi rankar {num_wines} viner efter kvalitet per krona.">
+  <meta name="twitter:title" content="Smakfynd — Bästa vinerna på Systembolaget {datetime.now().year}">
+  <meta name="twitter:description" content="Vi rankar hela Systembolagets sortiment efter kvalitet per krona.">
   <meta name="twitter:image" content="https://smakfynd.se/og-image.png">
 
   <!-- Structured Data -->
   <script type="application/ld+json">{json_ld}</script>
   <script type="application/ld+json">{wine_ld_json}</script>
   <script type="application/ld+json">{faq_ld}</script>
+  <script type="application/ld+json">{org_ld}</script>
+  <script type="application/ld+json">{nav_ld}</script>
 
   <style>
     :root {{
@@ -214,10 +305,13 @@ html = f"""<!DOCTYPE html>
 {noscript_wines}
       </ol>
 
+      {noscript_links}
+
       <h2>Om Smakfynd</h2>
       <p>Smakfynd är en oberoende tjänst skapad av Gabriel Linton, utbildad i dryckeskunskap vid
-      Restaurang- och hotellhögskolan i Grythyttan. Drivs av Olav Innovation AB.
-      Ingen koppling till Systembolaget. Vi säljer inte alkohol.</p>
+      Restaurang- och hotellhögskolan i Grythyttan och forskare vid Örebro universitet.
+      Drivs av Olav Innovation AB. Ingen koppling till Systembolaget. Vi säljer inte alkohol.</p>
+      <p>Uppdaterad {MONTH_SV} {datetime.now().year} — {num_wines} viner från {num_countries} länder.</p>
 
       <p><a href="https://smakfynd.se">Besök Smakfynd</a> — kräver JavaScript.</p>
     </div>
