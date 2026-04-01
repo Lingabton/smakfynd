@@ -311,6 +311,62 @@ function useSaved() {
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
 
+// Scroll-reveal hook — triggers animation when element enters viewport
+function useScrollReveal(threshold = 0.1) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") { setVisible(true); return; }
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold, rootMargin: "50px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+// Internal link helper — maps wine properties to relevant landing pages
+function getInternalLinks(p) {
+  const links = [];
+  // Country links
+  const countryMap = {
+    "Italien": "basta-italienska-vin", "Frankrike": "basta-franska-vin",
+    "Spanien": "basta-spanska-vin", "Chile": "basta-chilenska-vin",
+    "Sydafrika": "basta-sydafrikanska-vin", "Australien": "basta-australiska-vin",
+    "Portugal": "basta-portugisiska-vin",
+  };
+  if (countryMap[p.country]) links.push({ url: `/${countryMap[p.country]}/`, label: `Bästa ${p.country.toLowerCase()}ska viner` });
+
+  // Grape links
+  const grapeMap = {
+    "cabernet sauvignon": "basta-cabernet-sauvignon", "malbec": "basta-malbec",
+    "pinot noir": "basta-pinot-noir", "syrah": "basta-syrah-shiraz", "shiraz": "basta-syrah-shiraz",
+    "tempranillo": "basta-tempranillo", "sangiovese": "basta-sangiovese",
+    "chardonnay": "basta-chardonnay", "riesling": "basta-riesling",
+    "sauvignon blanc": "basta-sauvignon-blanc", "zinfandel": "basta-zinfandel",
+  };
+  const grape = (p.grape || "").toLowerCase();
+  for (const [key, slug] of Object.entries(grapeMap)) {
+    if (grape.includes(key)) { links.push({ url: `/${slug}/`, label: `Bästa ${key.charAt(0).toUpperCase() + key.slice(1)}` }); break; }
+  }
+
+  // Type links
+  const typeMap = { "Rött": "basta-roda-vin", "Vitt": "basta-vita-vin", "Rosé": "basta-rose", "Mousserande": "basta-bubbel" };
+  if (typeMap[p.category]) links.push({ url: `/${typeMap[p.category]}/`, label: `Alla ${(p.category || "").toLowerCase()} viner` });
+
+  // Price links
+  if (p.price < 100) links.push({ url: "/vin-under-100-kr/", label: "Viner under 100 kr" });
+  else if (p.price < 150) links.push({ url: "/vin-under-150-kr/", label: "Viner under 150 kr" });
+  else if (p.price < 200) links.push({ url: "/vin-under-200-kr/", label: "Viner under 200 kr" });
+
+  if (p.organic) links.push({ url: "/ekologiskt-vin/", label: "Ekologiska viner" });
+
+  return links.slice(0, 3);
+}
+
 // ════════════════════════════════════════════════════════════
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
@@ -328,6 +384,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
+  const [cardRef, cardVisible] = useScrollReveal(0.05);
   // Systembolaget food pairing SVG icons (official paths)
   const SB_FOOD_ICONS = {
     "Nöt": { vb: "0 0 35 32", tx: -335, ty: -407, d: "M362.64,417.04 C364.12,416.28 365.48,416 366.6,416 C367.8,416 368.88,416.36 369.68,417.04 C369.12,417.72 368.16,420.04 365.44,420.04 C364.4,420.04 363.24,419.76 361.76,419.04 C361.8,419.2 361.8,419.44 361.8,419.64 C361.8,421.08 360.92,423.52 360.84,426.24 C361.04,427.52 361.2,428.8 361.2,429.84 C361.2,433.88 359.8,436.24 358.6,436.92 C357.28,437.64 355,438.48 352.52,438.48 C350.04,438.48 347.76,437.68 346.36,436.92 C345.16,436.28 343.8,433.76 343.8,429.8 C343.8,428.72 343.92,427.52 344.12,426.24 C344.12,423.6 343.24,421.08 343.24,419.64 C343.24,419.44 343.24,419.2 343.28,419.04 C341.8,419.76 340.68,420.04 339.68,420.04 C337.04,420.04 335.8,418 335.32,417.04 C336.12,416.36 337.08,416 338.4,416 C339.52,416 340.88,416.28 342.4,417.04 C340.48,415.56 339.88,413.56 339.88,411.88 C339.88,409.48 341.16,407.52 342.12,407.52 C342.2,407.52 342.36,407.6 342.52,407.64 C343.84,408.68 342.68,413.48 345.72,413.48 L359.36,413.48 C362.44,413.48 361.16,408.68 362.48,407.64 C362.64,407.6 362.8,407.52 362.88,407.52 C363.92,407.52 365.12,409.48 365.12,411.92 C365.12,413.64 364.44,415.56 362.64,417.04 Z M345.56,421.88 C345.56,423.24 347,423.8 347.8,423.8 C349.44,423.8 349.88,422.6 349.88,421.88 C349.88,420.88 349.2,419.84 347.8,419.84 C347.04,419.84 345.56,420.24 345.56,421.88 Z M355.16,421.88 C355.16,423.24 356.32,423.8 357.2,423.8 C358.76,423.8 359.44,422.6 359.44,421.88 C359.44,420.88 358.72,419.84 357.28,419.84 C356.6,419.84 355.16,420.24 355.16,421.88 Z" },
@@ -357,6 +414,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
 
   return (
     <div
+      ref={cardRef}
       role="button" tabIndex={0} aria-expanded={open}
       aria-label={`${p.name} ${p.sub || ''} — ${s100} poäng, ${p.price} kr`}
       onClick={handleOpen}
@@ -365,8 +423,9 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
         background: t.card, borderRadius: 16, outline: "none",
         border: `1px solid ${open ? t.bdr : t.bdrL}`,
         boxShadow: open ? t.sh3 : t.sh1,
-        transition: "all 0.25s ease", overflow: "hidden",
-        animation: `slideUp 0.35s ease ${delay}s both`,
+        transition: "all 0.35s ease", overflow: "hidden",
+        opacity: cardVisible ? 1 : 0,
+        transform: cardVisible ? "translateY(0)" : "translateY(16px)",
         cursor: "pointer",
       }}
     >
@@ -743,6 +802,28 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                     </div>
                   ))}
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* ═══ INTERNAL LINKS — SEO + navigation ═══ */}
+          {(() => {
+            const links = getInternalLinks(p);
+            if (links.length === 0) return null;
+            return (
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${t.bdrL}`, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {links.map((link, i) => (
+                  <a key={i} href={link.url} onClick={e => e.stopPropagation()}
+                    style={{
+                      fontSize: 11, color: t.wine, textDecoration: "none",
+                      padding: "4px 10px", borderRadius: 100,
+                      border: `1px solid ${t.wine}20`, background: `${t.wine}06`,
+                      fontWeight: 500, transition: "all 0.2s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = `${t.wine}12`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = `${t.wine}06`; }}
+                  >{link.label} →</a>
+                ))}
               </div>
             );
           })()}

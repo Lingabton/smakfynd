@@ -534,6 +534,105 @@ function useSaved() {
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
 
+// Scroll-reveal hook — triggers animation when element enters viewport
+function useScrollReveal(threshold = 0.1) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        obs.disconnect();
+      }
+    }, {
+      threshold,
+      rootMargin: "50px"
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+// Internal link helper — maps wine properties to relevant landing pages
+function getInternalLinks(p) {
+  const links = [];
+  // Country links
+  const countryMap = {
+    "Italien": "basta-italienska-vin",
+    "Frankrike": "basta-franska-vin",
+    "Spanien": "basta-spanska-vin",
+    "Chile": "basta-chilenska-vin",
+    "Sydafrika": "basta-sydafrikanska-vin",
+    "Australien": "basta-australiska-vin",
+    "Portugal": "basta-portugisiska-vin"
+  };
+  if (countryMap[p.country]) links.push({
+    url: `/${countryMap[p.country]}/`,
+    label: `Bästa ${p.country.toLowerCase()}ska viner`
+  });
+
+  // Grape links
+  const grapeMap = {
+    "cabernet sauvignon": "basta-cabernet-sauvignon",
+    "malbec": "basta-malbec",
+    "pinot noir": "basta-pinot-noir",
+    "syrah": "basta-syrah-shiraz",
+    "shiraz": "basta-syrah-shiraz",
+    "tempranillo": "basta-tempranillo",
+    "sangiovese": "basta-sangiovese",
+    "chardonnay": "basta-chardonnay",
+    "riesling": "basta-riesling",
+    "sauvignon blanc": "basta-sauvignon-blanc",
+    "zinfandel": "basta-zinfandel"
+  };
+  const grape = (p.grape || "").toLowerCase();
+  for (const [key, slug] of Object.entries(grapeMap)) {
+    if (grape.includes(key)) {
+      links.push({
+        url: `/${slug}/`,
+        label: `Bästa ${key.charAt(0).toUpperCase() + key.slice(1)}`
+      });
+      break;
+    }
+  }
+
+  // Type links
+  const typeMap = {
+    "Rött": "basta-roda-vin",
+    "Vitt": "basta-vita-vin",
+    "Rosé": "basta-rose",
+    "Mousserande": "basta-bubbel"
+  };
+  if (typeMap[p.category]) links.push({
+    url: `/${typeMap[p.category]}/`,
+    label: `Alla ${(p.category || "").toLowerCase()} viner`
+  });
+
+  // Price links
+  if (p.price < 100) links.push({
+    url: "/vin-under-100-kr/",
+    label: "Viner under 100 kr"
+  });else if (p.price < 150) links.push({
+    url: "/vin-under-150-kr/",
+    label: "Viner under 150 kr"
+  });else if (p.price < 200) links.push({
+    url: "/vin-under-200-kr/",
+    label: "Viner under 200 kr"
+  });
+  if (p.organic) links.push({
+    url: "/ekologiskt-vin/",
+    label: "Ekologiska viner"
+  });
+  return links.slice(0, 3);
+}
+
 // ════════════════════════════════════════════════════════════
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
@@ -564,6 +663,7 @@ function Card({
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
+  const [cardRef, cardVisible] = useScrollReveal(0.05);
   // Systembolaget food pairing SVG icons (official paths)
   const SB_FOOD_ICONS = {
     "Nöt": {
@@ -656,6 +756,7 @@ function Card({
     }))));
   };
   return /*#__PURE__*/React.createElement("div", {
+    ref: cardRef,
     role: "button",
     tabIndex: 0,
     "aria-expanded": open,
@@ -673,9 +774,10 @@ function Card({
       outline: "none",
       border: `1px solid ${open ? t.bdr : t.bdrL}`,
       boxShadow: open ? t.sh3 : t.sh1,
-      transition: "all 0.25s ease",
+      transition: "all 0.35s ease",
       overflow: "hidden",
-      animation: `slideUp 0.35s ease ${delay}s both`,
+      opacity: cardVisible ? 1 : 0,
+      transform: cardVisible ? "translateY(0)" : "translateY(16px)",
       cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -1622,6 +1724,40 @@ function Card({
         fontFamily: "'Instrument Serif', serif"
       }
     }, w.price, " kr"))))));
+  })(), (() => {
+    const links = getInternalLinks(p);
+    if (links.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 14,
+        paddingTop: 12,
+        borderTop: `1px solid ${t.bdrL}`,
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, links.map((link, i) => /*#__PURE__*/React.createElement("a", {
+      key: i,
+      href: link.url,
+      onClick: e => e.stopPropagation(),
+      style: {
+        fontSize: 11,
+        color: t.wine,
+        textDecoration: "none",
+        padding: "4px 10px",
+        borderRadius: 100,
+        border: `1px solid ${t.wine}20`,
+        background: `${t.wine}06`,
+        fontWeight: 500,
+        transition: "all 0.2s"
+      },
+      onMouseEnter: e => {
+        e.currentTarget.style.background = `${t.wine}12`;
+      },
+      onMouseLeave: e => {
+        e.currentTarget.style.background = `${t.wine}06`;
+      }
+    }, link.label, " \u2192")));
   })()));
 }
 
