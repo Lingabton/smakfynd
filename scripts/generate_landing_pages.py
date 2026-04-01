@@ -557,6 +557,102 @@ def make_pages():
                            and (w.get('taste_body') or 12) <= 5],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+
+        # ─── Regioner ───
+        {
+            "slug": "basta-vin-fran-bordeaux",
+            "title": f"Bästa Bordeaux-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Bordeaux-viner på Systembolaget. Klassiska blandningar rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Bordeaux-viner på Systembolaget — {DATE_STR}",
+            "intro": "Bordeaux är vinvärldens mest ikoniska region — hem för legendariska châteaux och tidlösa blandningar av Cabernet Sauvignon och Merlot.",
+            "intro2": "Bordeaux terroir är unikt: havsnära klimat, grus- och lerjordar och sekler av vinkunskap skapar viner med struktur, elegans och lagringspotential. På Systembolaget finns allt från prisvärda Côtes de Bordeaux till exklusiva Saint-Émilion och Médoc. Vi har rankat alla Bordeaux-viner efter kvalitet per krona för att hitta de verkliga fynden.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Bordeaux'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-toscana",
+            "title": f"Bästa Toscana-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Toscana-viner på Systembolaget. Chianti, Brunello och mer — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Toscana-viner på Systembolaget — {DATE_STR}",
+            "intro": "Toscana är hem för Italiens mest älskade viner — från vardaglig Chianti till magnifik Brunello di Montalcino.",
+            "intro2": "Toscana levererar viner i alla prisklasser. Chianti Classico DOCG ger pålitlig kvalitet med Sangiovese-druvan i centrum, medan Brunello di Montalcino och Vino Nobile di Montepulciano erbjuder djupare komplexitet. Super Toscans blandar internationella druvor med italiensk finesse. Vi har rankat alla Toscana-viner efter kvalitet per krona.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Toscana'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-rioja",
+            "title": f"Bästa Rioja-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Rioja-viner på Systembolaget. Crianza, Reserva och Gran Reserva — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Rioja-viner på Systembolaget — {DATE_STR}",
+            "intro": "Rioja är Spaniens mest klassiska vinregion — känd för eleganta Tempranillo-viner med vanilj, körsbär och kryddiga toner.",
+            "intro2": "Rioja-viner delas in efter lagringstid: Joven (ung), Crianza (1 år i fat), Reserva (3 år totalt) och Gran Reserva (5 år totalt). Tempranillo dominerar, ofta med inslag av Garnacha och Graciano. Crianza ger ofta bäst prisvärdhet, medan Reserva och Gran Reserva erbjuder mer komplexitet och mognad. Vi rankar alla Rioja-viner efter smak och prisvärdhet.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Rioja'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-bourgogne",
+            "title": f"Bästa Bourgogne-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Bourgogne-viner på Systembolaget. Pinot Noir och Chardonnay — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Bourgogne-viner på Systembolaget — {DATE_STR}",
+            "intro": "Bourgogne är Pinot Noirs och Chardonnays hemland — eleganta viner med oöverträffad terroirkänsla.",
+            "intro2": "Bourgogne producerar världens mest eftertraktade Pinot Noir (röda) och Chardonnay (vita). Regionen är känd för sitt terroirfokus där varje vingård ger unika karaktärsdrag. Från fräsch Chablis till fyllig Meursault bland vita, och från elegant Beaune till kraftfull Gevrey-Chambertin bland röda — Bourgogne har enorm bredd. Priserna varierar kraftigt, men det finns fynd att göra.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Bourgogne'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-rhonedalen",
+            "title": f"Bästa Rhône-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Rhône-viner på Systembolaget. Syrah, Grenache och GSM-blandningar — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Rhône-viner på Systembolaget — {DATE_STR}",
+            "intro": "Rhônedalen erbjuder kraftfulla, kryddiga viner — från eleganta norra Rhône-Syraher till generösa södra Rhône-blandningar.",
+            "intro2": "Rhônedalen delas i norra och södra. Norra Rhône ger koncentrerade Syrah-viner från Côte-Rôtie, Hermitage och Cornas. Södra Rhône domineras av GSM-blandningar (Grenache, Syrah, Mourvèdre) med Châteauneuf-du-Pape som kronjuvel. Côtes du Rhône och Côtes du Rhône Villages erbjuder fantastisk prisvärdhet och är ofta bland Systembolagets bästa köp.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Rhonedalen'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+
+        # ─── Fler tillfällen ───
+        {
+            "slug": "vin-till-brunch",
+            "title": f"Bästa vinerna till brunch {YEAR}",
+            "meta": f"Vin till brunch? Här är de bästa mousserande, vita och rosévinerna på Systembolaget. {DATE_STR}.",
+            "h1": f"Bästa vinerna till brunch — {DATE_STR}",
+            "intro": "Brunch och bubbel hör ihop, men även lätta vita och roséer lyfter en söndagsbrunch. Här är de bästa alternativen.",
+            "intro2": "Till brunch vill du ha viner som är fräscha, lätta och festliga. Mousserande viner som Cava, Prosecco och Crémant är givna val — de funkar till allt från äggbenedict till frukt. Lätta vita viner och torra roséer kompletterar perfekt om du vill ha något stillsamt. Vi har valt ut de bästa brunchvinerna baserat på smak och prisvärdhet.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('type') == 'Mousserande'
+                                or (w.get('type') in ('Vitt', 'Rosé') and (w.get('taste_body') or 12) <= 6))],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-lax",
+            "title": f"Bästa vinerna till lax {YEAR}",
+            "meta": f"Vin till lax? Här är de bästa vita och rosévinerna som matchar lax perfekt. {DATE_STR}.",
+            "h1": f"Bästa vinerna till lax — {DATE_STR}",
+            "intro": "Lax är en av Sveriges mest älskade råvaror — och rätt vin gör måltiden komplett. Här är de bästa matchningarna.",
+            "intro2": "Till lax fungerar vita och roséer bäst. Fräsch Sauvignon Blanc, mineralisk Chablis eller en elegant Chardonnay lyfter både gravad, stekt och ugnsbakad lax. Lättare roséer med god syra passar också utmärkt, särskilt till grillad lax. Vi har filtrerat Systembolagets sortiment efter fiskpairing och valt de bästa vita och rosévinerna.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') in ('Vitt', 'Rosé')
+                           and any('fisk' in (f or '').lower() for f in (w.get('food_pairings') or []))],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-tacos",
+            "title": f"Bästa vinerna till tacos {YEAR}",
+            "meta": f"Vin till tacos? Här är de bästa prisvärda vinerna som passar till tacofredag. {DATE_STR}.",
+            "h1": f"Bästa vinerna till tacos — {DATE_STR}",
+            "intro": "Tacofredag förtjänar ett gott vin. Fruktiga röda med medelfyllig kropp eller en fräsch rosé funkar perfekt.",
+            "intro2": "Till tacos vill du ha avslappnade, fruktiga viner som inte tar över smaken. Medelkroppade röda viner som Malbec, Tempranillo och Garnacha passar utmärkt — de har frukt och krydda som kompletterar tacokryddorna. Rosé är ett annat toppval, särskilt till kyckling- och fisktacos. Vi har valt prisvärda viner under 150 kr som gör fredagstacosen ännu godare.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('price', 999) or 999) <= 150
+                           and ((w.get('type') == 'Rött' and (w.get('taste_body') or 0) >= 4 and (w.get('taste_body') or 0) <= 8)
+                                or w.get('type') == 'Rosé')],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
     ]
 
 def score_label(score):
@@ -612,9 +708,10 @@ def get_cross_links(current_slug, all_pages):
     tags = {
         'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
+        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
         'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
-        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling'],
+        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin'],
     }
     # Find current page's category
@@ -638,6 +735,7 @@ def render_page(page, all_pages=None):
         'typ': 'Vintyper',
         'druva': 'Druvor',
         'land': 'Länder',
+        'region': 'Regioner',
         'pris': 'Pris',
         'mat': 'Tillfällen & mat',
         'smak': 'Smakprofiler',
@@ -645,14 +743,15 @@ def render_page(page, all_pages=None):
     category_slugs = {
         'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
+        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
         'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
-        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling'],
+        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin'],
     }
     slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
     cross_sections = []
-    for cat_key in ['typ', 'druva', 'land', 'pris', 'mat', 'smak']:
+    for cat_key in ['typ', 'druva', 'land', 'region', 'pris', 'mat', 'smak']:
         cat_pages = [slug_to_page[s] for s in category_slugs[cat_key] if s in slug_to_page and s != page['slug']]
         if not cat_pages:
             continue
