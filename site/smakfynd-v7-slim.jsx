@@ -1619,65 +1619,73 @@ function FoodMatch({ products }) {
 // components/StoreMode.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/BarcodeScanner.jsx
+// Uses html5-qrcode library for cross-browser support (iPhone + Android)
 function BarcodeScanner({ onScan, onClose }) {
-  const videoRef = useRef(null);
+  const scannerDivRef = useRef(null);
   const scannerRef = useRef(null);
   const [error, setError] = useState(null);
-  const [scanning, setScanning] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let stopped = false;
-    async function startScanner() {
-      try {
-        // Try native BarcodeDetector first (Chrome/Android)
-        if (typeof BarcodeDetector !== "undefined") {
-          const detector = new BarcodeDetector({ formats: ["ean_13", "ean_8", "code_128", "code_39", "itf"] });
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+
+    async function loadAndStart() {
+      // Dynamically load html5-qrcode if not already loaded
+      if (!window.Html5Qrcode) {
+        try {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement("script");
+            s.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
           });
-          if (stopped) { stream.getTracks().forEach(t => t.stop()); return; }
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play();
-          }
-          scannerRef.current = stream;
-          const scan = async () => {
-            if (stopped || !videoRef.current) return;
-            try {
-              const barcodes = await detector.detect(videoRef.current);
-              if (barcodes.length > 0) {
-                const code = barcodes[0].rawValue;
-                stream.getTracks().forEach(t => t.stop());
-                onScan(code);
-                return;
-              }
-            } catch(e) {}
-            if (!stopped) requestAnimationFrame(scan);
-          };
-          videoRef.current.onloadedmetadata = () => { if (!stopped) scan(); };
+        } catch(e) {
+          setError("Kunde inte ladda streckkodsskannern.");
+          setLoading(false);
           return;
         }
+      }
+      if (stopped) return;
 
-        // Fallback: manual camera + simple detection
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        if (stopped) { stream.getTracks().forEach(t => t.stop()); return; }
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        }
-        scannerRef.current = stream;
-        setError("manual");
+      try {
+        const scanner = new window.Html5Qrcode("sf-barcode-reader");
+        scannerRef.current = scanner;
+
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 280, height: 160 },
+            aspectRatio: 1.7778,
+            formatsToSupport: [
+              window.Html5QrcodeSupportedFormats?.EAN_13,
+              window.Html5QrcodeSupportedFormats?.EAN_8,
+              window.Html5QrcodeSupportedFormats?.CODE_128,
+              window.Html5QrcodeSupportedFormats?.CODE_39,
+              window.Html5QrcodeSupportedFormats?.ITF,
+            ].filter(Boolean),
+          },
+          (decodedText) => {
+            // Success — stop scanner and return result
+            scanner.stop().catch(() => {});
+            onScan(decodedText);
+          },
+          () => {} // Ignore scan failures (continuous scanning)
+        );
+        setLoading(false);
       } catch(e) {
-        setError("Kunde inte öppna kameran. Kontrollera att du gett tillåtelse.");
+        setError("Kunde inte öppna kameran. Kontrollera att du gett tillåtelse i webbläsarens inställningar.");
+        setLoading(false);
       }
     }
-    startScanner();
+
+    loadAndStart();
+
     return () => {
       stopped = true;
       if (scannerRef.current) {
-        scannerRef.current.getTracks?.().forEach(t => t.stop());
+        scannerRef.current.stop().catch(() => {});
       }
     };
   }, []);
@@ -1685,52 +1693,33 @@ function BarcodeScanner({ onScan, onClose }) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 2000, background: "#000",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      display: "flex", flexDirection: "column",
     }}>
-      <video ref={videoRef} style={{ width: "100%", maxHeight: "70vh", objectFit: "cover" }} playsInline muted />
+      {/* Scanner renders into this div */}
+      <div id="sf-barcode-reader" ref={scannerDivRef} style={{ flex: 1, background: "#000" }} />
 
-      {/* Scanning overlay */}
-      <div style={{
-        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-        width: 260, height: 160, border: `3px solid ${t.wine}`,
-        borderRadius: 16, boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)",
-      }}>
-        {scanning && <div style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: 3,
-          background: t.wine, animation: "scanLine 2s ease-in-out infinite",
-        }} />}
-      </div>
-
-      {/* Instructions */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 16px 40px", textAlign: "center" }}>
-        {error === "manual" ? (
-          <div>
-            <p style={{ color: "#fff", fontSize: 14, margin: "0 0 12px" }}>
-              Din webbläsare saknar stöd för automatisk skanning.
-              Skriv in streckkoden manuellt:
-            </p>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input type="text" inputMode="numeric" placeholder="Skriv streckkoden..."
-                style={{ flex: 1, padding: "14px 16px", borderRadius: 12, border: "none", fontSize: 18, textAlign: "center", fontFamily: "monospace" }}
-                onKeyDown={e => { if (e.key === "Enter" && e.target.value.length >= 4) { onScan(e.target.value); } }}
-              />
-              <button onClick={onClose} style={{ padding: "14px 20px", borderRadius: 12, border: "none", background: t.wine, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Stäng</button>
-            </div>
-          </div>
-        ) : error ? (
+      {/* Bottom panel */}
+      <div style={{ padding: "20px 16px 40px", textAlign: "center", background: "rgba(0,0,0,0.85)" }}>
+        {loading && !error && (
+          <p style={{ color: "#fff", fontSize: 14, margin: "0 0 12px" }}>Startar kameran...</p>
+        )}
+        {error ? (
           <div>
             <p style={{ color: "#ff6b6b", fontSize: 14, margin: "0 0 12px" }}>{error}</p>
-            <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 12, border: "none", background: t.card, color: t.tx, fontSize: 14, cursor: "pointer" }}>Tillbaka</button>
+            <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 12, border: "none", background: t.card, color: t.tx, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Tillbaka</button>
           </div>
         ) : (
           <div>
             <p style={{ color: "#fff", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>
               Rikta kameran mot streckkoden
             </p>
-            <p style={{ color: "#ffffff90", fontSize: 12, margin: "0 0 16px" }}>
+            <p style={{ color: "#ffffff80", fontSize: 12, margin: "0 0 16px" }}>
               Hyllkanten eller flaskans streckkod
             </p>
-            <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 12, border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Avbryt</button>
+            <button onClick={() => { if (scannerRef.current) scannerRef.current.stop().catch(() => {}); onClose(); }}
+              style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}>
+              Avbryt
+            </button>
           </div>
         )}
       </div>
