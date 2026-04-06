@@ -653,6 +653,51 @@ def make_pages():
                                 or w.get('type') == 'Rosé')],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+
+        # ─── Fler regioner ───
+        {
+            "slug": "basta-vin-fran-champagne",
+            "title": f"Bästa Champagne på Systembolaget {YEAR}",
+            "meta": f"Topp 20 äkta Champagne-viner på Systembolaget. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Champagne på Systembolaget — {DATE_STR}",
+            "intro": "Äkta Champagne — inte bara bubbel. Här är de mousserande vinerna från Champagne som verkligen levererar.",
+            "intro2": "Bara mousserande vin från Champagne-regionen i Frankrike får kallas Champagne. Till skillnad från Cava, Prosecco och Crémant genomgår äkta Champagne en andra jäsning på flaskan som ger den karaktäristiska finheten, de små bubblorna och den komplexa smaken av brioche och rostad nöt. Priserna är högre, men kvalitetsskillnaden mot andra mousserande viner märks tydligt. Vi har rankat alla äkta Champagne-viner i Systembolagets fasta sortiment efter kvalitet per krona.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Champagne' and w.get('type') == 'Mousserande'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-languedoc",
+            "title": f"Bästa Languedoc-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Languedoc-viner på Systembolaget. Prisvärda viner från södra Frankrike. {DATE_STR}.",
+            "h1": f"Bästa Languedoc-viner på Systembolaget — {DATE_STR}",
+            "intro": "Languedoc är södra Frankrikes vinparadis — fantastisk kvalitet till priser som Bordeaux bara kan drömma om.",
+            "intro2": "Languedoc-Roussillon är Frankrikes största vinregion och en guldgruva för prisvärda viner. Här odlas Syrah, Grenache, Carignan och Mourvèdre i medelhavsklimat som ger mogna, generösa viner med kryddiga och fruktiga toner. Regionen har genomgått en kvalitetsrevolution de senaste decennierna — dagens Languedoc-viner håller ofta samma nivå som betydligt dyrare Rhône- och Bordeaux-viner. Ett av Systembolagets bäst bevarade vinfynd.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and 'languedoc' in (w.get('region') or '').lower()],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-vin-fran-alsace",
+            "title": f"Bästa Alsace-viner på Systembolaget {YEAR}",
+            "meta": f"Topp 20 Alsace-viner på Systembolaget. Riesling, Gewürztraminer och mer. {DATE_STR}.",
+            "h1": f"Bästa Alsace-viner på Systembolaget — {DATE_STR}",
+            "intro": "Alsace är Frankrikes vita vinmecka — hem för aromatiska Riesling och Gewürztraminer av världsklass.",
+            "intro2": "Alsace i nordöstra Frankrike producerar några av världens bästa vita viner. Riesling ger mineraliska, torra viner med fantastisk lagringspotential, medan Gewürztraminer bjuder på exotiska aromer av lychee, ros och kryddor. Pinot Gris levererar fylliga, runda viner och Crémant d'Alsace är ett av Frankrikes bästa mousserande fynd. Alsace-viner säljs på druva (inte region som i övriga Frankrike), vilket gör det lätt att välja rätt.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('region') or '') == 'Alsace'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-kaliforniska-vin",
+            "title": f"Bästa kaliforniska vinerna på Systembolaget {YEAR}",
+            "meta": f"Topp 20 kaliforniska viner på Systembolaget. Napa Valley, Sonoma och mer. {DATE_STR}.",
+            "h1": f"Bästa kaliforniska vinerna på Systembolaget — {DATE_STR}",
+            "intro": "Kalifornien producerar USA:s mest ikoniska viner — från kraftfulla Napa Cabernets till eleganta Sonoma Pinot Noirs.",
+            "intro2": "Kaliforniska viner på Systembolaget representerar det bästa från USA:s största vinstat. Napa Valley är känt för sina kraftfulla, koncentrerade Cabernet Sauvignon-viner, medan Sonoma erbjuder mer eleganta Pinot Noir och Chardonnay. Central Coast har vuxit fram som en spännande region med Rhône-druvor och unika terroir. Kalifornien levererar mogna, fruktdrivna viner med generös smak — perfekt för dig som gillar det nya världen-stilen med rik frukt och ofta fatlagring.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
     ]
 
 def score_label(score):
@@ -708,7 +753,7 @@ def get_cross_links(current_slug, all_pages):
     tags = {
         'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
-        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen'],
+        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
         'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
@@ -743,7 +788,7 @@ def render_page(page, all_pages=None):
     category_slugs = {
         'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
-        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen'],
+        'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
         'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
@@ -869,6 +914,30 @@ def render_page(page, all_pages=None):
     ]
     faq_ld = json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq_items}, ensure_ascii=False)
 
+    # Recipe schema for food pairing pages
+    recipe_ld = ""
+    if page['slug'].startswith('vin-till-'):
+        dish_name = page['h1'].split(' — ')[0].replace('Bästa vinerna till ', '').replace('Bästa vinerna till en ', '')
+        top3 = page['wines'][:3]
+        wine_names = ', '.join(w.get('name','') for w in top3)
+        recipe_data = {
+            "@context": "https://schema.org",
+            "@type": "Recipe",
+            "name": f"Vinmatchning: {dish_name}",
+            "description": page['meta'],
+            "author": {"@type": "Person", "name": "Gabriel Linton"},
+            "datePublished": today_iso,
+            "recipeCategory": "Vinmatchning",
+            "recipeCuisine": "Swedish",
+            "recipeIngredient": [f"{w.get('name','')} ({w.get('price',0)} kr)" for w in top3],
+            "recipeInstructions": [
+                {"@type": "HowToStep", "text": f"Välj ett av våra toppval: {wine_names}"},
+                {"@type": "HowToStep", "text": f"Servera vid rätt temperatur: vitt vin 8-10°C, rött vin 16-18°C"},
+                {"@type": "HowToStep", "text": "Öppna vinet 15-30 minuter innan servering för bästa smak"},
+            ],
+        }
+        recipe_ld = f'\n  <script type="application/ld+json">{json.dumps(recipe_data, ensure_ascii=False)}</script>'
+
     return f'''<!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -891,7 +960,7 @@ def render_page(page, all_pages=None):
 
   <script type="application/ld+json">{ld_json}</script>
   <script type="application/ld+json">{breadcrumb_ld}</script>
-  <script type="application/ld+json">{faq_ld}</script>
+  <script type="application/ld+json">{faq_ld}</script>{recipe_ld}
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">

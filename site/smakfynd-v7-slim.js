@@ -664,6 +664,7 @@ function Card({
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
   const [cardRef, cardVisible] = useScrollReveal(0.05);
+  const [hovered, setHovered] = useState(false);
   // Systembolaget food pairing SVG icons (official paths)
   const SB_FOOD_ICONS = {
     "Nöt": {
@@ -768,16 +769,18 @@ function Card({
         handleOpen();
       }
     },
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
     style: {
       background: t.card,
       borderRadius: 16,
       outline: "none",
-      border: `1px solid ${open ? t.bdr : t.bdrL}`,
-      boxShadow: open ? t.sh3 : t.sh1,
-      transition: "all 0.35s ease",
+      border: `1px solid ${open ? t.bdr : hovered ? t.bdr : t.bdrL}`,
+      boxShadow: open ? t.sh3 : hovered ? t.shHover : t.sh1,
+      transition: "all 0.3s ease",
       overflow: "hidden",
       opacity: cardVisible ? 1 : 0,
-      transform: cardVisible ? "translateY(0)" : "translateY(16px)",
+      transform: cardVisible ? hovered && !open ? "translateY(-2px) perspective(800px) rotateX(0.5deg)" : "translateY(0)" : "translateY(16px)",
       cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("div", {

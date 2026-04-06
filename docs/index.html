@@ -15,6 +15,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://product-cdn.systembolaget.se">
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Smakfynd — Bästa vinerna på Systembolaget 2026">
@@ -26,7 +28,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
-  <meta property="article:modified_time" content="2026-04-02">
+  <meta property="article:modified_time" content="2026-04-07">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -834,6 +836,7 @@ function Card({
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
   const [cardRef, cardVisible] = useScrollReveal(0.05);
+  const [hovered, setHovered] = useState(false);
   // Systembolaget food pairing SVG icons (official paths)
   const SB_FOOD_ICONS = {
     "Nöt": {
@@ -938,16 +941,18 @@ function Card({
         handleOpen();
       }
     },
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
     style: {
       background: t.card,
       borderRadius: 16,
       outline: "none",
-      border: `1px solid ${open ? t.bdr : t.bdrL}`,
-      boxShadow: open ? t.sh3 : t.sh1,
-      transition: "all 0.35s ease",
+      border: `1px solid ${open ? t.bdr : hovered ? t.bdr : t.bdrL}`,
+      boxShadow: open ? t.sh3 : hovered ? t.shHover : t.sh1,
+      transition: "all 0.3s ease",
       overflow: "hidden",
       opacity: cardVisible ? 1 : 0,
-      transform: cardVisible ? "translateY(0)" : "translateY(16px)",
+      transform: cardVisible ? hovered && !open ? "translateY(-2px) perspective(800px) rotateX(0.5deg)" : "translateY(0)" : "translateY(16px)",
       cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("div", {

@@ -385,6 +385,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
   const [cardRef, cardVisible] = useScrollReveal(0.05);
+  const [hovered, setHovered] = useState(false);
   // Systembolaget food pairing SVG icons (official paths)
   const SB_FOOD_ICONS = {
     "Nöt": { vb: "0 0 35 32", tx: -335, ty: -407, d: "M362.64,417.04 C364.12,416.28 365.48,416 366.6,416 C367.8,416 368.88,416.36 369.68,417.04 C369.12,417.72 368.16,420.04 365.44,420.04 C364.4,420.04 363.24,419.76 361.76,419.04 C361.8,419.2 361.8,419.44 361.8,419.64 C361.8,421.08 360.92,423.52 360.84,426.24 C361.04,427.52 361.2,428.8 361.2,429.84 C361.2,433.88 359.8,436.24 358.6,436.92 C357.28,437.64 355,438.48 352.52,438.48 C350.04,438.48 347.76,437.68 346.36,436.92 C345.16,436.28 343.8,433.76 343.8,429.8 C343.8,428.72 343.92,427.52 344.12,426.24 C344.12,423.6 343.24,421.08 343.24,419.64 C343.24,419.44 343.24,419.2 343.28,419.04 C341.8,419.76 340.68,420.04 339.68,420.04 C337.04,420.04 335.8,418 335.32,417.04 C336.12,416.36 337.08,416 338.4,416 C339.52,416 340.88,416.28 342.4,417.04 C340.48,415.56 339.88,413.56 339.88,411.88 C339.88,409.48 341.16,407.52 342.12,407.52 C342.2,407.52 342.36,407.6 342.52,407.64 C343.84,408.68 342.68,413.48 345.72,413.48 L359.36,413.48 C362.44,413.48 361.16,408.68 362.48,407.64 C362.64,407.6 362.8,407.52 362.88,407.52 C363.92,407.52 365.12,409.48 365.12,411.92 C365.12,413.64 364.44,415.56 362.64,417.04 Z M345.56,421.88 C345.56,423.24 347,423.8 347.8,423.8 C349.44,423.8 349.88,422.6 349.88,421.88 C349.88,420.88 349.2,419.84 347.8,419.84 C347.04,419.84 345.56,420.24 345.56,421.88 Z M355.16,421.88 C355.16,423.24 356.32,423.8 357.2,423.8 C358.76,423.8 359.44,422.6 359.44,421.88 C359.44,420.88 358.72,419.84 357.28,419.84 C356.6,419.84 355.16,420.24 355.16,421.88 Z" },
@@ -419,13 +420,17 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
       aria-label={`${p.name} ${p.sub || ''} — ${s100} poäng, ${p.price} kr`}
       onClick={handleOpen}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: t.card, borderRadius: 16, outline: "none",
-        border: `1px solid ${open ? t.bdr : t.bdrL}`,
-        boxShadow: open ? t.sh3 : t.sh1,
-        transition: "all 0.35s ease", overflow: "hidden",
+        border: `1px solid ${open ? t.bdr : hovered ? t.bdr : t.bdrL}`,
+        boxShadow: open ? t.sh3 : hovered ? t.shHover : t.sh1,
+        transition: "all 0.3s ease", overflow: "hidden",
         opacity: cardVisible ? 1 : 0,
-        transform: cardVisible ? "translateY(0)" : "translateY(16px)",
+        transform: cardVisible
+          ? (hovered && !open ? "translateY(-2px) perspective(800px) rotateX(0.5deg)" : "translateY(0)")
+          : "translateY(16px)",
         cursor: "pointer",
       }}
     >
