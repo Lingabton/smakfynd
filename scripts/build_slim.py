@@ -259,7 +259,7 @@ cleaned = []
 qa_issues = 0
 for m in mini:
     # Skip wines with no name
-    if not m.get("name") or len(m["name"]) < 2:
+    if not m.get("name") or len(m["name"]) < 3:
         qa_issues += 1
         continue
     # Skip wines with no score

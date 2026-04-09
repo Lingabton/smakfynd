@@ -28,7 +28,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
-  <meta property="article:modified_time" content="2026-04-07">
+  <meta property="article:modified_time" content="2026-04-09">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -444,14 +444,6 @@ const pill = (active, accent = t.wine) => ({
 // utils.jsx
 // ════════════════════════════════════════════════════════════
 // src/utils.jsx
-function rescale(raw) {
-  if (raw >= 16) return Math.min(99, 90 + Math.round((raw - 16) * 5));
-  if (raw >= 14) return Math.round(75 + (raw - 14) * 7.5);
-  if (raw >= 12) return Math.round(60 + (raw - 12) * 7.5);
-  if (raw >= 10) return Math.round(42 + (raw - 10) * 9);
-  if (raw >= 8) return Math.round(22 + (raw - 8) * 10);
-  return Math.max(1, Math.round(raw * 2.75));
-}
 function getScoreInfo(s100) {
   if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
   if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
@@ -2256,7 +2248,10 @@ function LoginModal({
       justifyContent: "center",
       padding: 20
     },
-    onClick: onClose
+    onClick: onClose,
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": "Logga in"
   }, /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),
     style: {
