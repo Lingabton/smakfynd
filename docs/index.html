@@ -197,6 +197,46 @@ const _sid = (() => {
     return "anon";
   }
 })();
+const _sessionStart = Date.now();
+
+// Session duration tracking — sends on page leave
+try {
+  const sendDuration = () => {
+    const duration = Math.round((Date.now() - _sessionStart) / 1000);
+    if (duration < 2) return; // skip bounces under 2s
+    const device = window.innerWidth < 768 ? "mobile" : "desktop";
+    navigator.sendBeacon?.(ANALYTICS_URL + "/event", JSON.stringify({
+      session: _sid,
+      event: "session_end",
+      data: {
+        duration_s: duration,
+        pages_viewed: performance.getEntriesByType?.("navigation")?.length || 1
+      },
+      page: location.hash || "/",
+      device,
+      referrer: document.referrer
+    })) || fetch(ANALYTICS_URL + "/event", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        session: _sid,
+        event: "session_end",
+        data: {
+          duration_s: duration
+        },
+        page: location.hash || "/",
+        device: device
+      }),
+      keepalive: true
+    }).catch(() => {});
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") sendDuration();
+  });
+  window.addEventListener("pagehide", sendDuration);
+} catch (e) {}
 function track(event, data) {
   try {
     const device = window.innerWidth < 768 ? "mobile" : "desktop";
@@ -218,21 +258,27 @@ function track(event, data) {
     }).catch(() => {});
   } catch (e) {}
 }
+
+// Debounced search tracking — only logs final query (not every keystroke)
+let _searchTimer = null;
 function trackSearch(query, count, clickedNr) {
   try {
-    fetch(ANALYTICS_URL + "/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        session: _sid,
-        query,
-        results_count: count,
-        clicked_nr: clickedNr
-      }),
-      keepalive: true
-    }).catch(() => {});
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(() => {
+      fetch(ANALYTICS_URL + "/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          session: _sid,
+          query,
+          results_count: count,
+          clicked_nr: clickedNr
+        }),
+        keepalive: true
+      }).catch(() => {});
+    }, 2000); // wait 2s after last keystroke
   } catch (e) {}
 }
 function trackAI(meal, response, latencyMs) {

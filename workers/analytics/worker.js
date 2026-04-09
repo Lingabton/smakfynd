@@ -152,6 +152,41 @@ export default {
         return new Response(JSON.stringify(result.results), { headers });
       }
 
+      // GET /sessions — session duration stats
+      if (request.method === "GET" && url.pathname === "/sessions") {
+        const result = await env.DB.prepare(
+          `SELECT
+             COUNT(*) as total_sessions,
+             ROUND(AVG(CASE WHEN json_extract(data, '$.duration_s') > 0 THEN json_extract(data, '$.duration_s') END)) as avg_duration_s,
+             ROUND(MAX(CASE WHEN json_extract(data, '$.duration_s') > 0 THEN json_extract(data, '$.duration_s') END)) as max_duration_s,
+             SUM(CASE WHEN json_extract(data, '$.duration_s') >= 30 THEN 1 ELSE 0 END) as engaged_sessions,
+             SUM(CASE WHEN json_extract(data, '$.duration_s') < 10 THEN 1 ELSE 0 END) as bounce_sessions
+           FROM events WHERE event = 'session_end' AND ts >= datetime('now', '-30 days')`
+        ).first();
+
+        const daily = await env.DB.prepare(
+          `SELECT DATE(ts) as day,
+             COUNT(*) as sessions,
+             ROUND(AVG(json_extract(data, '$.duration_s'))) as avg_s
+           FROM events WHERE event = 'session_end' AND ts >= datetime('now', '-14 days')
+           GROUP BY DATE(ts) ORDER BY day DESC`
+        ).all();
+
+        const byDevice = await env.DB.prepare(
+          `SELECT device,
+             COUNT(*) as sessions,
+             ROUND(AVG(json_extract(data, '$.duration_s'))) as avg_s
+           FROM events WHERE event = 'session_end' AND ts >= datetime('now', '-30 days')
+           GROUP BY device`
+        ).all();
+
+        return new Response(JSON.stringify({
+          ...result,
+          daily: daily.results,
+          by_device: byDevice.results,
+        }), { headers });
+      }
+
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     } catch (e) {
