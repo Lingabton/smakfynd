@@ -1,3 +1,21 @@
 data/
 vivino_log.txt
 node_modules/
+
+# Scrapers — private strategy, kept local only
+scripts/scrape_cellartracker.py
+scripts/scrape_winesearcher.py
+scripts/scrape_ws_critics.py
+scripts/scraper.py
+scripts/vivino_budget_sicily.py
+scripts/vivino_fix.py
+scripts/vivino_gap_finder.py
+scripts/vivino_gap_v2.py
+scripts/vivino_playwright.py
+
+# Environment / secrets
+.env
+.env.*
+*.key
+credentials.json
+secrets.json
