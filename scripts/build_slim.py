@@ -40,19 +40,29 @@ for p in data:
         continue
 
     old_price = None
-    # Check bootstrap first (historical data)
-    if nr in bootstrap:
-        b = bootstrap[nr]
-        if b.get('price_now') and abs(b['price_now'] - current) < 5:
-            # Price still matches the drop price — drop is still active
-            old_price = b.get('price_old')
-
-    # Check our own history
-    if not old_price and nr in price_hist:
+    # Check our own history FIRST (most reliable)
+    if nr in price_hist:
         hist = price_hist[nr]
         first = hist.get('price', 0) if isinstance(hist, dict) else hist
         if first and first > current:
             old_price = first
+
+    # Use bootstrap if our history confirms OR doesn't have enough data
+    if not old_price and nr in bootstrap:
+        b = bootstrap[nr]
+        if b.get('price_now') and abs(b['price_now'] - current) < 5:
+            bootstrap_old = b.get('price_old')
+            if nr in price_hist:
+                hist = price_hist[nr]
+                our_first = hist.get('price', 0) if isinstance(hist, dict) else hist
+                # Skip bootstrap if our first-seen price equals current (never was higher)
+                # AND the bootstrap claims a very large drop (likely wrong data)
+                if our_first and abs(our_first - current) < 2 and bootstrap_old and bootstrap_old > current * 1.5:
+                    old_price = None  # Suspicious: we never saw the higher price
+                else:
+                    old_price = bootstrap_old
+            else:
+                old_price = bootstrap_old
 
     if old_price and old_price > current:
         drop_pct = round((old_price - current) / old_price * 100)

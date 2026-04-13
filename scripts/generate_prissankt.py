@@ -54,19 +54,29 @@ for w in all_wines:
     old_price = None
     drop_date = None
 
-    # Check bootstrap data first
-    if nr in bootstrap:
-        b = bootstrap[nr]
-        if b.get('price_now') and abs(b['price_now'] - current_price) < 5:
-            old_price = b.get('price_old')
-
-    # Check price history
-    if not old_price and nr in first_seen:
+    # Check our own price history FIRST (most reliable)
+    if nr in first_seen:
         hist = first_seen[nr]
         first_price = hist.get('price', 0) if isinstance(hist, dict) else hist
         if first_price and first_price > current_price:
             old_price = first_price
             drop_date = hist.get('date', '') if isinstance(hist, dict) else None
+
+    # Use bootstrap if our history confirms OR doesn't contradict
+    if not old_price and nr in bootstrap:
+        b = bootstrap[nr]
+        if b.get('price_now') and abs(b['price_now'] - current_price) < 5:
+            bootstrap_old = b.get('price_old')
+            if nr in first_seen:
+                hist = first_seen[nr]
+                our_first = hist.get('price', 0) if isinstance(hist, dict) else hist
+                # Skip if our first-seen = current AND bootstrap claims >50% drop (suspicious)
+                if our_first and abs(our_first - current_price) < 2 and bootstrap_old and bootstrap_old > current_price * 1.5:
+                    pass  # Suspicious: we never saw the higher price
+                else:
+                    old_price = bootstrap_old
+            else:
+                old_price = bootstrap_old
 
     if old_price and old_price > current_price:
         savings = old_price - current_price
