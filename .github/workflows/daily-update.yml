@@ -64,10 +64,11 @@ jobs:
           python3 scripts/build_slim.py
           python3 scripts/deploy_html.py
 
-      - name: Generate landing pages
+      - name: Generate landing pages + price drops
         run: |
           python3 scripts/generate_landing_pages.py
           python3 scripts/generate_monthly_seo.py
+          python3 scripts/generate_prissankt.py
           # Add monthly pages to sitemap
           python3 -c "
           from datetime import datetime

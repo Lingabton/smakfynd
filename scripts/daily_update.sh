@@ -115,9 +115,10 @@ $PYTHON scripts/deploy_html.py 2>&1 | tail -2
 
 # ── Step 6: Generate landing pages ──
 echo ""
-echo "→ Step 6: Generating landing pages..."
+echo "→ Step 6: Generating landing pages + prissänkningar..."
 $PYTHON scripts/generate_landing_pages.py 2>&1 | tail -3
 $PYTHON scripts/generate_monthly_seo.py 2>&1 | tail -2
+$PYTHON scripts/generate_prissankt.py 2>&1 | tail -2
 
 # Update sitemap with monthly pages
 $PYTHON -c "
