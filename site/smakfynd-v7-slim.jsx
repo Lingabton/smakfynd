@@ -1320,6 +1320,7 @@ function WeeklyPick({ products }) {
 // src/components/QuickFilters.jsx
 function QuickFilters({ onFilter }) {
   const presets = [
+    { label: "Prissänkt just nu", icon: "🏷️", action: { cat: "all", price: "all", showDeals: true }, highlight: true },
     { label: "Topp under 100 kr", icon: "💰", action: { cat: "all", price: "0-99", showBest: false } },
     { label: "Bästa röda just nu", icon: "🍷", action: { cat: "Rött", price: "all", showBest: false } },
     { label: "Expertfavoriter", icon: "🏆", action: { cat: "all", price: "all", showBest: true } },
@@ -1332,11 +1333,17 @@ function QuickFilters({ onFilter }) {
       <div style={{ fontSize: 10, fontWeight: 600, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Snabbval</div>
       <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
         {presets.map((p, i) => (
-          <button key={i} onClick={() => { onFilter(p.action); track("filter", { type: "quickfilter", value: p.label }); }}
+          <button key={i} onClick={() => {
+              if (p.action.showDeals) { window.open("/prissankt/", "_self"); return; }
+              onFilter(p.action); track("filter", { type: "quickfilter", value: p.label });
+            }}
             style={{
-              padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`,
-              background: t.card, cursor: "pointer", fontFamily: "inherit",
-              fontSize: 12, color: t.txM, whiteSpace: "nowrap",
+              padding: "8px 14px", borderRadius: 10,
+              border: p.highlight ? `1.5px solid ${t.deal}` : `1px solid ${t.bdr}`,
+              background: p.highlight ? `${t.deal}08` : t.card,
+              cursor: "pointer", fontFamily: "inherit",
+              fontSize: 12, color: p.highlight ? t.deal : t.txM, whiteSpace: "nowrap",
+              fontWeight: p.highlight ? 600 : 400,
               display: "flex", alignItems: "center", gap: 5,
               transition: "all 0.2s", boxShadow: "0 1px 3px rgba(30,23,16,0.04)",
             }}
@@ -2340,11 +2347,12 @@ function SmakfyndApp() {
             <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
           </div>
           <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
-            {[["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
+            {[["weekly", "Veckans fynd"], ["deals", "Prissänkt"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
               ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }
                   if (k === "profile") { auth.logout(); return; }
+                  if (k === "deals") { window.open("/prissankt/", "_self"); return; }
                   if (k === "weekly" || k === "food" || k === "picks") {
                     const el = document.getElementById("section-" + k);
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });

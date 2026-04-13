@@ -2749,6 +2749,15 @@ function QuickFilters({
   onFilter
 }) {
   const presets = [{
+    label: "Prissänkt just nu",
+    icon: "🏷️",
+    action: {
+      cat: "all",
+      price: "all",
+      showDeals: true
+    },
+    highlight: true
+  }, {
     label: "Topp under 100 kr",
     icon: "💰",
     action: {
@@ -2812,6 +2821,10 @@ function QuickFilters({
   }, presets.map((p, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
     onClick: () => {
+      if (p.action.showDeals) {
+        window.open("/prissankt/", "_self");
+        return;
+      }
       onFilter(p.action);
       track("filter", {
         type: "quickfilter",
@@ -2821,13 +2834,14 @@ function QuickFilters({
     style: {
       padding: "8px 14px",
       borderRadius: 10,
-      border: `1px solid ${t.bdr}`,
-      background: t.card,
+      border: p.highlight ? `1.5px solid ${t.deal}` : `1px solid ${t.bdr}`,
+      background: p.highlight ? `${t.deal}08` : t.card,
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 12,
-      color: t.txM,
+      color: p.highlight ? t.deal : t.txM,
       whiteSpace: "nowrap",
+      fontWeight: p.highlight ? 600 : 400,
       display: "flex",
       alignItems: "center",
       gap: 5,
@@ -4578,7 +4592,7 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txL
     }
-  }, [["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`], ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
+  }, [["weekly", "Veckans fynd"], ["deals", "Prissänkt"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`], ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
     key: k,
     onClick: () => {
       if (k === "login") {
@@ -4587,6 +4601,10 @@ function SmakfyndApp() {
       }
       if (k === "profile") {
         auth.logout();
+        return;
+      }
+      if (k === "deals") {
+        window.open("/prissankt/", "_self");
         return;
       }
       if (k === "weekly" || k === "food" || k === "picks") {
