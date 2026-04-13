@@ -1,0 +1,104 @@
+name: Daily wine data update
+
+on:
+  schedule:
+    # Every day at 06:00 UTC (08:00 Swedish time)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests rapidfuzz
+
+      - name: Set up Node.js (for Babel)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Babel
+        run: |
+          cd $GITHUB_WORKSPACE
+          npm install --save-dev @babel/cli @babel/core @babel/preset-react
+
+      - name: Create data directories
+        run: |
+          mkdir -p data/history data/logs
+
+      - name: Download existing data (if cached)
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
+          restore-keys: |
+            wine-data-
+
+      - name: Fetch Systembolaget data
+        run: |
+          python3 scripts/fetch_systembolaget.py
+
+      - name: Score wines
+        run: |
+          python3 scripts/score_wines_v2.py
+
+      - name: Build site
+        run: |
+          python3 scripts/build_slim.py
+          python3 scripts/deploy_html.py
+
+      - name: Generate landing pages
+        run: |
+          python3 scripts/generate_landing_pages.py
+          python3 scripts/generate_monthly_seo.py
+          # Add monthly pages to sitemap
+          python3 -c "
+          from datetime import datetime
+          today = datetime.now().strftime('%Y-%m-%d')
+          sitemap = open('docs/sitemap.xml').read()
+          month_sv = ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'][datetime.now().month - 1]
+          monthly = [f'basta-vin-{month_sv}-{datetime.now().year}', 'billigt-och-bra-vin', 'basta-boxvin', 'vin-till-midsommar', 'vin-till-kraftskiva']
+          for slug in monthly:
+              if slug not in sitemap:
+                  sitemap = sitemap.replace('</urlset>', f'  <url>\n    <loc>https://smakfynd.se/{slug}/</loc>\n    <lastmod>{today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n</urlset>')
+          open('docs/sitemap.xml', 'w').write(sitemap)
+          "
+
+      - name: Save data cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "Smakfynd Bot"
+          git config user.email "bot@smakfynd.se"
+          git add docs/ site/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "data: daily price update $(date '+%Y-%m-%d')"
+            git push
+          fi
