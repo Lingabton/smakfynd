@@ -89,13 +89,27 @@ for p in data:
     groups.setdefault(key, []).append(p)
 
 slim = []
+slim_nrs = set()
 for key, prods in groups.items():
     prods.sort(key=lambda x: -(x.get('smakfynd_score', 0)))
     fast_prods = [p for p in prods if p.get('assortment') == 'Fast sortiment']
     other_prods = [p for p in prods if p.get('assortment') != 'Fast sortiment'][:40]
     combined = fast_prods + other_prods
     slim.extend(combined)
+    for p in combined:
+        slim_nrs.add(str(p.get('nr', '')))
     print(f"  {key}: {len(prods)} -> {len(combined)} (fast: {len(fast_prods)}, övrigt: {len(other_prods)})")
+
+# Ensure ALL price-dropped wines are included (even if not in top 40 ordervaror)
+price_drop_additions = 0
+for p in data:
+    nr = str(p.get('nr', ''))
+    if nr not in slim_nrs and p.get('price_vs_launch_pct', 0) > 0:
+        slim.append(p)
+        slim_nrs.add(nr)
+        price_drop_additions += 1
+if price_drop_additions:
+    print(f"  + {price_drop_additions} price-dropped wines added (were outside top 40 ordervaror)")
 
 # Build minimal JSON with all needed fields
 mini = []
