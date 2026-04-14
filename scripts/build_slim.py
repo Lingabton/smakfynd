@@ -82,36 +82,14 @@ print(f"Fast sortiment: {len(fast)} | Tillfälligt/övrigt: {len(tillfälligt)}"
 # Include all but mark assortment so JSX can filter
 print(f"After filter: {len(data)} products")
 
-# Include ALL fast sortiment + top 40 beställning per category
-groups = {}
-for p in data:
-    key = f"{p.get('type','')}|{p.get('pkg','')}"
-    groups.setdefault(key, []).append(p)
+# Include ALL scored wines — entire Systembolaget sortiment is searchable
+slim = sorted(data, key=lambda x: -(x.get('smakfynd_score', 0)))
+fast_count = sum(1 for p in slim if p.get('assortment') == 'Fast sortiment')
+other_count = len(slim) - fast_count
+print(f"  All wines: {len(slim)} (fast: {fast_count}, övrigt: {other_count})")
 
-slim = []
-slim_nrs = set()
-for key, prods in groups.items():
-    prods.sort(key=lambda x: -(x.get('smakfynd_score', 0)))
-    fast_prods = [p for p in prods if p.get('assortment') == 'Fast sortiment']
-    other_prods = [p for p in prods if p.get('assortment') != 'Fast sortiment'][:40]
-    combined = fast_prods + other_prods
-    slim.extend(combined)
-    for p in combined:
-        slim_nrs.add(str(p.get('nr', '')))
-    print(f"  {key}: {len(prods)} -> {len(combined)} (fast: {len(fast_prods)}, övrigt: {len(other_prods)})")
-
-# Ensure ALL price-dropped wines are included (even if not in top 40 ordervaror)
-price_drop_additions = 0
-for p in data:
-    nr = str(p.get('nr', ''))
-    if nr not in slim_nrs and p.get('price_vs_launch_pct', 0) > 0:
-        slim.append(p)
-        slim_nrs.add(nr)
-        price_drop_additions += 1
-if price_drop_additions:
-    print(f"  + {price_drop_additions} price-dropped wines added (were outside top 40 ordervaror)")
-
-# Build minimal JSON with all needed fields
+# Build minimal JSON — rich data for fast sortiment, slim for ordervaror
+is_fast = lambda p: p.get('assortment') == 'Fast sortiment'
 mini = []
 for p in slim:
     m = {
@@ -119,41 +97,49 @@ for p in slim:
         "name": (p.get("name", "") or "").strip().rstrip(" —-–"),
         "sub": (p.get("sub", "") or "").strip().rstrip(" —-–"),
         "price": p.get("price", 0),
-        "vol": p.get("vol", 750),
         "type": p.get("type", ""),
-        "pkg": p.get("pkg", ""),
         "country": p.get("country", ""),
         "grape": p.get("grape", ""),
         "smakfynd_score": p.get("smakfynd_score", 0),
-        "crowd_score": p.get("crowd_score"),
-        "crowd_reviews": p.get("crowd_reviews", 0),
-        "expert_score": p.get("expert_score"),
-        "price_score": p.get("price_score"),
-        "confidence": p.get("confidence", "låg"),
         "assortment": p.get("assortment", ""),
     }
-    # Image URL (uses different ID than product nr — must keep)
-    img = p.get("image_url", "")
-    if img:
-        if not img.endswith(".png"):
-            img = img + "_400.png"
-        m["image_url"] = img
-    # Optional fields (only include if they have data)
-    if p.get("organic"): m["organic"] = True
-    if p.get("cat3"): m["cat3"] = p["cat3"]
-    if p.get("food_pairings"): m["food_pairings"] = p["food_pairings"]
-    if p.get("taste_body"): m["taste_body"] = p["taste_body"]
-    if p.get("taste_sweet") is not None: m["taste_sweet"] = p["taste_sweet"]
-    if p.get("taste_fruit"): m["taste_fruit"] = p["taste_fruit"]
-    if p.get("taste_bitter") is not None: m["taste_bitter"] = p["taste_bitter"]
-    if p.get("style"): m["style"] = p["style"]
-    if p.get("region"): m["region"] = p["region"]
-    if p.get("expert_source"): m["expert_source"] = p["expert_source"]
-    if p.get("critics"):
-        m["critics"] = [{"c": c["critic"], "s": c["score"]} for c in p["critics"][:6]]
-    if p.get("num_critics"): m["num_critics"] = p["num_critics"]
-    if p.get("critic_spread") is not None: m["critic_spread"] = p["critic_spread"]
-    if p.get("critic_consensus"): m["critic_consensus"] = p["critic_consensus"]
+    # Core scores — always include
+    if p.get("crowd_score"): m["crowd_score"] = p["crowd_score"]
+    if p.get("expert_score"): m["expert_score"] = p["expert_score"]
+    if p.get("price_score"): m["price_score"] = p["price_score"]
+
+    # Rich fields — only for fast sortiment (to keep file size down)
+    if is_fast(p) or p.get("price_vs_launch_pct"):
+        m["vol"] = p.get("vol", 750)
+        m["pkg"] = p.get("pkg", "")
+        m["crowd_reviews"] = p.get("crowd_reviews", 0)
+        m["confidence"] = p.get("confidence", "låg")
+        img = p.get("image_url", "")
+        if img:
+            if not img.endswith(".png"):
+                img = img + "_400.png"
+            m["image_url"] = img
+        if p.get("organic"): m["organic"] = True
+        if p.get("cat3"): m["cat3"] = p["cat3"]
+        if p.get("food_pairings"): m["food_pairings"] = p["food_pairings"]
+        if p.get("taste_body"): m["taste_body"] = p["taste_body"]
+        if p.get("taste_sweet") is not None: m["taste_sweet"] = p["taste_sweet"]
+        if p.get("taste_fruit"): m["taste_fruit"] = p["taste_fruit"]
+        if p.get("taste_bitter") is not None: m["taste_bitter"] = p["taste_bitter"]
+        if p.get("style"): m["style"] = p["style"]
+        if p.get("region"): m["region"] = p["region"]
+        if p.get("expert_source"): m["expert_source"] = p["expert_source"]
+        if p.get("critics"):
+            m["critics"] = [{"c": c["critic"], "s": c["score"]} for c in p["critics"][:6]]
+        if p.get("num_critics"): m["num_critics"] = p["num_critics"]
+        if p.get("critic_spread") is not None: m["critic_spread"] = p["critic_spread"]
+        if p.get("critic_consensus"): m["critic_consensus"] = p["critic_consensus"]
+    else:
+        # Slim ordervaror — just enough for search + basic card display
+        m["pkg"] = p.get("pkg", "")
+        if p.get("region"): m["region"] = p["region"]
+        if p.get("organic"): m["organic"] = True
+
     if p.get("launch_price"): m["launch_price"] = p["launch_price"]
     if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
     mini.append(m)
