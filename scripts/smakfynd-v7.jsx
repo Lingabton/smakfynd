@@ -2543,6 +2543,31 @@ function SmakfyndApp() {
           </div>
         )}
 
+        {/* ═══ NEWSLETTER TEASER — compact, above the fold ═══ */}
+        <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 16px", borderRadius: 12, marginBottom: 14,
+            background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
+            border: `1px solid ${t.wine}15`, textDecoration: "none",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "30"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = t.wine + "15"}
+        >
+          <span style={{ fontSize: 16 }}>📬</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>Veckans bästa köp — direkt i inkorgen</div>
+            <div style={{ fontSize: 11, color: t.txL }}>Varje torsdag. Gratis.</div>
+          </div>
+          <span style={{ fontSize: 12, color: t.wine, fontWeight: 600 }}>Prenumerera →</span>
+        </a>
+
+        {/* ═══ AI MATCHER — visible on first scroll ═══ */}
+        <div id="section-food" style={{ marginBottom: 16 }}>
+          <FoodMatch products={products} />
+        </div>
+
         {/* ═══ SEARCH + STORE MODE ═══ */}
         <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           <div style={{ position: "relative", flex: 1 }}>
@@ -2567,6 +2592,18 @@ function SmakfyndApp() {
             onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
           ><span style={{ fontSize: 16 }}>🏪</span> I butiken?</button>
         </div>
+
+        {/* Popular searches — helps discoverability */}
+        {!search && (
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
+            <span style={{ fontSize: 11, color: t.txF, marginRight: 2 }}>Populärt:</span>
+            {["Chablis", "Malbec", "Pinot Noir", "Chianti", "Rioja", "Prosecco", "Côtes du Rhône"].map(q => (
+              <button key={q} onClick={() => { setSearch(q); setCat("all"); }}
+                style={{ fontSize: 11, color: t.txL, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 2 }}
+              >{q}</button>
+            ))}
+          </div>
+        )}
 
         {/* ═══ PACKAGE TOGGLE ═══ */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -2786,8 +2823,7 @@ function SmakfyndApp() {
         {/* ═══ VECKANS FYND (below wine list) ═══ */}
         <div id="section-weekly"><WeeklyPick products={products} /></div>
 
-        {/* ═══ AI FOOD MATCH ═══ */}
-        <div id="section-food"><FoodMatch products={products} /></div>
+        {/* AI matcher already placed above search */}
 
         {/* ═══ REDAKTIONENS VAL ═══ */}
         <div id="section-picks"><EditorsPicks products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} /></div>

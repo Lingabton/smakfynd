@@ -5008,7 +5008,57 @@ function SmakfyndApp() {
       cursor: "pointer",
       textDecoration: "underline"
     }
-  }, "St\xE4ng")), /*#__PURE__*/React.createElement("div", {
+  }, "St\xE4ng")), /*#__PURE__*/React.createElement("a", {
+    href: "https://smakfynd.substack.com",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "10px 16px",
+      borderRadius: 12,
+      marginBottom: 14,
+      background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
+      border: `1px solid ${t.wine}15`,
+      textDecoration: "none",
+      transition: "all 0.2s"
+    },
+    onMouseEnter: e => e.currentTarget.style.borderColor = t.wine + "30",
+    onMouseLeave: e => e.currentTarget.style.borderColor = t.wine + "15"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16
+    }
+  }, "\uD83D\uDCEC"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: t.tx
+    }
+  }, "Veckans b\xE4sta k\xF6p \u2014 direkt i inkorgen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: t.txL
+    }
+  }, "Varje torsdag. Gratis.")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: t.wine,
+      fontWeight: 600
+    }
+  }, "Prenumerera \u2192")), /*#__PURE__*/React.createElement("div", {
+    id: "section-food",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(FoodMatch, {
+    products: products
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
@@ -5083,7 +5133,37 @@ function SmakfyndApp() {
     style: {
       fontSize: 16
     }
-  }, "\uD83C\uDFEA"), " I butiken?")), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83C\uDFEA"), " I butiken?")), !search && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: t.txF,
+      marginRight: 2
+    }
+  }, "Popul\xE4rt:"), ["Chablis", "Malbec", "Pinot Noir", "Chianti", "Rioja", "Prosecco", "Côtes du Rhône"].map(q => /*#__PURE__*/React.createElement("button", {
+    key: q,
+    onClick: () => {
+      setSearch(q);
+      setCat("all");
+    },
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: 0,
+      fontFamily: "inherit",
+      textDecoration: "underline",
+      textUnderlineOffset: 2
+    }
+  }, q))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
@@ -5639,10 +5719,6 @@ function SmakfyndApp() {
   }, "Visar topp 50 av ", filtered.length, ". Anv\xE4nd filter f\xF6r att hitta fler.")), /*#__PURE__*/React.createElement("div", {
     id: "section-weekly"
   }, /*#__PURE__*/React.createElement(WeeklyPick, {
-    products: products
-  })), /*#__PURE__*/React.createElement("div", {
-    id: "section-food"
-  }, /*#__PURE__*/React.createElement(FoodMatch, {
     products: products
   })), /*#__PURE__*/React.createElement("div", {
     id: "section-picks"
