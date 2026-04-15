@@ -698,6 +698,103 @@ def make_pages():
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+
+        # ─── Fler pris & smakprofiler ───
+        {
+            "slug": "vin-under-80-kr",
+            "title": f"Bästa vinerna under 80 kr på Systembolaget {YEAR}",
+            "meta": f"Topp 20 viner under 80 kr på Systembolaget. De billigaste vinerna som faktiskt smakar bra. Uppdaterad {DATE_STR}.",
+            "h1": f"Bästa vinerna under 80 kr — {DATE_STR}",
+            "intro": "Går det att hitta riktigt bra vin till lägsta möjliga pris? Absolut. Vi har gått igenom alla viner under 80 kr och plockat ut de som faktiskt levererar smak och kvalitet — trots det låga priset.",
+            "intro2": "Under 80 kr är urvalet begränsat, men det finns pärlor att hitta. Chilenska och sydafrikanska viner dominerar denna prisklass med fruktiga, lättdruckna alternativ som överraskar. Nyckeln är att inte förvänta sig komplexitet utan att leta efter rena, välgjorda viner med bra frukt. Vår ranking filtrerar bort plonket och visar bara de som verkligen är värda pengarna.",
+            "guide": {
+                "title": "Hur hittar man bra vin under 80 kr?",
+                "points": [
+                    "Fokusera på Chile, Sydafrika och Spanien — dessa länder ger mest smak i lägsta prisklassen.",
+                    "Undvik komplicerade blandningar — en ren Cabernet Sauvignon eller Merlot ger oftast bäst resultat under 80 kr.",
+                    "Drick vinet ungt — billiga viner mår inte bra av lagring.",
+                    "Kolla smakfynd-poängen — den avslöjar vilka budgetviner som faktiskt håller måttet.",
+                ]
+            },
+            "faq_visible": [
+                ("Finns det drinkbart vin under 80 kr?", "Ja, det finns faktiskt riktigt trevliga viner under 80 kr. Framförallt från Chile och Sydafrika hittar du fruktiga, välgjorda viner som fungerar utmärkt till vardags. Nyckeln är att kolla betyg istället för att gissa."),
+                ("Vilket är det bästa billigaste vinet?", "Det varierar, men i prisklassen under 80 kr dominerar chilensk Cabernet Sauvignon och sydafrikansk Chenin Blanc. Kolla vår topplista för det senaste — den uppdateras varje vecka."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "fruktiga-roda-vin",
+            "title": f"Bästa fruktiga röda vinerna på Systembolaget {YEAR}",
+            "meta": f"Topp 20 fruktiga röda viner på Systembolaget. Smakrika och lättdruckna — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa fruktiga röda vinerna — {DATE_STR}",
+            "intro": "Gillar du röda viner med tydlig fruktighet? Bärrika, saftiga och generösa — här är de mest fruktdrivna röda vinerna som verkligen levererar smak.",
+            "intro2": "Fruktiga röda viner kännetecknas av intensiva smaker av mörka bär, körsbär, plommon och ibland tropiska toner. De är ofta lättdruckna och behöver ingen lång lagring. Druvor som Malbec, Zinfandel, Garnacha och Shiraz ger generellt mest fruktighet. Viner från varmare klimat — som Argentina, Australien och södra Spanien — tenderar att vara mer fruktdrivna än europeiska motsvarigheter. Vi har filtrerat på hög fruktighet i smakprofilen för att hitta de allra mest smakrika.",
+            "guide": {
+                "title": "Hur väljer man fruktiga röda viner?",
+                "points": [
+                    "Malbec från Argentina och Shiraz från Australien är två av de mest fruktdrivna druvorna.",
+                    "Kolla smakbeskrivningen — ord som 'bärig', 'saftig' och 'generös' signalerar hög fruktighet.",
+                    "Nya världen-viner (Chile, Argentina, Australien) är generellt fruktigare än europeiska.",
+                    "Servera fruktiga röda viner lite svalare, runt 15–16°C, för att framhäva fruktigheten.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilka druvor ger mest fruktiga röda viner?", "Malbec, Zinfandel, Garnacha och Shiraz är de mest fruktdrivna röda druvorna. Primitivo (Italiens version av Zinfandel) ger också mycket frukt. Merlot kan vara fruktig men tenderar att vara mer mjuk och rund."),
+                ("Passar fruktiga röda viner till mat?", "Absolut! Fruktiga röda viner är fantastiska till grillat, pizza, tacos och kryddiga rätter. Fruktigheten balanserar starka smaker och gör vinerna väldigt mångsidiga."),
+            ],
+            "wines": sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'
+                           and (w.get('taste_fruit') or 0) >= 8],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "ekologiskt-vin-under-150-kr",
+            "title": f"Bästa ekologiska vinerna under 150 kr {YEAR}",
+            "meta": f"Topp 20 ekologiska viner under 150 kr. Hållbart, prisvärt och gott — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa ekologiska vinerna under 150 kr — {DATE_STR}",
+            "intro": "Ekologiskt vin behöver varken kosta mycket eller smaka sämre. Här är de bästa eko-vinerna under 150 kr — prisvärda, hållbara och riktigt goda.",
+            "intro2": "Ekologiska viner har utvecklats enormt de senaste åren. Dagens eko-producenter gör viner som inte bara är bra för miljön utan också håller riktigt hög kvalitet. Under 150 kr hittar du ekologiska viner från Spanien, Italien, Chile och Frankrike som alla levererar smak och hållbarhet. Vi har filtrerat på ekologisk certifiering och pris för att hitta de bästa fynden.",
+            "guide": {
+                "title": "Hur väljer man ekologiskt vin?",
+                "points": [
+                    "Leta efter EU:s ekologiska märkning (det gröna lövet) — det garanterar att vinet uppfyller ekologiska standarder.",
+                    "Spanska och italienska eko-viner ger ofta bäst prisvärdhet under 150 kr.",
+                    "Ekologiskt vin innehåller generellt mindre svavel, vilket kan ge renare smak.",
+                    "Prova ekologiska viner från Languedoc och Puglia — de är ofta undervärderande fynd.",
+                ]
+            },
+            "faq_visible": [
+                ("Smakar ekologiskt vin annorlunda?", "Inte nödvändigtvis, men många upplever att eko-viner har en renare, mer autentisk smak. Lägre svavelhalt kan ge en mer levande fruktkänsla. Kvalitetsskillnaden handlar mer om producenten än om certifieringen."),
+                ("Är ekologiskt vin bättre?", "Ekologiskt vin är bättre för miljön tack vare färre kemiska bekämpningsmedel och mer hållbar odling. Smäckmässigt beror det på producenten — men de bästa eko-vinerna håller absolut samma nivå som konventionella viner."),
+            ],
+            "wines": sorted([w for w in fast if w.get('organic') and w.get('pkg') == 'Flaska'
+                           and (w.get('price', 999) or 999) < 150],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "torra-vita-vin",
+            "title": f"Bästa torra vita vinerna på Systembolaget {YEAR}",
+            "meta": f"Topp 20 torra vita viner på Systembolaget. Fräscha, mineraliska och eleganta — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa torra vita vinerna — {DATE_STR}",
+            "intro": "Letar du efter vita viner utan sötma? Torra, fräscha och eleganta — här är de bästa torra vita vinerna med krispig syra och ren smak.",
+            "intro2": "Torra vita viner har minimal restsocker och låter druvans karaktär, syran och mineraliteten stå i centrum. Chablis, Sancerre och torra Riesling är klassiska exempel. Sauvignon Blanc från Loire och Nya Zeeland ger fräsch citrus och gröna toner, medan torra Chardonnay från Bourgogne erbjuder mer kropp och komplexitet. Vi har filtrerat på låg sötma i smakprofilen för att hitta de allra torraste och mest eleganta vita vinerna.",
+            "guide": {
+                "title": "Hur väljer man torrt vitt vin?",
+                "points": [
+                    "Chablis och Sancerre är nästan alltid stentorra — trygga val om du vill undvika sötma.",
+                    "Kolla smakprofilen: sötma 1–3 av 12 innebär ett riktigt torrt vin.",
+                    "Sauvignon Blanc, Grüner Veltliner och Albariño ger generellt de torraste vita vinerna.",
+                    "Servera torrt vitt vin vid 8–10°C — kylan framhäver fräschheten och syran.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad betyder torrt vin?", "Torrt vin har lite eller inget restsocker — under 4 gram per liter. Det innebär att all druvsockret har jäst ut till alkohol. Torrt betyder inte surt eller tråkigt — det betyder att vinet låter frukt, syra och mineralitet tala istället för sötma."),
+                ("Vilka vita druvor ger torrast vin?", "Sauvignon Blanc, Chablis (Chardonnay), Muscadet, Grüner Veltliner och Albariño är bland de druvor som oftast ger riktigt torra vita viner. Riesling kan vara torrt men varierar — kolla alltid smakprofilen."),
+            ],
+            "wines": sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'
+                           and (w.get('taste_sweet') is not None and (w.get('taste_sweet') or 0) <= 3)],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
     ]
 
 def score_label(score):
@@ -755,9 +852,9 @@ def get_cross_links(current_slug, all_pages):
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
-        'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
+        'pris': ['vin-under-80-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
-        'smak': ['fylliga-roda-vin', 'latta-vita-vin'],
+        'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
     }
     # Find current page's category
     my_cat = None
@@ -790,9 +887,9 @@ def render_page(page, all_pages=None):
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
         'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
-        'pris': ['vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin'],
+        'pris': ['vin-under-80-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
-        'smak': ['fylliga-roda-vin', 'latta-vita-vin'],
+        'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
     }
     slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
     cross_sections = []
