@@ -49,8 +49,37 @@
       <a href="/vin-under-100-kr/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">Bästa vinerna under 100 kr</a> <a href="/vin-under-150-kr/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">Bästa vinerna under 150 kr</a> <a href="/basta-roda-vin/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">Bästa röda vinerna</a> <a href="/basta-vita-vin/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">Bästa vita vinerna</a> <a href="/basta-bubbel/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">Bästa bubbel & champagne</a>
     </nav>
 
-    <ol style="list-style:none;padding:0;margin:0">
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+    <div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#7a7060;align-self:center;margin-right:4px">Sortera:</span>
+      <button onclick="sortWines('drop')" class="sf-sort" data-key="drop" style="padding:6px 12px;border-radius:8px;border:1px solid #8b2332;background:#8b2332;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">Sänkning</button>
+      <button onclick="sortWines('price')" class="sf-sort" data-key="price" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Pris</button>
+      <button onclick="sortWines('score')" class="sf-sort" data-key="score" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Poäng</button>
+    </div>
+    <script>
+    function sortWines(key) {
+      var ol = document.querySelector("ol");
+      var items = Array.from(ol.querySelectorAll("li[data-score]"));
+      items.sort(function(a, b) {
+        var av = parseFloat(a.dataset[key]) || 0;
+        var bv = parseFloat(b.dataset[key]) || 0;
+        return key === "price" ? av - bv : bv - av;
+      });
+      items.forEach(function(li, i) {
+        var s = li.querySelector("strong");
+        if (s) s.textContent = (i + 1) + ". " + s.textContent.replace(/^\d+\.\s*/, "");
+        ol.appendChild(li);
+      });
+      document.querySelectorAll(".sf-sort").forEach(function(btn) {
+        var active = btn.dataset.key === key;
+        btn.style.background = active ? "#8b2332" : "#fefcf8";
+        btn.style.color = active ? "#fff" : "#4a4238";
+        btn.style.borderColor = active ? "#8b2332" : "#e6ddd0";
+      });
+    }
+    </script>
+
+    <ol style="list-style:none;padding:0;margin:0" id="wine-list">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="79" data-price="69.0" data-drop="30">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">1. MZ Chardonnay</strong>
@@ -66,15 +95,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Starkt fynd</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">69.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-30%</span>
     <a href="https://www.systembolaget.se/produkt/vin/7304501" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/7304501"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="67" data-price="299.0" data-drop="30">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">2. Charles Mignon</strong>
@@ -90,15 +120,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">299.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-30%</span>
     <a href="https://www.systembolaget.se/produkt/vin/5254201" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/5254201"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="67" data-price="499.0" data-drop="29">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">3. Henriot</strong>
@@ -114,15 +145,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">499.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-29%</span>
     <a href="https://www.systembolaget.se/produkt/vin/7771001" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/7771001"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="79.0" data-drop="28">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">4. Pierre Olivier</strong>
@@ -138,15 +170,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">79.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-28%</span>
     <a href="https://www.systembolaget.se/produkt/vin/7714101" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/7714101"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="70" data-price="139.0" data-drop="20">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">5. Orballo</strong>
@@ -162,15 +195,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Starkt fynd</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">139.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-20%</span>
     <a href="https://www.systembolaget.se/produkt/vin/269601" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/269601"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="89.0" data-drop="18">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">6. Indomita Gran Reserva</strong>
@@ -186,15 +220,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">89.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-18%</span>
     <a href="https://www.systembolaget.se/produkt/vin/2011701" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/2011701"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="67" data-price="149.0" data-drop="17">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">7. Twenty Acres by Bogle</strong>
@@ -210,15 +245,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">149.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-17%</span>
     <a href="https://www.systembolaget.se/produkt/vin/212301" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/212301"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="99.0" data-drop="17">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">8. Marqués de Riscal</strong>
@@ -234,15 +270,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">99.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-17%</span>
     <a href="https://www.systembolaget.se/produkt/vin/600101" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/600101"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="99.0" data-drop="14">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">9. Ritmo Latino</strong>
@@ -258,15 +295,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">99.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-14%</span>
     <a href="https://www.systembolaget.se/produkt/vin/219101" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/219101"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="66" data-price="329.0" data-drop="13">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">10. Bonnet</strong>
@@ -282,15 +320,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">329.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-13%</span>
     <a href="https://www.systembolaget.se/produkt/vin/755501" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/755501"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="69" data-price="79.0" data-drop="11">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">11. Bitchy Blend</strong>
@@ -306,15 +345,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">79.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-11%</span>
     <a href="https://www.systembolaget.se/produkt/vin/260501" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/260501"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="67" data-price="89.0" data-drop="10">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">12. Zonnebloem</strong>
@@ -330,15 +370,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Bra köp</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">89.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-10%</span>
     <a href="https://www.systembolaget.se/produkt/vin/202001" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/202001"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="89.0" data-drop="10">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">13. Les Vignerons d'Aghione</strong>
@@ -354,15 +395,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">89.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-10%</span>
     <a href="https://www.systembolaget.se/produkt/vin/2010301" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/2010301"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="89.0" data-drop="10">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">14. Paul Sapin</strong>
@@ -378,15 +420,16 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">89.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-10%</span>
     <a href="https://www.systembolaget.se/produkt/vin/214101" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/214101"
        style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
   </div>
 </li>
-<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+<li style="padding:16px 0;border-bottom:1px solid #e6ddd0" data-score="50" data-price="89.0" data-drop="10">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">15. Castelmondo</strong>
@@ -402,8 +445,9 @@
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">Okej värde</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">89.0 kr</span>
+    <span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-10%</span>
     <a href="https://www.systembolaget.se/produkt/vin/7308501" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/7308501"

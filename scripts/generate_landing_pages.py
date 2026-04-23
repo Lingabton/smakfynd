@@ -805,7 +805,7 @@ def score_label(score):
     if score >= 60: return "Bra köp"
     return "Okej värde"
 
-def render_wine_row(w, rank):
+def render_wine_row(w, rank, sortable=False):
     name = w.get('name', '')
     sub = w.get('sub', '')
     score = w.get('smakfynd_score', 0)
@@ -819,8 +819,10 @@ def render_wine_row(w, rank):
     crowd = f"Crowd: {w['crowd_score']:.1f}/10" if w.get('crowd_score') else ""
     style = w.get('style', '')
     style_text = f'<p style="margin:4px 0 0;font-size:13px;color:#7a7060;font-style:italic">{style[:120]}{"…" if len(style)>120 else ""}</p>' if style else ''
+    drop_pct = w.get('price_vs_launch_pct', 0) or 0
+    data_attrs = f' data-score="{score}" data-price="{price}" data-drop="{drop_pct}"' if sortable else ''
 
-    return f'''<li style="padding:16px 0;border-bottom:1px solid #e6ddd0">
+    return f'''<li style="padding:16px 0;border-bottom:1px solid #e6ddd0"{data_attrs}>
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <strong style="font-size:17px;font-family:Georgia,serif">{rank}. {name}</strong>
@@ -836,8 +838,9 @@ def render_wine_row(w, rank):
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">{label}</div>
     </div>
   </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline">
+  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
     <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">{price} kr</span>
+    {f'<span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-{drop_pct}%</span>' if drop_pct > 0 else ''}
     <a href="https://www.systembolaget.se/produkt/vin/{nr}" target="_blank" rel="noopener"
        style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
     <a href="https://smakfynd.se/#vin/{nr}"
@@ -870,7 +873,8 @@ def get_cross_links(current_slug, all_pages):
     return (same[:2] + other[:3])[:5]
 
 def render_page(page, all_pages=None):
-    wines_html = '\n'.join(render_wine_row(w, i+1) for i, w in enumerate(page['wines']))
+    is_deals = page['slug'] == 'prissankt-vin'
+    wines_html = '\n'.join(render_wine_row(w, i+1, sortable=is_deals) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
 
     # Quick-nav bar — top 4 related pages shown near the top of the page
@@ -1097,7 +1101,36 @@ def render_page(page, all_pages=None):
 
     {quick_nav_html}
 
-    <ol style="list-style:none;padding:0;margin:0">
+    {"" if not is_deals else '''<div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#7a7060;align-self:center;margin-right:4px">Sortera:</span>
+      <button onclick="sortWines('drop')" class="sf-sort" data-key="drop" style="padding:6px 12px;border-radius:8px;border:1px solid #8b2332;background:#8b2332;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">Sänkning</button>
+      <button onclick="sortWines('price')" class="sf-sort" data-key="price" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Pris</button>
+      <button onclick="sortWines('score')" class="sf-sort" data-key="score" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Poäng</button>
+    </div>
+    <script>
+    function sortWines(key) {
+      var ol = document.querySelector("ol");
+      var items = Array.from(ol.querySelectorAll("li[data-score]"));
+      items.sort(function(a, b) {
+        var av = parseFloat(a.dataset[key]) || 0;
+        var bv = parseFloat(b.dataset[key]) || 0;
+        return key === "price" ? av - bv : bv - av;
+      });
+      items.forEach(function(li, i) {
+        var s = li.querySelector("strong");
+        if (s) s.textContent = (i + 1) + ". " + s.textContent.replace(/^\\d+\\.\\s*/, "");
+        ol.appendChild(li);
+      });
+      document.querySelectorAll(".sf-sort").forEach(function(btn) {
+        var active = btn.dataset.key === key;
+        btn.style.background = active ? "#8b2332" : "#fefcf8";
+        btn.style.color = active ? "#fff" : "#4a4238";
+        btn.style.borderColor = active ? "#8b2332" : "#e6ddd0";
+      });
+    }
+    </script>'''}
+
+    <ol style="list-style:none;padding:0;margin:0" id="wine-list">
 {wines_html}
     </ol>
 
