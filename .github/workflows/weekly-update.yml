@@ -1,6 +1,6 @@
 name: Weekly Data Update & Deploy
 
-# Runs every Monday at 06:00 UTC — fresh data + Vivino top-100 refresh
+# Runs every Monday at 06:00 UTC — fresh data for the week
 on:
   schedule:
     - cron: '0 6 * * 1'
@@ -31,11 +31,6 @@ jobs:
       - name: Install Python dependencies
         run: pip install requests rapidfuzz
 
-      - name: Install Playwright
-        run: |
-          pip install playwright
-          playwright install chromium --with-deps
-
       - name: Restore data caches
         uses: actions/cache@v4
         with:
@@ -53,10 +48,6 @@ jobs:
 
       - name: Fetch Systembolaget data
         run: python3 scripts/fetch_systembolaget.py
-
-      - name: Refresh Vivino top 100
-        run: |
-          xvfb-run python3 scripts/vivino_playwright.py --refresh-top 100 || echo "Vivino refresh failed — continuing with cached data"
 
       - name: Score wines
         run: python3 scripts/score_wines_v2.py
@@ -93,10 +84,10 @@ jobs:
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/ data/vivino_cache.json
+          git add docs/ site/
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
-            git commit -m "Weekly update: fresh scores + Vivino top-100 refresh [auto]"
+            git commit -m "Weekly update: fresh scores & landing pages [auto]"
             git push
           fi

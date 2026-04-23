@@ -383,45 +383,36 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ SEARCH + STORE MODE ═══ */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-          <div style={{ position: "relative", flex: 1 }}>
-            <input type="text" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
-              style={{
-                width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
-                border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
-                color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-              onFocus={e => { e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
-              onBlur={e => { e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
-            />
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: t.txL, pointerEvents: "none" }}>⌕</span>
-          </div>
-          <button onClick={() => setStoreMode(true)} style={{
-            padding: "14px 16px", borderRadius: 14, border: `1px solid ${t.bdr}`,
-            background: t.card, cursor: "pointer", flexShrink: 0, fontFamily: "inherit",
-            fontSize: 13, color: t.txM, display: "flex", alignItems: "center", gap: 5,
-            transition: "all 0.2s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
-          ><span style={{ fontSize: 16 }}>🏪</span> I butiken?</button>
+        {/* ═══ SEARCH ═══ */}
+        <div style={{ position: "relative", marginBottom: 10 }}>
+          <input type="text" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{
+              width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
+              border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
+              color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
+            }}
+            onFocus={e => { e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
+            onBlur={e => { e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
+          />
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: t.txL, pointerEvents: "none" }}>⌕</span>
         </div>
 
-        {/* ═══ PACKAGE TOGGLE ═══ */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
-            {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
-              <button key={k} onClick={() => setPkg(k)} style={{
-                padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
-                fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
-                background: pkg === k ? t.card : "transparent",
-                color: pkg === k ? t.tx : t.txL,
-                boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                transition: "all 0.2s",
-              }}>{l}</button>
-            ))}
+        {/* ═══ STORE MODE BANNER ═══ */}
+        <div onClick={() => setStoreMode(true)} style={{
+          display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
+          borderRadius: 14, background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
+          border: `1px solid ${t.wine}20`, marginBottom: 14, cursor: "pointer",
+          transition: "all 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.background = t.wine + "10"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "20"; e.currentTarget.style.background = `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`; }}
+        >
+          <span style={{ fontSize: 24 }}>🏪</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>Står du i butiken?</div>
+            <div style={{ fontSize: 12, color: t.txM }}>Sök på vinets namn — se poängen och bättre alternativ direkt</div>
           </div>
+          <span style={{ fontSize: 16, color: t.txL }}>→</span>
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -436,21 +427,34 @@ function SmakfyndApp() {
           ))}
         </div>
 
-        {/* ═══ PRICE PILLS + EKO ═══ */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-          {PRICES.filter(p => p.k !== "all").map(({ k, l }) => (
-            <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
-          ))}
-          <button onClick={() => setShowEco(!showEco)} style={{ ...pill(showEco, t.green), display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 12 }}>🌿</span> Ekologiskt ({ecoN})
-          </button>
-        </div>
+        {/* ═══ QUICK PICKS ═══ */}
+        {!search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && (
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
+            {[
+              ["🔥", "Till grillat", () => { setSelFoods(["Kött"]); setShowAdvanced(true); }],
+              ["🐟", "Till fisk", () => { setCat("Vitt"); setSelFoods(["Fisk"]); setShowAdvanced(true); }],
+              ["💰", "Under 100 kr", () => { setPrice("0-79"); setShowAdvanced(true); }],
+              ["📉", "Prissänkt", () => { setShowDeals(true); setSortBy("drop"); setShowAdvanced(true); }],
+              ["🌿", "Ekologiskt", () => { setShowEco(true); }],
+            ].map(([icon, label, fn]) => (
+              <button key={label} onClick={fn} style={{
+                padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdrL}`,
+                background: t.card, cursor: "pointer", fontFamily: "inherit",
+                fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 5,
+                whiteSpace: "nowrap", transition: "all 0.2s", boxShadow: t.sh1,
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.color = t.txM; }}
+              ><span style={{ fontSize: 14 }}>{icon}</span> {label}</button>
+            ))}
+          </div>
+        )}
 
         {/* ═══ ADVANCED TOGGLE ═══ */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
           <button onClick={() => setShowAdvanced(!showAdvanced)}
-            style={{ ...pill(showAdvanced), display: "flex", alignItems: "center", gap: 4 }}>
-            Fler filter <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+            style={{ ...pill(showAdvanced || price !== "all" || pkg !== "Flaska" || showEco || showDeals || showNew || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd"), display: "flex", alignItems: "center", gap: 4 }}>
+            Filter {(() => { const n = (price !== "all" ? 1 : 0) + (pkg !== "Flaska" ? 1 : 0) + (showEco ? 1 : 0) + (showDeals ? 1 : 0) + (showNew ? 1 : 0) + (selCountry ? 1 : 0) + (selFoods.length > 0 ? 1 : 0) + (selRegion ? 1 : 0) + (selTaste ? 1 : 0) + (sortBy !== "smakfynd" ? 1 : 0); return n > 0 ? `(${n})` : ""; })()} <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
           </button>
           {hasFilters && (
             <button onClick={clearAll}
@@ -462,9 +466,34 @@ function SmakfyndApp() {
 
         {showAdvanced && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdrL}` }}>
+            {/* Package */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Förpackning</div>
+              <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
+                {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
+                  <button key={k} onClick={() => setPkg(k)} style={{
+                    padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
+                    fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
+                    background: pkg === k ? t.card : "transparent",
+                    color: pkg === k ? t.tx : t.txL,
+                    boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    transition: "all 0.2s",
+                  }}>{l}</button>
+                ))}
+              </div>
+            </div>
+            {/* Price */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pris</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {PRICES.filter(p => p.k !== "all").map(({ k, l }) => (
+                  <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
+                ))}
+              </div>
+            </div>
             {/* Tags row */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
+              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko ({ecoN})</button>
               <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
               <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") { setSortBy("smakfynd"); } }} style={pill(showDeals, t.deal)}>Prissänkt</button>
               <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
