@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Build smakfynd site with v2 data (crowd + expert + price scores)."""
 import json, os, math
+from pathlib import Path
 
-DATA_DIR = os.path.expanduser("~/smakfynd/data")
-SITE_FILE = os.path.expanduser("~/smakfynd/scripts/smakfynd-v7.jsx")
-OUTPUT = os.path.expanduser("~/smakfynd/site/smakfynd-v7-slim.jsx")
+BASE = Path(__file__).parent.parent
+DATA_DIR = str(BASE / "data")
+SITE_FILE = str(BASE / "scripts" / "smakfynd-v7.jsx")
+OUTPUT = str(BASE / "site" / "smakfynd-v7-slim.jsx")
 
 # Read v2 ranked data (with crowd, expert, price scores)
 src = os.path.join(DATA_DIR, "smakfynd_ranked_v2.json")
@@ -290,7 +292,7 @@ size = os.path.getsize(OUTPUT) / 1024
 print(f"Built: {OUTPUT} ({size:.0f} KB)")
 
 # Also write separate wines.json for async loading
-WINES_JSON = os.path.expanduser("~/smakfynd/docs/wines.json")
+WINES_JSON = str(BASE / "docs" / "wines.json")
 open(WINES_JSON, 'w').write(js_data)
 json_size = os.path.getsize(WINES_JSON) / 1024
 print(f"Built: {WINES_JSON} ({json_size:.0f} KB)")

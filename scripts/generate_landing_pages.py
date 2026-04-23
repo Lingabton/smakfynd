@@ -10,8 +10,9 @@ Output: docs/basta-roda-vin/, docs/vin-under-100-kr/, etc.
 
 import json, os
 from datetime import datetime
+from pathlib import Path
 
-BASE = os.path.expanduser("~/smakfynd")
+BASE = str(Path(__file__).parent.parent)
 DATA_PATH = os.path.join(BASE, "data", "smakfynd_ranked_v2.json")
 DOCS = os.path.join(BASE, "docs")
 

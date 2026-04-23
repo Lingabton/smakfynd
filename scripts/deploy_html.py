@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Deploy smakfynd JSX to docs/index.html with full SEO."""
 import os, re, json, subprocess
+from pathlib import Path
 
-BASE = os.path.expanduser("~/smakfynd")
+BASE = str(Path(__file__).parent.parent)
 JSX_PATH = os.path.join(BASE, "site", "smakfynd-v7-slim.jsx")
 DATA_PATH = os.path.join(BASE, "data", "smakfynd_ranked_v2.json")
 OUT_PATH = os.path.join(BASE, "docs", "index.html")

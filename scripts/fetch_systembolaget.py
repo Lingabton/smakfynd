@@ -9,8 +9,10 @@ Output: data/systembolaget_raw.json
 
 import json, os, time, sys
 from datetime import date
+from pathlib import Path
 
-DATA_DIR = os.path.expanduser("~/smakfynd/data")
+BASE = Path(__file__).parent.parent
+DATA_DIR = str(BASE / "data")
 OUT_FILE = os.path.join(DATA_DIR, "systembolaget_raw.json")
 HIST_DIR = os.path.join(DATA_DIR, "history")
 
@@ -27,6 +29,10 @@ CATEGORIES = [
     ("Mousserande vin", "vin"),
 ]
 
+# SB moved wine types from categoryLevel1 to categoryLevel2.
+# categoryLevel1 is now "Vin" for all wine types.
+CAT_LEVEL = "categoryLevel2"
+
 def normalize(p):
     """Extract relevant fields from SB API product."""
     name = (p.get("productNameBold") or "").strip()
@@ -41,7 +47,7 @@ def normalize(p):
         "type": {
             "Rött vin": "Rött", "Vitt vin": "Vitt",
             "Rosévin": "Rosé", "Mousserande vin": "Mousserande",
-        }.get(p.get("categoryLevel1", ""), p.get("categoryLevel1", "")),
+        }.get(p.get("categoryLevel2", ""), p.get("categoryLevel2", "")),
         "cat1": p.get("categoryLevel1", ""),
         "cat2": p.get("categoryLevel2", ""),
         "cat3": p.get("categoryLevel3", ""),
@@ -57,7 +63,7 @@ def normalize(p):
         "taste_sweet": p.get("tasteClockSweetness"),
         "taste_fruit": p.get("tasteClockFruitacid"),
         "taste_bitter": p.get("tasteClockBitter"),
-        "food_pairings": [t.get("name", "") for t in (p.get("tasteSymbols") or [])],
+        "food_pairings": [t if isinstance(t, str) else t.get("name", "") for t in (p.get("tasteSymbols") or [])],
         "image_url": f"https://product-cdn.systembolaget.se/productimages/{p.get('productNumber','')}/{p.get('productNumber','')}_400.png",
     }
 
@@ -73,7 +79,7 @@ def fetch_all():
         page = 1
         while True:
             params = {
-                "categoryLevel1": cat_name,
+                CAT_LEVEL: cat_name,
                 "size": page_size,
                 "page": page,
                 "sortBy": "Score",

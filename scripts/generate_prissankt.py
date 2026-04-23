@@ -13,8 +13,9 @@ Output: docs/prissankt/index.html
 
 import json, os, glob
 from datetime import datetime, date
+from pathlib import Path
 
-BASE = os.path.expanduser("~/smakfynd")
+BASE = str(Path(__file__).parent.parent)
 DATA_DIR = os.path.join(BASE, "data")
 DOCS = os.path.join(BASE, "docs")
 HIST_DIR = os.path.join(DATA_DIR, "history")
