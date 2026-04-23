@@ -77,6 +77,7 @@ def fetch_all():
     for cat_name, _ in CATEGORIES:
         print(f"  Fetching {cat_name}...")
         page = 1
+        cat_count = 0
         while True:
             params = {
                 CAT_LEVEL: cat_name,
@@ -103,10 +104,11 @@ def fetch_all():
                 nr = str(p.get("productNumber", ""))
                 if nr and nr not in all_products:
                     all_products[nr] = normalize(p)
+                    cat_count += 1
 
-            print(f"    Page {page}: {len(products)} products (total: {len(all_products)}/{total})")
+            print(f"    Page {page}: {len(products)} products (cat: {cat_count}/{total}, all: {len(all_products)})")
 
-            if len(all_products) >= total or len(products) < page_size:
+            if cat_count >= total or len(products) < page_size:
                 break
 
             page += 1
