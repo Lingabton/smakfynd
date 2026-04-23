@@ -22,7 +22,7 @@ function checkRateLimit(ip, limit = 100, windowMs = 60000) {
 export default {
   async fetch(request, env) {
     const cors = {
-      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "https://smakfynd.se",
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };

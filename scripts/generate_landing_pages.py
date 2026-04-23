@@ -873,6 +873,19 @@ def render_page(page, all_pages=None):
     wines_html = '\n'.join(render_wine_row(w, i+1) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
 
+    # Quick-nav bar — top 4 related pages shown near the top of the page
+    quick_links = get_cross_links(page['slug'], all_pages or [])
+    quick_nav_html = ""
+    if quick_links:
+        links = ' '.join(
+            f'<a href="/{p["slug"]}/" style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fefcf8;border:1px solid #e6ddd0;color:#8b2332;font-size:12px;text-decoration:none;white-space:nowrap">{p["title"].split(" — ")[0].split(" på ")[0]}</a>'
+            for p in quick_links
+        )
+        quick_nav_html = f'''
+    <nav style="margin-bottom:20px;display:flex;flex-wrap:wrap;gap:6px" aria-label="Relaterade listor">
+      {links}
+    </nav>'''
+
     # Cross-links — organized by category showing all related pages
     category_labels = {
         'typ': 'Vintyper',
@@ -1082,9 +1095,13 @@ def render_page(page, all_pages=None):
       </p>
     </header>
 
+    {quick_nav_html}
+
     <ol style="list-style:none;padding:0;margin:0">
 {wines_html}
     </ol>
+
+    {cross_html}
 
     {guide_html}
 
@@ -1104,8 +1121,6 @@ def render_page(page, all_pages=None):
         Utforska alla {len(all_wines)} viner på Smakfynd →
       </a>
     </div>
-
-    {cross_html}
 
     <footer style="margin-top:40px;padding-top:20px;border-top:1px solid #e6ddd0;text-align:center;font-size:11px;color:#a89e8e">
       <p>Smakfynd — skapad av Gabriel Linton · Olav Innovation AB</p>

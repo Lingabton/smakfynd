@@ -11,6 +11,34 @@
  *   GET  /profile?token=X              → { user }
  */
 
+// Rate limiter for login attempts (per email)
+const loginAttempts = new Map();
+function checkLoginRate(email, maxAttempts = 5, windowMs = 600000) {
+  const now = Date.now();
+  const entry = loginAttempts.get(email);
+  if (!entry || now - entry.start > windowMs) {
+    loginAttempts.set(email, { start: now, count: 1 });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= maxAttempts;
+}
+
+// Generate HMAC-based unsubscribe token (no DB needed)
+async function generateUnsubToken(email, secret) {
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(email));
+  return Array.from(new Uint8Array(sig).slice(0, 16), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyUnsubToken(email, token, secret) {
+  const expected = await generateUnsubToken(email, secret);
+  return token === expected;
+}
+
 function generateToken() {
   const arr = new Uint8Array(32);
   crypto.getRandomValues(arr);
@@ -36,7 +64,7 @@ function getToken(request, url) {
 export default {
   async fetch(request, env) {
     const cors = {
-      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "https://smakfynd.se",
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
@@ -57,6 +85,11 @@ export default {
           return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
         }
         const cleanEmail = email.toLowerCase().trim();
+
+        // Rate limit: max 5 login attempts per email per 10 minutes
+        if (!checkLoginRate(cleanEmail)) {
+          return new Response(JSON.stringify({ error: "För många försök. Vänta några minuter." }), { status: 429, headers });
+        }
 
         // Step 2: verify code and complete login
         if (code) {
@@ -249,14 +282,23 @@ export default {
         return new Response(JSON.stringify({ ok: true, message: "Avregistrerad från nyhetsbrev" }), { headers });
       }
 
-      // GET /unsubscribe?email=X — simple link for email footers
+      // GET /unsubscribe?email=X&token=Y — verified link for email footers
       if (request.method === "GET" && url.pathname === "/unsubscribe") {
         const email = url.searchParams.get("email");
-        if (email) {
-          await env.DB.prepare("UPDATE users SET newsletter = 0 WHERE email = ?").bind(email.toLowerCase().trim()).run();
+        const unsubToken = url.searchParams.get("token");
+        if (email && unsubToken) {
+          const secret = env.ADMIN_KEY || "smakfynd-unsub";
+          const valid = await verifyUnsubToken(email.toLowerCase().trim(), unsubToken, secret);
+          if (valid) {
+            await env.DB.prepare("UPDATE users SET newsletter = 0 WHERE email = ?").bind(email.toLowerCase().trim()).run();
+            return new Response(
+              '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Avregistrerad</h2><p>Du kommer inte längre få nyhetsbrev från Smakfynd.</p><a href="https://smakfynd.se">Tillbaka till Smakfynd</a></body></html>',
+              { headers: { ...cors, "Content-Type": "text/html" } }
+            );
+          }
         }
         return new Response(
-          '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Avregistrerad</h2><p>Du kommer inte längre få nyhetsbrev från Smakfynd.</p><a href="https://smakfynd.se">Tillbaka till Smakfynd</a></body></html>',
+          '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Ogiltig länk</h2><p>Den här avregistreringslänken är ogiltig eller har gått ut.</p><a href="https://smakfynd.se">Tillbaka till Smakfynd</a></body></html>',
           { headers: { ...cors, "Content-Type": "text/html" } }
         );
       }
@@ -275,6 +317,19 @@ export default {
         ]);
 
         return new Response(JSON.stringify({ ok: true, message: "Konto och all data raderad" }), { headers });
+      }
+
+      // GET /unsub-token?email=X — generate unsubscribe token (admin only, for email links)
+      if (request.method === "GET" && url.pathname === "/unsub-token") {
+        const adminKey = request.headers.get("X-Admin-Key");
+        if (!adminKey || adminKey !== env.ADMIN_KEY) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+        }
+        const email = url.searchParams.get("email");
+        if (!email) return new Response(JSON.stringify({ error: "email required" }), { status: 400, headers });
+        const secret = env.ADMIN_KEY || "smakfynd-unsub";
+        const token = await generateUnsubToken(email.toLowerCase().trim(), secret);
+        return new Response(JSON.stringify({ email: email.toLowerCase().trim(), token }), { headers });
       }
 
       // GET /subscribers — list newsletter subscribers (admin, requires secret)

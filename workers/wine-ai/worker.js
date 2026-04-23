@@ -102,7 +102,7 @@ async function callAI(ai, system, userMessage, context) {
 export default {
   async fetch(request, env) {
     const corsHeaders = {
-      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "https://smakfynd.se",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
