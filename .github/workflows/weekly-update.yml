@@ -1,6 +1,6 @@
 name: Weekly Data Update & Deploy
 
-# Runs every Monday at 06:00 UTC — fresh data for the week
+# Runs every Monday at 06:00 UTC — fresh data + Vivino top-100 refresh
 on:
   schedule:
     - cron: '0 6 * * 1'
@@ -28,36 +28,75 @@ jobs:
       - name: Install Babel
         run: npm ci
 
-      - name: Rebuild scores & site
-        run: |
-          # Score wines (uses existing data caches)
-          python3 scripts/score_wines_v2.py
+      - name: Install Python dependencies
+        run: pip install requests rapidfuzz
 
-          # Build app
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Restore data caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
+          restore-keys: |
+            wine-data-
+
+      - name: Create data directories
+        run: mkdir -p data/history data/logs
+
+      - name: Fetch Systembolaget data
+        run: python3 scripts/fetch_systembolaget.py
+
+      - name: Refresh Vivino top 100
+        run: |
+          xvfb-run python3 scripts/vivino_playwright.py --refresh-top 100 || echo "Vivino refresh failed — continuing with cached data"
+
+      - name: Score wines
+        run: python3 scripts/score_wines_v2.py
+
+      - name: Build site
+        run: |
           python3 scripts/build_app.py
           python3 scripts/build_slim.py
           python3 scripts/deploy_html.py
           python3 scripts/generate_landing_pages.py
 
-          # Validate
+      - name: Validate
+        run: |
           python3 scripts/validate_data.py
           node tests/test_scoring.js
           node tests/test_data.js
 
-          # Snapshot prices
+      - name: Other tasks
+        run: |
           python3 scripts/snapshot_prices.py || echo "No price snapshot (missing data)"
-
-          # Generate Gabriels val (with existing picks)
           python3 scripts/gabriels_val.py || echo "Gabriels val skipped"
+
+      - name: Save data cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
 
       - name: Commit & push if changed
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/
+          git add docs/ site/ data/vivino_cache.json
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
-            git commit -m "Weekly update: fresh scores & landing pages [auto]"
+            git commit -m "Weekly update: fresh scores + Vivino top-100 refresh [auto]"
             git push
           fi

@@ -174,7 +174,8 @@ def main():
 
     # Launch browser
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        is_ci = os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS")
+        browser = p.chromium.launch(headless=bool(is_ci))
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
             viewport={"width": 1280, "height": 900},

@@ -1,0 +1,71 @@
+name: Monthly Vivino full refresh
+
+# Runs 1st of every month at 04:00 UTC — full crowd score refresh
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # Full refresh can take a while
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests rapidfuzz playwright
+          playwright install chromium --with-deps
+
+      - name: Restore data caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
+          restore-keys: |
+            wine-data-
+
+      - name: Create data directories
+        run: mkdir -p data/history data/logs
+
+      - name: Fetch Systembolaget data
+        run: python3 scripts/fetch_systembolaget.py
+
+      - name: Full Vivino refresh
+        run: |
+          xvfb-run python3 scripts/vivino_playwright.py --refresh-all || echo "Vivino refresh incomplete — saving partial results"
+
+      - name: Save data cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+            data/history/first_seen_prices.json
+            data/prissankt_bootstrap.json
+          key: wine-data-${{ github.run_number }}
+
+      - name: Commit updated cache
+        run: |
+          git config user.name "Smakfynd Bot"
+          git config user.email "bot@smakfynd.se"
+          git add data/vivino_cache.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "data: monthly Vivino full refresh $(date '+%Y-%m-%d') [auto]"
+            git push
+          fi
