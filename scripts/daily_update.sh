@@ -75,13 +75,27 @@ else:
     print('  No SB data found')
 " 2>&1
 
-# ── Step 3: Vivino gap matching (only new/unmatched wines) ──
+# ── Step 3: Vivino matching ──
 if [ "$1" != "--sb-only" ]; then
     echo ""
-    echo "→ Step 3: Vivino gap matching (new wines only)..."
-    # Only run if vivino_playwright.py exists and there are gaps
     if [ -f scripts/vivino_playwright.py ]; then
-        GAP_COUNT=$($PYTHON -c "
+        DAY_OF_WEEK=$(date '+%u')  # 1=Monday, 7=Sunday
+        DAY_OF_MONTH=$(date '+%d')
+
+        # Monthly full refresh (1st of month)
+        if [ "$DAY_OF_MONTH" = "01" ]; then
+            echo "→ Step 3: Vivino FULL refresh (monthly)..."
+            $PYTHON scripts/vivino_playwright.py --refresh-all 2>&1 | tail -10
+
+        # Weekly top-100 refresh (every Monday)
+        elif [ "$DAY_OF_WEEK" = "1" ]; then
+            echo "→ Step 3: Vivino top-100 refresh (weekly)..."
+            $PYTHON scripts/vivino_playwright.py --refresh-top 100 2>&1 | tail -10
+
+        # Daily gap matching (new wines only)
+        else
+            echo "→ Step 3: Vivino gap matching (new wines only)..."
+            GAP_COUNT=$($PYTHON -c "
 import json, os
 sb = json.load(open(os.path.expanduser('~/smakfynd/data/systembolaget_raw.json')))
 cache = {}
@@ -91,14 +105,15 @@ if os.path.exists(cache_file):
 gaps = [w for w in sb if f\"{w.get('name','')}|{w.get('sub','')}|{w.get('country','')}\" not in cache]
 print(len(gaps))
 " 2>/dev/null)
-        if [ "$GAP_COUNT" -gt 0 ] 2>/dev/null; then
-            echo "  $GAP_COUNT wines missing Vivino data — matching first 50..."
-            $PYTHON scripts/vivino_playwright.py --test 50 2>&1 | tail -5
-        else
-            echo "  No Vivino gaps — skipping"
+            if [ "$GAP_COUNT" -gt 0 ] 2>/dev/null; then
+                echo "  $GAP_COUNT wines missing Vivino data — matching first 50..."
+                $PYTHON scripts/vivino_playwright.py --test 50 2>&1 | tail -5
+            else
+                echo "  No Vivino gaps — skipping"
+            fi
         fi
     else
-        echo "  vivino_playwright.py not found — skipping"
+        echo "→ Step 3: vivino_playwright.py not found — skipping"
     fi
 fi
 
