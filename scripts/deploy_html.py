@@ -216,7 +216,7 @@ html = f"""<!DOCTYPE html>
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Smakfynd — Hitta bästa vinerna på Systembolaget {datetime.now().year}</title>
   <meta name="description" content="Smakfynd rankar {num_wines} viner från {num_countries} länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Uppdaterad {MONTH_SV} {datetime.now().year}.">
   <meta name="author" content="Gabriel Linton">

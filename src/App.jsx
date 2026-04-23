@@ -176,6 +176,7 @@ function SmakfyndApp() {
     else if (sortBy === "crowd") r.sort((a, b) => (b.crowd_score || 0) - (a.crowd_score || 0));
     else if (sortBy === "price_asc") r.sort((a, b) => (a.price || 0) - (b.price || 0));
     else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));
+    else if (sortBy === "drop") r.sort((a, b) => (b.price_vs_launch_pct || 0) - (a.price_vs_launch_pct || 0));
     return r;
   }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
@@ -465,7 +466,7 @@ function SmakfyndApp() {
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
               <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
-              <button onClick={() => { setShowDeals(!showDeals); if (!showDeals) setShowNew(false); }} style={pill(showDeals, t.deal)}>Prissänkt</button>
+              <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") { setSortBy("smakfynd"); } }} style={pill(showDeals, t.deal)}>Prissänkt</button>
               <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
             </div>
             {/* Country */}
@@ -513,7 +514,7 @@ function SmakfyndApp() {
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sortera</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[["smakfynd", "Smakfynd-poäng"], ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
+                {[["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
                   <button key={k} onClick={() => setSortBy(k)} style={pill(sortBy === k)}>{l}</button>
                 ))}
               </div>
@@ -525,7 +526,7 @@ function SmakfyndApp() {
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
-            <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
+            <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", drop: "Störst prissänkning först", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
           </div>
           <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Rankade efter kvalitet i förhållande till pris — inte "bästa vinet", utan bästa värdet i sin kategori.</div>
         </div>
