@@ -114,8 +114,6 @@ for p in slim:
     # Image URL
     img = p.get("image_url", "")
     if img:
-        if not img.endswith(".png"):
-            img = img + "_400.png"
         m["image_url"] = img
     # Optional fields — include for all wines that have the data
     if p.get("organic"): m["organic"] = True

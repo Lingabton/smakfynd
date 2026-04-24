@@ -64,7 +64,7 @@ def normalize(p):
         "taste_fruit": p.get("tasteClockFruitacid"),
         "taste_bitter": p.get("tasteClockBitter"),
         "food_pairings": [t if isinstance(t, str) else t.get("name", "") for t in (p.get("tasteSymbols") or [])],
-        "image_url": f"https://product-cdn.systembolaget.se/productimages/{p.get('productNumber','')}/{p.get('productNumber','')}_400.png",
+        "image_url": (p.get("images", [{}])[0].get("imageUrl", "") + "_400.webp") if p.get("images") else "",
     }
 
 def fetch_all():
