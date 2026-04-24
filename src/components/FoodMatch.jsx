@@ -86,6 +86,8 @@ function FoodMatch({ products }) {
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,7 +95,9 @@ function FoodMatch({ products }) {
             meal: userMessage,
             context: existingContext || [],
           }),
+          signal: controller.signal,
         });
+        clearTimeout(timeout);
         data = await res.json();
         if (!data.error) break;
         if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
@@ -149,7 +153,8 @@ function FoodMatch({ products }) {
         </div>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <input type="text" value={meal} onChange={e => setMeal(e.target.value)}
+        <label htmlFor="sf-meal" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Beskriv din måltid</label>
+        <input id="sf-meal" type="text" value={meal} onChange={e => setMeal(e.target.value)}
           placeholder="T.ex. toast skagen, sedan oxfilé med rödvinssky..."
           onKeyDown={e => e.key === "Enter" && handleSubmit()}
           style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}

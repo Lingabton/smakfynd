@@ -4,7 +4,7 @@ function getImageUrl(p) {
   return null;
 }
 
-function ProductImage({ p, size = 52, style: extraStyle = {} }) {
+function ProductImage({ p, size = 52, style: extraStyle = {}, eager = false }) {
   const [err, setErr] = useState(false);
   const url = getImageUrl(p);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾", Öl: "🍺" })[p.category] || "✦";
@@ -28,7 +28,7 @@ function ProductImage({ p, size = 52, style: extraStyle = {} }) {
       <img
         src={url}
         alt={p.name}
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         onError={() => setErr(true)}
         style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }}
       />

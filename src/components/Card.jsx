@@ -36,7 +36,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
       <div style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start" }}>
         {/* Product image with rank overlay */}
         <div style={{ position: "relative", flexShrink: 0 }}>
-          <ProductImage p={p} size={52} />
+          <ProductImage p={p} size={52} eager={rank <= 3} />
           <div style={{
             position: "absolute", top: -4, left: -4,
             width: 20, height: 20, borderRadius: 6,
@@ -175,8 +175,9 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             }}
             onMouseEnter={e => e.currentTarget.style.color = t.wine}
             onMouseLeave={e => e.currentTarget.style.color = t.txM}
+            aria-label={`Köp ${p.name} på Systembolaget (öppnas i nytt fönster)`}
           >
-            Systembolaget <span style={{ fontSize: 9 }}>↗</span>
+            Systembolaget <span style={{ fontSize: 9 }} aria-hidden="true">↗</span>
           </a>
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {

@@ -66,11 +66,6 @@ function SmakfyndApp() {
         }
       }
 
-      // Fallback to embedded sample data
-      if (SAMPLE_PRODUCTS.length > 0) {
-        setAllData(SAMPLE_PRODUCTS);
-        setLoadError(null);
-      }
       setLoading(false);
     }
     loadData();
@@ -385,7 +380,8 @@ function SmakfyndApp() {
 
         {/* ═══ SEARCH ═══ */}
         <div style={{ position: "relative", marginBottom: 10 }}>
-          <input type="text" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
+          <label htmlFor="sf-search" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Sök vin</label>
+          <input id="sf-search" type="search" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
             style={{
               width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
               border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
@@ -398,7 +394,9 @@ function SmakfyndApp() {
         </div>
 
         {/* ═══ STORE MODE BANNER ═══ */}
-        <div onClick={() => setStoreMode(true)} style={{
+        <div role="button" tabIndex={0} aria-label="Öppna butiksläge — sök på vinets namn och se poäng direkt"
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setStoreMode(true); } }}
+          onClick={() => setStoreMode(true)} style={{
           display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
           borderRadius: 14, background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
           border: `1px solid ${t.wine}20`, marginBottom: 14, cursor: "pointer",

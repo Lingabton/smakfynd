@@ -47,7 +47,6 @@ function trackAI(meal, response, latencyMs) {
   } catch(e) {}
 }
 
-const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL
 
 const CATS = [
   { k:"all", l:"Alla", i:"✦" }, { k:"Rött", l:"Rött vin", i:"🍷" },

@@ -23,8 +23,6 @@ function LoginModal({ onClose, onLogin }) {
       if (data.error) throw new Error(data.error);
       if (data.status === "code_sent") {
         setStep(2);
-        // TEMP: auto-fill code during development
-        if (data._dev_code) setCode(data._dev_code);
       }
     } catch (e) {
       setError(e.message || "Kunde inte skicka kod");
@@ -52,8 +50,14 @@ function LoginModal({ onClose, onLogin }) {
     setLoading(false);
   };
 
+  useEffect(() => {
+    const handleEsc = e => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Logga in" style={{
       position: "fixed", inset: 0, background: "rgba(30,23,16,0.5)", zIndex: 1000,
       display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
     }} onClick={onClose}>
