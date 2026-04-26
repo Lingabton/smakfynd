@@ -134,7 +134,13 @@ function SmakfyndApp() {
 
   const [showBackToTop, setShowBackToTop] = useState(false);
   useEffect(() => {
-    const onScroll = () => setShowBackToTop(window.scrollY > 800);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { setShowBackToTop(window.scrollY > 800); ticking = false; });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -233,7 +239,7 @@ function SmakfyndApp() {
                   }
                   setPanel(panel === k ? null : k);
                 }}
-                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400 }}
+                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400, padding: "8px 2px", minHeight: 44, display: "inline-flex", alignItems: "center" }}
               >{l}</span>
             ))}
           </div>
@@ -270,6 +276,16 @@ function SmakfyndApp() {
               </p>
             </div>
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
+
+            <div style={{ padding: 16, borderRadius: 12, background: `${t.wine}06`, border: `1px solid ${t.wine}12`, marginTop: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>🍷 Stöd Smakfynd</div>
+              <p style={{ fontSize: 12, color: t.txM, margin: "0 0 8px", lineHeight: 1.5 }}>
+                Smakfynd är gratis och oberoende — inga annonser, inga sponsrade placeringar. Om du tycker om tjänsten kan du bjuda oss på ett glas.
+              </p>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.wine }}>Swish: 123 456 78 90</div>
+              <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>Alla bidrag går till servrar, data och utveckling.</div>
+            </div>
+
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
         )}
@@ -549,6 +565,9 @@ function SmakfyndApp() {
           </div>
         )}
 
+        {/* ═══ WINE OF THE DAY ═══ */}
+        {!search && !showDeals && !showNew && cat === "Rött" && <WineOfDay products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
+
         {/* ═══ RESULTS ═══ */}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -632,10 +651,13 @@ function SmakfyndApp() {
                 {!autoOpenNr && <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>}
               </div>
             ))}
-            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.slice(1, 5).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.length > 5 && <NewsletterCTA compact={true} />}
+            {filtered.slice(5, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 6} delay={Math.min((i + 5) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 50 && (
-              <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
-                Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
+              <div style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}` }}>
+                <div style={{ fontSize: 14, color: t.txM, marginBottom: 8 }}>Visar topp 50 av {filtered.length} viner</div>
+                <div style={{ fontSize: 12, color: t.txL }}>Använd filter för att hitta fler, eller logga in för att se hela listan.</div>
               </div>
             )}
           </div>
@@ -646,6 +668,9 @@ function SmakfyndApp() {
 
         {/* ═══ AI FOOD MATCH ═══ */}
         <div id="section-food"><FoodMatch products={products} /></div>
+
+        {/* ═══ NEWSLETTER CTA ═══ */}
+        <NewsletterCTA />
 
         {/* ═══ REDAKTIONENS VAL ═══ */}
         <div id="section-picks"><EditorsPicks products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} /></div>

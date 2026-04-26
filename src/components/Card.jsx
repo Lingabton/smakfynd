@@ -171,7 +171,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             style={{
               display: "inline-flex", alignItems: "center", gap: 4,
               fontSize: 11, color: t.txM, textDecoration: "none",
-              transition: "color 0.2s",
+              transition: "color 0.2s", minHeight: 44, padding: "8px 4px",
             }}
             onMouseEnter={e => e.currentTarget.style.color = t.wine}
             onMouseLeave={e => e.currentTarget.style.color = t.txM}
@@ -189,12 +189,17 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                 navigator.share({ title: p.name, text, url }).catch(() => {});
               } else {
                 navigator.clipboard?.writeText(`${text}\n${url}`);
+                const btn = e.currentTarget;
+                const orig = btn.textContent;
+                btn.textContent = "✓ Kopierad!";
+                btn.style.color = t.green;
+                setTimeout(() => { btn.innerHTML = '<span style="font-size:13px;line-height:1">↗</span> Dela'; btn.style.color = t.txL; }, 2000);
               }
             }}
             style={{
               display: "inline-flex", alignItems: "center", gap: 4,
               fontSize: 12, color: t.txL, background: "none", border: "none",
-              cursor: "pointer", padding: "2px 0", fontFamily: "inherit",
+              cursor: "pointer", padding: "8px 4px", fontFamily: "inherit", minHeight: 44,
             }}>
             <span style={{ fontSize: 13, lineHeight: 1 }}>↗</span> Dela
           </button>

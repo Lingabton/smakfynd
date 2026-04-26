@@ -77,6 +77,30 @@ export default {
     const url = new URL(request.url);
 
     try {
+      // POST /subscribe — frictionless newsletter signup (no verification)
+      if (request.method === "POST" && url.pathname === "/subscribe") {
+        const { email } = await request.json();
+        if (!email || !email.includes("@")) {
+          return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
+        }
+        const cleanEmail = email.toLowerCase().trim();
+        if (!checkLoginRate(cleanEmail, 3)) {
+          return new Response(JSON.stringify({ error: "För många försök" }), { status: 429, headers });
+        }
+        const existing = await env.DB.prepare("SELECT id, newsletter FROM users WHERE email = ?").bind(cleanEmail).first();
+        if (existing) {
+          if (!existing.newsletter) {
+            await env.DB.prepare("UPDATE users SET newsletter = 1, newsletter_consent_at = ? WHERE id = ?")
+              .bind(new Date().toISOString(), existing.id).run();
+          }
+        } else {
+          await env.DB.prepare(
+            "INSERT INTO users (email, newsletter, newsletter_consent_at) VALUES (?, 1, ?)"
+          ).bind(cleanEmail, new Date().toISOString()).run();
+        }
+        return new Response(JSON.stringify({ ok: true, message: "Prenumeration aktiverad!" }), { headers });
+      }
+
       // POST /login — Step 1: send verification code
       if (request.method === "POST" && url.pathname === "/login") {
         const body = await request.json();

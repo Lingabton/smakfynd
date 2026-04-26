@@ -796,6 +796,162 @@ def make_pages():
                            and (w.get('taste_sweet') is not None and (w.get('taste_sweet') or 0) <= 3)],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+
+        # ─── Nya sidor: seasonal + long-tail ───
+        {
+            "slug": "vin-under-90-kr",
+            "title": f"Bästa vinerna under 90 kr på Systembolaget {YEAR}",
+            "meta": f"Topp 20 bästa viner under 90 kr. Prisvärt och gott — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa vinerna under 90 kr — {DATE_STR}",
+            "intro": "Du behöver inte spendera mycket för att dricka bra. Här är de bästa vinerna under 90 kr — vardagsfavoriter med hög poäng.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "sommarvin",
+            "title": f"Bästa sommarvinerna {YEAR} — fräscha och kylda",
+            "meta": f"Bästa sommarviner på Systembolaget {YEAR}. Fräscha vita, rosé och bubbel för grillkvällar och picknick. {DATE_STR}.",
+            "h1": f"Bästa sommarvinerna {YEAR}",
+            "intro": "Sommar = fräscht, kylt och enkelt. Här är de vita, rosé och mousserande vinerna som passar perfekt till grillkvällar, picknick och sena sommarkvällar.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
+                           and (w.get('price', 999) or 999) <= 200],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "hostvin",
+            "title": f"Bästa höstvinerna {YEAR} — varma och fylliga",
+            "meta": f"Bästa höstviner: fylliga röda till mörka kvällar, vilt och gratänger. {DATE_STR}.",
+            "h1": f"Bästa höstvinerna {YEAR}",
+            "intro": "Hösten kallar på varma, fylliga viner. Här är de röda vinerna som passar perfekt till viltstuvning, svampsås och mörka novemberkvällar.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+                           and (w.get('taste_body') or 0) >= 7],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-pizza",
+            "title": f"Bästa vinerna till pizza {YEAR}",
+            "meta": f"Vilket vin passar till pizza? Topp 20 bästa vinerna till pizza — från Margherita till pepperoni. {DATE_STR}.",
+            "h1": f"Bästa vinerna till pizza — {DATE_STR}",
+            "intro": "Pizza och vin är en klassisk kombo. Italienska röda och friska vita — här är de bästa vinerna till pizzakvällen.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('country') == 'Italien' or w.get('grape', '').lower() in ('sangiovese', 'primitivo', 'montepulciano'))
+                           and w.get('type') in ('Rött', 'Vitt')],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-sushi",
+            "title": f"Bästa vinerna till sushi {YEAR}",
+            "meta": f"Bästa viner till sushi och japansk mat. Fräscha vita, torr rosé och lätt bubbel. {DATE_STR}.",
+            "h1": f"Bästa vinerna till sushi — {DATE_STR}",
+            "intro": "Sushi kräver vin med fräschör och precision. Fräscha vita, torra roséer och mousserande — här är de bästa vinerna till sushi.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
+                           and (w.get('taste_sweet') is None or (w.get('taste_sweet') or 0) <= 4)],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-lamm",
+            "title": f"Bästa vinerna till lamm {YEAR}",
+            "meta": f"Bästa viner till lamm, grillat lamm och lammkotletter. Kraftiga röda med kryddig karaktär. {DATE_STR}.",
+            "h1": f"Bästa vinerna till lamm — {DATE_STR}",
+            "intro": "Lamm vill ha vin med struktur och kryddighet. Syrah, Tempranillo och Cabernet Sauvignon — här är de bästa vinerna till lammrätter.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+                           and (w.get('taste_body') or 0) >= 7
+                           and any(g in (w.get('grape') or '').lower() for g in ['syrah', 'shiraz', 'tempranillo', 'cabernet', 'malbec', 'grenache', 'mourvèdre'])],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-picknick",
+            "title": f"Bästa vinerna till picknick {YEAR}",
+            "meta": f"Bästa picknick-viner — lätta, fräscha och enkla att ta med. {DATE_STR}.",
+            "h1": f"Bästa vinerna till picknick — {DATE_STR}",
+            "intro": "Picknick = lättsamt, fräscht och gärna kylt. Här är de bästa vinerna att ta med i korgen — från roséer till lätta bubbel.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') in ('Rosé', 'Vitt', 'Mousserande')
+                           and (w.get('price', 999) or 999) <= 150],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-merlot",
+            "title": f"Bästa Merlot-vinerna på Systembolaget {YEAR}",
+            "meta": f"Topp 20 bästa Merlot på Systembolaget. Mjuka, fruktiga och eleganta — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Merlot-vinerna — {DATE_STR}",
+            "intro": "Merlot är den mjuka, tillgängliga favoriten. Fruktigt, rundt och vänligt — perfekt för den som vill ha ett rött vin utan för mycket tanniner.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and 'merlot' in (w.get('grape') or '').lower()],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-grenache",
+            "title": f"Bästa Grenache/Garnacha-vinerna {YEAR}",
+            "meta": f"Topp 20 Grenache/Garnacha från Systembolaget. Kryddigt, fruktigt, generöst. {DATE_STR}.",
+            "h1": f"Bästa Grenache-vinerna — {DATE_STR}",
+            "intro": "Grenache (eller Garnacha) ger generösa, kryddiga röda viner med bärtoner och värme. Populär i Rhônedalen, Spanien och Australien.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and any(g in (w.get('grape') or '').lower() for g in ['grenache', 'garnacha'])],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-argentinska-vin",
+            "title": f"Bästa argentinska vinerna på Systembolaget {YEAR}",
+            "meta": f"Topp 20 argentinska viner. Malbec, Torrontés och mer — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa argentinska vinerna — {DATE_STR}",
+            "intro": "Argentina = Malbec. Men det finns mer — Torrontés, Cabernet Franc och spännande blandningar. Här är de bästa argentinska vinerna just nu.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Argentina'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-cava",
+            "title": f"Bästa Cava på Systembolaget {YEAR}",
+            "meta": f"Topp Cava — prisvärt bubbel från Spanien. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Cava — {DATE_STR}",
+            "intro": "Cava är Spaniens svar på champagne — till en bråkdel av priset. Fräscht, torrt och festligt. Här är de bästa Cava-köpen.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande' and w.get('country') == 'Spanien'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "mousserande-vin-under-150-kr",
+            "title": f"Bästa mousserande viner under 150 kr {YEAR}",
+            "meta": f"Bubbel under 150 kr — festligt utan att ruinera dig. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa mousserande vinerna under 150 kr — {DATE_STR}",
+            "intro": "Du behöver inte betala champagne-pris för riktigt bra bubbel. Här är de bästa mousserande vinerna under 150 kr — perfekta för fredagsmys, fest eller bara för att det är onsdag.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and (w.get('price', 999) or 999) < 150],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-svamp",
+            "title": f"Bästa vinerna till svamprisotto och svamprätter {YEAR}",
+            "meta": f"Bästa viner till svamp, svamprisotto och tryffel. Jordiga röda och eleganta vita. {DATE_STR}.",
+            "h1": f"Bästa vinerna till svamprätter — {DATE_STR}",
+            "intro": "Svamp vill ha vin med jordiga toner och elegans. Pinot Noir, Nebbiolo och fyllda Chardonnay — här är de bästa vinerna till svamprisotto och kantareller.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and any(g in (w.get('grape') or '').lower() for g in ['pinot noir', 'nebbiolo', 'barbera', 'chardonnay', 'barolo'])
+                           and (w.get('taste_body') or 0) >= 5],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "vin-till-nyar",
+            "title": f"Bästa vinerna till nyår {YEAR + 1}",
+            "meta": f"Bästa bubbel och vin till nyårsfirandet. Champagne, Cava, Prosecco och mer. {DATE_STR}.",
+            "h1": f"Bästa vinerna till nyår",
+            "intro": "Nyår kräver bubbel! Här är de bästa mousserande vinerna för att fira in det nya året — från prisvärd Cava till exklusiv Champagne.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Mousserande'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-carmenere",
+            "title": f"Bästa Carménère på Systembolaget {YEAR}",
+            "meta": f"Topp Carménère — Chiles underskattade druva. Kryddigt och unikt. {DATE_STR}.",
+            "h1": f"Bästa Carménère-vinerna — {DATE_STR}",
+            "intro": "Carménère — Chiles signaturdruva med kryddiga, gröna och mörka bärtoner. Unik och ofta undervärderad. Här är de bästa köpen.",
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and 'carm' in (w.get('grape') or '').lower()],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
     ]
 
 def score_label(score):
@@ -852,13 +1008,14 @@ def get_cross_links(current_slug, all_pages):
     """Get 5 related landing pages for cross-linking, prioritizing same category."""
     # Tag each page with categories for smarter matching
     tags = {
-        'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
-        'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
+        'druva': ['basta-malbec', 'basta-merlot', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel', 'basta-grenache', 'basta-carmenere'],
+        'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin', 'basta-argentinska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
-        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
-        'pris': ['vin-under-80-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
-        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
+        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr'],
+        'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
+        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
+        'sasong': ['sommarvin', 'hostvin'],
     }
     # Find current page's category
     my_cat = None
@@ -901,13 +1058,14 @@ def render_page(page, all_pages=None):
         'smak': 'Smakprofiler',
     }
     category_slugs = {
-        'druva': ['basta-malbec', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel'],
-        'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin'],
+        'druva': ['basta-malbec', 'basta-merlot', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel', 'basta-grenache', 'basta-carmenere'],
+        'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin', 'basta-argentinska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
-        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose'],
-        'pris': ['vin-under-80-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
-        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos'],
+        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr'],
+        'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
+        'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
+        'sasong': ['sommarvin', 'hostvin'],
     }
     slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
     cross_sections = []

@@ -28,6 +28,8 @@ FILES = [
     "components/QuickFilters.jsx",
     "components/EditorsPicks.jsx",
     "components/FoodMatch.jsx",
+    "components/NewsletterCTA.jsx",
+    "components/WineOfDay.jsx",
     "components/StoreMode.jsx",
     "components/AgeGate.jsx",
     "App.jsx",

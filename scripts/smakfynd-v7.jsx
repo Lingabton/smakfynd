@@ -20,26 +20,6 @@ const _sid = (() => {
     return s;
   } catch(e) { return "anon"; }
 })();
-const _sessionStart = Date.now();
-
-// Session duration tracking — sends on page leave
-try {
-  const sendDuration = () => {
-    const duration = Math.round((Date.now() - _sessionStart) / 1000);
-    if (duration < 2) return; // skip bounces under 2s
-    const device = window.innerWidth < 768 ? "mobile" : "desktop";
-    navigator.sendBeacon?.(ANALYTICS_URL + "/event",
-      JSON.stringify({ session: _sid, event: "session_end", data: { duration_s: duration, pages_viewed: performance.getEntriesByType?.("navigation")?.length || 1 }, page: location.hash || "/", device, referrer: document.referrer })
-    ) || fetch(ANALYTICS_URL + "/event", {
-      method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ session: _sid, event: "session_end", data: { duration_s: duration }, page: location.hash || "/", device: device }),
-      keepalive: true,
-    }).catch(() => {});
-  };
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sendDuration(); });
-  window.addEventListener("pagehide", sendDuration);
-} catch(e) {}
-
 function track(event, data) {
   try {
     const device = window.innerWidth < 768 ? "mobile" : "desktop";
@@ -50,19 +30,13 @@ function track(event, data) {
     }).catch(() => {});
   } catch(e) {}
 }
-
-// Debounced search tracking — only logs final query (not every keystroke)
-let _searchTimer = null;
 function trackSearch(query, count, clickedNr) {
   try {
-    clearTimeout(_searchTimer);
-    _searchTimer = setTimeout(() => {
-      fetch(ANALYTICS_URL + "/search", {
-        method: "POST", headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ session: _sid, query, results_count: count, clicked_nr: clickedNr }),
-        keepalive: true,
-      }).catch(() => {});
-    }, 2000); // wait 2s after last keystroke
+    fetch(ANALYTICS_URL + "/search", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session: _sid, query, results_count: count, clicked_nr: clickedNr }),
+      keepalive: true,
+    }).catch(() => {});
   } catch(e) {}
 }
 function trackAI(meal, response, latencyMs) {
@@ -76,7 +50,6 @@ function trackAI(meal, response, latencyMs) {
   } catch(e) {}
 }
 
-const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL
 
 const CATS = [
   { k:"all", l:"Alla", i:"✦" }, { k:"Rött", l:"Rött vin", i:"🍷" },
@@ -171,6 +144,15 @@ const pill = (active, accent = t.wine) => ({
 // utils.jsx
 // ════════════════════════════════════════════════════════════
 // src/utils.jsx
+function rescale(raw) {
+  if (raw >= 16) return Math.min(99, 90 + Math.round((raw - 16) * 5));
+  if (raw >= 14) return Math.round(75 + (raw - 14) * 7.5);
+  if (raw >= 12) return Math.round(60 + (raw - 12) * 7.5);
+  if (raw >= 10) return Math.round(42 + (raw - 10) * 9);
+  if (raw >= 8) return Math.round(22 + (raw - 8) * 10);
+  return Math.max(1, Math.round(raw * 2.75));
+}
+
 function getScoreInfo(s100) {
   if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
   if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
@@ -212,20 +194,12 @@ function ScoreBars({ p }) {
 // components/ProductImage.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/ProductImage.jsx
-function getImageUrl(p, size = 200) {
-  // Try SB image URL - use direct URL (works in most browsers)
+function getImageUrl(p) {
   if (p.image_url) return p.image_url;
-  if (p.nr) return `https://product-cdn.systembolaget.se/productimages/${p.nr}/${p.nr}_400.png`;
   return null;
 }
 
-// Fallback: try Systembolaget's other image CDN
-function getImageUrlFallback(p) {
-  if (p.nr) return `https://sb-product-media-prod.azureedge.net/productimages/${p.nr}/${p.nr}_100.png`;
-  return null;
-}
-
-function ProductImage({ p, size = 52, style: extraStyle = {} }) {
+function ProductImage({ p, size = 52, style: extraStyle = {}, eager = false }) {
   const [err, setErr] = useState(false);
   const url = getImageUrl(p);
   const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾", Öl: "🍺" })[p.category] || "✦";
@@ -249,16 +223,8 @@ function ProductImage({ p, size = 52, style: extraStyle = {} }) {
       <img
         src={url}
         alt={p.name}
-        loading="lazy"
-        onError={(e) => {
-          // Try fallback CDN before giving up
-          const fallback = getImageUrlFallback(p);
-          if (fallback && e.target.src !== fallback) {
-            e.target.src = fallback;
-          } else {
-            setErr(true);
-          }
-        }}
+        loading={eager ? "eager" : "lazy"}
+        onError={() => setErr(true)}
         style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }}
       />
     </div>
@@ -328,62 +294,6 @@ function useSaved() {
 // Global saved state (shared between components)
 const SavedContext = React.createContext(null);
 
-// Scroll-reveal hook — triggers animation when element enters viewport
-function useScrollReveal(threshold = 0.1) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") { setVisible(true); return; }
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold, rootMargin: "50px" });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return [ref, visible];
-}
-
-// Internal link helper — maps wine properties to relevant landing pages
-function getInternalLinks(p) {
-  const links = [];
-  // Country links
-  const countryMap = {
-    "Italien": "basta-italienska-vin", "Frankrike": "basta-franska-vin",
-    "Spanien": "basta-spanska-vin", "Chile": "basta-chilenska-vin",
-    "Sydafrika": "basta-sydafrikanska-vin", "Australien": "basta-australiska-vin",
-    "Portugal": "basta-portugisiska-vin",
-  };
-  if (countryMap[p.country]) links.push({ url: `/${countryMap[p.country]}/`, label: `Bästa ${p.country.toLowerCase()}ska viner` });
-
-  // Grape links
-  const grapeMap = {
-    "cabernet sauvignon": "basta-cabernet-sauvignon", "malbec": "basta-malbec",
-    "pinot noir": "basta-pinot-noir", "syrah": "basta-syrah-shiraz", "shiraz": "basta-syrah-shiraz",
-    "tempranillo": "basta-tempranillo", "sangiovese": "basta-sangiovese",
-    "chardonnay": "basta-chardonnay", "riesling": "basta-riesling",
-    "sauvignon blanc": "basta-sauvignon-blanc", "zinfandel": "basta-zinfandel",
-  };
-  const grape = (p.grape || "").toLowerCase();
-  for (const [key, slug] of Object.entries(grapeMap)) {
-    if (grape.includes(key)) { links.push({ url: `/${slug}/`, label: `Bästa ${key.charAt(0).toUpperCase() + key.slice(1)}` }); break; }
-  }
-
-  // Type links
-  const typeMap = { "Rött": "basta-roda-vin", "Vitt": "basta-vita-vin", "Rosé": "basta-rose", "Mousserande": "basta-bubbel" };
-  if (typeMap[p.category]) links.push({ url: `/${typeMap[p.category]}/`, label: `Alla ${(p.category || "").toLowerCase()} viner` });
-
-  // Price links
-  if (p.price < 100) links.push({ url: "/vin-under-100-kr/", label: "Viner under 100 kr" });
-  else if (p.price < 150) links.push({ url: "/vin-under-150-kr/", label: "Viner under 150 kr" });
-  else if (p.price < 200) links.push({ url: "/vin-under-200-kr/", label: "Viner under 200 kr" });
-
-  if (p.organic) links.push({ url: "/ekologiskt-vin/", label: "Ekologiska viner" });
-
-  return links.slice(0, 3);
-}
-
 // ════════════════════════════════════════════════════════════
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
@@ -396,335 +306,381 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
     if (next) track("click", { nr: p.nr, name: p.name, score: p.smakfynd_score, rank });
   };
   const sv = React.useContext(SavedContext);
+  const icon = ({ Rött: "🍷", Vitt: "🥂", Rosé: "🌸", Mousserande: "🍾" })[p.category] || "✦";
   const s100 = p.smakfynd_score;
   const [label, col, emoji] = getScoreInfo(s100);
   const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
+  
+  // Rank badges
   const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
-  const [cardRef, cardVisible] = useScrollReveal(0.05);
-  const [hovered, setHovered] = useState(false);
-  // Systembolaget food pairing SVG icons (official paths)
-  const SB_FOOD_ICONS = {
-    "Nöt": { vb: "0 0 35 32", tx: -335, ty: -407, d: "M362.64,417.04 C364.12,416.28 365.48,416 366.6,416 C367.8,416 368.88,416.36 369.68,417.04 C369.12,417.72 368.16,420.04 365.44,420.04 C364.4,420.04 363.24,419.76 361.76,419.04 C361.8,419.2 361.8,419.44 361.8,419.64 C361.8,421.08 360.92,423.52 360.84,426.24 C361.04,427.52 361.2,428.8 361.2,429.84 C361.2,433.88 359.8,436.24 358.6,436.92 C357.28,437.64 355,438.48 352.52,438.48 C350.04,438.48 347.76,437.68 346.36,436.92 C345.16,436.28 343.8,433.76 343.8,429.8 C343.8,428.72 343.92,427.52 344.12,426.24 C344.12,423.6 343.24,421.08 343.24,419.64 C343.24,419.44 343.24,419.2 343.28,419.04 C341.8,419.76 340.68,420.04 339.68,420.04 C337.04,420.04 335.8,418 335.32,417.04 C336.12,416.36 337.08,416 338.4,416 C339.52,416 340.88,416.28 342.4,417.04 C340.48,415.56 339.88,413.56 339.88,411.88 C339.88,409.48 341.16,407.52 342.12,407.52 C342.2,407.52 342.36,407.6 342.52,407.64 C343.84,408.68 342.68,413.48 345.72,413.48 L359.36,413.48 C362.44,413.48 361.16,408.68 362.48,407.64 C362.64,407.6 362.8,407.52 362.88,407.52 C363.92,407.52 365.12,409.48 365.12,411.92 C365.12,413.64 364.44,415.56 362.64,417.04 Z M345.56,421.88 C345.56,423.24 347,423.8 347.8,423.8 C349.44,423.8 349.88,422.6 349.88,421.88 C349.88,420.88 349.2,419.84 347.8,419.84 C347.04,419.84 345.56,420.24 345.56,421.88 Z M355.16,421.88 C355.16,423.24 356.32,423.8 357.2,423.8 C358.76,423.8 359.44,422.6 359.44,421.88 C359.44,420.88 358.72,419.84 357.28,419.84 C356.6,419.84 355.16,420.24 355.16,421.88 Z" },
-    "Kött": { vb: "0 0 35 32", tx: -335, ty: -407, d: "M362.64,417.04 C364.12,416.28 365.48,416 366.6,416 C367.8,416 368.88,416.36 369.68,417.04 C369.12,417.72 368.16,420.04 365.44,420.04 C364.4,420.04 363.24,419.76 361.76,419.04 C361.8,419.2 361.8,419.44 361.8,419.64 C361.8,421.08 360.92,423.52 360.84,426.24 C361.04,427.52 361.2,428.8 361.2,429.84 C361.2,433.88 359.8,436.24 358.6,436.92 C357.28,437.64 355,438.48 352.52,438.48 C350.04,438.48 347.76,437.68 346.36,436.92 C345.16,436.28 343.8,433.76 343.8,429.8 C343.8,428.72 343.92,427.52 344.12,426.24 C344.12,423.6 343.24,421.08 343.24,419.64 C343.24,419.44 343.24,419.2 343.28,419.04 C341.8,419.76 340.68,420.04 339.68,420.04 C337.04,420.04 335.8,418 335.32,417.04 C336.12,416.36 337.08,416 338.4,416 C339.52,416 340.88,416.28 342.4,417.04 C340.48,415.56 339.88,413.56 339.88,411.88 C339.88,409.48 341.16,407.52 342.12,407.52 C342.2,407.52 342.36,407.6 342.52,407.64 C343.84,408.68 342.68,413.48 345.72,413.48 L359.36,413.48 C362.44,413.48 361.16,408.68 362.48,407.64 C362.64,407.6 362.8,407.52 362.88,407.52 C363.92,407.52 365.12,409.48 365.12,411.92 C365.12,413.64 364.44,415.56 362.64,417.04 Z M345.56,421.88 C345.56,423.24 347,423.8 347.8,423.8 C349.44,423.8 349.88,422.6 349.88,421.88 C349.88,420.88 349.2,419.84 347.8,419.84 C347.04,419.84 345.56,420.24 345.56,421.88 Z M355.16,421.88 C355.16,423.24 356.32,423.8 357.2,423.8 C358.76,423.8 359.44,422.6 359.44,421.88 C359.44,420.88 358.72,419.84 357.28,419.84 C356.6,419.84 355.16,420.24 355.16,421.88 Z" },
-    "Lamm": { vb: "0 0 36 30", tx: -697, ty: -409, d: "M730.28,429.88 C730.28,430.48 730.16,431.36 729.4,432.12 C729.72,433.52 730.32,436.2 730.32,437.12 C730.32,437.76 729.96,438.12 729.52,438.12 C729.16,438.12 728.8,437.8 728.6,437.2 C728.32,436.36 727.72,434.4 727.12,433 C725.88,433 724.88,432.36 724.84,431.92 L724.84,432.12 C724.84,433.36 723.56,434.16 722.16,434.16 C721.08,434.16 720.04,433.64 719.44,432.32 C718.8,433.28 717.56,433.76 716.32,433.76 C714.92,433.76 713.68,433.16 713.32,431.72 C712.88,432.16 712.24,432.4 711.64,432.52 C711,433.8 710.28,436.2 710.04,437.24 C709.88,437.92 709.4,438.24 709.04,438.24 C708.6,438.24 708.28,437.8 708.28,437.2 C708.28,435.8 709.04,432.76 709.24,431.68 C708.96,431.32 708.64,430.92 708.64,430.24 L708.64,429.84 C708.64,429.72 708.64,429.6 708.68,429.48 L708.64,429.48 C708.16,429.48 705.8,428.36 705.8,425.84 C705.8,424.52 706.48,423.72 707.16,423.12 C707.56,422.8 708,422.56 708.48,422.36 C708.04,421.36 707.4,420.96 706.48,420.96 C704.72,420.96 702.04,422.56 699.96,422.56 C697.84,422.56 697.12,421 697.12,419.84 C697.12,419.4 697.2,418.96 697.4,418.6 C698.04,417.52 700.16,416.2 702.12,415.2 C703.28,414.6 704.52,414 705.92,413.4 C705.84,413.24 705.76,413.08 705.68,412.88 C705.56,412.56 705.44,412.04 705.44,411.52 C705.44,411.24 705.48,410.84 705.64,410.4 C705.96,409.48 706.2,409 706.56,409 C707,409 707.32,409.6 707.96,410.64 C708.36,411.32 708.36,412.2 708.36,412.84 L708.36,413.24 C708.56,412.88 708.8,412.52 709.04,412.2 C709.48,411.6 710,411.08 710.6,410.88 C711.52,410.6 712.08,410.44 712.44,410.44 C712.8,410.44 712.96,410.6 712.96,410.96 C712.96,411.16 712.88,411.6 712.76,412.2 C712.56,413.04 711.96,413.64 711.36,414.08 C711,414.32 710.64,414.52 710.24,414.64 C711.04,415.4 711.48,416.32 711.72,417.12 C711.88,417.6 711.96,418.08 712.04,418.52 C712.08,418.08 712.24,417.72 712.48,417.4 C712.92,416.8 713.68,416.28 715.08,416.28 C716,416.28 716.56,416.72 717,417.16 C717.24,417.44 717.44,417.72 717.56,418.04 C717.8,417.56 718.08,417.12 718.4,416.76 C719,416.12 719.84,415.48 721.08,415.48 C722.24,415.48 722.96,416.04 723.44,416.64 C723.72,417 723.96,417.4 724.12,417.84 C724.36,417.56 724.64,417.32 724.92,417.12 C725.44,416.76 726.12,416.44 726.88,416.44 C728.6,416.44 729.8,418 729.8,419.72 L729.8,420 L730.16,420 C732.04,420 732.88,421.04 732.88,422.28 C732.88,423.2 732.36,424.16 731.4,424.76 C732.32,424.88 732.8,425.88 732.8,426.84 C732.8,428.16 732,429.44 730.28,429.44 L730.28,429.88 Z M707.04,418.2 C707.96,418.2 708.64,417.8 708.64,416.88 C708.64,416.08 707.92,415.24 706.96,415.24 C706.16,415.24 705.52,415.92 705.52,416.68 C705.52,417.64 706.12,418.2 707.04,418.2 Z" },
-    "Fisk": { vb: "0 0 41 23", tx: -97, ty: -414, d: "M137.38,419.8 C137.38,421.16 135.34,423.52 135.34,426.12 C135.34,428.48 137.54,430.48 137.54,432.08 C137.54,432.8 136.7,433.12 136.1,433.12 C133.34,433.12 129.26,428.76 128.14,427.52 C125.78,430.28 119.98,436.08 113.34,436.08 C110.14,436.08 107.18,434.76 104.7,433 C109.62,432.08 110.18,429.04 110.18,429.04 C108.7,429.8 106.78,430.28 104.9,430.28 C102.22,430.28 99.22,429.04 97.74,426.52 C97.54,426.12 97.46,425.92 97.46,425.68 C97.46,425 98.54,425.08 99.22,424.8 C101.82,420.2 106.34,418.04 106.34,418.04 C106.34,418.04 108.62,414.84 111.1,414.84 C121.5,414.84 125.78,421.84 128.14,424.6 C129.26,423.24 133.86,418.88 136.22,418.88 C136.66,418.88 137.38,419 137.38,419.8 Z M105.58,423.56 C105.58,424.48 106.14,425.44 107.5,425.44 C108.82,425.44 109.54,424.44 109.54,423.72 C109.54,422.72 108.82,421.64 107.54,421.64 C106.06,421.64 105.58,422.64 105.58,423.56 Z" },
-    "Fläsk": { vb: "0 0 42 29", tx: -273, ty: -409, d: "M314.72,410.88 L314.76,410.88 C314.76,411.08 312.52,414.68 308.68,415.96 C308,417.24 306.96,418.44 306.28,419.04 C307.44,420.76 308,422.56 308,424.2 C308,430.12 305.32,432.12 305.32,436.08 C305.32,436.68 305.36,437.28 305.52,438 L301.76,438 C301.84,437.64 301.84,437.28 301.84,436.92 C301.84,434.12 300.2,432.52 297.76,432.52 C297.08,432.52 296.68,432.68 294,432.68 C291.6,432.68 290.84,432.52 290.28,432.52 C289,432.52 288.16,432.96 287.6,434.64 C287.36,435.72 287.24,436.88 287.24,438 L283.72,438 C283.72,438 283.84,437.28 283.84,436.36 C283.84,435.16 283.72,433.36 282.96,432.16 C281.56,430.04 274.64,429.12 273.24,428.8 L273.24,424.32 C273.24,424.32 274.32,424.76 275.36,424.76 C276.2,424.76 277.08,424.52 277.44,423.64 C278.32,421.6 279.64,418.84 279.64,418.84 L278.2,413.48 L282.76,416.12 L282.4,411.08 L286.12,414.24 C287.8,413.52 290.24,413.04 293.48,413.04 C298.92,413.04 302.8,415.04 305.16,417.64 C305.52,417.32 306,416.76 306.4,416.16 C304.2,416.16 302.68,414.36 302.68,412.48 C302.68,410.76 303.96,409.56 305.76,409.56 C307.64,409.56 309.28,410.92 309.28,413.12 C309.28,413.48 309.16,414.28 309.12,414.4 C311.16,414.16 314.72,410.88 314.72,410.88 Z M284.84,425.2 C285.8,425.2 286.68,424.52 286.68,423.44 C286.68,422.44 286.04,421.48 284.72,421.48 C283.44,421.48 282.68,422.44 282.68,423.32 C282.68,424.48 283.68,425.2 284.84,425.2 Z M306.76,414.64 L307.12,414.64 C307.28,414.24 307.48,413.52 307.48,413.12 C307.48,411.92 306.72,410.84 305.48,410.84 C304.72,410.84 304.2,411.52 304.2,412.24 C304.2,413.56 305.2,414.64 306.76,414.64 Z" },
-    "Skaldjur": { vb: "0 0 46 19", tx: -158, ty: -415, d: "M193.14,415.92 C199.34,415.92 203.74,419.12 203.74,424.52 C203.74,431.12 198.38,434 192.22,434 C187.86,434 183.34,432.56 180.66,430.16 C184.34,430.6 187.74,431.08 190.46,431.08 C194.3,431.08 196.74,430.24 196.74,427.92 C196.74,426 193.26,425.96 193.26,425.96 C192.58,425.96 192.14,426.64 191.38,427.36 C190.94,427.52 189.26,428.12 186.78,428.12 C185.02,428.12 182.74,427.88 180.3,426.8 C179.42,426.44 178.06,425.4 178.06,425.4 C178.06,425.4 166.82,423.72 163.46,422.76 C164.5,422.84 169.62,423.24 172.98,423.24 C174.3,423.24 175.42,423.16 175.82,423.04 C175.82,423.04 162.62,420.44 158.26,417.76 C158.26,417.76 167.7,420 174.86,420 C176.94,420 178.86,419.8 180.3,419.32 C186.7,417.04 190.06,415.92 193.14,415.92 Z M178.78,420.6 C178.26,420.6 177.14,420.96 177.14,422.08 C177.14,423.24 178.02,423.6 178.58,423.6 C179.1,423.6 180.14,423.24 180.14,422.08 C180.14,421 179.26,420.6 178.78,420.6 Z" },
-    "Kyckling": { vb: "0 0 29 31", tx: -224, ty: -409, d: "M251.16,425.84 C251.76,426.64 252.64,427.76 252.64,428.68 C252.64,429.04 252.6,429.24 252.28,429.52 C252.08,429.8 250.28,430.04 249.84,430.24 C248.16,431.2 247.2,432.96 245.48,433.8 C245.32,433.84 245,434.04 245,434.52 C245,434.88 245.36,435.92 245.68,436.28 C246,436.64 247.76,436.44 247.76,437.12 C247.76,437.72 246.44,437.68 244.8,438.32 C243.24,438.92 242.32,439.96 241.6,439.96 C241.32,439.96 241.04,439.76 241.04,439.48 C241.04,438.92 242.72,438.12 242.72,437.76 C242.72,437.68 242.68,437.56 242.52,437.56 C242.36,437.56 240.64,438.32 240.4,438.32 C240.2,438.32 240.08,438.04 240.08,437.88 C240.08,437 242.28,436.36 243.8,436.16 C244.24,436.08 244.36,435.88 244.36,435.6 C244.36,435.24 244.16,434.88 243.96,434.6 C243.8,434.48 243.76,434.48 243.6,434.48 C243.2,434.48 242.32,434.92 240.08,434.92 C238.24,434.92 237.8,434.72 237.24,434.72 C237,434.72 236.84,434.84 236.64,435.04 C236.24,435.48 235.72,436.24 235.72,436.68 C235.72,437.68 237.36,438.08 237.36,438.8 C237.36,438.88 237.36,439 237.24,439.08 C237.24,439.12 237.16,439.12 237.04,439.12 C236.64,439.12 234.8,438.32 232.76,438.32 L231,438.32 C230.6,438.32 230.4,438.32 230.4,438.08 C230.4,436.92 232.96,437.36 232.96,436.92 C232.96,436.44 230.4,436.92 230.4,436.24 C230.4,435.8 230.96,435.6 231.56,435.6 C232.56,435.6 234,436.08 234.28,436.08 C234.8,436.08 235.28,435.24 235.28,434.6 C235.28,434.28 234.96,434.04 234.72,433.96 C230.68,432.44 227.6,429.48 227.6,424.92 C227.6,421 230.44,418.8 230.44,417.08 L230.44,417 C230.44,417 224.36,416.8 224.36,416.16 C224.36,415.56 229.36,412.48 229.36,412.48 C229.72,410.48 231.84,409.12 233.72,409.12 C236.28,409.12 237.92,411.56 237.92,413.84 C237.92,415.16 237.44,416.72 236.36,418.16 C235.92,418.72 234.2,420.4 234.2,421.44 C234.2,421.88 234.64,422.36 235.4,422.36 C237.24,422.36 239.24,420.8 241.04,420.8 C244.76,420.8 248.84,423 251.16,425.84 Z M231.56,412.64 C231.56,413.28 232,414.04 233.16,414.04 C234.08,414.04 234.72,413.52 234.72,412.72 C234.72,411.92 234.08,411.08 233.16,411.08 C232.2,411.08 231.56,411.76 231.56,412.64 Z" },
-    "Fågel": { vb: "0 0 29 31", tx: -224, ty: -409, d: "M251.16,425.84 C251.76,426.64 252.64,427.76 252.64,428.68 C252.64,429.04 252.6,429.24 252.28,429.52 C252.08,429.8 250.28,430.04 249.84,430.24 C248.16,431.2 247.2,432.96 245.48,433.8 C245.32,433.84 245,434.04 245,434.52 C245,434.88 245.36,435.92 245.68,436.28 C246,436.64 247.76,436.44 247.76,437.12 C247.76,437.72 246.44,437.68 244.8,438.32 C243.24,438.92 242.32,439.96 241.6,439.96 C241.32,439.96 241.04,439.76 241.04,439.48 C241.04,438.92 242.72,438.12 242.72,437.76 C242.72,437.68 242.68,437.56 242.52,437.56 C242.36,437.56 240.64,438.32 240.4,438.32 C240.2,438.32 240.08,438.04 240.08,437.88 C240.08,437 242.28,436.36 243.8,436.16 C244.24,436.08 244.36,435.88 244.36,435.6 C244.36,435.24 244.16,434.88 243.96,434.6 C243.8,434.48 243.76,434.48 243.6,434.48 C243.2,434.48 242.32,434.92 240.08,434.92 C238.24,434.92 237.8,434.72 237.24,434.72 C237,434.72 236.84,434.84 236.64,435.04 C236.24,435.48 235.72,436.24 235.72,436.68 C235.72,437.68 237.36,438.08 237.36,438.8 C237.36,438.88 237.36,439 237.24,439.08 C237.24,439.12 237.16,439.12 237.04,439.12 C236.64,439.12 234.8,438.32 232.76,438.32 L231,438.32 C230.6,438.32 230.4,438.32 230.4,438.08 C230.4,436.92 232.96,437.36 232.96,436.92 C232.96,436.44 230.4,436.92 230.4,436.24 C230.4,435.8 230.96,435.6 231.56,435.6 C232.56,435.6 234,436.08 234.28,436.08 C234.8,436.08 235.28,435.24 235.28,434.6 C235.28,434.28 234.96,434.04 234.72,433.96 C230.68,432.44 227.6,429.48 227.6,424.92 C227.6,421 230.44,418.8 230.44,417.08 L230.44,417 C230.44,417 224.36,416.8 224.36,416.16 C224.36,415.56 229.36,412.48 229.36,412.48 C229.72,410.48 231.84,409.12 233.72,409.12 C236.28,409.12 237.92,411.56 237.92,413.84 C237.92,415.16 237.44,416.72 236.36,418.16 C235.92,418.72 234.2,420.4 234.2,421.44 C234.2,421.88 234.64,422.36 235.4,422.36 C237.24,422.36 239.24,420.8 241.04,420.8 C244.76,420.8 248.84,423 251.16,425.84 Z M231.56,412.64 C231.56,413.28 232,414.04 233.16,414.04 C234.08,414.04 234.72,413.52 234.72,412.72 C234.72,411.92 234.08,411.08 233.16,411.08 C232.2,411.08 231.56,411.76 231.56,412.64 Z" },
-    "Vilt": { vb: "0 0 40 29", tx: -390, ty: -407, d: "M410.78,433.84 C410.78,433.84 410.46,434 409.86,434 C409.22,434 408.26,433.84 407.14,433.24 C405.9,432.56 404.3,430.04 402.38,430.04 C401.1,430.04 400.5,430.8 398.42,433.08 C397.86,433.64 397.26,433.96 396.54,433.96 C393.78,433.96 390.46,429.88 390.46,428.04 C390.46,425 394.18,419.68 399.54,419.6 L413.62,419.36 C414.46,419.36 414.82,418.28 414.82,417.6 C414.82,417.12 414.74,416.8 414.5,416.76 C414.06,416.68 411.98,416.68 409.7,416.68 C406.3,416.68 399.5,416.52 397.46,414.2 C396.9,413.52 396.02,412.44 396.02,411.44 C396.02,410.84 396.42,410.2 397.06,410.2 C397.54,410.2 398.06,410.44 398.42,411.04 C399.1,412.2 400.06,413.36 401.62,413.36 C402.94,413.36 402.38,411.4 402.78,410.68 C403.06,410.16 403.46,409.96 403.9,409.96 C404.46,409.96 404.94,410.36 405.06,411.2 C405.22,412.2 404.86,413.56 406.18,414.04 C406.94,414.32 408.22,414.4 409.58,414.4 C411.62,414.4 413.86,414.16 414.3,414.04 C415.66,413.64 415.38,412.2 415.58,411.24 C415.74,410.48 416.34,410.12 416.82,410.12 C417.26,410.12 417.58,410.36 417.86,410.88 C418.1,411.36 418.06,412.24 418.14,412.8 C418.22,413.52 418.74,413.88 419.38,413.88 C419.94,413.88 420.5,413.64 420.7,413.08 C421.06,411.88 420.7,411.24 421.22,410.32 C421.54,409.8 421.94,409.56 422.46,409.56 C423.46,409.56 423.58,410.48 423.58,411.44 C423.58,412.04 423.58,412.8 424.66,412.8 C426.7,412.8 426.34,408.88 427.34,408.04 C427.54,407.84 427.82,407.76 428.14,407.76 C429.26,407.76 429.54,408.6 429.54,409.24 C429.54,410.76 428.54,413.84 427.06,414.88 C425.78,415.8 420.54,415.52 418.42,416.92 C418.14,417.12 417.98,417.6 417.98,418 C417.98,418.56 418.18,419.36 418.78,419.88 C423.26,423.64 424.42,431.6 424.58,434.72 C424.62,435.4 424.14,435.72 423.5,435.72 L411.42,435.72 C410.86,435.72 410.78,433.84 410.78,433.84 Z M411.66,425.4 C412.54,425.4 413.3,424.76 413.3,423.88 C413.3,422.92 412.7,422.16 411.62,422.16 C410.54,422.16 409.9,423.12 409.9,423.88 C409.9,424.84 411.02,425.4 411.66,425.4 Z" },
-    "Ost": { vb: "0 0 27 28", tx: -604, ty: -410, d: "M619.72,423.08 C621.44,423.08 622.76,421.64 622.84,419.92 L630.52,433.04 C630.52,433.04 625.24,437.96 617.48,437.96 C609.76,437.96 604.48,433.04 604.48,433.04 L607.68,427.6 C608.08,429.52 609.76,431 611.72,431 C613.92,431 615.72,429.04 615.72,426.72 C615.72,424.28 613.84,422.4 611.48,422.4 C611.16,422.4 610.88,422.52 610.52,422.6 L617.48,410.36 L620.96,416.72 C620.6,416.56 620.2,416.4 619.76,416.4 C617.96,416.4 616.6,417.92 616.6,419.76 C616.6,421.64 617.96,423.08 619.72,423.08 Z M624.84,432.4 C624.84,431.2 624.16,429.52 622.24,429.52 C620.76,429.52 619.44,430.8 619.44,432.4 C619.44,433.88 620.6,435.12 622.04,435.12 C623.52,435.12 624.84,433.88 624.84,432.4 Z" },
-    "Grönsaker": { vb: "0 0 23 37", tx: -450, ty: -404, d: "M463.42,423.12 C464.18,423.08 464.98,423 465.78,423 C467.78,423 469.86,423.4 471.46,425.04 C472.46,426.04 472.94,427.32 472.94,428.72 C472.94,430.24 472.3,431.84 470.86,433.28 C468.98,435.24 466.26,435.88 464.38,437 C462.14,438.32 462.34,440.12 461.54,440.12 C460.66,440.12 460.86,438.32 458.58,437 C456.66,435.88 453.94,435.24 452.02,433.28 C450.7,431.84 450.06,430.24 450.06,428.72 C450.06,427.32 450.54,425.96 451.46,425.04 C453.1,423.4 455.06,423 457.06,423 C457.62,423 458.06,423 458.66,423.08 C458.26,422.2 457.86,421.28 457.46,420.56 C456.78,419.36 455.94,419.56 454.82,419.44 C453.66,419.28 452.7,418.96 452.7,418.04 C452.7,417.72 452.78,417.32 453.1,416.88 C452.78,417 452.46,417.08 452.22,417.08 C451.38,417.08 450.94,416.4 450.94,415.64 C450.94,415.2 451.14,414.56 451.62,414.32 C451.14,413.68 450.94,413.04 450.94,412.56 C450.94,411.64 451.58,410.96 452.38,410.96 C452.98,410.96 453.66,411.32 454.3,412.12 C454.78,411.72 455.22,411.52 455.62,411.52 C456.46,411.52 457.06,412.12 457.06,412.96 C457.06,413.36 456.94,413.68 456.74,414.12 C457.06,413.96 457.46,413.92 457.7,413.92 C458.78,413.92 459.3,414.8 459.3,415.76 C459.3,417.08 459.02,418.28 459.02,419.36 C459.02,419.64 459.02,420 459.1,420.2 C459.3,420.92 459.7,422.08 460.14,423.12 C460.66,423.2 461.1,423.2 461.86,423.2 C462.06,421.48 462.5,419.36 462.5,417.92 C462.5,416.6 461.5,415.32 461.02,414.12 C460.78,413.56 460.66,412.96 460.66,412.48 C460.66,411.32 461.3,410.52 462.98,410.2 C462.3,409.64 461.94,408.88 461.94,408.32 C461.94,407.36 462.74,406.56 463.74,406.56 C464.18,406.56 464.78,406.72 465.3,407.04 C465.5,405.4 466.54,404.64 467.46,404.64 C468.42,404.64 469.26,405.28 469.26,406.56 C469.26,407 469.1,407.56 468.9,408.12 C468.9,408.12 469.02,408.08 469.38,408.08 C470.62,408.08 471.26,409 471.26,409.76 C471.26,410.6 470.62,411.36 469.18,411.52 C469.86,412.56 470.1,413.24 470.1,413.92 C470.1,415.04 469.18,415.6 467.98,416 C466.34,416.52 464.82,416.68 464.42,418.4 C464.06,419.8 463.7,421.64 463.42,423.12 Z" },
-  };
-  const foodSvg = (type) => {
-    const match = Object.entries(SB_FOOD_ICONS).find(([k]) => type.toLowerCase().includes(k.toLowerCase()));
-    if (!match) return null;
-    const ic = match[1];
-    return React.createElement("svg", { width: 18, height: 18, viewBox: ic.vb, style: { flexShrink: 0 } },
-      React.createElement("g", { stroke: "none", strokeWidth: "1", fillRule: "evenodd" },
-        React.createElement("g", { transform: `translate(${ic.tx}, ${ic.ty})`, fill: t.txM },
-          React.createElement("path", { d: ic.d })
-        )
-      )
-    );
-  };
+  // Don't show rank numbers — just show wines as "Topp-viner" when scores are close
 
   return (
     <div
-      ref={cardRef}
       role="button" tabIndex={0} aria-expanded={open}
       aria-label={`${p.name} ${p.sub || ''} — ${s100} poäng, ${p.price} kr`}
       onClick={handleOpen}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
-        background: t.card, borderRadius: 16, outline: "none",
-        border: `1px solid ${open ? t.bdr : hovered ? t.bdr : t.bdrL}`,
-        boxShadow: open ? t.sh3 : hovered ? t.shHover : t.sh1,
-        transition: "all 0.3s ease", overflow: "hidden",
-        opacity: cardVisible ? 1 : 0,
-        transform: cardVisible
-          ? (hovered && !open ? "translateY(-2px) perspective(800px) rotateX(0.5deg)" : "translateY(0)")
-          : "translateY(16px)",
+        background: t.card, borderRadius: 14, outline: "none",
+        border: `1px solid ${open ? t.bdr : t.bdrL}`,
+        boxShadow: open ? t.sh3 : t.sh1,
+        transition: "all 0.25s ease", overflow: "hidden",
+        animation: `slideUp 0.35s ease ${delay}s both`,
         cursor: "pointer",
       }}
     >
-      {/* ═══ TOP: Image + Name + Score ═══ */}
-      <div style={{ padding: "18px 20px 0", display: "flex", gap: 16, alignItems: "flex-start" }}>
-        {/* Product image with rank badge */}
+      {/* Main row */}
+      <div style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+        {/* Product image with rank overlay */}
         <div style={{ position: "relative", flexShrink: 0 }}>
-          <ProductImage p={p} size={56} />
+          <ProductImage p={p} size={52} eager={rank <= 3} />
           <div style={{
-            position: "absolute", top: -5, left: -5,
-            width: 22, height: 22, borderRadius: 7,
+            position: "absolute", top: -4, left: -4,
+            width: 20, height: 20, borderRadius: 6,
             background: rank <= 3 ? `linear-gradient(135deg, ${t.wine}, ${t.wineD})` : t.card,
             border: rank <= 3 ? "none" : `1px solid ${t.bdr}`,
             color: rank <= 3 ? "#fff" : t.txM,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 800, fontFamily: "'Instrument Serif', Georgia, serif",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
           }}>
             {rank}
           </div>
-          {/* Badge below image */}
-          {badge && (
-            <div style={{
-              marginTop: 6, padding: "2px 6px", borderRadius: 4, textAlign: "center",
-              background: rank === 1 ? t.wine : `${t.wine}15`,
-              color: rank === 1 ? "#fff" : t.wine,
-              fontSize: 7, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em",
-              whiteSpace: "nowrap",
-            }}>{badge}</div>
-          )}
         </div>
 
-        {/* Name */}
+        {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
-            margin: 0, fontSize: 20, fontFamily: "'Instrument Serif', Georgia, serif",
-            fontWeight: 400, color: t.tx, lineHeight: 1.15,
-          }}>{p.name}</h3>
-          {/* Overlapping badges */}
-          {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
-            <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-              {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 8, fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: t.deal, color: "#fff" }}>−{p.price_vs_launch_pct}%</span>}
-              {p.organic && <span style={{ fontSize: 8, fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: t.green, color: "#fff" }}>EKO</span>}
-              {p.is_new && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 6px", borderRadius: 4, background: t.wine, color: "#fff" }}>NY</span>}
+          {/* Row 1: Name + score badge */}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h3 style={{
+                margin: 0, fontSize: 17, fontFamily: "'Instrument Serif', Georgia, serif",
+                fontWeight: 400, color: t.tx, lineHeight: 1.2,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{p.name}</h3>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: t.txL, letterSpacing: "0.01em" }}>
+                {p.sub} · {p.country}{p.region ? `, ${p.region}` : ""}
+              </p>
             </div>
-          )}
-        </div>
-
-        {/* Score circle + label */}
-        <div style={{ flexShrink: 0, textAlign: "center" }}>
-          <svg width="52" height="52" viewBox="0 0 50 50" style={{ display: "block" }}>
-            <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
-            <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
-            <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
-              strokeDasharray={`${s100 * 1.38} 138`} strokeLinecap="round"
-              transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 0.8s ease" }} />
-            <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
-              fontSize="19" fontWeight="900" fill="#2d6b3f">{s100}</text>
-          </svg>
-          <div style={{ fontSize: 9, fontWeight: 600, color: col, marginTop: 2 }}>{label}</div>
-        </div>
-      </div>
-
-      {/* ═══ STRUCTURED INFO GRID ═══ */}
-      <div style={{ padding: "12px 20px 0" }}>
-        {/* 2-column metadata grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-          <div>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Druva</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: t.tx }}>{p.grape || p.sub || "—"}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Land</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: t.tx }}>{p.country}{p.region ? `, ${p.region}` : ""}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Passar till</div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              {(p.food_pairings || []).slice(0, 3).map((f, i) => (
-                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 13, color: t.txM }}>
-                  {foodSvg(f)}
-                  {f}
-                </span>
-              ))}
-              {(!p.food_pairings || p.food_pairings.length === 0) && <span style={{ fontSize: 13, color: t.txL }}>—</span>}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Pris</div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price} kr</span>
-              {p.vol && p.price && <span style={{ fontSize: 11, color: t.txL }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
-            </div>
-            {p.launch_price && p.price_vs_launch_pct > 0 && (
-              <span style={{ fontSize: 11, color: t.deal, fontWeight: 600 }}>Sänkt från {p.launch_price} kr</span>
-            )}
-          </div>
-        </div>
-
-        {/* ═══ SMAKPROFIL + POÄNG side by side — grouped with bg ═══ */}
-        <div style={{
-          display: "flex", gap: 20, marginTop: 14,
-          padding: "14px 16px", borderRadius: 12,
-          background: t.bg,
-        }}>
-          {/* Taste profile (left) */}
-          {(p.taste_body || p.taste_fruit) && (
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Smakprofil</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {[
-                  ["Lätt", "Fylligt", p.taste_body, 12],
-                  ["Stram", "Fruktigt", p.taste_fruit, 12],
-                ].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => (
-                  <div key={lo} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, color: t.txL, width: 34, textAlign: "right", flexShrink: 0 }}>{lo}</span>
-                    <div style={{ flex: 1, height: 2, borderRadius: 1, background: t.bdr, position: "relative" }}>
-                      <div style={{
-                        position: "absolute", top: "50%", left: `${(val / max) * 100}%`,
-                        width: 9, height: 9, borderRadius: "50%",
-                        background: t.wine, border: `2px solid ${t.bg}`,
-                        transform: "translate(-50%, -50%)",
-                        boxShadow: `0 0 0 1px ${t.wine}30`,
-                      }} />
-                    </div>
-                    <span style={{ fontSize: 11, color: t.txL, width: 40, flexShrink: 0 }}>{hi}</span>
-                  </div>
-                ))}
+            {/* Score badge with overlapping tags */}
+            <div style={{ flexShrink: 0, textAlign: "center" }}>
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <svg width="50" height="50" viewBox="0 0 50 50" style={{ display: "block" }}>
+                  <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
+                  <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
+                  <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
+                    strokeDasharray={`${s100 * 1.38} 138`} strokeLinecap="round"
+                    transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 0.8s ease" }} />
+                  <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
+                    fontSize="19" fontWeight="900" fill="#2d6b3f">{s100}</text>
+                </svg>
+              {/* Overlapping mini-badges */}
+              {(p.organic || p.price_vs_launch_pct > 0 || p.is_new) && (
+                <div style={{ position: "absolute", top: -6, left: -14, display: "flex", gap: 2 }}>
+                  {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 8, fontWeight: 800, padding: "2px 5px", borderRadius: 4, background: t.deal, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>−{p.price_vs_launch_pct}%</span>}
+                  {p.organic && <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 7px", borderRadius: 5, background: t.green, color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", letterSpacing: "0.05em" }}>EKO</span>}
+                  {p.is_new && <span style={{ fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: t.wine, color: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>NY</span>}
+                </div>
+              )}
               </div>
+              <div style={{ fontSize: 9, fontWeight: 600, color: col, marginTop: 3 }}>{label}</div>
+            </div>
+          </div>
+
+          {/* Row 2: Price + kr/l + grape + food */}
+          <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
+            {p.vol && p.price && <span style={{ fontSize: 11, fontWeight: 600, color: t.txM, background: t.bg, padding: "1px 6px", borderRadius: 4 }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
+            {p.launch_price && p.price_vs_launch_pct > 0 && (
+              <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
+            )}
+            {(p.grape || foodStr) && <span style={{ color: t.bdr }}>·</span>}
+            {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
+            {p.grape && foodStr && <span style={{ color: t.bdr }}>·</span>}
+            {foodStr && <span style={{ fontSize: 11, color: t.txL }}>{foodStr}</span>}
+          </div>
+
+          {/* Row 3: Crowd/Expert bars */}
+          <div style={{ marginTop: 8 }}>
+            <ScoreBars p={p} />
+          </div>
+
+          {/* Row 3b: Why-chips — explain why this wine ranks high */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 5 }}>
+            {p.expert_score >= 7.5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>Expertbetyg</span>}
+            {p.price_score >= 8 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.greenL, color: t.green }}>Prisvärt</span>}
+            {(p.crowd_reviews || 0) >= 5000 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#6b8cce10", color: "#6b8cce" }}>Populärt</span>}
+            {p.organic && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#2d7a3e10", color: "#2d7a3e" }}>Eko</span>}
+            {p.price_vs_launch_pct > 5 && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: t.dealL, color: t.deal }}>Prissänkt</span>}
+            {p.critics && p.critics.length >= 3 && p.critics.every(cr => cr.s >= 85) && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>{p.critics.length} av {p.num_critics || p.critics.length} kritiker ger 85+</span>}
+            {p.critic_consensus === "stark konsensus" && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#b07d3b10", color: "#b07d3b" }}>Stark konsensus</span>}
+            {p.critic_consensus === "kontroversiellt" && <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#ce6b6b10", color: "#ce6b6b" }}>Delade meningar</span>}
+          </div>
+
+          {/* Row 3c: Situation chips */}
+          {(() => {
+            const chips = [];
+            if (p.food_pairings?.some(f => /lamm|grillat|kött/i.test(f)) && p.taste_body >= 7) chips.push("Fynd till grillat");
+            else if (p.food_pairings?.some(f => /fisk|skaldjur/i.test(f)) && p.category === "Vitt") chips.push("Perfekt till fisk");
+            if (p.price <= 100 && p.smakfynd_score >= 70) chips.push("Tryggt vardagsvin");
+            if (p.crowd_reviews >= 10000 && p.crowd_score >= 7.5) chips.push("Tryggt middagsvin");
+            if (p.price >= 200 && p.expert_score >= 8) chips.push("Imponera på middagen");
+            return chips.length > 0 ? (
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 3 }}>
+                {chips.slice(0, 2).map(c => <span key={c} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: `${t.wine}08`, color: t.wine, fontWeight: 500 }}>{c}</span>)}
+              </div>
+            ) : null;
+          })()}
+
+          {/* Row 4: Contextual insight + verdict */}
+          {p.insight && (
+            <div style={{ marginTop: 5, fontSize: 11, color: t.wine, lineHeight: 1.4, fontWeight: 500 }}>
+              {p.insight}
             </div>
           )}
-
-          {/* Divider */}
-          {(p.taste_body || p.taste_fruit) && <div style={{ width: 1, background: t.bdr, alignSelf: "stretch" }} />}
-
-          {/* Score bars (right) */}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Poäng</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {p.crowd_score && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 11, color: t.txL, width: 40 }}>Crowd</span>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
-                    <div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce", transition: "width 0.8s ease" }} />
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#6b8cce", minWidth: 24, textAlign: "right" }}>{p.crowd_score.toFixed(1)}</span>
-                </div>
-              )}
-              {p.expert_score && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 11, color: t.txL, width: 40 }}>Expert</span>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden" }}>
-                    <div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b", transition: "width 0.8s ease" }} />
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#b07d3b", minWidth: 24, textAlign: "right" }}>{p.expert_score.toFixed(1)}</span>
-                </div>
-              )}
-            </div>
+          <div style={{ marginTop: p.insight ? 2 : 5, fontSize: 11, color: t.txM, lineHeight: 1.4, fontStyle: "italic" }}>
+            {(() => {
+              const c = p.crowd_score || 0, e = p.expert_score || 0, pr = p.price_score || 0;
+              const rev = p.crowd_reviews || 0;
+              if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
+              if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
+              if (c >= 8.0) return "Mycket omtyckt bland vindrickare";
+              if (e >= 8.0 && pr >= 8) return "Kritikerfavorit till överraskande lågt pris";
+              if (e >= 7.5 && pr >= 8) return "Bra expertbetyg och mer smak än prislappen antyder";
+              if (e >= 7.5 && c >= 7.0) return "Uppskattat av både publik och kritiker";
+              if (pr >= 9 && c >= 7.0) return "Mycket vin för pengarna — svårslaget i prisklassen";
+              if (pr >= 8 && c >= 7.0) return "Bra köp för priset — bred uppskattning";
+              if (pr >= 8) return "Prisvärt val med rimligt betyg";
+              if (c >= 7.5 && rev >= 5000) return "Tryggt och populärt — många har provat och gillar";
+              if (c >= 7.0) return "Solitt val med god crowd-uppskattning";
+              return null;
+            })()}
           </div>
         </div>
       </div>
 
-      {/* ═══ ACTION ROW ═══ */}
+      {/* Action row */}
       <div style={{
-        padding: "14px 20px", marginTop: 10,
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderTop: `1px solid ${t.bdrL}`,
+        padding: "0 18px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 11, color: t.txM, textDecoration: "none",
+              transition: "color 0.2s", minHeight: 44, padding: "8px 4px",
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = t.wine}
+            onMouseLeave={e => e.currentTarget.style.color = t.txM}
+            aria-label={`Köp ${p.name} på Systembolaget (öppnas i nytt fönster)`}
+          >
+            Systembolaget <span style={{ fontSize: 9 }} aria-hidden="true">↗</span>
+          </a>
           {sv && <SaveButton nr={p.nr || p.id} sv={sv} auth={auth} />}
           <button onClick={e => {
               e.stopPropagation();
               track("share", { nr: p.nr, name: p.name });
               const url = `https://smakfynd.se/#vin/${p.nr}`;
               const text = `${p.name} ${p.sub || ''} — ${p.smakfynd_score}/100 på Smakfynd (${p.price}kr)`;
-              if (navigator.share) { navigator.share({ title: p.name, text, url }).catch(() => {}); }
-              else { navigator.clipboard?.writeText(`${text}\n${url}`); }
+              if (navigator.share) {
+                navigator.share({ title: p.name, text, url }).catch(() => {});
+              } else {
+                navigator.clipboard?.writeText(`${text}\n${url}`);
+                const btn = e.currentTarget;
+                const orig = btn.textContent;
+                btn.textContent = "✓ Kopierad!";
+                btn.style.color = t.green;
+                setTimeout(() => { btn.innerHTML = '<span style="font-size:13px;line-height:1">↗</span> Dela'; btn.style.color = t.txL; }, 2000);
+              }
             }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, background: "none", border: "none", cursor: "pointer", padding: "2px 0", fontFamily: "inherit" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            Dela
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 12, color: t.txL, background: "none", border: "none",
+              cursor: "pointer", padding: "8px 4px", fontFamily: "inherit", minHeight: 44,
+            }}>
+            <span style={{ fontSize: 13, lineHeight: 1 }}>↗</span> Dela
           </button>
-          <a href={sbUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); track("sb_click", { nr: p.nr, name: p.name, price: p.price }); }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 500, color: t.txM, textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.color = t.wine}
-            onMouseLeave={e => e.currentTarget.style.color = t.txM}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Se på systembolaget
-          </a>
         </div>
-        <span style={{ fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 4, fontWeight: 500, cursor: "pointer" }}>
-          {open ? "Dölj information" : "Mer information"}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0)" }}><polyline points="6 9 12 15 18 9"/></svg>
+        <span style={{ fontSize: 10, color: t.txF, display: "flex", alignItems: "center", gap: 3 }}>
+          {open ? "Stäng ▲" : "Se varför ▼"}
         </span>
       </div>
 
-      {/* ═══ EXPANDED DETAIL ═══ */}
+      {/* Expanded detail */}
       {open && (
-        <div style={{ padding: "0 20px 20px", animation: "scaleIn 0.2s ease both" }}>
-          {/* Insight */}
-          {p.insight && (
-            <div style={{ marginBottom: 12, fontSize: 12, color: t.wine, fontWeight: 500, lineHeight: 1.4 }}>
-              {p.insight}
+        <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${t.bdrL}`, paddingTop: 14 }}>
+          {/* Badges */}
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+            {badge && <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 10px", borderRadius: 100, background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`, color: rank === 1 ? "#fff" : t.wine, textTransform: "uppercase", letterSpacing: "0.08em", boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none" }}>{rank === 1 ? "🏆 " : ""}{badge}</span>}
+            {p.confidence === "hög" && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Hög trygghet</span>}
+            {p.price_vs_launch_pct > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: t.dealL, color: t.deal, textTransform: "uppercase" }}>Prissänkt −{p.price_vs_launch_pct}%</span>}
+            {p.organic && <span style={{ fontSize: 9, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: t.greenL, color: t.green }}>Ekologiskt</span>}
+            {p.food_pairings?.length > 0 && <span style={{ fontSize: 9, fontWeight: 500, padding: "3px 10px", borderRadius: 100, background: t.bg, color: t.txM, border: `1px solid ${t.bdrL}` }}>Passar till {p.food_pairings.slice(0,2).join(", ")}</span>}
+          </div>
+          {/* Quick taste description */}
+          {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 10, lineHeight: 1.5 }}>{p.style}</div>}
+
+          <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+            <ProductImage p={p} size={56} style={{ borderRadius: 10, background: "#faf7f2" }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", fontSize: 11, color: t.txM, marginBottom: 6 }}>
+                {[p.grape, p.alc ? `${p.alc}%` : null, `${p.vol} ml`, `${p.country}${p.region ? `, ${p.region}` : ""}`].filter(Boolean).map((v, i, arr) => (
+                  <span key={i}>{v}{i < arr.length - 1 ? <span style={{ color: t.bdr, margin: "0 2px" }}>·</span> : ""}</span>
+                ))}
+              </div>
+              {p.food_pairings?.length > 0 && (
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {p.food_pairings.map((f, i) => <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 100, background: t.bg, color: t.txM, border: `1px solid ${t.bdrL}` }}>{f}</span>)}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Taste profile — compact with verbal descriptor */}
+          {(p.taste_body || p.taste_fruit || p.taste_sweet != null) && (
+            <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 10, background: t.bg }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                <span style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em" }}>Smakprofil</span>
+                <span style={{ fontSize: 11, color: t.txM, fontStyle: "italic" }}>{(() => {
+                  const words = [];
+                  if (p.taste_body >= 9) words.push("fylligt");
+                  else if (p.taste_body >= 6) words.push("medelkroppad");
+                  else if (p.taste_body && p.taste_body <= 4) words.push("lätt");
+                  if (p.taste_fruit >= 9) words.push("fruktigt");
+                  else if (p.taste_fruit && p.taste_fruit <= 3) words.push("stramt");
+                  if (p.taste_sweet != null && p.taste_sweet <= 2) words.push("torrt");
+                  else if (p.taste_sweet >= 8) words.push("sött");
+                  return words.length > 0 ? words.join(", ") : null;
+                })()}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  ["Lätt", "Fylligt", p.taste_body, 12],
+                  ["Stram", "Fruktigt", p.taste_fruit, 12],
+                  ["Torrt", "Sött", p.taste_sweet, 12],
+                ].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => (
+                  <div key={lo}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 10, color: t.txL, width: 40, textAlign: "right", flexShrink: 0 }}>{lo}</span>
+                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdr, position: "relative" }}>
+                        <div style={{
+                          position: "absolute", top: "50%", left: `${(val / max) * 100}%`,
+                          width: 9, height: 9, borderRadius: "50%",
+                          background: t.wine, border: `2px solid ${t.card}`,
+                          transform: "translate(-50%, -50%)",
+                          boxShadow: `0 0 0 1px ${t.wine}40`,
+                        }} />
+                      </div>
+                      <span style={{ fontSize: 10, color: t.txL, width: 40, flexShrink: 0 }}>{hi}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Quick taste description */}
-          {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 14, lineHeight: 1.5 }}>{p.style}</div>}
+          {/* Score breakdown */}
+          <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 10, background: t.bg }}>
+            <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Poängfördelning</div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {/* Left: score bars */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Crowd */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#6b8cce" }}>Crowd</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: p.crowd_score ? "#6b8cce" : t.txL }}>{p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.crowd_score && (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} />
+                      </div>
+                      <div style={{ fontSize: 10, color: t.txL }}>
+                        {p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : ""}
+                        {p.crowd_reviews >= 50000 && <span style={{ color: t.green, fontWeight: 600 }}> — mycket pålitligt</span>}
+                        {p.crowd_reviews >= 10000 && p.crowd_reviews < 50000 && <span style={{ color: t.txM }}> — pålitligt</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-          {/* ═══ POÄNGFÖRDELNING — 3 columns ═══ */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 9, color: t.txF, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, borderTop: `1px solid ${t.bdrL}`, paddingTop: 14 }}>Poängfördelning</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-              {/* Crowd */}
-              <div style={{ padding: "12px 10px", borderRadius: 10, background: t.bg }}>
-                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: p.crowd_score ? "#6b8cce" : t.txL }}>
-                  {p.crowd_score ? p.crowd_score.toFixed(1) : "—"}<span style={{ fontSize: 11, fontWeight: 400 }}>/10</span>
+                {/* Expert */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#b07d3b" }}>Expert</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: p.expert_score ? "#b07d3b" : t.txL }}>{p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.expert_score ? (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} />
+                      </div>
+                      {p.critics && p.critics.length > 0 ? (
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                          {p.critics.map((cr, ci) => (
+                            <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>
+                              {cr.c}: {cr.s}
+                            </span>
+                          ))}
+                          {p.num_critics > (p.critics || []).length && (
+                            <span style={{ fontSize: 9, padding: "2px 6px", color: t.txL }}>+{p.num_critics - p.critics.length} till</span>
+                          )}
+                          {p.critic_spread != null && (
+                            <span style={{ fontSize: 9, padding: "2px 6px", color: p.critic_spread <= 4 ? t.green : p.critic_spread >= 12 ? "#ce6b6b" : t.txL }}>
+                              Spridning: {p.critic_spread}p
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 10, color: t.txL }}>Snitt från erkända vinkritiker</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 10, color: t.txL, fontStyle: "italic" }}>Inga kritikerrecensioner hittade för detta vin</div>
+                  )}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#6b8cce", marginBottom: 6 }}>Crowd</div>
-                <div style={{ height: 3, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 6 }}>
-                  <div style={{ width: `${(p.crowd_score || 0) * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} />
-                </div>
-                <div style={{ fontSize: 9, color: t.txL, lineHeight: 1.4 }}>
-                  {p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : "Omdömen från vindrickare"}
+
+                {/* Price */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: t.txM }}>Prisvärde</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: t.txM }}>{p.price_score ? `${p.price_score.toFixed(1)}/10` : "—"}</span>
+                  </div>
+                  {p.price_score && (
+                    <div>
+                      <div style={{ height: 4, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ width: `${p.price_score * 10}%`, height: "100%", borderRadius: 2, background: t.txM }} />
+                      </div>
+                      <div style={{ fontSize: 10, color: t.txL }}>
+                        {(() => {
+                          const catMedians = { "Rött": 279, "Vitt": 239, "Rosé": 160, "Mousserande": 399 };
+                          const catNames = { "Rött": "rött vin", "Vitt": "vitt vin", "Rosé": "rosévin", "Mousserande": "mousserande" };
+                          const median = catMedians[p.category] || 250;
+                          return `${p.price}kr · Medianen för ${catNames[p.category] || "vin"}: ${median}kr`;
+                        })()}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Expert */}
-              <div style={{ padding: "12px 10px", borderRadius: 10, background: t.bg }}>
-                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: p.expert_score ? "#b07d3b" : t.txL }}>
-                  {p.expert_score ? p.expert_score.toFixed(1) : "—"}<span style={{ fontSize: 11, fontWeight: 400 }}>/10</span>
+              {/* Right: total score */}
+              <div style={{ textAlign: "center", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 14,
+                  background: `linear-gradient(135deg, ${col}18, ${col}08)`,
+                  border: `2px solid ${col}30`,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</span>
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#b07d3b", marginBottom: 6 }}>Expert</div>
-                <div style={{ height: 3, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 6 }}>
-                  <div style={{ width: `${(p.expert_score || 0) * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} />
-                </div>
-                <div style={{ fontSize: 9, color: t.txL, lineHeight: 1.4 }}>
-                  {p.critics && p.critics.length > 0
-                    ? `Snitt från ${p.critics.length} erkända vinkritiker`
-                    : "Snitt från erkända vinkritiker"}
-                </div>
-              </div>
-
-              {/* Prisvärde */}
-              <div style={{ padding: "12px 10px", borderRadius: 10, background: t.bg }}>
-                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: p.price_score ? t.txM : t.txL }}>
-                  {p.price_score ? p.price_score.toFixed(1) : "—"}<span style={{ fontSize: 11, fontWeight: 400 }}>/10</span>
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: t.txM, marginBottom: 6 }}>Prisvärde</div>
-                <div style={{ height: 3, borderRadius: 2, background: t.bdr, overflow: "hidden", marginBottom: 6 }}>
-                  <div style={{ width: `${(p.price_score || 0) * 10}%`, height: "100%", borderRadius: 2, background: t.txM }} />
-                </div>
-                <div style={{ fontSize: 9, color: t.txL, lineHeight: 1.4 }}>
-                  {(() => {
-                    const catMedians = { "Rött": 279, "Vitt": 239, "Rosé": 160, "Mousserande": 399 };
-                    const catNames = { "Rött": "rött vin", "Vitt": "vitt vin", "Rosé": "rosévin", "Mousserande": "mousserande" };
-                    const median = catMedians[p.category] || 250;
-                    return `${p.price}kr · Medianen för ${catNames[p.category] || "vin"}: ${median}kr`;
-                  })()}
-                </div>
+                <span style={{ fontSize: 9, color: t.txL, marginTop: 4 }}>Smak för</span>
+                <span style={{ fontSize: 9, color: t.txL }}>pengarna</span>
               </div>
             </div>
-
-            {/* Critic detail chips */}
-            {p.critics && p.critics.length > 0 && (
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 8 }}>
-                {p.critics.map((cr, ci) => (
-                  <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>
-                    {cr.c}: {cr.s}
-                  </span>
-                ))}
-                {p.num_critics > (p.critics || []).length && (
-                  <span style={{ fontSize: 9, padding: "2px 6px", color: t.txL }}>+{p.num_critics - p.critics.length} till</span>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Price drop info */}
@@ -734,8 +690,9 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             </div>
           )}
 
-          {/* ═══ SIMILAR WINES ═══ */}
+          {/* Similar wines with reasons */}
           {allProducts && (() => {
+            // Taste similarity: how close are body, fruit, sweet profiles?
             const tasteSim = (a, b) => {
               let score = 0, count = 0;
               if (a.taste_body && b.taste_body) { score += 1 - Math.abs(a.taste_body - b.taste_body) / 12; count++; }
@@ -747,23 +704,27 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             const similar = allProducts
               .filter(w => w.category === p.category && w.package === p.package
                 && w.assortment === "Fast sortiment"
-                && (w.nr || w.id) !== (p.nr || p.id))
+                && (w.nr || w.id) !== (p.nr || p.id)
+)
               .map(w => {
+                // Calculate similarity score
                 let sim = 0;
                 const taste = tasteSim(w, p);
-                sim += taste * 40;
-                if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20;
-                if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15;
-                if (w.country && p.country && w.country === p.country) sim += 5;
-                if (w.region && p.region && w.region === p.region) sim += 10;
-                if (Math.abs(w.price - p.price) <= 30) sim += 5;
+                sim += taste * 40; // taste profile most important (0-40)
+                if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20; // same grape
+                if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15; // same style (e.g. "Fruktigt & Smakrikt")
+                if (w.country && p.country && w.country === p.country) sim += 5; // same country
+                if (w.region && p.region && w.region === p.region) sim += 10; // same region
+                if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
+                // Score matters: bonus for better, penalty for worse
                 sim += (w.smakfynd_score - p.smakfynd_score) * 2;
                 return { ...w, _sim: sim, _taste: taste };
               })
-              .filter(w => w._sim >= 20)
+              .filter(w => w._sim >= 20) // minimum similarity threshold
               .sort((a, b) => b._sim - a._sim)
               .slice(0, 3)
               .map(w => {
+                // Generate reason WHY this is recommended
                 const reasons = [];
                 if (w._taste >= 0.8) reasons.push("Liknande smakprofil");
                 if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) reasons.push("Samma druva");
@@ -773,29 +734,21 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                 if (w.smakfynd_score > p.smakfynd_score + 2) reasons.push("Bättre värde per krona");
                 else if (w.smakfynd_score > p.smakfynd_score) reasons.push("Högre poäng");
                 if ((w.expert_score || 0) > (p.expert_score || 0) + 0.5) reasons.push("Starkare expertstöd");
-                return { ...w, _reason: reasons.slice(0, 2).join(" – ") || "Liknande stil och prisklass" };
+                return { ...w, _reason: reasons.slice(0, 2).join(" · ") || "Liknande stil och prisklass" };
               });
             if (similar.length === 0) return null;
             return (
-              <div>
-                <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", color: t.tx, marginBottom: 12, borderTop: `1px solid ${t.bdrL}`, paddingTop: 14 }}>
-                  Här är fler tips om du gillar {p.name}:
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ marginBottom: 0 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Gillar du {p.name}? Testa även</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {similar.map((w, i) => (
                     <div key={i}
                       onClick={e => { e.stopPropagation(); window.location.hash = `vin/${w.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "12px 14px", borderRadius: 12,
-                        background: t.bg, border: `1px solid ${t.bdrL}`,
-                        cursor: "pointer", transition: "all 0.2s",
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.transform = "translateY(0)"; }}
+                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: t.bg, border: `1px solid ${t.bdrL}`, textDecoration: "none", transition: "border-color 0.2s", cursor: "pointer" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = t.bdrL}
                     >
-                      {/* Score circle */}
-                      <svg width="38" height="38" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
+                      <svg width="34" height="34" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
                         <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
                         <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
                         <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
@@ -804,48 +757,22 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                         <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
                           fontSize="16" fontWeight="900" fill="#2d6b3f">{w.smakfynd_score}</text>
                       </svg>
-
-                      {/* Wine image */}
-                      <ProductImage p={w} size={36} />
-
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{w.name}</div>
-                        <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{w.grape || w.sub}, {w.country}</div>
+                        <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
+                        <div style={{ fontSize: 10, color: t.txL }}>{w.sub} · {w.country}</div>
                         <div style={{ fontSize: 10, color: t.green, marginTop: 2, fontWeight: 500 }}>{w._reason}</div>
                       </div>
-
-                      {/* Price */}
-                      <div style={{ flexShrink: 0, textAlign: "right" }}>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>
-                          {w.price} kr
+                      <div style={{ flexShrink: 0, textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>
+                          {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
                         </span>
+                        <a href={`https://www.systembolaget.se/produkt/vin/${w.nr}`} target="_blank" rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          style={{ fontSize: 9, color: t.txL, textDecoration: "none" }}>SB ↗</a>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            );
-          })()}
-
-          {/* ═══ INTERNAL LINKS — SEO + navigation ═══ */}
-          {(() => {
-            const links = getInternalLinks(p);
-            if (links.length === 0) return null;
-            return (
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${t.bdrL}`, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {links.map((link, i) => (
-                  <a key={i} href={link.url} onClick={e => e.stopPropagation()}
-                    style={{
-                      fontSize: 11, color: t.wine, textDecoration: "none",
-                      padding: "4px 10px", borderRadius: 100,
-                      border: `1px solid ${t.wine}20`, background: `${t.wine}06`,
-                      fontWeight: 500, transition: "all 0.2s",
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = `${t.wine}12`; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = `${t.wine}06`; }}
-                  >{link.label} →</a>
-                ))}
               </div>
             );
           })()}
@@ -869,13 +796,13 @@ function SaveButton({ nr, sv, auth }) {
       <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter", auth); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
-          display: "inline-flex", alignItems: "center", gap: 5,
-          fontSize: 13, color: saved ? t.wine : t.txM,
+          display: "inline-flex", alignItems: "center", gap: 4,
+          fontSize: 12, color: saved ? t.wine : t.txL,
           background: "none", border: "none", cursor: "pointer", padding: "2px 0",
-          fontFamily: "inherit", transition: "all 0.2s", fontWeight: 500,
+          fontFamily: "inherit", transition: "all 0.2s",
         }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-        <span style={{ fontWeight: saved ? 600 : 500 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
+        <span style={{ fontSize: 15, lineHeight: 1 }}>{saved ? "♥" : "♡"}</span>
+        <span style={{ fontWeight: saved ? 600 : 400 }}>{saved ? (lists.length === 1 ? LISTS.find(l => l.k === lists[0])?.l || "Sparad" : `${lists.length} listor`) : "Spara"}</span>
       </button>
       {menuOpen && (
         <div onClick={e => e.stopPropagation()} style={{
@@ -980,8 +907,6 @@ function LoginModal({ onClose, onLogin }) {
       if (data.error) throw new Error(data.error);
       if (data.status === "code_sent") {
         setStep(2);
-        // TEMP: auto-fill code during development
-        if (data._dev_code) setCode(data._dev_code);
       }
     } catch (e) {
       setError(e.message || "Kunde inte skicka kod");
@@ -1009,11 +934,17 @@ function LoginModal({ onClose, onLogin }) {
     setLoading(false);
   };
 
+  useEffect(() => {
+    const handleEsc = e => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Logga in" style={{
       position: "fixed", inset: 0, background: "rgba(30,23,16,0.5)", zIndex: 1000,
       display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-    }} onClick={onClose} role="dialog" aria-modal="true" aria-label="Logga in">
+    }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
         background: t.card, borderRadius: 20, padding: "32px 28px", maxWidth: 380, width: "100%",
         boxShadow: "0 20px 60px rgba(30,23,16,0.2)", animation: "scaleIn 0.2s ease",
@@ -1215,101 +1146,10 @@ function WeeklyPick({ products }) {
 
   if (!pick) return null;
 
-  const [_label, scoreCol] = getScoreInfo(pick.smakfynd_score);
-  const foodStr = (pick.food_pairings || []).slice(0, 3).join(", ");
-  const sbUrl = `https://www.systembolaget.se/produkt/vin/${pick.nr}`;
-
   return (
-    <div style={{
-      margin: "0 -16px 24px", padding: "32px 28px",
-      background: "linear-gradient(165deg, #1a1510 0%, #2a2118 40%, #1e1814 100%)",
-      borderRadius: 20, position: "relative", overflow: "hidden",
-    }}>
-      {/* Subtle wine-colored glow */}
-      <div style={{
-        position: "absolute", top: -40, right: -40, width: 160, height: 160,
-        borderRadius: "50%", background: `radial-gradient(circle, ${t.wine}18, transparent 70%)`,
-        pointerEvents: "none",
-      }} />
-
-      {/* Label */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, position: "relative" }}>
-        <div style={{ width: 3, height: 18, borderRadius: 2, background: t.gold }} />
-        <span style={{ fontSize: 10, fontWeight: 800, color: t.gold, textTransform: "uppercase", letterSpacing: "0.16em" }}>Veckans fynd</span>
-      </div>
-
-      {/* Main content */}
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start", position: "relative" }}>
-        {/* Large product image */}
-        <ProductImage p={pick} size={100} style={{ borderRadius: 14, background: "#2a2520", border: "1px solid rgba(255,255,255,0.06)" }} />
-
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
-            margin: 0, fontSize: 24, fontFamily: "'Instrument Serif', Georgia, serif",
-            fontWeight: 400, color: "#f5ede3", lineHeight: 1.15,
-          }}>{pick.name}</h3>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9e9588" }}>
-            {pick.sub} · {pick.country}{pick.region ? `, ${pick.region}` : ""}
-          </p>
-
-          {/* Price + score side by side */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 12 }}>
-            <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: "#f5ede3" }}>
-              {pick.price}<span style={{ fontSize: 14, fontWeight: 400, color: "#9e9588" }}>kr</span>
-            </span>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <svg width="38" height="38" viewBox="0 0 50 50">
-                <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
-                <circle cx="25" cy="25" r="22" fill="none" stroke="#b08d40" strokeWidth="2.5"
-                  strokeDasharray={`${pick.smakfynd_score * 1.38} 138`} strokeLinecap="round"
-                  transform="rotate(-90 25 25)" style={{ transition: "stroke-dasharray 1s ease" }} />
-                <text x="25" y="30" textAnchor="middle" fontFamily="'Instrument Serif', Georgia, serif"
-                  fontSize="17" fontWeight="900" fill="#b08d40">{pick.smakfynd_score}</text>
-              </svg>
-            </div>
-          </div>
-
-          {/* Score bars — inverted colors */}
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
-            {pick.crowd_score && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 10, color: "#6b6355", width: 44, textAlign: "right" }}>Crowd</span>
-                <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-                  <div style={{ width: `${pick.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce", animation: "fillBar 1s ease 0.3s both" }} />
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#6b8cce", minWidth: 24, textAlign: "right" }}>{pick.crowd_score.toFixed(1)}</span>
-              </div>
-            )}
-            {pick.expert_score && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 10, color: "#6b6355", width: 44, textAlign: "right" }}>Expert</span>
-                <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-                  <div style={{ width: `${pick.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b", animation: "fillBar 1s ease 0.5s both" }} />
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#b07d3b", minWidth: 24, textAlign: "right" }}>{pick.expert_score.toFixed(1)}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Food + reason */}
-          {foodStr && <p style={{ margin: "10px 0 0", fontSize: 11, color: "#6b6355" }}>Passar till {foodStr}</p>}
-
-          {/* CTA */}
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <a href={sbUrl} target="_blank" rel="noopener noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "8px 16px", borderRadius: 8,
-                background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-                color: "#f5ede3", fontSize: 12, fontWeight: 600, textDecoration: "none",
-                boxShadow: `0 2px 8px ${t.wine}30`,
-              }}>
-              Köp på Systembolaget <span style={{ fontSize: 10 }}>↗</span>
-            </a>
-          </div>
-        </div>
-      </div>
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Veckans fynd</div>
+      <Card p={pick} rank={1} delay={0} allProducts={products} />
     </div>
   );
 }
@@ -1320,7 +1160,6 @@ function WeeklyPick({ products }) {
 // src/components/QuickFilters.jsx
 function QuickFilters({ onFilter }) {
   const presets = [
-    { label: "Prissänkt just nu", icon: "🏷️", action: { cat: "all", price: "all", showDeals: true }, highlight: true },
     { label: "Topp under 100 kr", icon: "💰", action: { cat: "all", price: "0-99", showBest: false } },
     { label: "Bästa röda just nu", icon: "🍷", action: { cat: "Rött", price: "all", showBest: false } },
     { label: "Expertfavoriter", icon: "🏆", action: { cat: "all", price: "all", showBest: true } },
@@ -1333,17 +1172,11 @@ function QuickFilters({ onFilter }) {
       <div style={{ fontSize: 10, fontWeight: 600, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Snabbval</div>
       <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
         {presets.map((p, i) => (
-          <button key={i} onClick={() => {
-              if (p.action.showDeals) { window.open("/prissankt/", "_self"); return; }
-              onFilter(p.action); track("filter", { type: "quickfilter", value: p.label });
-            }}
+          <button key={i} onClick={() => { onFilter(p.action); track("filter", { type: "quickfilter", value: p.label }); }}
             style={{
-              padding: "8px 14px", borderRadius: 10,
-              border: p.highlight ? `1.5px solid ${t.deal}` : `1px solid ${t.bdr}`,
-              background: p.highlight ? `${t.deal}08` : t.card,
-              cursor: "pointer", fontFamily: "inherit",
-              fontSize: 12, color: p.highlight ? t.deal : t.txM, whiteSpace: "nowrap",
-              fontWeight: p.highlight ? 600 : 400,
+              padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`,
+              background: t.card, cursor: "pointer", fontFamily: "inherit",
+              fontSize: 12, color: t.txM, whiteSpace: "nowrap",
               display: "flex", alignItems: "center", gap: 5,
               transition: "all 0.2s", boxShadow: "0 1px 3px rgba(30,23,16,0.04)",
             }}
@@ -1366,50 +1199,34 @@ function QuickFilters({ onFilter }) {
 function EditorsPicks({ products, onSelect }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div style={{ marginBottom: 16 }}>
       <button onClick={() => setOpen(!open)}
         style={{
-          width: "100%", padding: "16px 20px", borderRadius: 16,
+          width: "100%", padding: "12px 16px", borderRadius: 12,
           background: t.card, border: `1px solid ${t.bdr}`,
           cursor: "pointer", fontFamily: "inherit", textAlign: "left",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          boxShadow: open ? t.sh2 : t.sh1,
-          transition: "all 0.25s ease",
         }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: `linear-gradient(135deg, ${t.wine}18, ${t.wine}08)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 15,
-          }}>🍷</div>
-          <span style={{ fontSize: 14, color: t.tx }}>
-            <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic" }}>Gabriels val</strong>
-            <span style={{ color: t.txL, fontSize: 12 }}> — utvalda fynd vi testat</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 14 }}>🍷</span>
+          <span style={{ fontSize: 13, color: t.tx }}>
+            <strong style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}>Redaktionens val</strong>
+            <span style={{ color: t.txL }}> — 3 utvalda fynd vi testat och gillar</span>
           </span>
         </div>
         <span style={{ fontSize: 10, color: t.txL, transition: "transform 0.2s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
       </button>
       {open && (
-        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
           {GABRIELS_PICKS.map((pick, i) => {
             const mp = products.find(pr => String(pr.nr) === String(pick.nr));
             const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
             return (
-              <div key={i}
-                style={{
-                  padding: "20px 20px", borderRadius: 16, background: t.card,
-                  border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default",
-                  position: "relative", overflow: "hidden",
-                  animation: `slideUp 0.3s ease ${i * 0.1}s both`,
-                }}
+              <div key={i} style={{ padding: "14px 16px", borderRadius: 12, background: t.card, border: `1px solid ${t.bdr}`, cursor: mp ? "pointer" : "default" }}
                 onClick={() => mp && onSelect(mp.nr || pick.nr)}>
-                {/* Accent line */}
-                <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", background: `linear-gradient(180deg, ${t.wine}, ${t.wine}40)`, borderRadius: "4px 0 0 4px" }} />
-
-                <div style={{ fontSize: 9, fontWeight: 800, color: t.wine, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>{pick.verdict}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <svg width="48" height="48" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: t.wine, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{pick.verdict}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <svg width="40" height="40" viewBox="0 0 50 50" style={{ flexShrink: 0 }}>
                     <circle cx="25" cy="25" r="22" fill="#e8f0e4" />
                     <circle cx="25" cy="25" r="22" fill="none" stroke="#d4ddd0" strokeWidth="2.5" />
                     <circle cx="25" cy="25" r="22" fill="none" stroke="#2d6b3f" strokeWidth="2.5"
@@ -1419,18 +1236,12 @@ function EditorsPicks({ products, onSelect }) {
                       fontSize="17" fontWeight="900" fill="#2d6b3f">{pick.smakfynd_score}</text>
                   </svg>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 18, fontFamily: "'Instrument Serif', serif", color: t.tx, lineHeight: 1.2 }}>{pick.name}</div>
-                    <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{pick.sub} · {pick.price}</div>
+                    <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx }}>{pick.name}</div>
+                    <div style={{ fontSize: 11, color: t.txL }}>{pick.sub} · {pick.price}</div>
                   </div>
                 </div>
-                {/* Pull-quote style note */}
-                <p style={{
-                  fontSize: 13, color: t.txM, lineHeight: 1.6, margin: "12px 0 0",
-                  fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic",
-                  paddingLeft: 14, borderLeft: `2px solid ${t.bdrL}`,
-                }}>"{pick.note}"</p>
-                {pick.food && <div style={{ fontSize: 11, color: t.txL, marginTop: 8 }}>Passar till: {pick.food}</div>}
-                {mp && <div style={{ fontSize: 11, color: t.wine, marginTop: 8, fontWeight: 500 }}>Se fullständig profil →</div>}
+                <p style={{ fontSize: 12, color: t.txM, lineHeight: 1.5, margin: "8px 0 0", fontStyle: "italic" }}>{pick.note}</p>
+                {mp && <div style={{ fontSize: 10, color: t.wine, marginTop: 6 }}>Klicka för att se fullständig profil →</div>}
               </div>
             );
           })}
@@ -1531,6 +1342,8 @@ function FoodMatch({ products }) {
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1538,7 +1351,9 @@ function FoodMatch({ products }) {
             meal: userMessage,
             context: existingContext || [],
           }),
+          signal: controller.signal,
         });
+        clearTimeout(timeout);
         data = await res.json();
         if (!data.error) break;
         if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
@@ -1585,26 +1400,17 @@ function FoodMatch({ products }) {
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
 
   return (
-    <div style={{
-      padding: "28px 24px", borderRadius: 20, marginBottom: 24,
-      background: "linear-gradient(160deg, #fdfbf7 0%, #f8f0e8 50%, #f5ede3 100%)",
-      border: `1px solid ${t.bdr}`,
-      boxShadow: "0 4px 20px rgba(139,35,50,0.04)",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: 12,
-          background: `linear-gradient(135deg, ${t.wine}15, ${t.wine}08)`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 20,
-        }}>🍽</div>
+    <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <span style={{ fontSize: 18 }}>🍽</span>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", color: t.tx }}>Kvällens middag?</div>
-          <div style={{ fontSize: 12, color: t.txL }}>Beskriv din måltid — vi matchar vinet.</div>
+          <div style={{ fontSize: 15, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>Kvällens middag?</div>
+          <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta — vi föreslår vinet.</div>
         </div>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <input type="text" value={meal} onChange={e => setMeal(e.target.value)}
+        <label htmlFor="sf-meal" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Beskriv din måltid</label>
+        <input id="sf-meal" type="text" value={meal} onChange={e => setMeal(e.target.value)}
           placeholder="T.ex. toast skagen, sedan oxfilé med rödvinssky..."
           onKeyDown={e => e.key === "Enter" && handleSubmit()}
           style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
@@ -1640,13 +1446,9 @@ function FoodMatch({ products }) {
       </div>
 
       {loading && (
-        <div style={{ textAlign: "center", padding: "24px 0", color: t.txL }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 10 }}>
-            {["🍷", "🥂", "🍾"].map((glass, i) => (
-              <span key={i} style={{ fontSize: 22, animation: `dotPulse 1.2s ease ${i * 0.3}s infinite` }}>{glass}</span>
-            ))}
-          </div>
-          <div style={{ fontSize: 13, fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", color: t.txM }}>Analyserar din måltid...</div>
+        <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
+          <div style={{ fontSize: 24, marginBottom: 6 }}>🍷</div>
+          <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid...</div>
         </div>
       )}
 
@@ -1726,171 +1528,178 @@ function FoodMatch({ products }) {
 }
 
 // ════════════════════════════════════════════════════════════
-// components/StoreMode.jsx
+// components/NewsletterCTA.jsx
 // ════════════════════════════════════════════════════════════
-// src/components/BarcodeScanner.jsx
-// Uses html5-qrcode library for cross-browser support (iPhone + Android)
-function BarcodeScanner({ onScan, onClose }) {
-  const scannerDivRef = useRef(null);
-  const scannerRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+// src/components/NewsletterCTA.jsx
+function NewsletterCTA({ compact = false }) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState(null); // null | "loading" | "done" | "error"
 
-  useEffect(() => {
-    let stopped = false;
-
-    async function loadAndStart() {
-      // Dynamically load html5-qrcode if not already loaded
-      if (!window.Html5Qrcode) {
-        try {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement("script");
-            s.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
-          });
-        } catch(e) {
-          setError("Kunde inte ladda streckkodsskannern.");
-          setLoading(false);
-          return;
-        }
+  const handleSubmit = async () => {
+    if (!email.includes("@")) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("https://smakfynd-auth.smakfynd.workers.dev/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus("done");
+        track("subscribe", { source: compact ? "inline" : "section" });
+      } else {
+        setStatus("error");
       }
-      if (stopped) return;
-
-      try {
-        const scanner = new window.Html5Qrcode("sf-barcode-reader");
-        scannerRef.current = scanner;
-
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 280, height: 160 },
-            aspectRatio: 1.7778,
-            formatsToSupport: [
-              window.Html5QrcodeSupportedFormats?.EAN_13,
-              window.Html5QrcodeSupportedFormats?.EAN_8,
-              window.Html5QrcodeSupportedFormats?.CODE_128,
-              window.Html5QrcodeSupportedFormats?.CODE_39,
-              window.Html5QrcodeSupportedFormats?.ITF,
-            ].filter(Boolean),
-          },
-          (decodedText) => {
-            // Success — stop scanner and return result
-            scanner.stop().catch(() => {});
-            onScan(decodedText);
-          },
-          () => {} // Ignore scan failures (continuous scanning)
-        );
-        setLoading(false);
-      } catch(e) {
-        setError("Kunde inte öppna kameran. Kontrollera att du gett tillåtelse i webbläsarens inställningar.");
-        setLoading(false);
-      }
+    } catch (e) {
+      setStatus("error");
     }
+  };
 
-    loadAndStart();
+  if (status === "done") {
+    return (
+      <div style={{
+        padding: compact ? "12px 16px" : "20px 22px", borderRadius: 14,
+        background: `${t.green}08`, border: `1px solid ${t.green}20`,
+        textAlign: "center", margin: compact ? "8px 0" : "20px 0",
+      }}>
+        <div style={{ fontSize: 20, marginBottom: 4 }}>✓</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: t.green }}>Tack!</div>
+        <div style={{ fontSize: 12, color: t.txM }}>Du får veckans bästa fynd i din inbox.</div>
+      </div>
+    );
+  }
 
-    return () => {
-      stopped = true;
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
-      }
-    };
-  }, []);
+  if (compact) {
+    return (
+      <div style={{
+        display: "flex", gap: 8, padding: "14px 16px", borderRadius: 14,
+        background: t.surface, border: `1px solid ${t.bdr}`, margin: "8px 0",
+        alignItems: "center",
+      }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>📬 Veckans bästa vinköp i din inbox</div>
+          <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="din@email.se"
+              onKeyDown={e => e.key === "Enter" && handleSubmit()}
+              style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 13, color: t.tx, outline: "none", boxSizing: "border-box", minWidth: 0 }}
+            />
+            <button onClick={handleSubmit} disabled={status === "loading"}
+              style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: t.wine, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", flexShrink: 0, opacity: status === "loading" ? 0.6 : 1 }}>
+              {status === "loading" ? "..." : "Prenumerera"}
+            </button>
+          </div>
+          {status === "error" && <div style={{ fontSize: 11, color: t.deal, marginTop: 4 }}>Något gick fel, försök igen.</div>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
-      position: "fixed", inset: 0, zIndex: 2000, background: "#000",
-      display: "flex", flexDirection: "column",
+      padding: "24px 22px", borderRadius: 16, margin: "24px 0",
+      background: `linear-gradient(145deg, ${t.wine}06, ${t.wine}03)`,
+      border: `1px solid ${t.wine}15`,
     }}>
-      {/* Scanner renders into this div */}
-      <div id="sf-barcode-reader" ref={scannerDivRef} style={{ flex: 1, background: "#000" }} />
+      <div style={{ fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 4 }}>
+        📬 Missa inte veckans vinköp
+      </div>
+      <p style={{ fontSize: 13, color: t.txM, margin: "0 0 12px", lineHeight: 1.5 }}>
+        Varje vecka skickar vi de bästa fynden — prissänkta viner, nya topprankade och Gabriels personliga val. Gratis, ingen spam.
+      </p>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="din@email.se"
+          onKeyDown={e => e.key === "Enter" && handleSubmit()}
+          style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box" }}
+        />
+        <button onClick={handleSubmit} disabled={status === "loading"}
+          style={{ padding: "12px 20px", borderRadius: 12, border: "none", background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", flexShrink: 0, opacity: status === "loading" ? 0.6 : 1 }}>
+          {status === "loading" ? "Skickar..." : "Prenumerera"}
+        </button>
+      </div>
+      {status === "error" && <div style={{ fontSize: 12, color: t.deal, marginTop: 6 }}>Något gick fel, försök igen.</div>}
+      <p style={{ fontSize: 10, color: t.txF, margin: "8px 0 0" }}>
+        Vi skickar max 1 mail/vecka. Avsluta när du vill.
+      </p>
+    </div>
+  );
+}
 
-      {/* Bottom panel */}
-      <div style={{ padding: "20px 16px 40px", textAlign: "center", background: "rgba(0,0,0,0.85)" }}>
-        {loading && !error && (
-          <p style={{ color: "#fff", fontSize: 14, margin: "0 0 12px" }}>Startar kameran...</p>
-        )}
-        {error ? (
-          <div>
-            <p style={{ color: "#ff6b6b", fontSize: 14, margin: "0 0 12px" }}>{error}</p>
-            <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 12, border: "none", background: t.card, color: t.tx, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Tillbaka</button>
+// ════════════════════════════════════════════════════════════
+// components/WineOfDay.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/WineOfDay.jsx
+function WineOfDay({ products, onSelect }) {
+  const pick = useMemo(() => {
+    if (!products || products.length < 50) return null;
+    const today = new Date().toISOString().slice(0, 10);
+    const hash = [...today].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0);
+    const top = products
+      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 72 && p.price <= 200)
+      .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
+      .slice(0, 80);
+    return top.length > 0 ? top[Math.abs(hash) % top.length] : null;
+  }, [products]);
+
+  if (!pick) return null;
+
+  const [_label, col] = getScoreInfo(pick.smakfynd_score);
+
+  return (
+    <div style={{ marginBottom: 14, padding: "14px 16px", borderRadius: 14, background: `linear-gradient(135deg, ${t.wine}06, ${t.wine}03)`, border: `1px solid ${t.wine}12` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <span style={{ fontSize: 14 }} aria-hidden="true">✦</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.08em" }}>Dagens vin</span>
+        <span style={{ fontSize: 10, color: t.txF, marginLeft: "auto" }}>{new Date().toLocaleDateString("sv-SE", { day: "numeric", month: "short" })}</span>
+      </div>
+      <div
+        role="button" tabIndex={0}
+        onClick={() => onSelect && onSelect(pick.nr)}
+        onKeyDown={e => { if (e.key === "Enter") onSelect && onSelect(pick.nr); }}
+        style={{ display: "flex", gap: 12, alignItems: "center", cursor: "pointer" }}
+      >
+        <ProductImage p={pick} size={48} eager={true} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pick.name}</div>
+          <div style={{ fontSize: 12, color: t.txL }}>{pick.sub} · {pick.country} · {pick.grape}</div>
+        </div>
+        <div style={{ textAlign: "center", flexShrink: 0 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: `${col}15`, border: `2px solid ${col}30`,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{pick.smakfynd_score}</span>
           </div>
-        ) : (
-          <div>
-            <p style={{ color: "#fff", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>
-              Rikta kameran mot streckkoden
-            </p>
-            <p style={{ color: "#ffffff80", fontSize: 12, margin: "0 0 16px" }}>
-              Hyllkanten eller flaskans streckkod
-            </p>
-            <button onClick={() => { if (scannerRef.current) scannerRef.current.stop().catch(() => {}); onClose(); }}
-              style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}>
-              Avbryt
-            </button>
+          <div style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif", marginTop: 4 }}>
+            {pick.price}<span style={{ fontSize: 10, fontWeight: 400, color: t.txL }}>kr</span>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
+// ════════════════════════════════════════════════════════════
+// components/StoreMode.jsx
+// ════════════════════════════════════════════════════════════
 // src/components/StoreMode.jsx
 function StoreMode({ products, onClose }) {
   const [q, setQ] = useState("");
-  const [showScanner, setShowScanner] = useState(false);
   const sv = React.useContext(SavedContext);
   const inputRef = useRef(null);
-  // EAN lookup: loaded from ean_lookup.json if available
-  const [eanMap, setEanMap] = useState({});
 
   useEffect(() => { inputRef.current?.focus(); }, []);
-
-  // Try to load EAN lookup data
-  useEffect(() => {
-    fetch("ean_lookup.json").then(r => r.ok ? r.json() : {}).then(data => {
-      if (data && typeof data === "object") setEanMap(data);
-    }).catch(() => {});
-  }, []);
-
-  const handleBarcodeScan = (code) => {
-    setShowScanner(false);
-    // Try direct article number match first
-    const directMatch = products.find(p => String(p.nr) === code);
-    if (directMatch) {
-      setQ(code);
-      track("barcode_scan", { code, type: "nr", matched: true });
-      return;
-    }
-    // Try EAN lookup
-    if (eanMap[code]) {
-      setQ(String(eanMap[code]));
-      track("barcode_scan", { code, type: "ean", matched: true });
-      return;
-    }
-    // Try partial match (last digits might be article number)
-    const partial = code.replace(/^0+/, "");
-    const partialMatch = products.find(p => String(p.nr) === partial);
-    if (partialMatch) {
-      setQ(partial);
-      track("barcode_scan", { code, type: "partial", matched: true });
-      return;
-    }
-    // No match — show the code in search
-    setQ(code);
-    track("barcode_scan", { code, type: "unknown", matched: false });
-  };
 
   const result = useMemo(() => {
     if (q.length < 2) return null;
     const query = q.toLowerCase().trim();
 
-    // Search by article number, EAN, or name
+    // Search by article number or name — show multiple matches
     const matches = products.filter(p =>
       String(p.nr) === query ||
-      String(p.nr) === q.trim() ||
       p.name?.toLowerCase().includes(query) ||
       (p.sub && p.sub.toLowerCase().includes(query))
     ).slice(0, 5);
@@ -1986,18 +1795,8 @@ function StoreMode({ products, onClose }) {
           onBlur={e => e.target.style.borderColor = t.wine + "30"}
         />
         <span style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", fontSize: 22, color: t.txL, pointerEvents: "none" }}>🔍</span>
-        <button onClick={() => setShowScanner(true)}
-          style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 22, background: "none", border: "none", cursor: "pointer", padding: "6px", borderRadius: 8 }}
-          title="Skanna streckkod">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-        </button>
+        <span style={{ position: "absolute", right: 18, top: "50%", transform: "translateY(-50%)", fontSize: 20, color: t.bdr, pointerEvents: "none" }} title="Streckkods-scanner kommer snart">📷</span>
       </div>
-
-      {/* Barcode scanner overlay */}
-      {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} />}
 
       {/* Result */}
       {result && result.match && (
@@ -2045,23 +1844,9 @@ function StoreMode({ products, onClose }) {
           <div style={{ fontSize: 36, marginBottom: 12 }}>🏪</div>
           <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 6 }}>Stå i butiken?</div>
           <div style={{ fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
-            Skanna streckkoden eller skriv vinets namn.<br />
+            Skriv in vinets namn eller artikelnummer.<br />
             Vi visar poängen och om det finns bättre alternativ.
           </div>
-          <button onClick={() => setShowScanner(true)}
-            style={{
-              marginTop: 16, padding: "14px 24px", borderRadius: 12,
-              background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#fff", fontSize: 15, fontWeight: 600, border: "none",
-              cursor: "pointer", fontFamily: "inherit",
-              display: "inline-flex", alignItems: "center", gap: 8,
-            }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
-            Skanna streckkod
-          </button>
         </div>
       )}
     </div>
@@ -2077,15 +1862,15 @@ function AgeGate({ onConfirm }) {
     <div style={{
       minHeight: "100vh", background: "#f5f1eb", display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: "'DM Sans', -apple-system, sans-serif", padding: 20,
-    }}>
+    }} role="dialog" aria-modal="true" aria-label="Åldersverifiering">
       <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       <div style={{ textAlign: "center", maxWidth: 380 }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🍷</div>
+        <div style={{ fontSize: 48, marginBottom: 16 }} aria-hidden="true">🍷</div>
         <h1 style={{ margin: "0 0 8px", fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: "#2d2520" }}>Smakfynd</h1>
         <p style={{ margin: "0 0 24px", fontSize: 14, color: "#8a7e72", lineHeight: 1.6 }}>
           Den här sidan innehåller information om alkoholhaltiga drycker och riktar sig till personer som fyllt 25 år.
         </p>
-        <button onClick={onConfirm} style={{
+        <button onClick={onConfirm} autoFocus style={{
           padding: "14px 36px", borderRadius: 14, border: "none", cursor: "pointer",
           background: "#6b2a3a", color: "#fff", fontSize: 15, fontWeight: 600,
           fontFamily: "inherit", transition: "opacity 0.2s", marginBottom: 12,
@@ -2175,11 +1960,6 @@ function SmakfyndApp() {
         }
       }
 
-      // Fallback to embedded sample data
-      if (SAMPLE_PRODUCTS.length > 0) {
-        setAllData(SAMPLE_PRODUCTS);
-        setLoadError(null);
-      }
       setLoading(false);
     }
     loadData();
@@ -2248,7 +2028,13 @@ function SmakfyndApp() {
 
   const [showBackToTop, setShowBackToTop] = useState(false);
   useEffect(() => {
-    const onScroll = () => setShowBackToTop(window.scrollY > 800);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { setShowBackToTop(window.scrollY > 800); ticking = false; });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -2285,6 +2071,7 @@ function SmakfyndApp() {
     else if (sortBy === "crowd") r.sort((a, b) => (b.crowd_score || 0) - (a.crowd_score || 0));
     else if (sortBy === "price_asc") r.sort((a, b) => (a.price || 0) - (b.price || 0));
     else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));
+    else if (sortBy === "drop") r.sort((a, b) => (b.price_vs_launch_pct || 0) - (a.price_vs_launch_pct || 0));
     return r;
   }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
@@ -2309,12 +2096,6 @@ function SmakfyndApp() {
         @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         @keyframes scaleIn { from { opacity:0; transform:scale(0.97) } to { opacity:1; transform:scale(1) } }
-        @keyframes countUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes heroReveal { from { opacity:0; transform:translateY(20px) scale(0.98) } to { opacity:1; transform:translateY(0) scale(1) } }
-        @keyframes glowPulse { 0%,100% { box-shadow: 0 0 20px rgba(139,35,50,0.08) } 50% { box-shadow: 0 0 40px rgba(139,35,50,0.15) } }
-        @keyframes fillBar { from { width: 0% } }
-        @keyframes dotPulse { 0%,100% { opacity:0.3 } 50% { opacity:1 } }
-        @keyframes scanLine { 0% { top:0 } 50% { top:calc(100% - 3px) } 100% { top:0 } }
         ::selection { background: ${t.wine}20 }
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
@@ -2326,33 +2107,25 @@ function SmakfyndApp() {
           outline: 2px solid ${t.wine}60;
           outline-offset: 2px;
         }
-        [role="button"]:hover { transform: translateY(-1px); }
         @media (max-width: 480px) {
           header { padding: 10px 16px 0 !important; }
         }
       `}</style>
 
-      {/* ═══ HERO — cinematic header ═══ */}
-      <header style={{
-        padding: "0 20px", maxWidth: 580, margin: "0 auto",
-        animation: "heroReveal 0.6s ease both",
-      }}>
+      {/* ═══ HERO — compact, collapsible on mobile ═══ */}
+      <header style={{ padding: "16px 20px 0", maxWidth: 580, margin: "0 auto", animation: "fadeIn 0.4s ease" }}>
         {/* Top bar: Logo + nav */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0 0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <svg width="28" height="28" viewBox="0 0 40 40" style={{ animation: "fadeIn 0.8s ease 0.2s both" }}>
-              <circle cx="20" cy="20" r="19" fill={t.wine}/>
-              <text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text>
-            </svg>
+            <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
             <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
           </div>
           <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
-            {[["weekly", "Veckans fynd"], ["deals", "Prissänkt"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
+            {[["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
               ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }
                   if (k === "profile") { auth.logout(); return; }
-                  if (k === "deals") { window.open("/prissankt/", "_self"); return; }
                   if (k === "weekly" || k === "food" || k === "picks") {
                     const el = document.getElementById("section-" + k);
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2360,57 +2133,19 @@ function SmakfyndApp() {
                   }
                   setPanel(panel === k ? null : k);
                 }}
-                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400 }}
+                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400, padding: "8px 2px", minHeight: 44, display: "inline-flex", alignItems: "center" }}
               >{l}</span>
             ))}
           </div>
         </div>
 
-        {/* Hero headline */}
-        <div style={{ textAlign: "center", padding: "28px 0 20px" }}>
-          <h1 style={{
-            margin: 0, fontSize: 36, lineHeight: 1.1,
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontWeight: 400, fontStyle: "italic", color: t.tx,
-            animation: "heroReveal 0.7s ease 0.15s both",
-            letterSpacing: "-0.01em",
-          }}>
-            Hela Systembolagets butikssortiment.
-            <br />
-            <span style={{ color: t.wine }}>Vi hittade de bästa köpen.</span>
-          </h1>
-          <p style={{
-            margin: "10px 0 0", fontSize: 14, color: t.txM, lineHeight: 1.5,
-            animation: "countUp 0.5s ease 0.3s both",
-          }}>
-            Vi kombinerar crowd-betyg, expertrecensioner och prisjämförelse<br />
-            för att ranka varje vin efter kvalitet per krona.
-          </p>
-
-          {/* Animated stats row */}
-          <div style={{
-            display: "flex", justifyContent: "center", gap: 24, marginTop: 18,
-            animation: "countUp 0.5s ease 0.4s both",
-          }}>
-            {[
-              [reviewsStr, "omdömen"],
-              [String(countries), "länder"],
-              ["100%", "av Systembolaget"],
-            ].map(([num, label], i) => (
-              <div key={i} style={{ textAlign: "center", animation: `countUp 0.4s ease ${0.5 + i * 0.1}s both` }}>
-                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>{num}</div>
-                <div style={{ fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Subtle divider */}
-          <div style={{
-            width: 40, height: 2, borderRadius: 1,
-            background: `linear-gradient(90deg, transparent, ${t.wine}40, transparent)`,
-            margin: "18px auto 0",
-          }} />
-        </div>
+        {/* Tagline */}
+        <p style={{ margin: "0 0 4px", fontSize: 13, color: t.txM, textAlign: "center" }}>
+          {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner rankade efter kvalitet per krona
+        </p>
+        <p style={{ margin: "0 0 10px", fontSize: 11, color: t.txL, textAlign: "center", lineHeight: 1.5 }}>
+          Vi kombinerar betyg från hundratusentals vindrickare och erkända kritiker med priset — så du hittar vinerna som ger mest smak för pengarna.
+        </p>
       </header>
 
       <div style={{ maxWidth: 580, margin: "0 auto", padding: "24px 16px 80px" }}>
@@ -2435,6 +2170,16 @@ function SmakfyndApp() {
               </p>
             </div>
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
+
+            <div style={{ padding: 16, borderRadius: 12, background: `${t.wine}06`, border: `1px solid ${t.wine}12`, marginTop: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>🍷 Stöd Smakfynd</div>
+              <p style={{ fontSize: 12, color: t.txM, margin: "0 0 8px", lineHeight: 1.5 }}>
+                Smakfynd är gratis och oberoende — inga annonser, inga sponsrade placeringar. Om du tycker om tjänsten kan du bjuda oss på ett glas.
+              </p>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.wine }}>Swish: 123 456 78 90</div>
+              <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>Alla bidrag går till servrar, data och utveckling.</div>
+            </div>
+
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
         )}
@@ -2543,82 +2288,39 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ NEWSLETTER TEASER — compact, above the fold ═══ */}
-        <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "10px 16px", borderRadius: 12, marginBottom: 14,
-            background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
-            border: `1px solid ${t.wine}15`, textDecoration: "none",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "30"}
-          onMouseLeave={e => e.currentTarget.style.borderColor = t.wine + "15"}
+        {/* ═══ SEARCH ═══ */}
+        <div style={{ position: "relative", marginBottom: 10 }}>
+          <label htmlFor="sf-search" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Sök vin</label>
+          <input id="sf-search" type="search" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{
+              width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
+              border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
+              color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
+            }}
+            onFocus={e => { e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
+            onBlur={e => { e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
+          />
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: t.txL, pointerEvents: "none" }}>⌕</span>
+        </div>
+
+        {/* ═══ STORE MODE BANNER ═══ */}
+        <div role="button" tabIndex={0} aria-label="Öppna butiksläge — sök på vinets namn och se poäng direkt"
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setStoreMode(true); } }}
+          onClick={() => setStoreMode(true)} style={{
+          display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
+          borderRadius: 14, background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
+          border: `1px solid ${t.wine}20`, marginBottom: 14, cursor: "pointer",
+          transition: "all 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.background = t.wine + "10"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "20"; e.currentTarget.style.background = `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`; }}
         >
-          <span style={{ fontSize: 16 }}>📬</span>
+          <span style={{ fontSize: 24 }}>🏪</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>Veckans bästa köp — direkt i inkorgen</div>
-            <div style={{ fontSize: 11, color: t.txL }}>Varje torsdag. Gratis.</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>Står du i butiken?</div>
+            <div style={{ fontSize: 12, color: t.txM }}>Sök på vinets namn — se poängen och bättre alternativ direkt</div>
           </div>
-          <span style={{ fontSize: 12, color: t.wine, fontWeight: 600 }}>Prenumerera →</span>
-        </a>
-
-        {/* ═══ AI MATCHER — visible on first scroll ═══ */}
-        <div id="section-food" style={{ marginBottom: 16 }}>
-          <FoodMatch products={products} />
-        </div>
-
-        {/* ═══ SEARCH + STORE MODE ═══ */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-          <div style={{ position: "relative", flex: 1 }}>
-            <input type="text" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
-              style={{
-                width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
-                border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
-                color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-              onFocus={e => { e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
-              onBlur={e => { e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
-            />
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: t.txL, pointerEvents: "none" }}>⌕</span>
-          </div>
-          <button onClick={() => setStoreMode(true)} style={{
-            padding: "14px 16px", borderRadius: 14, border: `1px solid ${t.bdr}`,
-            background: t.card, cursor: "pointer", flexShrink: 0, fontFamily: "inherit",
-            fontSize: 13, color: t.txM, display: "flex", alignItems: "center", gap: 5,
-            transition: "all 0.2s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
-          ><span style={{ fontSize: 16 }}>🏪</span> I butiken?</button>
-        </div>
-
-        {/* Popular searches — helps discoverability */}
-        {!search && (
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
-            <span style={{ fontSize: 11, color: t.txF, marginRight: 2 }}>Populärt:</span>
-            {["Chablis", "Malbec", "Pinot Noir", "Chianti", "Rioja", "Prosecco", "Côtes du Rhône"].map(q => (
-              <button key={q} onClick={() => { setSearch(q); setCat("all"); }}
-                style={{ fontSize: 11, color: t.txL, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit", textDecoration: "underline", textUnderlineOffset: 2 }}
-              >{q}</button>
-            ))}
-          </div>
-        )}
-
-        {/* ═══ PACKAGE TOGGLE ═══ */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
-            {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
-              <button key={k} onClick={() => setPkg(k)} style={{
-                padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
-                fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
-                background: pkg === k ? t.card : "transparent",
-                color: pkg === k ? t.tx : t.txL,
-                boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                transition: "all 0.2s",
-              }}>{l}</button>
-            ))}
-          </div>
+          <span style={{ fontSize: 16, color: t.txL }}>→</span>
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -2633,21 +2335,34 @@ function SmakfyndApp() {
           ))}
         </div>
 
-        {/* ═══ PRICE PILLS + EKO ═══ */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-          {PRICES.filter(p => p.k !== "all").map(({ k, l }) => (
-            <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
-          ))}
-          <button onClick={() => setShowEco(!showEco)} style={{ ...pill(showEco, t.green), display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 12 }}>🌿</span> Ekologiskt ({ecoN})
-          </button>
-        </div>
+        {/* ═══ QUICK PICKS ═══ */}
+        {!search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && (
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
+            {[
+              ["🔥", "Till grillat", () => { setSelFoods(["Kött"]); setShowAdvanced(true); }],
+              ["🐟", "Till fisk", () => { setCat("Vitt"); setSelFoods(["Fisk"]); setShowAdvanced(true); }],
+              ["💰", "Under 100 kr", () => { setPrice("0-79"); setShowAdvanced(true); }],
+              ["📉", "Prissänkt", () => { setShowDeals(true); setSortBy("drop"); setShowAdvanced(true); }],
+              ["🌿", "Ekologiskt", () => { setShowEco(true); }],
+            ].map(([icon, label, fn]) => (
+              <button key={label} onClick={fn} style={{
+                padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdrL}`,
+                background: t.card, cursor: "pointer", fontFamily: "inherit",
+                fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 5,
+                whiteSpace: "nowrap", transition: "all 0.2s", boxShadow: t.sh1,
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.color = t.txM; }}
+              ><span style={{ fontSize: 14 }}>{icon}</span> {label}</button>
+            ))}
+          </div>
+        )}
 
         {/* ═══ ADVANCED TOGGLE ═══ */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
           <button onClick={() => setShowAdvanced(!showAdvanced)}
-            style={{ ...pill(showAdvanced), display: "flex", alignItems: "center", gap: 4 }}>
-            Fler filter <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+            style={{ ...pill(showAdvanced || price !== "all" || pkg !== "Flaska" || showEco || showDeals || showNew || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd"), display: "flex", alignItems: "center", gap: 4 }}>
+            Filter {(() => { const n = (price !== "all" ? 1 : 0) + (pkg !== "Flaska" ? 1 : 0) + (showEco ? 1 : 0) + (showDeals ? 1 : 0) + (showNew ? 1 : 0) + (selCountry ? 1 : 0) + (selFoods.length > 0 ? 1 : 0) + (selRegion ? 1 : 0) + (selTaste ? 1 : 0) + (sortBy !== "smakfynd" ? 1 : 0); return n > 0 ? `(${n})` : ""; })()} <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
           </button>
           {hasFilters && (
             <button onClick={clearAll}
@@ -2659,11 +2374,36 @@ function SmakfyndApp() {
 
         {showAdvanced && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdrL}` }}>
+            {/* Package */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Förpackning</div>
+              <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
+                {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
+                  <button key={k} onClick={() => setPkg(k)} style={{
+                    padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
+                    fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
+                    background: pkg === k ? t.card : "transparent",
+                    color: pkg === k ? t.tx : t.txL,
+                    boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    transition: "all 0.2s",
+                  }}>{l}</button>
+                ))}
+              </div>
+            </div>
+            {/* Price */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pris</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {PRICES.filter(p => p.k !== "all").map(({ k, l }) => (
+                  <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
+                ))}
+              </div>
+            </div>
             {/* Tags row */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko</button>
+              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko ({ecoN})</button>
               <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
-              <button onClick={() => { setShowDeals(!showDeals); if (!showDeals) setShowNew(false); }} style={pill(showDeals, t.deal)}>Prissänkt</button>
+              <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") { setSortBy("smakfynd"); } }} style={pill(showDeals, t.deal)}>Prissänkt</button>
               <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
             </div>
             {/* Country */}
@@ -2711,7 +2451,7 @@ function SmakfyndApp() {
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sortera</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[["smakfynd", "Smakfynd-poäng"], ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
+                {[["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
                   <button key={k} onClick={() => setSortBy(k)} style={pill(sortBy === k)}>{l}</button>
                 ))}
               </div>
@@ -2719,11 +2459,14 @@ function SmakfyndApp() {
           </div>
         )}
 
+        {/* ═══ WINE OF THE DAY ═══ */}
+        {!search && !showDeals && !showNew && cat === "Rött" && <WineOfDay products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
+
         {/* ═══ RESULTS ═══ */}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
-            <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
+            <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", drop: "Störst prissänkning först", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
           </div>
           <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Rankade efter kvalitet i förhållande till pris — inte "bästa vinet", utan bästa värdet i sin kategori.</div>
         </div>
@@ -2777,10 +2520,7 @@ function SmakfyndApp() {
               if (sectionWines.length === 0) return null;
               return (
                 <div key={title}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 12px" }}>
-                    <div style={{ width: 3, height: 20, borderRadius: 2, background: t.wine }} />
-                    <h3 style={{ margin: 0, fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: t.tx }}>{title}</h3>
-                  </div>
+                  <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
                   </div>
@@ -2800,21 +2540,18 @@ function SmakfyndApp() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.slice(0, 1).map((p, i) => (
-              <div key={p.id || i} style={{ position: "relative" }}>
-                {/* Gold accent for #1 */}
-                <div style={{
-                  position: "absolute", top: 0, left: 20, right: 20, height: 3, zIndex: 1,
-                  borderRadius: "0 0 3px 3px",
-                  background: "linear-gradient(90deg, transparent, #b08d40, #d4a84b, #b08d40, transparent)",
-                }} />
+              <div key={p.id || i}>
                 <Card p={p} rank={1} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />
                 {!autoOpenNr && <div style={{ textAlign: "center", fontSize: 11, color: t.txL, margin: "-4px 0 6px", animation: "fadeIn 1s ease 0.5s both" }}>↑ Tryck på ett vin för att se mer</div>}
               </div>
             ))}
-            {filtered.slice(1, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.slice(1, 5).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.length > 5 && <NewsletterCTA compact={true} />}
+            {filtered.slice(5, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 6} delay={Math.min((i + 5) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 50 && (
-              <div style={{ textAlign: "center", padding: 20, color: t.txL, fontSize: 13 }}>
-                Visar topp 50 av {filtered.length}. Använd filter för att hitta fler.
+              <div style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}` }}>
+                <div style={{ fontSize: 14, color: t.txM, marginBottom: 8 }}>Visar topp 50 av {filtered.length} viner</div>
+                <div style={{ fontSize: 12, color: t.txL }}>Använd filter för att hitta fler, eller logga in för att se hela listan.</div>
               </div>
             )}
           </div>
@@ -2823,7 +2560,11 @@ function SmakfyndApp() {
         {/* ═══ VECKANS FYND (below wine list) ═══ */}
         <div id="section-weekly"><WeeklyPick products={products} /></div>
 
-        {/* AI matcher already placed above search */}
+        {/* ═══ AI FOOD MATCH ═══ */}
+        <div id="section-food"><FoodMatch products={products} /></div>
+
+        {/* ═══ NEWSLETTER CTA ═══ */}
+        <NewsletterCTA />
 
         {/* ═══ REDAKTIONENS VAL ═══ */}
         <div id="section-picks"><EditorsPicks products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} /></div>
@@ -2858,12 +2599,9 @@ function SmakfyndApp() {
         })()}
 
         {/* ═══ SITUATIONER ═══ */}
-        <div style={{ marginTop: 44 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 16px" }}>
-            <div style={{ width: 3, height: 20, borderRadius: 2, background: t.wine }} />
-            <h3 style={{ margin: 0, fontSize: 20, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: t.tx }}>Hitta vin till tillfället</h3>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ marginTop: 40 }}>
+          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Hitta vin till tillfället</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {[
               ["Dejt", "Romantisk middag", "🕯️", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
               ["Grillkväll", "Sommar & BBQ", "🔥", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
@@ -2877,19 +2615,14 @@ function SmakfyndApp() {
                 <button key={title} onClick={() => { setSearch(""); setCat("all"); setShowAdvanced(false);
                   const best = matches[0]; if (best) { window.location.hash = `vin/${best.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }
                 }}
-                  style={{
-                    padding: "18px 18px", borderRadius: 16, background: t.card,
-                    border: `1px solid ${t.bdrL}`, cursor: "pointer", textAlign: "left",
-                    fontFamily: "inherit", transition: "all 0.25s ease",
-                    boxShadow: t.sh1,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.boxShadow = t.sh2; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.boxShadow = t.sh1; e.currentTarget.style.transform = "translateY(0)"; }}
+                  style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = t.bdr}
                 >
-                  <div style={{ fontSize: 24, marginBottom: 6 }}>{emoji}</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{title}</div>
-                  <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{sub}</div>
-                  <div style={{ fontSize: 10, color: t.txF, marginTop: 6, fontWeight: 500 }}>{matches.length} viner →</div>
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>{emoji}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{title}</div>
+                  <div style={{ fontSize: 11, color: t.txL }}>{sub}</div>
+                  <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>{matches.length} viner</div>
                 </button>
               );
             })}
@@ -2959,32 +2692,24 @@ function SmakfyndApp() {
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{
-          marginTop: 44, padding: "36px 28px", borderRadius: 20,
-          background: "linear-gradient(165deg, #1a1510 0%, #2a2118 50%, #1e1814 100%)",
-          textAlign: "center", position: "relative", overflow: "hidden",
+          marginTop: 40, padding: "28px 24px", borderRadius: 18,
+          background: t.card, border: `1px solid ${t.bdr}`,
+          textAlign: "center",
         }}>
-          {/* Subtle glow */}
-          <div style={{
-            position: "absolute", bottom: -30, left: "50%", transform: "translateX(-50%)",
-            width: 200, height: 100, borderRadius: "50%",
-            background: `radial-gradient(circle, ${t.wine}15, transparent 70%)`,
-            pointerEvents: "none",
-          }} />
-          <div style={{ fontSize: 10, fontWeight: 800, color: t.gold, textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 10, position: "relative" }}>Nyhetsbrev</div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 26, fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontStyle: "italic", color: "#f5ede3", position: "relative" }}>Veckans bästa köp</h3>
-          <p style={{ fontSize: 13, color: "#9e9588", margin: "0 0 20px", lineHeight: 1.5, position: "relative" }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Nyhetsbrev</div>
+          <h3 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Veckans bästa köp</h3>
+          <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.5 }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
           <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
             style={{
-              display: "inline-block", padding: "14px 32px", borderRadius: 12, border: "none", cursor: "pointer",
+              display: "inline-block", padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer",
               background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#f5ede3", fontSize: 14, fontWeight: 600, textDecoration: "none",
-              boxShadow: `0 4px 16px ${t.wine}40`, transition: "all 0.2s",
-              position: "relative",
+              color: "#fff", fontSize: 14, fontWeight: 600, textDecoration: "none",
+              boxShadow: `0 2px 8px ${t.wine}25`, transition: "opacity 0.2s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 6px 20px ${t.wine}50`; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}40`; }}
-          >Prenumerera gratis ↗</a>
-          <p style={{ fontSize: 11, color: "#6b6355", margin: "12px 0 0", position: "relative" }}>Avsluta när du vill.</p>
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          >Prenumerera på Substack ↗</a>
+          <p style={{ fontSize: 11, color: t.txL, margin: "10px 0 0" }}>Gratis. Avsluta när du vill.</p>
         </div>
 
         {/* ═══ FOOTER ═══ */}
