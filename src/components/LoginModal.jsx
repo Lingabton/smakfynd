@@ -199,5 +199,72 @@ function useAuth() {
     }).catch(() => {});
   };
 
-  return { user, token, login, logout, syncWines, saveToServer, removeFromServer };
+  // Premium features
+  const rateWine = (nr, rating, notes) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/rate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, nr, rating, notes }),
+      keepalive: true,
+    }).catch(() => {});
+  };
+
+  const setAlert = (nr, alertType, threshold) => {
+    if (!token) return;
+    return fetch(AUTH_URL + "/alert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, nr, alert_type: alertType, threshold }),
+    }).then(r => r.json()).catch(() => ({}));
+  };
+
+  const removeAlert = (nr, alertType) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/remove-alert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, nr, alert_type: alertType }),
+      keepalive: true,
+    }).catch(() => {});
+  };
+
+  const addToCellar = (nr, action, data) => {
+    if (!token) return;
+    return fetch(AUTH_URL + "/cellar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, nr, action, ...data }),
+    }).then(r => r.json()).catch(() => ({}));
+  };
+
+  const getRatings = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/ratings?token=" + token);
+      const data = await res.json();
+      return data.ratings || [];
+    } catch(e) { return []; }
+  };
+
+  const getAlerts = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/alerts?token=" + token);
+      const data = await res.json();
+      return data.alerts || [];
+    } catch(e) { return []; }
+  };
+
+  const getCellar = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/cellar?token=" + token);
+      const data = await res.json();
+      return data.cellar || [];
+    } catch(e) { return []; }
+  };
+
+  return { user, token, login, logout, syncWines, saveToServer, removeFromServer,
+           rateWine, setAlert, removeAlert, addToCellar, getRatings, getAlerts, getCellar };
 }

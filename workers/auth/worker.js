@@ -368,6 +368,120 @@ export default {
         return new Response(JSON.stringify({ count: result.results.length, subscribers: result.results }), { headers });
       }
 
+      // ═══ PREMIUM FEATURES ═══
+
+      // POST /rate — rate a wine (builds taste profile)
+      if (request.method === "POST" && url.pathname === "/rate") {
+        const { token, nr, rating, notes } = await request.json();
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        if (!nr || !rating || rating < 1 || rating > 5) {
+          return new Response(JSON.stringify({ error: "nr och rating (1-5) krävs" }), { status: 400, headers });
+        }
+        await env.DB.prepare(
+          `INSERT INTO ratings (user_id, wine_nr, rating, notes)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(user_id, wine_nr) DO UPDATE SET rating = ?, notes = ?, rated_at = datetime('now')`
+        ).bind(user.id, nr, rating, notes || null, rating, notes || null).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+
+      // GET /ratings?token=X — get all user ratings
+      if (request.method === "GET" && url.pathname === "/ratings") {
+        const token = getToken(request, url);
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        const rows = await env.DB.prepare(
+          "SELECT wine_nr, rating, notes, rated_at FROM ratings WHERE user_id = ? ORDER BY rated_at DESC"
+        ).bind(user.id).all();
+        return new Response(JSON.stringify({ ratings: rows.results }), { headers });
+      }
+
+      // GET /taste-profile?token=X — calculated taste preferences from ratings
+      if (request.method === "GET" && url.pathname === "/taste-profile") {
+        const token = getToken(request, url);
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        const rows = await env.DB.prepare(
+          "SELECT wine_nr, rating FROM ratings WHERE user_id = ? AND rating >= 4"
+        ).bind(user.id).all();
+        return new Response(JSON.stringify({ liked_wines: rows.results, count: rows.results.length }), { headers });
+      }
+
+      // POST /alert — set price/stock alert on a wine
+      if (request.method === "POST" && url.pathname === "/alert") {
+        const { token, nr, alert_type, threshold } = await request.json();
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        if (!nr || !alert_type) {
+          return new Response(JSON.stringify({ error: "nr och alert_type krävs" }), { status: 400, headers });
+        }
+        const validTypes = ["price_drop", "price_below", "back_in_stock"];
+        if (!validTypes.includes(alert_type)) {
+          return new Response(JSON.stringify({ error: "Ogiltig alert_type" }), { status: 400, headers });
+        }
+        await env.DB.prepare(
+          `INSERT INTO price_alerts (user_id, wine_nr, alert_type, threshold)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(user_id, wine_nr, alert_type) DO UPDATE SET threshold = ?, active = 1`
+        ).bind(user.id, nr, alert_type, threshold || null, threshold || null).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+
+      // DELETE /alert — remove an alert
+      if (request.method === "POST" && url.pathname === "/remove-alert") {
+        const { token, nr, alert_type } = await request.json();
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        await env.DB.prepare(
+          "DELETE FROM price_alerts WHERE user_id = ? AND wine_nr = ? AND alert_type = ?"
+        ).bind(user.id, nr, alert_type).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+
+      // GET /alerts?token=X — get all user alerts
+      if (request.method === "GET" && url.pathname === "/alerts") {
+        const token = getToken(request, url);
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        const rows = await env.DB.prepare(
+          "SELECT wine_nr, alert_type, threshold, active, created_at FROM price_alerts WHERE user_id = ? AND active = 1"
+        ).bind(user.id).all();
+        return new Response(JSON.stringify({ alerts: rows.results }), { headers });
+      }
+
+      // POST /cellar — add wine to cellar / tasting diary
+      if (request.method === "POST" && url.pathname === "/cellar") {
+        const { token, nr, action, notes, occasion, rating } = await request.json();
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        if (!nr) return new Response(JSON.stringify({ error: "nr krävs" }), { status: 400, headers });
+
+        if (action === "taste") {
+          // Log a tasting
+          await env.DB.prepare(
+            "INSERT INTO cellar (user_id, wine_nr, status, notes, occasion, personal_rating, tasted_at) VALUES (?, ?, 'tasted', ?, ?, ?, datetime('now'))"
+          ).bind(user.id, nr, notes || null, occasion || null, rating || null).run();
+        } else {
+          // Add to cellar (bought / planning)
+          await env.DB.prepare(
+            "INSERT OR IGNORE INTO cellar (user_id, wine_nr, status) VALUES (?, ?, 'in_cellar')"
+          ).bind(user.id, nr).run();
+        }
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+
+      // GET /cellar?token=X — get cellar + tasting history
+      if (request.method === "GET" && url.pathname === "/cellar") {
+        const token = getToken(request, url);
+        const user = await getUserByToken(env.DB, token);
+        if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
+        const rows = await env.DB.prepare(
+          "SELECT wine_nr, status, notes, occasion, personal_rating, tasted_at, created_at FROM cellar WHERE user_id = ? ORDER BY created_at DESC"
+        ).bind(user.id).all();
+        return new Response(JSON.stringify({ cellar: rows.results }), { headers });
+      }
+
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     } catch (e) {

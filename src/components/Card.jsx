@@ -478,6 +478,15 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
             );
           })()}
 
+          {/* Premium actions: Rate, Alert, Cellar */}
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${t.bdrL}` }}>
+            <StarRating nr={p.nr} auth={auth} />
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+              <AlertButton nr={p.nr} wine={p} auth={auth} />
+              <CellarButton nr={p.nr} auth={auth} />
+            </div>
+          </div>
+
         </div>
       )}
     </div>

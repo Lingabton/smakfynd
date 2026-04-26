@@ -19,6 +19,7 @@ FILES = [
     "components/ScoreBars.jsx",
     "components/ProductImage.jsx",
     "hooks.jsx",
+    "components/WineActions.jsx",
     "components/Card.jsx",
     "components/SaveButton.jsx",
     "components/AIQuestion.jsx",
