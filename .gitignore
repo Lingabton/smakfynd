@@ -1,4 +1,6 @@
 data/
+!data/vivino_cache.json
+!data/expert_cache.json
 vivino_log.txt
 node_modules/
 
