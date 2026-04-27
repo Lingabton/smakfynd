@@ -518,6 +518,343 @@ function useSaved() {
 const SavedContext = React.createContext(null);
 
 // ════════════════════════════════════════════════════════════
+// components/WineActions.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/WineActions.jsx — Rating, Alerts, Cellar actions for expanded card
+
+function StarRating({
+  nr,
+  auth
+}) {
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [saved, setSaved] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: t.txL
+    }
+  }, "Ditt betyg:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 2
+    }
+  }, [1, 2, 3, 4, 5].map(star => /*#__PURE__*/React.createElement("span", {
+    key: star,
+    onClick: e => {
+      e.stopPropagation();
+      if (!auth.user) return;
+      setRating(star);
+      setSaved(true);
+      auth.rateWine(nr, star);
+      track("rate", {
+        nr,
+        rating: star
+      });
+      setTimeout(() => setSaved(false), 2000);
+    },
+    onMouseEnter: () => setHover(star),
+    onMouseLeave: () => setHover(0),
+    style: {
+      fontSize: 18,
+      cursor: auth.user ? "pointer" : "default",
+      color: (hover || rating) >= star ? "#d4a84b" : t.bdr,
+      transition: "color 0.15s, transform 0.15s",
+      transform: hover >= star ? "scale(1.15)" : "scale(1)"
+    }
+  }, (hover || rating) >= star ? "★" : "☆"))), saved && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.green,
+      fontWeight: 600
+    }
+  }, "Sparat!"), !auth.user && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: t.txF
+    }
+  }, "Logga in f\xF6r att betygs\xE4tta"));
+}
+function AlertButton({
+  nr,
+  wine,
+  auth
+}) {
+  const [showMenu, setShowMenu] = useState(false);
+  const [alertSet, setAlertSet] = useState(null); // "price_drop" | "price_below" | etc
+
+  if (!auth.user) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      setShowMenu(!showMenu);
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 11,
+      color: alertSet ? t.wine : t.txM,
+      background: alertSet ? `${t.wine}08` : "none",
+      border: `1px solid ${alertSet ? t.wine + "30" : t.bdrL}`,
+      borderRadius: 8,
+      cursor: "pointer",
+      padding: "6px 10px",
+      fontFamily: "inherit",
+      transition: "all 0.2s"
+    }
+  }, "\uD83D\uDD14 ", alertSet ? "Larm aktivt" : "Fynd-larm"), showMenu && /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      position: "absolute",
+      top: "100%",
+      left: 0,
+      marginTop: 4,
+      zIndex: 10,
+      background: t.card,
+      borderRadius: 12,
+      border: `1px solid ${t.bdr}`,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+      padding: 12,
+      minWidth: 220
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: t.tx,
+      marginBottom: 8
+    }
+  }, "Bevaka ", wine.name), [["price_drop", "📉 Meddela vid prissänkning", "När priset sjunker"], ["price_below", `💰 Under ${Math.round(wine.price * 0.85)} kr`, `När priset går under ${Math.round(wine.price * 0.85)} kr`], ["back_in_stock", "📦 Tillbaka i sortiment", "När vinet kommer tillbaka"]].map(([type, label, desc]) => /*#__PURE__*/React.createElement("button", {
+    key: type,
+    onClick: () => {
+      auth.setAlert(nr, type, type === "price_below" ? Math.round(wine.price * 0.85) : null);
+      setAlertSet(type);
+      setShowMenu(false);
+      track("alert_set", {
+        nr,
+        type
+      });
+    },
+    style: {
+      display: "block",
+      width: "100%",
+      textAlign: "left",
+      padding: "8px 10px",
+      borderRadius: 8,
+      border: "none",
+      background: alertSet === type ? `${t.green}10` : "transparent",
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 12,
+      color: t.txM,
+      transition: "background 0.15s",
+      marginBottom: 2
+    },
+    onMouseEnter: e => e.currentTarget.style.background = t.bg,
+    onMouseLeave: e => e.currentTarget.style.background = alertSet === type ? `${t.green}10` : "transparent"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 500
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL
+    }
+  }, desc)))));
+}
+function CellarButton({
+  nr,
+  auth
+}) {
+  const [status, setStatus] = useState(null); // null | "added" | "tasting"
+  const [showTasting, setShowTasting] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [occasion, setOccasion] = useState("");
+  const [personalRating, setPersonalRating] = useState(0);
+  if (!auth.user) return null;
+  if (showTasting) {
+    return /*#__PURE__*/React.createElement("div", {
+      onClick: e => e.stopPropagation(),
+      style: {
+        padding: 14,
+        borderRadius: 12,
+        background: t.bg,
+        border: `1px solid ${t.bdrL}`,
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: t.tx,
+        marginBottom: 8
+      }
+    }, "\uD83D\uDCDD Provningsanteckning"), /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      value: occasion,
+      onChange: e => setOccasion(e.target.value),
+      placeholder: "Tillf\xE4lle (t.ex. fredagsmiddag, dejt)",
+      style: {
+        width: "100%",
+        padding: "8px 12px",
+        borderRadius: 8,
+        border: `1px solid ${t.bdr}`,
+        background: t.card,
+        fontSize: 12,
+        color: t.tx,
+        outline: "none",
+        boxSizing: "border-box",
+        marginBottom: 6
+      }
+    }), /*#__PURE__*/React.createElement("textarea", {
+      value: notes,
+      onChange: e => setNotes(e.target.value),
+      placeholder: "Dina tankar om vinet...",
+      rows: 2,
+      style: {
+        width: "100%",
+        padding: "8px 12px",
+        borderRadius: 8,
+        border: `1px solid ${t.bdr}`,
+        background: t.card,
+        fontSize: 12,
+        color: t.tx,
+        outline: "none",
+        boxSizing: "border-box",
+        resize: "vertical",
+        fontFamily: "inherit",
+        marginBottom: 6
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: t.txL
+      }
+    }, "Betyg:"), [1, 2, 3, 4, 5].map(s => /*#__PURE__*/React.createElement("span", {
+      key: s,
+      onClick: () => setPersonalRating(s),
+      style: {
+        fontSize: 16,
+        cursor: "pointer",
+        color: personalRating >= s ? "#d4a84b" : t.bdr
+      }
+    }, personalRating >= s ? "★" : "☆"))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        auth.addToCellar(nr, "taste", {
+          notes,
+          occasion,
+          rating: personalRating || null
+        });
+        setStatus("tasted");
+        setShowTasting(false);
+        track("cellar_taste", {
+          nr
+        });
+      },
+      style: {
+        padding: "8px 16px",
+        borderRadius: 8,
+        border: "none",
+        background: t.wine,
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer",
+        fontFamily: "inherit"
+      }
+    }, "Spara"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowTasting(false),
+      style: {
+        padding: "8px 16px",
+        borderRadius: 8,
+        border: `1px solid ${t.bdr}`,
+        background: t.card,
+        color: t.txM,
+        fontSize: 12,
+        cursor: "pointer",
+        fontFamily: "inherit"
+      }
+    }, "Avbryt")));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, status !== "added" && /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      auth.addToCellar(nr, "add");
+      setStatus("added");
+      track("cellar_add", {
+        nr
+      });
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 11,
+      color: t.txM,
+      background: "none",
+      border: `1px solid ${t.bdrL}`,
+      borderRadius: 8,
+      cursor: "pointer",
+      padding: "6px 10px",
+      fontFamily: "inherit"
+    }
+  }, "\uD83C\uDF7E L\xE4gg i k\xE4llaren"), status === "added" && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: t.green,
+      padding: "6px 10px"
+    }
+  }, "\u2713 I k\xE4llaren"), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      setShowTasting(true);
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 11,
+      color: t.txM,
+      background: "none",
+      border: `1px solid ${t.bdrL}`,
+      borderRadius: 8,
+      cursor: "pointer",
+      padding: "6px 10px",
+      fontFamily: "inherit"
+    }
+  }, "\uD83D\uDCDD Har provats"));
+}
+
+// ════════════════════════════════════════════════════════════
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/Card.jsx
@@ -1681,7 +2018,30 @@ function Card({
         textDecoration: "none"
       }
     }, "SB \u2197"))))));
-  })()));
+  })(), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      paddingTop: 12,
+      borderTop: `1px solid ${t.bdrL}`
+    }
+  }, /*#__PURE__*/React.createElement(StarRating, {
+    nr: p.nr,
+    auth: auth
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap",
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(AlertButton, {
+    nr: p.nr,
+    wine: p,
+    auth: auth
+  }), /*#__PURE__*/React.createElement(CellarButton, {
+    nr: p.nr,
+    auth: auth
+  })))));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2258,6 +2618,99 @@ function useAuth() {
       keepalive: true
     }).catch(() => {});
   };
+
+  // Premium features
+  const rateWine = (nr, rating, notes) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/rate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        rating,
+        notes
+      }),
+      keepalive: true
+    }).catch(() => {});
+  };
+  const setAlert = (nr, alertType, threshold) => {
+    if (!token) return;
+    return fetch(AUTH_URL + "/alert", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        alert_type: alertType,
+        threshold
+      })
+    }).then(r => r.json()).catch(() => ({}));
+  };
+  const removeAlert = (nr, alertType) => {
+    if (!token) return;
+    fetch(AUTH_URL + "/remove-alert", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        alert_type: alertType
+      }),
+      keepalive: true
+    }).catch(() => {});
+  };
+  const addToCellar = (nr, action, data) => {
+    if (!token) return;
+    return fetch(AUTH_URL + "/cellar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        token,
+        nr,
+        action,
+        ...data
+      })
+    }).then(r => r.json()).catch(() => ({}));
+  };
+  const getRatings = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/ratings?token=" + token);
+      const data = await res.json();
+      return data.ratings || [];
+    } catch (e) {
+      return [];
+    }
+  };
+  const getAlerts = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/alerts?token=" + token);
+      const data = await res.json();
+      return data.alerts || [];
+    } catch (e) {
+      return [];
+    }
+  };
+  const getCellar = async () => {
+    if (!token) return [];
+    try {
+      const res = await fetch(AUTH_URL + "/cellar?token=" + token);
+      const data = await res.json();
+      return data.cellar || [];
+    } catch (e) {
+      return [];
+    }
+  };
   return {
     user,
     token,
@@ -2265,7 +2718,14 @@ function useAuth() {
     logout,
     syncWines,
     saveToServer,
-    removeFromServer
+    removeFromServer,
+    rateWine,
+    setAlert,
+    removeAlert,
+    addToCellar,
+    getRatings,
+    getAlerts,
+    getCellar
   };
 }
 
