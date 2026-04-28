@@ -1,45 +1,6 @@
 User-agent: *
 Allow: /
 
-# Landing pages
-Allow: /basta-roda-vin/
-Allow: /basta-vita-vin/
-Allow: /basta-bubbel/
-Allow: /basta-rose/
-Allow: /vin-under-100-kr/
-Allow: /vin-under-150-kr/
-Allow: /vin-under-200-kr/
-Allow: /basta-premium-vin/
-Allow: /ekologiskt-vin/
-Allow: /vin-till-grillat/
-Allow: /vin-till-fisk/
-Allow: /vin-till-pasta/
-Allow: /vin-till-ost/
-Allow: /vin-till-kyckling/
-Allow: /vin-till-dejt/
-Allow: /vin-till-julmat/
-Allow: /basta-malbec/
-Allow: /basta-cabernet-sauvignon/
-Allow: /basta-pinot-noir/
-Allow: /basta-syrah-shiraz/
-Allow: /basta-riesling/
-Allow: /basta-tempranillo/
-Allow: /basta-sangiovese/
-Allow: /basta-chardonnay/
-Allow: /basta-sauvignon-blanc/
-Allow: /basta-zinfandel/
-Allow: /basta-italienska-vin/
-Allow: /basta-franska-vin/
-Allow: /basta-spanska-vin/
-Allow: /basta-chilenska-vin/
-Allow: /basta-sydafrikanska-vin/
-Allow: /basta-australiska-vin/
-Allow: /basta-portugisiska-vin/
-Allow: /fylliga-roda-vin/
-Allow: /latta-vita-vin/
-Allow: /prissankt-vin/
-
-# Static assets - no need to crawl
 Disallow: /wines.json
 Disallow: /sw.js
 Disallow: /manifest.json

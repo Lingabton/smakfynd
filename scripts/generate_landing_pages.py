@@ -111,10 +111,10 @@ def make_pages():
         },
         {
             "slug": "basta-bubbel",
-            "title": f"Bästa bubbel & champagne på Systembolaget {YEAR}",
-            "meta": f"Topp 20 mousserande viner och champagne på Systembolaget. Rankade efter kvalitet per krona. {DATE_STR}.",
-            "h1": f"Bästa bubbel på Systembolaget — {DATE_STR}",
-            "intro": "Cava, prosecco, crémant eller champagne? Här är de mousserande vinerna som ger mest fest för pengarna.",
+            "title": f"Bästa bubbel {YEAR} — Bästa mousserande på Systembolaget",
+            "meta": f"Bästa bubbel {YEAR}. Topp 20 mousserande viner, champagne och cava på Systembolaget — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa bubbel {YEAR} — mousserande, champagne & cava",
+            "intro": "Bästa bubbel just nu? Cava, prosecco, crémant eller champagne — här är de mousserande vinerna som ger mest fest för pengarna.",
             "intro2": "Bubbel från Systembolaget inkluderar allt från spansk Cava under hundralappen till prestigefylld champagne. Crémant från Alsace och Loire är ofta de bästa fynden — champagnekvalitet till en bråkdel av priset. Vi jämför betyg och pris åt dig.",
             "guide": {
                 "title": "Hur väljer man bubbel?",
@@ -134,10 +134,10 @@ def make_pages():
         },
         {
             "slug": "basta-rose",
-            "title": f"Bästa rosévinerna på Systembolaget {YEAR}",
-            "meta": f"Topp 20 roséer på Systembolaget. Rankade efter smak och prisvärde. {DATE_STR}.",
-            "h1": f"Bästa rosévinerna på Systembolaget — {DATE_STR}",
-            "intro": "Sommar eller vinter — rosé funkar alltid. Här är de som ger mest smak för pengarna.",
+            "title": f"Bästa rosé {YEAR} — Bästa rosévinerna på Systembolaget",
+            "meta": f"Bästa rosé {YEAR}. Topp 20 rosévin på Systembolaget — rankade efter kvalitet per krona. Bäst rosé just nu, uppdaterad {DATE_STR}.",
+            "h1": f"Bästa rosévinerna {YEAR} — topp 20 på Systembolaget",
+            "intro": "Letar du efter bästa rosé {YEAR}? Sommar eller vinter — rosé funkar alltid. Här är de rosévinerna som ger mest smak för pengarna just nu.",
             "intro2": "Roséviner på Systembolaget har exploderat i popularitet. Provence-rosé dominerar, men spanska och italienska roséer erbjuder ofta bättre prisvärdhet. Letar du efter en torr, elegant rosé eller en fruktigare variant? Vår ranking hjälper dig välja rätt.",
             "guide": {
                 "title": "Hur väljer man rosé?",
