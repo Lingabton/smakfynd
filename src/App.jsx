@@ -145,6 +145,7 @@ function SmakfyndApp() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const [searchFocused, setSearchFocused] = useState(false);
   const [showEco, setShowEco] = useState(false);
   const [showBest, setShowBest] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -185,6 +186,8 @@ function SmakfyndApp() {
   const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
   const ecoN = products.filter(p => p.organic).length;
   const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd";
+  const hasNonCatFilters = price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || pkg !== "Flaska";
+  const searchCompact = hasNonCatFilters && !search && !searchFocused;
 
   const clearAll = () => { setSearch(""); setCat("all"); setPrice("all"); setShowNew(false); setShowDeals(false); setShowEco(false); setSelCountry(null); setSelFoods([]); setShowBest(false); setSelRegion(null); setSelTaste(null); setSortBy("smakfynd"); };
 
@@ -397,16 +400,20 @@ function SmakfyndApp() {
         {/* ═══ SEARCH ═══ */}
         <div style={{ position: "relative", marginBottom: 10 }}>
           <label htmlFor="sf-search" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Sök vin</label>
-          <input id="sf-search" type="search" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
+          <input id="sf-search" type="search" placeholder={searchCompact ? "Sök..." : "Sök vin, druva, land, stil..."} value={search} onChange={e => setSearch(e.target.value)}
             style={{
-              width: "100%", padding: "14px 16px 14px 42px", borderRadius: 14,
-              border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
-              color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
+              width: "100%",
+              padding: searchCompact ? "8px 16px 8px 36px" : "14px 16px 14px 42px",
+              borderRadius: searchCompact ? 10 : 14,
+              border: `1px solid ${t.bdr}`, background: t.card,
+              fontSize: searchCompact ? 13 : 14,
+              color: t.tx, outline: "none", boxSizing: "border-box",
+              transition: "padding 0.25s ease, font-size 0.25s ease, border-color 0.2s, box-shadow 0.2s",
             }}
-            onFocus={e => { e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
-            onBlur={e => { e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
+            onFocus={e => { setSearchFocused(true); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
+            onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
-          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: t.txL, pointerEvents: "none" }}>⌕</span>
+          <span style={{ position: "absolute", left: searchCompact ? 12 : 14, top: "50%", transform: "translateY(-50%)", fontSize: searchCompact ? 14 : 16, color: t.txL, pointerEvents: "none", transition: "left 0.25s ease" }}>⌕</span>
         </div>
 
         {/* ═══ STORE MODE BANNER ═══ */}
@@ -513,13 +520,10 @@ function SmakfyndApp() {
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[
-                  ["Italien", "\ud83c\uddee\ud83c\uddf9"], ["Frankrike", "\ud83c\uddeb\ud83c\uddf7"], ["Spanien", "\ud83c\uddea\ud83c\uddf8"],
-                  ["USA", "\ud83c\uddfa\ud83c\uddf8"], ["Tyskland", "\ud83c\udde9\ud83c\uddea"], ["Sydafrika", "\ud83c\uddff\ud83c\udde6"],
-                  ["Chile", "\ud83c\udde8\ud83c\uddf1"], ["Portugal", "\ud83c\uddf5\ud83c\uddf9"], ["Australien", "\ud83c\udde6\ud83c\uddfa"],
-                  ["Argentina", "\ud83c\udde6\ud83c\uddf7"], ["Nya Zeeland", "\ud83c\uddf3\ud83c\uddff"], ["\u00d6sterrike", "\ud83c\udde6\ud83c\uddf9"],
-                ].map(([c, flag]) => (
-                  <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{flag} {c}</button>
+                {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika",
+                  "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike",
+                ].map(c => (
+                  <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{c}</button>
                 ))}
               </div>
             </div>
@@ -705,26 +709,25 @@ function SmakfyndApp() {
           <h3 style={{ margin: "0 0 14px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Hitta vin till tillfället</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {[
-              ["Dejt", "Romantisk middag", "🕯️", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
-              ["Grillkväll", "Sommar & BBQ", "🔥", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
-              ["Svärföräldrarna", "Tryggt & imponerande", "🎩", p => p.expert_score >= 7.5 && p.crowd_score >= 7 && p.price >= 150],
-              ["Fredagsmys", "Under 120 kr", "🍕", p => p.price <= 120 && p.smakfynd_score >= 70],
-              ["Picknick", "Lätt & friskt", "🧺", p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 6],
-              ["After work", "Bubbel & lättviner", "🥂", p => p.category === "Mousserande" || ((p.taste_body || 12) <= 5 && p.category === "Vitt")],
-            ].map(([title, sub, emoji, filterFn]) => {
+              ["Dejt", "Romantisk middag", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
+              ["Grillkväll", "Sommar & BBQ", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
+              ["Svärföräldrarna", "Tryggt & imponerande", p => p.expert_score >= 7.5 && p.crowd_score >= 7 && p.price >= 150],
+              ["Fredagsmys", "Under 120 kr", p => p.price <= 120 && p.smakfynd_score >= 70],
+              ["Picknick", "Lätt & friskt", p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 6],
+              ["After work", "Bubbel & lättviner", p => p.category === "Mousserande" || ((p.taste_body || 12) <= 5 && p.category === "Vitt")],
+            ].map(([title, sub, filterFn]) => {
               const matches = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && filterFn(p)).slice(0, 3);
               return (
                 <button key={title} onClick={() => { setSearch(""); setCat("all"); setShowAdvanced(false);
                   const best = matches[0]; if (best) { window.location.hash = `vin/${best.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }
                 }}
-                  style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
+                  style={{ padding: "16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
                   onMouseLeave={e => e.currentTarget.style.borderColor = t.bdr}
                 >
-                  <div style={{ fontSize: 20, marginBottom: 4 }}>{emoji}</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{title}</div>
-                  <div style={{ fontSize: 11, color: t.txL }}>{sub}</div>
-                  <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>{matches.length} viner</div>
+                  <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{sub}</div>
+                  <div style={{ fontSize: 10, color: t.txF, marginTop: 6 }}>{matches.length} viner</div>
                 </button>
               );
             })}
@@ -753,7 +756,7 @@ function SmakfyndApp() {
                     <div key={i} onClick={() => { window.location.hash = `vin/${p.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
                       style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", cursor: "pointer", borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none" }}>
                       <span style={{ fontSize: 13, color: t.txM }}>{p.name} <span style={{ color: t.txL }}>{p.sub}</span></span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{p.price}kr</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{p.price}{"\u00A0"}kr</span>
                     </div>
                   ))}
                 </div>
@@ -783,7 +786,7 @@ function SmakfyndApp() {
                   {pick && (
                     <div onClick={() => { window.location.hash = `vin/${pick.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
                       style={{ fontSize: 12, color: t.wine, cursor: "pointer", fontWeight: 600 }}>
-                      Vårt tips: {pick.name} ({pick.price}kr, {pick.smakfynd_score}/100) →
+                      Vårt tips: {pick.name} ({pick.price}{"\u00A0"}kr, {pick.smakfynd_score}/100) →
                     </div>
                   )}
                 </div>

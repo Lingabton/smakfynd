@@ -62,7 +62,7 @@ function WineResult({ m }) {
       </div>
       <div style={{ textAlign: "right", flexShrink: 0 }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>
-          {m.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+          {m.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
         </div>
         {m._tier && <div style={{ fontSize: 9, fontWeight: 700, color: m._tierCol || t.txL, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{m._tier}</div>}
       </div>
@@ -248,7 +248,7 @@ function FoodMatch({ products }) {
                     const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
                     return [...header, ...c.wines.filter(m => m.nr).map(m => {
                       const p = products.find(pr => String(pr.nr) === String(m.nr));
-                      return p ? `  ${p.name} ${p.sub || ""} — ${p.price}kr (${p.smakfynd_score}/100)` : null;
+                      return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100)` : null;
                     }).filter(Boolean)];
                   });
                   const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;

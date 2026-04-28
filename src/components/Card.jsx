@@ -92,10 +92,10 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
 
           {/* Row 2: Price + kr/l + grape + food */}
           <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span></span>
             {p.vol && p.price && <span style={{ fontSize: 11, fontWeight: 600, color: t.txM, background: t.bg, padding: "1px 6px", borderRadius: 4 }}>{Math.round(p.price / (p.vol / 1000))} kr/l</span>}
             {p.launch_price && p.price_vs_launch_pct > 0 && (
-              <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}kr</span>
+              <span style={{ fontSize: 12, color: t.txL, textDecoration: "line-through" }}>{p.launch_price}{"\u00A0"}kr</span>
             )}
             {(p.grape || foodStr) && <span style={{ color: t.bdr }}>·</span>}
             {p.grape && <span style={{ fontSize: 11, color: t.txM }}>{p.grape}</span>}
@@ -184,7 +184,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
               e.stopPropagation();
               track("share", { nr: p.nr, name: p.name });
               const url = `https://smakfynd.se/#vin/${p.nr}`;
-              const text = `${p.name} ${p.sub || ''} — ${p.smakfynd_score}/100 på Smakfynd (${p.price}kr)`;
+              const text = `${p.name} ${p.sub || ''} \u2014 ${p.smakfynd_score}/100 på Smakfynd (${p.price}\u00A0kr)`;
               if (navigator.share) {
                 navigator.share({ title: p.name, text, url }).catch(() => {});
               } else {
@@ -360,7 +360,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                           const catMedians = { "Rött": 279, "Vitt": 239, "Rosé": 160, "Mousserande": 399 };
                           const catNames = { "Rött": "rött vin", "Vitt": "vitt vin", "Rosé": "rosévin", "Mousserande": "mousserande" };
                           const median = catMedians[p.category] || 250;
-                          return `${p.price}kr · Medianen för ${catNames[p.category] || "vin"}: ${median}kr`;
+                          return `${p.price}\u00A0kr \u00B7 Medianen för ${catNames[p.category] || "vin"}: ${median}\u00A0kr`;
                         })()}
                       </div>
                     </div>
@@ -387,7 +387,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
           {/* Price drop info */}
           {p.launch_price && p.price_vs_launch_pct > 0 && (
             <div style={{ padding: "10px 14px", borderRadius: 10, background: t.dealL, marginBottom: 14, fontSize: 13, color: t.deal, lineHeight: 1.5 }}>
-              Lanserades för <strong>{p.launch_price} kr</strong> — nu {p.price} kr. Du sparar {p.launch_price - p.price} kr per flaska.
+              Lanserades för <strong>{p.launch_price}{"\u00A0"}kr</strong>, nu {p.price}{"\u00A0"}kr. Du sparar {p.launch_price - p.price}{"\u00A0"}kr per flaska.
             </div>
           )}
 
@@ -465,7 +465,7 @@ function Card({ p, rank, delay, totalInCategory, allProducts, autoOpen, auth }) 
                       </div>
                       <div style={{ flexShrink: 0, textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
                         <span style={{ fontSize: 14, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>
-                          {w.price}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
+                          {w.price}{"\u00A0"}<span style={{ fontSize: 9, fontWeight: 400, color: t.txL }}>kr</span>
                         </span>
                         <a href={`https://www.systembolaget.se/produkt/vin/${w.nr}`} target="_blank" rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}
