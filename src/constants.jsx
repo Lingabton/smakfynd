@@ -49,9 +49,9 @@ function trackAI(meal, response, latencyMs) {
 
 
 const CATS = [
-  { k:"all", l:"Alla", i:"✦" }, { k:"Rött", l:"Rött vin", i:"🍷" },
-  { k:"Vitt", l:"Vitt vin", i:"🥂" }, { k:"Rosé", l:"Rosé", i:"🌸" },
-  { k:"Mousserande", l:"Bubbel", i:"🍾" },
+  { k:"all", l:"Alla" }, { k:"Rött", l:"Rött vin" },
+  { k:"Vitt", l:"Vitt vin" }, { k:"Rosé", l:"Rosé" },
+  { k:"Mousserande", l:"Bubbel" },
 ];
 const PRICES = [
   { k:"all", l:"Alla priser" }, { k:"0-79", l:"Under 80 kr" },
