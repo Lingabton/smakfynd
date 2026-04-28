@@ -4892,7 +4892,7 @@ function SmakfyndApp() {
       textAlign: "center",
       lineHeight: 1.3
     }
-  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner rankade efter v\xE4rde \u2014 inte prestige."), /*#__PURE__*/React.createElement("p", {
+  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner rankade efter v\xE4rde."), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: "0 0 10px",
       fontSize: 12,

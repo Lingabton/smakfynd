@@ -2462,7 +2462,7 @@ function SmakfyndApp() {
 
         {/* Tagline */}
         <p style={{ margin: "0 0 4px", fontSize: 14, fontFamily: "'Instrument Serif', Georgia, serif", color: t.txM, textAlign: "center", lineHeight: 1.3 }}>
-          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner rankade efter värde — inte prestige.
+          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner rankade efter värde.
         </p>
         <p style={{ margin: "0 0 10px", fontSize: 12, fontStyle: "italic", color: t.txL, textAlign: "center", lineHeight: 1.4 }}>
           Inte "bästa vinet" utan bästa köpet i sin kategori.
