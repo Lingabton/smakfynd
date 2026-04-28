@@ -86,24 +86,19 @@ function trackAI(meal, response, latencyMs) {
 }
 const CATS = [{
   k: "all",
-  l: "Alla",
-  i: "✦"
+  l: "Alla"
 }, {
   k: "Rött",
-  l: "Rött vin",
-  i: "🍷"
+  l: "Rött vin"
 }, {
   k: "Vitt",
-  l: "Vitt vin",
-  i: "🥂"
+  l: "Vitt vin"
 }, {
   k: "Rosé",
-  l: "Rosé",
-  i: "🌸"
+  l: "Rosé"
 }, {
   k: "Mousserande",
-  l: "Bubbel",
-  i: "🍾"
+  l: "Bubbel"
 }];
 const PRICES = [{
   k: "all",
@@ -3974,6 +3969,131 @@ function WineOfDay({
 }
 
 // ════════════════════════════════════════════════════════════
+// components/Methodology.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/Methodology.jsx
+function Methodology() {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 640,
+      margin: "0 auto",
+      padding: "80px 20px 60px",
+      borderTop: `1px solid ${t.bdrL}`
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: "0 0 20px",
+      fontSize: 24,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontWeight: 400,
+      color: t.tx,
+      lineHeight: 1.2
+    }
+  }, "S\xE5 fungerar Smakfynd-po\xE4ngen"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 16px",
+      fontSize: 14,
+      color: t.txM,
+      lineHeight: 1.7
+    }
+  }, "Varje vin f\xE5r en po\xE4ng mellan 0 och 100, baserad p\xE5 tre saker:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 14,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontSize: 20,
+      color: t.tx
+    }
+  }, "75 %"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: t.tx,
+      marginLeft: 8
+    }
+  }, "Kvalitet")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: t.txM,
+      lineHeight: 1.6
+    }
+  }, "V\xE4gt snitt av crowd-betyg fr\xE5n Vivino och expertbetyg fr\xE5n upp till sex kritiker (Suckling, Decanter, Falstaff m.fl.). Konsensusbonus n\xE4r crowd och experter \xE4r \xF6verens.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontSize: 20,
+      color: t.tx
+    }
+  }, "25 %"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: t.tx,
+      marginLeft: 8
+    }
+  }, "Prisv\xE4rde")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: t.txM,
+      lineHeight: 1.6
+    }
+  }, "Literpriset j\xE4mf\xF6rt med medianen i samma kategori. Ett r\xF6tt vin f\xF6r 112 kr f\xE5r h\xF6g prisv\xE4rde-po\xE4ng eftersom medianen \xE4r 279 kr.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: t.tx
+    }
+  }, "Eko-bonus")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: t.txM,
+      lineHeight: 1.6
+    }
+  }, "En liten bonus f\xF6r ekologiska viner."))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 0",
+      fontSize: 14,
+      color: t.tx,
+      lineHeight: 1.7,
+      fontWeight: 500
+    }
+  }, "Resultatet: en enda siffra som s\xE4ger hur mycket smak du f\xE5r per krona \u2014 inte hur prestigefullt vinet \xE4r."), /*#__PURE__*/React.createElement("hr", {
+    style: {
+      border: "none",
+      borderTop: `1px solid ${t.bdrL}`,
+      margin: "28px 0 20px"
+    }
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: t.txL,
+      lineHeight: 1.7,
+      fontStyle: "italic"
+    }
+  }, "Smakfynd \xE4r byggt av Gabriel Linton, forskare i entrepren\xF6rskap och innovation. Sajten finns f\xF6r att Systembolagets sortiment \xE4r sv\xE5rnavigerat och vinguider tenderar att ranka \"b\xE4st\" snarare \xE4n \"smartast k\xF6p\". Ingen koppling till Systembolaget. Drivs av Olav Innovation AB."));
+}
+
+// ════════════════════════════════════════════════════════════
 // components/StoreMode.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/StoreMode.jsx
@@ -4766,19 +4886,22 @@ function SmakfyndApp() {
   }, l)))), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: "0 0 4px",
-      fontSize: 13,
+      fontSize: 14,
+      fontFamily: "'Instrument Serif', Georgia, serif",
       color: t.txM,
-      textAlign: "center"
+      textAlign: "center",
+      lineHeight: 1.3
     }
-  }, products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : "", " viner rankade efter kvalitet per krona"), /*#__PURE__*/React.createElement("p", {
+  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner rankade efter v\xE4rde \u2014 inte prestige."), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: "0 0 10px",
-      fontSize: 11,
+      fontSize: 12,
+      fontStyle: "italic",
       color: t.txL,
       textAlign: "center",
-      lineHeight: 1.5
+      lineHeight: 1.4
     }
-  }, "Vi kombinerar betyg fr\xE5n hundratusentals vindrickare och erk\xE4nda kritiker med priset \u2014 s\xE5 du hittar vinerna som ger mest smak f\xF6r pengarna.")), /*#__PURE__*/React.createElement("div", {
+  }, "Inte \"b\xE4sta vinet\" utan b\xE4sta k\xF6pet i sin kategori.")), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 580,
       margin: "0 auto",
@@ -5255,17 +5378,8 @@ function SmakfyndApp() {
         value: ct.k
       });
     },
-    style: {
-      ...pill(cat === ct.k),
-      display: "flex",
-      alignItems: "center",
-      gap: 5
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14
-    }
-  }, ct.i), " ", ct.l))), !search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: pill(cat === ct.k)
+  }, ct.l))), !search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -5386,7 +5500,7 @@ function SmakfyndApp() {
       padding: 3,
       width: "fit-content"
     }
-  }, [["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+  }, [["Flaska", "Flaskor"], ["BiB", "Bag-in-box"], ["Stor", "Storpack"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
     key: k,
     onClick: () => setPkg(k),
     style: {
@@ -5438,7 +5552,7 @@ function SmakfyndApp() {
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowEco(!showEco),
     style: pill(showEco, t.green)
-  }, "Eko (", ecoN, ")"), /*#__PURE__*/React.createElement("button", {
+  }, "Ekologiskt (", ecoN, ")"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setShowNew(!showNew);
       if (!showNew) setShowDeals(false);
@@ -5586,13 +5700,7 @@ function SmakfyndApp() {
     crowd: "Sorterat efter crowd-betyg",
     price_asc: "Lägst pris först",
     price_desc: "Högst pris först"
-  }[sortBy])), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txF,
-      marginTop: 3
-    }
-  }, "Rankade efter kvalitet i f\xF6rh\xE5llande till pris \u2014 inte \"b\xE4sta vinet\", utan b\xE4sta v\xE4rdet i sin kategori.")), loadError && !loading && allData.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }[sortBy]))), loadError && !loading && allData.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "48px 20px"
@@ -6178,7 +6286,7 @@ function SmakfyndApp() {
         fontWeight: 600
       }
     }, "V\xE5rt tips: ", pick.name, " (", pick.price, "kr, ", pick.smakfynd_score, "/100) \u2192"));
-  }))), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement(Methodology, null), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 40,
       padding: "28px 24px",

@@ -52,9 +52,9 @@ function trackAI(meal, response, latencyMs) {
 
 
 const CATS = [
-  { k:"all", l:"Alla", i:"✦" }, { k:"Rött", l:"Rött vin", i:"🍷" },
-  { k:"Vitt", l:"Vitt vin", i:"🥂" }, { k:"Rosé", l:"Rosé", i:"🌸" },
-  { k:"Mousserande", l:"Bubbel", i:"🍾" },
+  { k:"all", l:"Alla" }, { k:"Rött", l:"Rött vin" },
+  { k:"Vitt", l:"Vitt vin" }, { k:"Rosé", l:"Rosé" },
+  { k:"Mousserande", l:"Bubbel" },
 ];
 const PRICES = [
   { k:"all", l:"Alla priser" }, { k:"0-79", l:"Under 80 kr" },
@@ -1940,6 +1940,70 @@ function WineOfDay({ products, onSelect }) {
 }
 
 // ════════════════════════════════════════════════════════════
+// components/Methodology.jsx
+// ════════════════════════════════════════════════════════════
+// src/components/Methodology.jsx
+function Methodology() {
+  return (
+    <div style={{
+      maxWidth: 640, margin: "0 auto", padding: "80px 20px 60px",
+      borderTop: `1px solid ${t.bdrL}`,
+    }}>
+      <h2 style={{
+        margin: "0 0 20px", fontSize: 24,
+        fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400,
+        color: t.tx, lineHeight: 1.2,
+      }}>Så fungerar Smakfynd-poängen</h2>
+
+      <p style={{ margin: "0 0 16px", fontSize: 14, color: t.txM, lineHeight: 1.7 }}>
+        Varje vin får en poäng mellan 0 och 100, baserad på tre saker:
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}>
+        <div>
+          <div style={{ marginBottom: 2 }}>
+            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.tx }}>75 %</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginLeft: 8 }}>Kvalitet</span>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
+            Vägt snitt av crowd-betyg från Vivino och expertbetyg från upp till sex kritiker (Suckling, Decanter, Falstaff m.fl.). Konsensusbonus när crowd och experter är överens.
+          </p>
+        </div>
+
+        <div>
+          <div style={{ marginBottom: 2 }}>
+            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.tx }}>25 %</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginLeft: 8 }}>Prisvärde</span>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
+            Literpriset jämfört med medianen i samma kategori. Ett rött vin för 112 kr får hög prisvärde-poäng eftersom medianen är 279 kr.
+          </p>
+        </div>
+
+        <div>
+          <div style={{ marginBottom: 2 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>Eko-bonus</span>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
+            En liten bonus för ekologiska viner.
+          </p>
+        </div>
+      </div>
+
+      <p style={{ margin: "0 0 0", fontSize: 14, color: t.tx, lineHeight: 1.7, fontWeight: 500 }}>
+        Resultatet: en enda siffra som säger hur mycket smak du får per krona — inte hur prestigefullt vinet är.
+      </p>
+
+      <hr style={{ border: "none", borderTop: `1px solid ${t.bdrL}`, margin: "28px 0 20px" }} />
+
+      <p style={{ margin: 0, fontSize: 12, color: t.txL, lineHeight: 1.7, fontStyle: "italic" }}>
+        Smakfynd är byggt av Gabriel Linton, forskare i entreprenörskap och innovation. Sajten finns för att Systembolagets sortiment är svårnavigerat och vinguider tenderar att ranka "bäst" snarare än "smartast köp". Ingen koppling till Systembolaget. Drivs av Olav Innovation AB.
+      </p>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
 // components/StoreMode.jsx
 // ════════════════════════════════════════════════════════════
 // src/components/StoreMode.jsx
@@ -2397,11 +2461,11 @@ function SmakfyndApp() {
         </div>
 
         {/* Tagline */}
-        <p style={{ margin: "0 0 4px", fontSize: 13, color: t.txM, textAlign: "center" }}>
-          {products.length > 100 ? `${Math.round(products.length / 100) * 100}+` : ""} viner rankade efter kvalitet per krona
+        <p style={{ margin: "0 0 4px", fontSize: 14, fontFamily: "'Instrument Serif', Georgia, serif", color: t.txM, textAlign: "center", lineHeight: 1.3 }}>
+          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner rankade efter värde — inte prestige.
         </p>
-        <p style={{ margin: "0 0 10px", fontSize: 11, color: t.txL, textAlign: "center", lineHeight: 1.5 }}>
-          Vi kombinerar betyg från hundratusentals vindrickare och erkända kritiker med priset — så du hittar vinerna som ger mest smak för pengarna.
+        <p style={{ margin: "0 0 10px", fontSize: 12, fontStyle: "italic", color: t.txL, textAlign: "center", lineHeight: 1.4 }}>
+          Inte "bästa vinet" utan bästa köpet i sin kategori.
         </p>
       </header>
 
@@ -2583,11 +2647,8 @@ function SmakfyndApp() {
         {/* ═══ CATEGORY PILLS ═══ */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
           {CATS.map(ct => (
-            <button key={ct.k} onClick={() => { setCat(ct.k); track("filter", { type: "category", value: ct.k }); }} style={{
-              ...pill(cat === ct.k),
-              display: "flex", alignItems: "center", gap: 5,
-            }}>
-              <span style={{ fontSize: 14 }}>{ct.i}</span> {ct.l}
+            <button key={ct.k} onClick={() => { setCat(ct.k); track("filter", { type: "category", value: ct.k }); }} style={pill(cat === ct.k)}>
+              {ct.l}
             </button>
           ))}
         </div>
@@ -2635,7 +2696,7 @@ function SmakfyndApp() {
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Förpackning</div>
               <div style={{ display: "flex", gap: 4, background: t.bdrL, borderRadius: 100, padding: 3, width: "fit-content" }}>
-                {[["Flaska", "🍾 Flaskor"], ["BiB", "📦 Bag-in-box"], ["Stor", "🧴 Storpack"]].map(([k, l]) => (
+                {[["Flaska", "Flaskor"], ["BiB", "Bag-in-box"], ["Stor", "Storpack"]].map(([k, l]) => (
                   <button key={k} onClick={() => setPkg(k)} style={{
                     padding: "7px 16px", borderRadius: 100, border: "none", cursor: "pointer",
                     fontSize: 12, fontWeight: pkg === k ? 600 : 400, fontFamily: "inherit",
@@ -2658,7 +2719,7 @@ function SmakfyndApp() {
             </div>
             {/* Tags row */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Eko ({ecoN})</button>
+              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
               <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
               <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") { setSortBy("smakfynd"); } }} style={pill(showDeals, t.deal)}>Prissänkt</button>
               <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
@@ -2725,7 +2786,6 @@ function SmakfyndApp() {
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
             <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", drop: "Störst prissänkning först", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
           </div>
-          <div style={{ fontSize: 10, color: t.txF, marginTop: 3 }}>Rankade efter kvalitet i förhållande till pris — inte "bästa vinet", utan bästa värdet i sin kategori.</div>
         </div>
 
         {loadError && !loading && allData.length === 0 ? (
@@ -2946,6 +3006,9 @@ function SmakfyndApp() {
             })}
           </div>
         </div>
+
+        {/* ═══ METODIK ═══ */}
+        <Methodology />
 
         {/* ═══ NEWSLETTER ═══ */}
         <div style={{
