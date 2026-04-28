@@ -282,7 +282,7 @@ function SmakfyndApp() {
               <p style={{ fontSize: 12, color: t.txM, margin: "0 0 8px", lineHeight: 1.5 }}>
                 Smakfynd är gratis och oberoende — inga annonser, inga sponsrade placeringar. Om du tycker om tjänsten kan du bjuda oss på ett glas.
               </p>
-              <div style={{ fontSize: 13, fontWeight: 600, color: t.wine }}>Swish: 123 456 78 90</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.wine }}>Swish: 0730-910551</div>
               <div style={{ fontSize: 10, color: t.txF, marginTop: 4 }}>Alla bidrag går till servrar, data och utveckling.</div>
             </div>
 
