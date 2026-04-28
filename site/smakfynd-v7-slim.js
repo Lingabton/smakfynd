@@ -4952,21 +4952,21 @@ function SmakfyndApp() {
       color: t.tx,
       marginBottom: 4
     }
-  }, "Gabriel Linton, grundare"), /*#__PURE__*/React.createElement("p", {
+  }, "Gabriel Linton"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 13,
       color: t.txM,
       lineHeight: 1.6,
       margin: 0
     }
-  }, "Forskare i innovation och entrepren\xF6rskap (PhD, \xD6rebro universitet). F\xF8rsteamanuensis vid Universitetet i Innlandet, Norge. Utbildad i dryckeskunskap vid Restaurang- och hotellh\xF6gskolan i Grythyttan. MBA, Cleveland State University."), /*#__PURE__*/React.createElement("p", {
+  }, "Jag har pluggat dryckeskunskap i Grythyttan, forskar i innovation vid Universitetet i Innlandet i Norge och har en MBA fr\xE5n Cleveland State."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 13,
       color: t.txM,
       lineHeight: 1.6,
       margin: "8px 0 0"
     }
-  }, "Jag ville hitta bra vin utan att gissa. Som forskare vill jag ha data \u2014 inte magk\xE4nsla. All information fanns redan, men ingen hade kopplat ihop den \xE5t vanliga konsumenter. Och jag m\xE4rkte att billigare viner ofta smakade n\xE4stan lika bra som betydligt dyrare. S\xE5 jag byggde Smakfynd \u2014 ett system som v\xE4ger in priset i omd\xF6met, systematiskt.")), /*#__PURE__*/React.createElement("p", {
+  }, "Smakfynd b\xF6rjade f\xF6r att jag tyckte det var on\xF6digt sv\xE5rt att hitta bra vin p\xE5 Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar h\xE4nsyn till priset, inte bara kvaliteten. S\xE5 jag byggde det.")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txL,
