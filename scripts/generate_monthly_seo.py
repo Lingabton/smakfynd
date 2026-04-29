@@ -112,11 +112,17 @@ def make_page(slug, title, meta, h1, intro, content_html, wines, extra_sections=
     # JSON-LD
     items_ld = []
     for i, w in enumerate(wines[:10]):
+        img = w.get('image_url', '') or 'https://smakfynd.se/og-image.svg'
+        grape = w.get('grape', '')
+        country = w.get('country', '')
+        desc = (w.get('style', '') or '')[:200] or (f"{grape} från {country}" if grape else f"Vin från {country}")
         items_ld.append({
             "@type": "ListItem", "position": i + 1,
             "item": {
                 "@type": "Product",
                 "name": f"{w.get('name','')} {w.get('sub','')}".strip(),
+                "image": img,
+                "description": desc,
                 "brand": {"@type": "Brand", "name": w.get('name', '')},
                 "category": "Wine",
                 "offers": {"@type": "Offer", "price": str(w.get('price', 0)), "priceCurrency": "SEK",

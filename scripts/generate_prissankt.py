@@ -176,11 +176,19 @@ def render_drop_row(d, rank):
 # Build JSON-LD
 items_ld = []
 for i, d in enumerate(drops[:10]):
+    img = d.get('image_url', '') or 'https://smakfynd.se/og-image.svg'
+    grape = d.get('grape', '')
+    country = d.get('country', '')
+    desc = f"{grape} från {country}" if grape else f"Vin från {country}"
     items_ld.append({
         "@type": "ListItem", "position": i + 1,
         "item": {
             "@type": "Product",
             "name": f"{d.get('name','')} {d.get('sub','')}".strip(),
+            "image": img,
+            "description": desc,
+            "brand": {"@type": "Brand", "name": d.get('name', '')},
+            "category": "Wine",
             "offers": {
                 "@type": "Offer", "price": str(d.get('price', 0)), "priceCurrency": "SEK",
                 "availability": "https://schema.org/InStock",
