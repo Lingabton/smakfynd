@@ -3,12 +3,12 @@ function AgeGate({ onConfirm }) {
   return (
     <div style={{
       minHeight: "100vh", background: "#f5f1eb", display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: "'DM Sans', -apple-system, sans-serif", padding: 20,
+      fontFamily: t.sans, padding: 20,
     }} role="dialog" aria-modal="true" aria-label="Åldersverifiering">
-      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       <div style={{ textAlign: "center", maxWidth: 380 }}>
         <div style={{ fontSize: 48, marginBottom: 16 }} aria-hidden="true">🍷</div>
-        <h1 style={{ margin: "0 0 8px", fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, color: "#2d2520" }}>Smakfynd</h1>
+        <h1 style={{ margin: "0 0 8px", fontSize: 28, fontFamily: t.serif, fontWeight: 400, color: "#2d2520" }}>Smakfynd</h1>
         <p style={{ margin: "0 0 24px", fontSize: 14, color: "#8a7e72", lineHeight: 1.6 }}>
           Den här sidan innehåller information om alkoholhaltiga drycker och riktar sig till personer som fyllt 25 år.
         </p>

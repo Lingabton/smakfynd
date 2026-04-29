@@ -30,7 +30,7 @@ function WineOfDay({ products, onSelect }) {
       >
         <ProductImage p={pick} size={48} eager={true} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pick.name}</div>
+          <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pick.name}</div>
           <div style={{ fontSize: 12, color: t.txL }}>{pick.sub} · {pick.country} · {pick.grape}</div>
         </div>
         <div style={{ textAlign: "center", flexShrink: 0 }}>
@@ -39,9 +39,9 @@ function WineOfDay({ products, onSelect }) {
             background: `${col}15`, border: `2px solid ${col}30`,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           }}>
-            <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{pick.smakfynd_score}</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{pick.smakfynd_score}</span>
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif", marginTop: 4 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: t.tx, fontFamily: t.serif, marginTop: 4 }}>
             {pick.price}<span style={{ fontSize: 10, fontWeight: 400, color: t.txL }}>kr</span>
           </div>
         </div>

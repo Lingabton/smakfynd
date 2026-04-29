@@ -7,7 +7,7 @@ function Methodology() {
     }}>
       <h2 style={{
         margin: "0 0 20px", fontSize: 24,
-        fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400,
+        fontFamily: t.serif, fontWeight: 400,
         color: t.tx, lineHeight: 1.2,
       }}>Så fungerar Smakfynd-poängen</h2>
 
@@ -18,7 +18,7 @@ function Methodology() {
       <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}>
         <div>
           <div style={{ marginBottom: 2 }}>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.tx }}>75 %</span>
+            <span style={{ fontFamily: t.serif, fontSize: 20, color: t.tx }}>75 %</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginLeft: 8 }}>Kvalitet</span>
           </div>
           <p style={{ margin: 0, fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
@@ -28,7 +28,7 @@ function Methodology() {
 
         <div>
           <div style={{ marginBottom: 2 }}>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.tx }}>25 %</span>
+            <span style={{ fontFamily: t.serif, fontSize: 20, color: t.tx }}>25 %</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginLeft: 8 }}>Prisvärde</span>
           </div>
           <p style={{ margin: 0, fontSize: 13, color: t.txM, lineHeight: 1.6 }}>

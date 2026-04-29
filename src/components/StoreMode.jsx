@@ -52,11 +52,11 @@ function StoreMode({ products, onClose }) {
           border: `2px solid ${col}30`,
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         }}>
-          <span style={{ fontSize: 22, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{p.smakfynd_score}</span>
+          <span style={{ fontSize: 22, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{p.smakfynd_score}</span>
           <span style={{ fontSize: 6, fontWeight: 700, color: col, opacity: 0.7 }}>POÄNG</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, lineHeight: 1.2 }}>{p.name}</div>
+          <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx, lineHeight: 1.2 }}>{p.name}</div>
           <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{p.sub} · {p.country}</div>
           {p.grape && <div style={{ fontSize: 11, color: t.txM, marginTop: 2 }}>{p.grape}</div>}
           <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
@@ -66,7 +66,7 @@ function StoreMode({ products, onClose }) {
           </div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: t.tx, fontFamily: t.serif }}>
             {p.price}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
           </div>
           <div style={{ fontSize: 10, color: t.txL }}>nr {p.nr}</div>
@@ -77,15 +77,15 @@ function StoreMode({ products, onClose }) {
 
   return (
     <div style={{
-      minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif",
+      minHeight: "100vh", background: t.bg, fontFamily: t.sans,
       padding: "0 16px 40px",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
       {/* Header */}
       <div style={{ padding: "20px 0 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>Smakfynd</div>
+          <div style={{ fontSize: 18, fontFamily: t.serif, color: t.tx }}>Smakfynd</div>
           <div style={{ fontSize: 11, color: t.txL }}>Stå-i-butiken-läge</div>
         </div>
         <button onClick={onClose} style={{
@@ -102,7 +102,7 @@ function StoreMode({ products, onClose }) {
             width: "100%", padding: "20px 60px 20px 52px", borderRadius: 16,
             border: `2px solid ${t.wine}30`, background: t.card, fontSize: 20,
             color: t.tx, outline: "none", boxSizing: "border-box",
-            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontFamily: t.serif,
           }}
           onFocus={e => e.target.style.borderColor = t.wine}
           onBlur={e => e.target.style.borderColor = t.wine + "30"}
@@ -155,7 +155,7 @@ function StoreMode({ products, onClose }) {
       {!result && (
         <div>
           <div style={{ textAlign: "center", padding: "24px 20px 16px", color: t.txL }}>
-            <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 4 }}>Skriv in vinets namn</div>
+            <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Skriv in vinets namn</div>
             <div style={{ fontSize: 12, color: t.txM }}>
               Vi visar poängen och bättre alternativ i samma prisklass.
             </div>
@@ -171,7 +171,7 @@ function StoreMode({ products, onClose }) {
                   display: "flex", alignItems: "center", gap: 10, padding: "10px 0",
                   borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none", cursor: "pointer",
                 }}>
-                  <span style={{ fontSize: 16, fontWeight: 900, color: t.green, fontFamily: "'Instrument Serif', Georgia, serif", width: 28, textAlign: "center" }}>{p.smakfynd_score}</span>
+                  <span style={{ fontSize: 16, fontWeight: 900, color: t.green, fontFamily: t.serif, width: 28, textAlign: "center" }}>{p.smakfynd_score}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
                     <div style={{ fontSize: 11, color: t.txL }}>{p.sub} · {p.price}{"\u00A0"}kr</div>

@@ -198,9 +198,9 @@ function SmakfyndApp() {
 
   return (
     <SavedContext.Provider value={sv}>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     {storeMode && <StoreMode products={products} onClose={() => setStoreMode(false)} />}
-    <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif", display: storeMode ? "none" : "block" }}>
+    <div style={{ minHeight: "100vh", background: t.bg, fontFamily: t.sans, display: storeMode ? "none" : "block" }}>
       <style>{`
         @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
@@ -209,8 +209,9 @@ function SmakfyndApp() {
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
         * { scrollbar-width: none; box-sizing: border-box; }
-        a { transition: color 0.15s ease; }
+        a { transition: color 0.15s ease; color: ${t.txM}; }
         button { transition: all 0.15s ease; }
+        .tabnum { font-variant-numeric: tabular-nums; }
         img { transition: opacity 0.3s ease; }
         [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible {
           outline: 2px solid ${t.wine}60;
@@ -226,7 +227,7 @@ function SmakfyndApp() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <svg width="22" height="22" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.wine }}>Smakfynd</span>
+            <span style={{ fontFamily: t.serif, fontSize: 20, color: t.wine }}>Smakfynd</span>
           </div>
           <div style={{ display: "flex", gap: 12, fontSize: 12, color: t.txL }}>
             {[["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`], ["about", "Om"],
@@ -261,7 +262,7 @@ function SmakfyndApp() {
         {/* ═══ PANELS ═══ */}
         {panel === "about" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
-            <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
+            <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
               Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>crowd-betyg</strong> från hundratusentals vindrickare, <strong>expertrecensioner</strong> från internationella kritiker och <strong>prisjämförelse</strong> inom varje kategori.
             </p>
@@ -269,7 +270,7 @@ function SmakfyndApp() {
               Resultatet: <strong>en enda poäng</strong> som visar kvalitet per krona. Inte det "bästa" vinet — utan det bästa <em>köpet</em>.
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
-              <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 4 }}>Gabriel Linton</div>
+              <div style={{ fontSize: 15, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Gabriel Linton</div>
               <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.6, margin: 0 }}>
                 Jag har pluggat dryckeskunskap i Grythyttan, forskar i innovation vid Universitetet i Innlandet i Norge och har en MBA från Cleveland State.
               </p>
@@ -294,7 +295,7 @@ function SmakfyndApp() {
 
         {panel === "method" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
-            <h2 style={{ margin: "0 0 14px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Så beräknas poängen</h2>
+            <h2 style={{ margin: "0 0 14px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Så beräknas poängen</h2>
 
             {/* The three components */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
@@ -320,7 +321,7 @@ function SmakfyndApp() {
             </div>
 
             {/* Transparency section */}
-            <h3 style={{ margin: "0 0 10px", fontSize: 15, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Transparens</h3>
+            <h3 style={{ margin: "0 0 10px", fontSize: 15, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Transparens</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
               {[
                 ["Datakällor", "Crowd-betyg hämtas från internationella vindrickare. Expertpoäng kommer från Wine Enthusiast (130 000 recensioner) och Wine-Searcher (aggregat från flera kritiker). Prisdata från Systembolaget."],
@@ -362,7 +363,7 @@ function SmakfyndApp() {
 
         {panel === "saved" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
-            <h2 style={{ margin: "0 0 4px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Mina viner</h2>
+            <h2 style={{ margin: "0 0 4px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Mina viner</h2>
             <p style={{ margin: "0 0 12px", fontSize: 12, color: t.txL }}>Sparas i webbläsaren. Logga in (kommer snart) för att synka.</p>
 
             {/* List tabs */}
@@ -606,7 +607,7 @@ function SmakfyndApp() {
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
             <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.4 }}>🔍</div>
-            <p style={{ fontSize: 17, fontFamily: "'Instrument Serif', serif", fontStyle: "italic", color: t.txM }}>Inga produkter matchade din sökning.</p>
+            <p style={{ fontSize: 17, fontFamily: t.serif, fontStyle: "italic", color: t.txM }}>Inga produkter matchade din sökning.</p>
             <button onClick={clearAll}
               style={{ marginTop: 10, fontSize: 13, color: t.wine, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
               Visa alla produkter
@@ -629,7 +630,7 @@ function SmakfyndApp() {
               if (sectionWines.length === 0) return null;
               return (
                 <div key={title}>
-                  <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{title}</h3>
+                  <h3 style={{ margin: "0 0 10px", fontSize: 16, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>{title}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {sectionWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
                   </div>
@@ -638,7 +639,7 @@ function SmakfyndApp() {
             })}
             {/* CTA → AI matcher */}
             <div style={{ textAlign: "center", padding: "20px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
-              <div style={{ fontSize: 14, fontFamily: "'Instrument Serif', serif", color: t.tx, marginBottom: 6 }}>Vet du vad du ska äta?</div>
+              <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 6 }}>Vet du vad du ska äta?</div>
               <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Vår AI matchar rätt vin till din middag.</p>
               <button onClick={() => { const el = document.getElementById("section-food"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>

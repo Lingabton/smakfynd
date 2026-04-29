@@ -70,7 +70,7 @@ function NewsletterCTA({ compact = false }) {
       background: `linear-gradient(145deg, ${t.wine}06, ${t.wine}03)`,
       border: `1px solid ${t.wine}15`,
     }}>
-      <div style={{ fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 4 }}>
+      <div style={{ fontSize: 18, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>
         📬 Missa inte veckans vinköp
       </div>
       <p style={{ fontSize: 13, color: t.txM, margin: "0 0 12px", lineHeight: 1.5 }}>

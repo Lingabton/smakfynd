@@ -212,29 +212,25 @@ const FAQS = [{
 const t = {
   // Backgrounds
   bg: "#f5f1ea",
-  // warmer, slightly darker
   surface: "#fdfbf7",
   card: "#ffffff",
   // Borders
   bdr: "#e2d8c8",
-  // warmer border
   bdrL: "#ede6da",
-  // Brand
+  // Brand — reserved for primary CTAs + brand mark only
   wine: "#8b2332",
   wineD: "#6b1a27",
   wineL: "#8b233210",
   // Text
   tx: "#1a1510",
-  // slightly darker for better contrast
-  txM: "#3d3830",
-  // darker mid-text
+  txM: "#3a2a1f",
+  // warm near-black for body links
   txL: "#6b6355",
-  // darker light text
   txF: "#9e9588",
   // Semantic
-  green: "#2d7a3e",
-  // slightly cooler green
-  greenL: "#2d7a3e10",
+  green: "#3d7a4a",
+  // olive-green for positive signals (comparisons)
+  greenL: "#3d7a4a10",
   deal: "#c44020",
   dealL: "#c4402010",
   gold: "#b08d40",
@@ -242,10 +238,38 @@ const t = {
   sh1: "0 1px 3px rgba(26,21,16,0.04)",
   sh2: "0 4px 12px rgba(26,21,16,0.06)",
   sh3: "0 8px 24px rgba(26,21,16,0.08)",
-  shHover: "0 8px 28px rgba(26,21,16,0.10)"
+  shHover: "0 8px 28px rgba(26,21,16,0.10)",
+  // Typography
+  serif: "'Newsreader', Georgia, serif",
+  sans: "'Inter', -apple-system, sans-serif"
 };
 
 // ── Shared styles ──
+// STATUS pills: filled, one per card (Toppköp, Starkt fynd, EKO)
+const statusPill = (label, color = t.green) => ({
+  fontSize: 9,
+  fontWeight: 700,
+  fontFamily: t.sans,
+  padding: "3px 8px",
+  borderRadius: 6,
+  background: color,
+  color: "#fff",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  whiteSpace: "nowrap"
+});
+
+// VIBE pills: outlined, multiple per card (Prisvärt, Tryggt vardagsvin)
+const vibePill = (color = t.txM) => ({
+  fontSize: 9,
+  fontFamily: t.sans,
+  padding: "2px 7px",
+  borderRadius: 100,
+  background: "transparent",
+  border: `1px solid ${color}30`,
+  color: color,
+  whiteSpace: "nowrap"
+});
 const pill = (active, accent = t.wine) => ({
   padding: "8px 16px",
   borderRadius: 100,
@@ -873,6 +897,7 @@ function Card({
     });
   };
   const sv = React.useContext(SavedContext);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
   const s100 = p.smakfynd_score;
   const [label, col] = getScoreInfo(s100);
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
@@ -941,7 +966,7 @@ function Card({
     style: {
       fontSize: 12,
       color: t.txL,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       flexShrink: 0
     }
@@ -949,7 +974,7 @@ function Card({
     style: {
       margin: 0,
       fontSize: 16,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx,
       lineHeight: 1.2,
@@ -957,19 +982,13 @@ function Card({
       textOverflow: "ellipsis",
       whiteSpace: "nowrap"
     }
-  }, p.name), p.organic && /*#__PURE__*/React.createElement("svg", {
-    width: "14",
-    height: "14",
-    viewBox: "0 0 16 16",
-    style: {
-      flexShrink: 0,
-      marginTop: 2
-    }
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M8 1c3.5 2 5 5 5 9-2-1-4-1-5.5.5C6 9 4.5 7 3 6c1-2.5 3-4 5-5z",
-    fill: t.green,
-    opacity: "0.7"
-  }))), /*#__PURE__*/React.createElement("div", {
+  }, p.name), p.organic && /*#__PURE__*/React.createElement("span", {
+    style: statusPill("EKO", t.green)
+  }, "EKO"), !p.organic && s100 >= 80 && /*#__PURE__*/React.createElement("span", {
+    style: statusPill("Toppköp", t.green)
+  }, "Toppk\xF6p"), !p.organic && s100 >= 70 && s100 < 80 && /*#__PURE__*/React.createElement("span", {
+    style: statusPill("Starkt fynd", "#5a7542")
+  }, "Starkt fynd")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -989,7 +1008,7 @@ function Card({
       fontSize: 16,
       fontWeight: 700,
       color: t.tx,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       flexShrink: 0,
       marginLeft: 8
     }
@@ -1014,7 +1033,25 @@ function Card({
       background: `${t.green}10`,
       fontSize: 10
     }
-  }, Math.round(comparison.price / p.price), "x v\xE4rde")), /*#__PURE__*/React.createElement("div", {
+  }, Math.round(comparison.price / p.price), "x v\xE4rde")), (() => {
+    const vibes = [];
+    if (p.price_score >= 8) vibes.push("Prisvärt");
+    if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
+    if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
+    if (p.price <= 100 && s100 >= 70) vibes.push("Budgetfavorit");
+    if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
+    return vibes.length > 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4,
+        flexWrap: "wrap",
+        marginTop: 4
+      }
+    }, vibes.slice(0, 3).map(v => /*#__PURE__*/React.createElement("span", {
+      key: v,
+      style: vibePill(t.txM)
+    }, v))) : null;
+  })(), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 3,
       fontSize: 11,
@@ -1024,7 +1061,8 @@ function Card({
     style: {
       flexShrink: 0,
       textAlign: "center",
-      width: 52
+      width: 52,
+      position: "relative"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1032,7 +1070,7 @@ function Card({
       fontWeight: 900,
       color: col,
       lineHeight: 1,
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     }
   }, s100), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1099,7 +1137,106 @@ function Card({
       borderRadius: 2,
       background: t.green
     }
-  })))))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      setShowScoreInfo(!showScoreInfo);
+    },
+    style: {
+      fontSize: 9,
+      color: t.txF,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      fontFamily: t.sans,
+      marginTop: 3,
+      padding: 0
+    }
+  }, "?"), showScoreInfo && /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      position: "absolute",
+      top: "100%",
+      right: -8,
+      marginTop: 6,
+      zIndex: 10,
+      width: 260,
+      padding: 14,
+      borderRadius: 12,
+      background: t.card,
+      border: `1px solid ${t.bdr}`,
+      boxShadow: t.sh3,
+      textAlign: "left",
+      fontSize: 11,
+      color: t.txM,
+      lineHeight: 1.5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: t.serif,
+      fontSize: 13,
+      fontWeight: 600,
+      color: t.tx,
+      marginBottom: 6
+    }
+  }, "Hur r\xE4knas po\xE4ngen?"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 6px"
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "#6b8cce"
+    }
+  }, "Kvalitet (75%)"), " \u2014 snitt av crowd-betyg (Vivino) och expertbetyg."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 6px"
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: t.green
+    }
+  }, "Prisv\xE4rde (25%)"), " \u2014 literpris j\xE4mf\xF6rt med kategorins median."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 8px"
+    }
+  }, "Ekologiska viner f\xE5r en liten bonus."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: t.txL,
+      marginBottom: 4
+    }
+  }, "KRITIKER"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap"
+    }
+  }, ["Suckling", "Decanter", "Falstaff", "Wine Spectator", "Wine Enthusiast", "Vinous"].map(c => /*#__PURE__*/React.createElement("span", {
+    key: c,
+    style: {
+      fontSize: 9,
+      padding: "2px 6px",
+      borderRadius: 4,
+      background: t.bg,
+      color: t.txL
+    }
+  }, c))), /*#__PURE__*/React.createElement("a", {
+    href: "#",
+    onClick: e => {
+      e.preventDefault();
+      const el = document.querySelector('[id*="section"]');
+      if (el) el.scrollIntoView({
+        behavior: "smooth"
+      });
+      setShowScoreInfo(false);
+    },
+    style: {
+      display: "block",
+      marginTop: 8,
+      fontSize: 10,
+      color: t.wine
+    }
+  }, "L\xE4s mer om metoden \u2192")))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 16px 10px",
       display: "flex",
@@ -1483,7 +1620,7 @@ function Card({
         fontSize: 16,
         fontWeight: 900,
         color: col,
-        fontFamily: "'Instrument Serif', Georgia, serif",
+        fontFamily: t.serif,
         width: 28,
         textAlign: "center"
       }
@@ -1869,7 +2006,7 @@ function LoginModal({
     style: {
       margin: "0 0 6px",
       fontSize: 22,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx
     }
@@ -2312,7 +2449,7 @@ function WineResult({
       fontWeight: 900,
       color: col,
       lineHeight: 1,
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     }
   }, m.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2322,7 +2459,7 @@ function WineResult({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx,
       overflow: "hidden",
       textOverflow: "ellipsis",
@@ -2350,7 +2487,7 @@ function WineResult({
       fontSize: 17,
       fontWeight: 700,
       color: t.tx,
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     }
   }, m.price, "\u00A0", /*#__PURE__*/React.createElement("span", {
     style: {
@@ -2467,7 +2604,7 @@ function FoodMatch({
     style: {
       fontSize: 15,
       fontWeight: 400,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx
     }
   }, "Kv\xE4llens middag?"), /*#__PURE__*/React.createElement("div", {
@@ -2641,7 +2778,7 @@ function FoodMatch({
       fontSize: 13,
       fontWeight: 600,
       color: dishColors[ci % dishColors.length],
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     }
   }, course.dish)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2873,7 +3010,7 @@ function NewsletterCTA({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx,
       marginBottom: 4
     }
@@ -3016,7 +3153,7 @@ function WineOfDay({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx,
       overflow: "hidden",
       textOverflow: "ellipsis",
@@ -3050,14 +3187,14 @@ function WineOfDay({
       fontWeight: 900,
       color: col,
       lineHeight: 1,
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     }
   }, pick.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
       fontWeight: 700,
       color: t.tx,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       marginTop: 4
     }
   }, pick.price, /*#__PURE__*/React.createElement("span", {
@@ -3085,7 +3222,7 @@ function Methodology() {
     style: {
       margin: "0 0 20px",
       fontSize: 24,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx,
       lineHeight: 1.2
@@ -3110,7 +3247,7 @@ function Methodology() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontSize: 20,
       color: t.tx
     }
@@ -3134,7 +3271,7 @@ function Methodology() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontSize: 20,
       color: t.tx
     }
@@ -3263,7 +3400,7 @@ function StoreMode({
         fontWeight: 900,
         color: col,
         lineHeight: 1,
-        fontFamily: "'Instrument Serif', Georgia, serif"
+        fontFamily: t.serif
       }
     }, p.smakfynd_score), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -3280,7 +3417,7 @@ function StoreMode({
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 16,
-        fontFamily: "'Instrument Serif', Georgia, serif",
+        fontFamily: t.serif,
         color: t.tx,
         lineHeight: 1.2
       }
@@ -3336,7 +3473,7 @@ function StoreMode({
         fontSize: 20,
         fontWeight: 700,
         color: t.tx,
-        fontFamily: "'Instrument Serif', Georgia, serif"
+        fontFamily: t.serif
       }
     }, p.price, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -3355,11 +3492,11 @@ function StoreMode({
     style: {
       minHeight: "100vh",
       background: t.bg,
-      fontFamily: "'DM Sans', -apple-system, sans-serif",
+      fontFamily: t.sans,
       padding: "0 16px 40px"
     }
   }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap",
     rel: "stylesheet"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3371,7 +3508,7 @@ function StoreMode({
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx
     }
   }, "Smakfynd"), /*#__PURE__*/React.createElement("div", {
@@ -3413,7 +3550,7 @@ function StoreMode({
       color: t.tx,
       outline: "none",
       boxSizing: "border-box",
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: t.serif
     },
     onFocus: e => e.target.style.borderColor = t.wine,
     onBlur: e => e.target.style.borderColor = t.wine + "30"
@@ -3534,7 +3671,7 @@ function StoreMode({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       color: t.tx,
       marginBottom: 4
     }
@@ -3571,7 +3708,7 @@ function StoreMode({
       fontSize: 16,
       fontWeight: 900,
       color: t.green,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       width: 28,
       textAlign: "center"
     }
@@ -3610,14 +3747,14 @@ function AgeGate({
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontFamily: "'DM Sans', -apple-system, sans-serif",
+      fontFamily: t.sans,
       padding: 20
     },
     role: "dialog",
     "aria-modal": "true",
     "aria-label": "\xC5ldersverifiering"
   }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap",
     rel: "stylesheet"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3634,7 +3771,7 @@ function AgeGate({
     style: {
       margin: "0 0 8px",
       fontSize: 28,
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: "#2d2520"
     }
@@ -3921,7 +4058,7 @@ function SmakfyndApp() {
   return /*#__PURE__*/React.createElement(SavedContext.Provider, {
     value: sv
   }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap",
     rel: "stylesheet"
   }), storeMode && /*#__PURE__*/React.createElement(StoreMode, {
     products: products,
@@ -3930,7 +4067,7 @@ function SmakfyndApp() {
     style: {
       minHeight: "100vh",
       background: t.bg,
-      fontFamily: "'DM Sans', -apple-system, sans-serif",
+      fontFamily: t.sans,
       display: storeMode ? "none" : "block"
     }
   }, /*#__PURE__*/React.createElement("style", null, `
@@ -3941,8 +4078,9 @@ function SmakfyndApp() {
         input::placeholder { color: ${t.txF} }
         *::-webkit-scrollbar { display: none }
         * { scrollbar-width: none; box-sizing: border-box; }
-        a { transition: color 0.15s ease; }
+        a { transition: color 0.15s ease; color: ${t.txM}; }
         button { transition: all 0.15s ease; }
+        .tabnum { font-variant-numeric: tabular-nums; }
         img { transition: opacity 0.3s ease; }
         [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible {
           outline: 2px solid ${t.wine}60;
@@ -3989,7 +4127,7 @@ function SmakfyndApp() {
     fontWeight: "400"
   }, "S")), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontFamily: t.serif,
       fontSize: 20,
       color: t.wine
     }
@@ -4064,7 +4202,7 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 12px",
       fontSize: 22,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx
     }
@@ -4092,7 +4230,7 @@ function SmakfyndApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       color: t.tx,
       marginBottom: 4
     }
@@ -4174,7 +4312,7 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 14px",
       fontSize: 22,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx
     }
@@ -4230,7 +4368,7 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 10px",
       fontSize: 15,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx
     }
@@ -4334,7 +4472,7 @@ function SmakfyndApp() {
     style: {
       margin: "0 0 4px",
       fontSize: 22,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontWeight: 400,
       color: t.tx
     }
@@ -5066,7 +5204,7 @@ function SmakfyndApp() {
   }, "\uD83D\uDD0D"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 17,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       fontStyle: "italic",
       color: t.txM
     }
@@ -5099,7 +5237,7 @@ function SmakfyndApp() {
       style: {
         margin: "0 0 10px",
         fontSize: 16,
-        fontFamily: "'Instrument Serif', serif",
+        fontFamily: t.serif,
         fontWeight: 400,
         color: t.tx
       }
@@ -5128,7 +5266,7 @@ function SmakfyndApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: t.serif,
       color: t.tx,
       marginBottom: 6
     }

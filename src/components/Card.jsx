@@ -7,6 +7,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
     if (next) track("click", { nr: p.nr, name: p.name, score: p.smakfynd_score, rank });
   };
   const sv = React.useContext(SavedContext);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
   const s100 = p.smakfynd_score;
   const [label, col] = getScoreInfo(s100);
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
@@ -53,15 +54,17 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
 
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Row 1: Rank + Name */}
+          {/* Row 1: Rank + Name + Status pill */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-            <span style={{ fontSize: 12, color: t.txL, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, flexShrink: 0 }}>#{rank}</span>
+            <span style={{ fontSize: 12, color: t.txL, fontFamily: t.serif, fontWeight: 400, flexShrink: 0 }}>#{rank}</span>
             <h3 style={{
-              margin: 0, fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif",
+              margin: 0, fontSize: 16, fontFamily: t.serif,
               fontWeight: 400, color: t.tx, lineHeight: 1.2,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{p.name}</h3>
-            {p.organic && <svg width="14" height="14" viewBox="0 0 16 16" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1c3.5 2 5 5 5 9-2-1-4-1-5.5.5C6 9 4.5 7 3 6c1-2.5 3-4 5-5z" fill={t.green} opacity="0.7"/></svg>}
+            {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
+            {!p.organic && s100 >= 80 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.organic && s100 >= 70 && s100 < 80 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
           {/* Row 2: Sub + Price */}
@@ -69,7 +72,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {p.sub}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif", flexShrink: 0, marginLeft: 8 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: t.serif, flexShrink: 0, marginLeft: 8 }}>
               {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
             </span>
           </div>
@@ -84,17 +87,31 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             </div>
           )}
 
-          {/* Row 4: Metadata */}
+          {/* Row 4: Vibe pills */}
+          {(() => {
+            const vibes = [];
+            if (p.price_score >= 8) vibes.push("Prisvärt");
+            if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
+            if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
+            if (p.price <= 100 && s100 >= 70) vibes.push("Budgetfavorit");
+            if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
+            return vibes.length > 0 ? (
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                {vibes.slice(0, 3).map(v => <span key={v} style={vibePill(t.txM)}>{v}</span>)}
+              </div>
+            ) : null;
+          })()}
+
+          {/* Row 5: Metadata */}
           <div style={{ marginTop: 3, fontSize: 11, color: t.txL }}>
             {meta}{foodStr ? ` · ${foodStr}` : ""}
           </div>
         </div>
 
-        {/* Score with split bars */}
-        <div style={{ flexShrink: 0, textAlign: "center", width: 52 }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{s100}</div>
+        {/* Score with split bars + "?" */}
+        <div style={{ flexShrink: 0, textAlign: "center", width: 52, position: "relative" }}>
+          <div style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
           <div style={{ fontSize: 8, color: t.txL, marginTop: 2, marginBottom: 4 }}>{label}</div>
-          {/* Split bars: kvalitet + prisvärde */}
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
               <span style={{ fontSize: 7, color: t.txF, width: 10 }}>K</span>
@@ -109,6 +126,29 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               </div>
             </div>
           </div>
+          <button onClick={e => { e.stopPropagation(); setShowScoreInfo(!showScoreInfo); }}
+            style={{ fontSize: 9, color: t.txF, background: "none", border: "none", cursor: "pointer", fontFamily: t.sans, marginTop: 3, padding: 0 }}>?</button>
+          {showScoreInfo && (
+            <div onClick={e => e.stopPropagation()} style={{
+              position: "absolute", top: "100%", right: -8, marginTop: 6, zIndex: 10,
+              width: 260, padding: 14, borderRadius: 12,
+              background: t.card, border: `1px solid ${t.bdr}`, boxShadow: t.sh3,
+              textAlign: "left", fontSize: 11, color: t.txM, lineHeight: 1.5,
+            }}>
+              <div style={{ fontFamily: t.serif, fontSize: 13, fontWeight: 600, color: t.tx, marginBottom: 6 }}>Hur räknas poängen?</div>
+              <p style={{ margin: "0 0 6px" }}><strong style={{ color: "#6b8cce" }}>Kvalitet (75%)</strong> — snitt av crowd-betyg (Vivino) och expertbetyg.</p>
+              <p style={{ margin: "0 0 6px" }}><strong style={{ color: t.green }}>Prisvärde (25%)</strong> — literpris jämfört med kategorins median.</p>
+              <p style={{ margin: "0 0 8px" }}>Ekologiska viner får en liten bonus.</p>
+              <div style={{ fontSize: 9, color: t.txL, marginBottom: 4 }}>KRITIKER</div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {["Suckling", "Decanter", "Falstaff", "Wine Spectator", "Wine Enthusiast", "Vinous"].map(c => (
+                  <span key={c} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: t.bg, color: t.txL }}>{c}</span>
+                ))}
+              </div>
+              <a href="#" onClick={e => { e.preventDefault(); const el = document.querySelector('[id*="section"]'); if (el) el.scrollIntoView({ behavior: "smooth" }); setShowScoreInfo(false); }}
+                style={{ display: "block", marginTop: 8, fontSize: 10, color: t.wine }}>Läs mer om metoden →</a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -261,7 +301,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                         onMouseEnter={e => e.currentTarget.style.background = t.bdrL}
                         onMouseLeave={e => e.currentTarget.style.background = t.bg}
                       >
-                        <span style={{ fontSize: 16, fontWeight: 900, color: col, fontFamily: "'Instrument Serif', Georgia, serif", width: 28, textAlign: "center" }}>{w.smakfynd_score}</span>
+                        <span style={{ fontSize: 16, fontWeight: 900, color: col, fontFamily: t.serif, width: 28, textAlign: "center" }}>{w.smakfynd_score}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
                           <div style={{ fontSize: 10, color: t.txL }}>{w.country} · {w.price}{"\u00A0"}kr</div>

@@ -65,7 +65,7 @@ function LoginModal({ onClose, onLogin }) {
         background: t.card, borderRadius: 20, padding: "32px 28px", maxWidth: 380, width: "100%",
         boxShadow: "0 20px 60px rgba(30,23,16,0.2)", animation: "scaleIn 0.2s ease",
       }}>
-        <h2 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>
+        <h2 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>
           {step === 1 ? "Logga in" : "Ange kod"}
         </h2>
 

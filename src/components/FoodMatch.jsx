@@ -53,15 +53,15 @@ function WineResult({ m }) {
         background: `${col}12`, border: `2px solid ${col}30`,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       }}>
-        <span style={{ fontSize: 17, fontWeight: 900, color: col, lineHeight: 1, fontFamily: "'Instrument Serif', Georgia, serif" }}>{m.smakfynd_score}</span>
+        <span style={{ fontSize: 17, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{m.smakfynd_score}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
+        <div style={{ fontSize: 15, fontFamily: t.serif, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
         <div style={{ fontSize: 12, color: t.txL }}>{m.sub} · {m.country}</div>
         {m._why && <div style={{ fontSize: 11, color: t.txM, marginTop: 3, lineHeight: 1.4 }}>{m._why}</div>}
       </div>
       <div style={{ textAlign: "right", flexShrink: 0 }}>
-        <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, fontFamily: "'Instrument Serif', Georgia, serif" }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: t.tx, fontFamily: t.serif }}>
           {m.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
         </div>
         {m._tier && <div style={{ fontSize: 9, fontWeight: 700, color: m._tierCol || t.txL, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{m._tier}</div>}
@@ -148,7 +148,7 @@ function FoodMatch({ products }) {
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 18 }}>🍽</span>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 400, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx }}>Kvällens middag?</div>
+          <div style={{ fontSize: 15, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
           <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta — vi föreslår vinet.</div>
         </div>
       </div>
@@ -215,7 +215,7 @@ function FoodMatch({ products }) {
                   {courseResults.length > 1 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <div style={{ width: 4, height: 18, borderRadius: 2, background: dishColors[ci % dishColors.length] }} />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: dishColors[ci % dishColors.length], fontFamily: "'Instrument Serif', Georgia, serif" }}>{course.dish}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: dishColors[ci % dishColors.length], fontFamily: t.serif }}>{course.dish}</span>
                     </div>
                   )}
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
