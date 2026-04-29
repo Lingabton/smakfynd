@@ -91,7 +91,7 @@ function StoreMode({ products, onClose }) {
         <button onClick={onClose} style={{
           padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`,
           background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
-        }}>Tillbaka</button>
+        }}>Tillbaka till Smakfynd</button>
       </div>
 
       {/* Big search */}
@@ -153,12 +153,32 @@ function StoreMode({ products, onClose }) {
       )}
 
       {!result && (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: t.txL }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>🏪</div>
-          <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 6 }}>Stå i butiken?</div>
-          <div style={{ fontSize: 13, color: t.txM, lineHeight: 1.6 }}>
-            Skriv in vinets namn eller artikelnummer.<br />
-            Vi visar poängen och om det finns bättre alternativ.
+        <div>
+          <div style={{ textAlign: "center", padding: "24px 20px 16px", color: t.txL }}>
+            <div style={{ fontSize: 16, fontFamily: "'Instrument Serif', Georgia, serif", color: t.tx, marginBottom: 4 }}>Skriv in vinets namn</div>
+            <div style={{ fontSize: 12, color: t.txM }}>
+              Vi visar poängen och bättre alternativ i samma prisklass.
+            </div>
+          </div>
+          <div style={{ padding: "0 0 20px" }}>
+            <div style={{ fontSize: 10, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Topplista just nu</div>
+            {products
+              .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 75)
+              .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
+              .slice(0, 5)
+              .map((p, i) => (
+                <div key={i} onClick={() => setQ(p.name)} style={{
+                  display: "flex", alignItems: "center", gap: 10, padding: "10px 0",
+                  borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none", cursor: "pointer",
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 900, color: t.green, fontFamily: "'Instrument Serif', Georgia, serif", width: 28, textAlign: "center" }}>{p.smakfynd_score}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: t.txL }}>{p.sub} · {p.price}{"\u00A0"}kr</div>
+                  </div>
+                </div>
+              ))
+            }
           </div>
         </div>
       )}

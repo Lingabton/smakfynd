@@ -198,7 +198,7 @@ function SmakfyndApp() {
 
   return (
     <SavedContext.Provider value={sv}>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
     {storeMode && <StoreMode products={products} onClose={() => setStoreMode(false)} />}
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'DM Sans', -apple-system, sans-serif", display: storeMode ? "none" : "block" }}>
       <style>{`
@@ -221,43 +221,42 @@ function SmakfyndApp() {
         }
       `}</style>
 
-      {/* ═══ HERO — compact, collapsible on mobile ═══ */}
-      <header style={{ padding: "16px 20px 0", maxWidth: 580, margin: "0 auto", animation: "fadeIn 0.4s ease" }}>
-        {/* Top bar: Logo + nav */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      {/* ═══ HEADER ═══ */}
+      <header style={{ padding: "12px 20px 0", maxWidth: 680, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, color: t.wine }}>Smakfynd</span>
+            <svg width="22" height="22" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
+            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: t.wine }}>Smakfynd</span>
           </div>
-          <div style={{ display: "flex", gap: 14, fontSize: 12, color: t.txL }}>
-            {[["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`],
-              ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => (
+          <div style={{ display: "flex", gap: 12, fontSize: 12, color: t.txL }}>
+            {[["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`], ["about", "Om"],
+              [auth.user ? "profile" : "login", auth.user ? "Konto" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }
                   if (k === "profile") { auth.logout(); return; }
-                  if (k === "weekly" || k === "food" || k === "picks") {
-                    const el = document.getElementById("section-" + k);
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                    return;
-                  }
                   setPanel(panel === k ? null : k);
                 }}
-                style={{ cursor: "pointer", color: panel === k ? t.wine : (k === "login" ? t.wine : t.txL), fontWeight: panel === k ? 600 : 400, padding: "8px 2px", minHeight: 44, display: "inline-flex", alignItems: "center" }}
+                style={{ cursor: "pointer", color: k === "login" ? t.wine : t.txL, fontWeight: panel === k ? 600 : 400, padding: "8px 0", minHeight: 44, display: "inline-flex", alignItems: "center" }}
               >{l}</span>
             ))}
           </div>
         </div>
-
-        {/* Tagline */}
-        <p style={{ margin: "0 0 4px", fontSize: 14, fontFamily: "'Instrument Serif', Georgia, serif", color: t.txM, textAlign: "center", lineHeight: 1.3 }}>
-          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner rankade efter värde.
-        </p>
-        <p style={{ margin: "0 0 10px", fontSize: 12, fontStyle: "italic", color: t.txL, textAlign: "center", lineHeight: 1.4 }}>
-          Inte "bästa vinet" utan bästa köpet i sin kategori.
-        </p>
       </header>
 
-      <div style={{ maxWidth: 580, margin: "0 auto", padding: "24px 16px 80px" }}>
+      {/* ═══ HERO ═══ */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 20px 0", textAlign: "center" }}>
+        <h1 style={{
+          margin: "0 0 6px", fontFamily: "'Newsreader', Georgia, serif", fontWeight: 400,
+          fontSize: "clamp(32px, 6vw, 56px)", color: t.tx, lineHeight: 1.1, letterSpacing: "-0.02em",
+        }}>
+          Bästa köpet i sin kategori
+        </h1>
+        <p style={{ margin: "0 0 20px", fontSize: 13, color: t.txL }}>
+          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter värde
+        </p>
+      </div>
+
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px 80px" }}>
 
         {/* ═══ PANELS ═══ */}
         {panel === "about" && (
@@ -397,43 +396,51 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ SEARCH ═══ */}
+        {/* ═══ JOB 1: VIN TILL IKVÄLL ═══ */}
+        <div id="section-food" style={{ marginBottom: 20 }}>
+          <FoodMatch products={products} />
+        </div>
+
+        {/* ═══ JOB 2: STÅ I BUTIKEN ═══ */}
+        <button onClick={() => setStoreMode(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: 14, width: "100%",
+            padding: "16px 20px", borderRadius: 16, border: `2px solid ${t.wine}25`,
+            background: t.card, cursor: "pointer", fontFamily: "inherit",
+            marginBottom: 24, transition: "all 0.2s", textAlign: "left",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}10`; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "25"; e.currentTarget.style.boxShadow = "none"; }}
+        >
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${t.wine}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx }}>Skanna i butiken</div>
+            <div style={{ fontSize: 12, color: t.txM }}>Sök på vinets namn, se poängen och bättre alternativ</div>
+          </div>
+          <span style={{ fontSize: 18, color: t.txL }}>→</span>
+        </button>
+
+        {/* ═══ JOB 3: BROWSA TOPPEN — search + filters + list ═══ */}
+        <div style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 20, marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Browsa alla viner</div>
+        </div>
+
+        {/* Search */}
         <div style={{ position: "relative", marginBottom: 10 }}>
           <label htmlFor="sf-search" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Sök vin</label>
-          <input id="sf-search" type="search" placeholder={searchCompact ? "Sök..." : "Sök vin, druva, land, stil..."} value={search} onChange={e => setSearch(e.target.value)}
+          <input id="sf-search" type="search" placeholder="Sök vin, druva, land, stil..." value={search} onChange={e => setSearch(e.target.value)}
             style={{
-              width: "100%",
-              padding: searchCompact ? "8px 16px 8px 36px" : "14px 16px 14px 42px",
-              borderRadius: searchCompact ? 10 : 14,
-              border: `1px solid ${t.bdr}`, background: t.card,
-              fontSize: searchCompact ? 13 : 14,
+              width: "100%", padding: "12px 16px 12px 40px", borderRadius: 12,
+              border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14,
               color: t.tx, outline: "none", boxSizing: "border-box",
-              transition: "padding 0.25s ease, font-size 0.25s ease, border-color 0.2s, box-shadow 0.2s",
+              transition: "border-color 0.2s, box-shadow 0.2s",
             }}
             onFocus={e => { setSearchFocused(true); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
             onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
-          <span style={{ position: "absolute", left: searchCompact ? 12 : 14, top: "50%", transform: "translateY(-50%)", fontSize: searchCompact ? 14 : 16, color: t.txL, pointerEvents: "none", transition: "left 0.25s ease" }}>⌕</span>
-        </div>
-
-        {/* ═══ STORE MODE BANNER ═══ */}
-        <div role="button" tabIndex={0} aria-label="Öppna butiksläge — sök på vinets namn och se poäng direkt"
-          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setStoreMode(true); } }}
-          onClick={() => setStoreMode(true)} style={{
-          display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
-          borderRadius: 14, background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
-          border: `1px solid ${t.wine}20`, marginBottom: 14, cursor: "pointer",
-          transition: "all 0.2s",
-        }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.background = t.wine + "10"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "20"; e.currentTarget.style.background = `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`; }}
-        >
-          <span style={{ fontSize: 24 }}>🏪</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>Står du i butiken?</div>
-            <div style={{ fontSize: 12, color: t.txM }}>Sök på vinets namn — se poängen och bättre alternativ direkt</div>
-          </div>
-          <span style={{ fontSize: 16, color: t.txL }}>→</span>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: t.txL, pointerEvents: "none" }}>⌕</span>
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -445,45 +452,33 @@ function SmakfyndApp() {
           ))}
         </div>
 
-        {/* ═══ QUICK PICKS ═══ */}
-        {!search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && (
-          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 10 }}>
-            {[
-              ["🔥", "Till grillat", () => { setSelFoods(["Kött"]); setShowAdvanced(true); }],
-              ["🐟", "Till fisk", () => { setCat("Vitt"); setSelFoods(["Fisk"]); setShowAdvanced(true); }],
-              ["💰", "Under 100 kr", () => { setPrice("0-79"); setShowAdvanced(true); }],
-              ["📉", "Prissänkt", () => { setShowDeals(true); setSortBy("drop"); setShowAdvanced(true); }],
-              ["🌿", "Ekologiskt", () => { setShowEco(true); }],
-            ].map(([icon, label, fn]) => (
-              <button key={label} onClick={fn} style={{
-                padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdrL}`,
-                background: t.card, cursor: "pointer", fontFamily: "inherit",
-                fontSize: 12, color: t.txM, display: "flex", alignItems: "center", gap: 5,
-                whiteSpace: "nowrap", transition: "all 0.2s", boxShadow: t.sh1,
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "40"; e.currentTarget.style.color = t.wine; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdrL; e.currentTarget.style.color = t.txM; }}
-              ><span style={{ fontSize: 14 }}>{icon}</span> {label}</button>
-            ))}
+        {/* ═══ ACTIVE FILTER CHIPS ═══ */}
+        {hasNonCatFilters ? (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
+            {price !== "all" && <span onClick={() => setPrice("all")} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{PRICES.find(p => p.k === price)?.l} ✕</span>}
+            {pkg !== "Flaska" && <span onClick={() => setPkg("Flaska")} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{pkg === "BiB" ? "Bag-in-box" : "Storpack"} ✕</span>}
+            {showEco && <span onClick={() => setShowEco(false)} style={{ ...pill(true, t.green), cursor: "pointer", fontSize: 11 }}>Ekologiskt ✕</span>}
+            {showDeals && <span onClick={() => { setShowDeals(false); if (sortBy === "drop") setSortBy("smakfynd"); }} style={{ ...pill(true, t.deal), cursor: "pointer", fontSize: 11 }}>Prissänkt ✕</span>}
+            {showNew && <span onClick={() => setShowNew(false)} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>Nyheter ✕</span>}
+            {selCountry && <span onClick={() => setSelCountry(null)} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{selCountry} ✕</span>}
+            {selRegion && <span onClick={() => setSelRegion(null)} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{selRegion} ✕</span>}
+            {selTaste && <span onClick={() => setSelTaste(null)} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{selTaste} ✕</span>}
+            {selFoods.map(f => <span key={f} onClick={() => toggleFood(f)} style={{ ...pill(true), cursor: "pointer", fontSize: 11 }}>{f} ✕</span>)}
+            <button onClick={clearAll} style={{ fontSize: 11, color: t.txL, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Rensa alla</button>
+            <button onClick={() => setShowAdvanced(!showAdvanced)} style={{ fontSize: 11, color: t.txM, background: "none", border: `1px solid ${t.bdrL}`, borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", marginLeft: "auto" }}>
+              {showAdvanced ? "Dölj filter" : "+ Filter"}
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+            <button onClick={() => setShowAdvanced(!showAdvanced)} style={{ ...pill(showAdvanced), display: "flex", alignItems: "center", gap: 4 }}>
+              Filter <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+            </button>
           </div>
         )}
 
-        {/* ═══ ADVANCED TOGGLE ═══ */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
-          <button onClick={() => setShowAdvanced(!showAdvanced)}
-            style={{ ...pill(showAdvanced || price !== "all" || pkg !== "Flaska" || showEco || showDeals || showNew || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd"), display: "flex", alignItems: "center", gap: 4 }}>
-            Filter {(() => { const n = (price !== "all" ? 1 : 0) + (pkg !== "Flaska" ? 1 : 0) + (showEco ? 1 : 0) + (showDeals ? 1 : 0) + (showNew ? 1 : 0) + (selCountry ? 1 : 0) + (selFoods.length > 0 ? 1 : 0) + (selRegion ? 1 : 0) + (selTaste ? 1 : 0) + (sortBy !== "smakfynd" ? 1 : 0); return n > 0 ? `(${n})` : ""; })()} <span style={{ fontSize: 10, transition: "transform 0.2s", display: "inline-block", transform: showAdvanced ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
-          </button>
-          {hasFilters && (
-            <button onClick={clearAll}
-              style={{ padding: "8px 14px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: "transparent", color: t.txL, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
-              Rensa filter ✕
-            </button>
-          )}
-        </div>
-
         {showAdvanced && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdrL}` }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12, padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdrL}` }}>
             {/* Package */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Förpackning</div>
@@ -495,7 +490,6 @@ function SmakfyndApp() {
                     background: pkg === k ? t.card : "transparent",
                     color: pkg === k ? t.tx : t.txL,
                     boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                    transition: "all 0.2s",
                   }}>{l}</button>
                 ))}
               </div>
@@ -503,34 +497,48 @@ function SmakfyndApp() {
             {/* Price */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pris</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {PRICES.filter(p => p.k !== "all").map(({ k, l }) => (
-                  <button key={k} onClick={() => { setPrice(price === k ? "all" : k); track("filter", { type: "price", value: k }); }} style={pill(price === k)}>{l}</button>
-                ))}
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                {PRICES.filter(pr => pr.k !== "all").map(({ k, l }) => {
+                  const cnt = products.filter(w => { const [a, b] = k.split("-").map(Number); return w.price >= a && w.price <= b; }).length;
+                  return <button key={k} onClick={() => { setPrice(price === k ? "all" : k); }} style={pill(price === k)}>{l} <span style={{ fontSize: 10, color: t.txF }}>({cnt})</span></button>;
+                })}
               </div>
             </div>
-            {/* Tags row */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
-              <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter</button>
-              <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") { setSortBy("smakfynd"); } }} style={pill(showDeals, t.deal)}>Prissänkt</button>
-              <button onClick={() => setShowBest(!showBest)} style={pill(showBest)}>Beställning</button>
+            {/* Toggles */}
+            <div>
+              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Filter</div>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
+                <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({products.filter(p => p.is_new).length})</button>
+                <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({products.filter(p => p.price_vs_launch_pct > 0).length})</button>
+              </div>
             </div>
-            {/* Country */}
+            {/* Country → Region hierarchical */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika",
-                  "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike",
-                ].map(c => (
-                  <button key={c} onClick={() => setSelCountry(selCountry === c ? null : c)} style={pill(selCountry === c)}>{c}</button>
-                ))}
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
+                  const cnt = products.filter(w => w.country === c).length;
+                  return <button key={c} onClick={() => { setSelCountry(selCountry === c ? null : c); setSelRegion(null); }} style={pill(selCountry === c)}>{c} ({cnt})</button>;
+                })}
               </div>
+              {selCountry && (() => {
+                const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
+                if (regions.length === 0) return null;
+                return (
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6, paddingLeft: 12, borderLeft: `2px solid ${t.wine}30` }}>
+                    {regions.slice(0, 10).map(rg => {
+                      const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
+                      return <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg} ({cnt})</button>;
+                    })}
+                  </div>
+                );
+              })()}
             </div>
             {/* Food */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Passar till</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => (
                   <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
                 ))}
@@ -539,27 +547,22 @@ function SmakfyndApp() {
             {/* Taste */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Smak</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 {["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => (
                   <button key={ts} onClick={() => setSelTaste(selTaste === ts ? null : ts)} style={pill(selTaste === ts)}>{ts}</button>
                 ))}
               </div>
             </div>
-            {/* Region */}
-            <div>
-              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Region</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["Bordeaux", "Toscana", "Rioja", "Piemonte", "Bourgogne", "Rhonedalen", "Champagne", "Kalifornien"].map(rg => (
-                  <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg}</button>
-                ))}
-              </div>
-            </div>
-            {/* Sort */}
-            <div>
+            {/* Sort — visually different */}
+            <div style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 10 }}>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sortera</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 {[["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
-                  <button key={k} onClick={() => setSortBy(k)} style={pill(sortBy === k)}>{l}</button>
+                  <button key={k} onClick={() => setSortBy(k)} style={{
+                    padding: "7px 14px", borderRadius: 8, border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
+                    background: sortBy === k ? `${t.wine}08` : "transparent",
+                    color: sortBy === k ? t.wine : t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: sortBy === k ? 600 : 400,
+                  }}>{l}</button>
                 ))}
               </div>
             </div>
@@ -663,162 +666,11 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ VECKANS FYND (below wine list) ═══ */}
-        <div id="section-weekly"><WeeklyPick products={products} /></div>
-
-        {/* ═══ AI FOOD MATCH ═══ */}
-        <div id="section-food"><FoodMatch products={products} /></div>
-
-        {/* ═══ NEWSLETTER CTA ═══ */}
-        <NewsletterCTA />
-
-        {/* ═══ REDAKTIONENS VAL ═══ */}
-        <div id="section-picks"><EditorsPicks products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} /></div>
-
-        {/* ═══ SÄSONGSINNEHÅLL ═══ */}
-        {(() => {
-          const month = new Date().getMonth(); // 0-11
-          const season = month >= 4 && month <= 8 ? "sommar" : month >= 2 && month <= 4 ? "vår" : month >= 9 && month <= 10 ? "höst" : "vinter";
-          const seasonConfig = {
-            vår: { title: "Vårviner", sub: "Lätta, friska viner för ljusare kvällar", emoji: "🌸", filter: p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 7 },
-            sommar: { title: "Sommarviner", sub: "Kylda favoriter till grillkvällar och picknick", emoji: "☀️", filter: p => (p.category === "Vitt" || p.category === "Rosé" || p.category === "Mousserande") && p.price <= 200 },
-            höst: { title: "Höstviner", sub: "Fylliga röda till mörka kvällar", emoji: "🍂", filter: p => p.category === "Rött" && (p.taste_body || 0) >= 7 },
-            vinter: { title: "Vinterviner", sub: "Värmande röda och festliga bubbel", emoji: "❄️", filter: p => (p.category === "Rött" && (p.taste_body || 0) >= 8) || p.category === "Mousserande" },
-          };
-          const cfg = seasonConfig[season];
-          const seasonWines = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && cfg.filter(p)).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 4);
-          if (seasonWines.length === 0) return null;
-          return (
-            <div style={{ marginTop: 40 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 20 }}>{cfg.emoji}</span>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>{cfg.title}</h3>
-                  <p style={{ margin: 0, fontSize: 12, color: t.txL }}>{cfg.sub}</p>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {seasonWines.map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* ═══ SITUATIONER ═══ */}
-        <div style={{ marginTop: 40 }}>
-          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Hitta vin till tillfället</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {[
-              ["Dejt", "Romantisk middag", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300],
-              ["Grillkväll", "Sommar & BBQ", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))],
-              ["Svärföräldrarna", "Tryggt & imponerande", p => p.expert_score >= 7.5 && p.crowd_score >= 7 && p.price >= 150],
-              ["Fredagsmys", "Under 120 kr", p => p.price <= 120 && p.smakfynd_score >= 70],
-              ["Picknick", "Lätt & friskt", p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 6],
-              ["After work", "Bubbel & lättviner", p => p.category === "Mousserande" || ((p.taste_body || 12) <= 5 && p.category === "Vitt")],
-            ].map(([title, sub, filterFn]) => {
-              const matches = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && filterFn(p)).slice(0, 3);
-              return (
-                <button key={title} onClick={() => { setSearch(""); setCat("all"); setShowAdvanced(false);
-                  const best = matches[0]; if (best) { window.location.hash = `vin/${best.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }
-                }}
-                  style={{ padding: "16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, cursor: "pointer", textAlign: "left", fontFamily: "inherit", transition: "all 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = t.wine + "40"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = t.bdr}
-                >
-                  <div style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{title}</div>
-                  <div style={{ fontSize: 11, color: t.txL, marginTop: 2 }}>{sub}</div>
-                  <div style={{ fontSize: 10, color: t.txF, marginTop: 6 }}>{matches.length} viner</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ═══ PRESENT-SEKTION ═══ */}
-        <div style={{ marginTop: 40 }}>
-          <h3 style={{ margin: "0 0 6px", fontSize: 18, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Ge bort vin</h3>
-          <p style={{ margin: "0 0 14px", fontSize: 12, color: t.txL }}>Kurerade val per budget — trygga presenter.</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              ["Under 100 kr", 0, 100, "Trevlig gest"],
-              ["100–200 kr", 100, 200, "Uppskattad present"],
-              ["200–400 kr", 200, 400, "Lyxig gåva"],
-            ].map(([label, lo, hi, desc]) => {
-              const picks = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.expert_score >= 7).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 3);
-              if (picks.length === 0) return null;
-              return (
-                <div key={label} style={{ padding: "14px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: t.tx }}>{label}</span>
-                    <span style={{ fontSize: 11, color: t.txL }}>{desc}</span>
-                  </div>
-                  {picks.map((p, i) => (
-                    <div key={i} onClick={() => { window.location.hash = `vin/${p.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                      style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", cursor: "pointer", borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none" }}>
-                      <span style={{ fontSize: 13, color: t.txM }}>{p.name} <span style={{ color: t.txL }}>{p.sub}</span></span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: t.tx, fontFamily: "'Instrument Serif', serif" }}>{p.price}{"\u00A0"}kr</span>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ═══ NYBÖRJARGUIDE ═══ */}
-        <div style={{ marginTop: 40, padding: "24px 20px", borderRadius: 18, background: t.card, border: `1px solid ${t.bdr}` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Ny på vin?</div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 20, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Börja här</h3>
-          <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.6 }}>
-            Du behöver inte kunna något om vin. Smakfynd har redan gjort jobbet — vi har analyserat tusentals viner och rankat dem efter kvalitet per krona. Högst poäng = mest smak för pengarna.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              ["1. Börja med ett rött under 100 kr", "Rött", 0, 100, "Tryggt och prisvärt — de flesta gillar dessa."],
-              ["2. Testa ett vitt till fisk eller kyckling", "Vitt", 0, 150, "Fräscht och enkelt — passar till vardagsmiddag."],
-              ["3. Prova bubbel till fredagen", "Mousserande", 0, 200, "Inte bara för fest — perfekt till fredagsmys."],
-            ].map(([title, cat, lo, hi, tip]) => {
-              const pick = products.find(p => p.category === cat && p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.smakfynd_score >= 70);
-              return (
-                <div key={title} style={{ padding: "12px 14px", borderRadius: 12, background: t.bg }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: t.tx, marginBottom: 4 }}>{title}</div>
-                  <p style={{ fontSize: 12, color: t.txL, margin: "0 0 6px" }}>{tip}</p>
-                  {pick && (
-                    <div onClick={() => { window.location.hash = `vin/${pick.nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                      style={{ fontSize: 12, color: t.wine, cursor: "pointer", fontWeight: 600 }}>
-                      Vårt tips: {pick.name} ({pick.price}{"\u00A0"}kr, {pick.smakfynd_score}/100) →
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ═══ METODIK ═══ */}
+        {/* ═══ METHODOLOGY ═══ */}
         <Methodology />
 
         {/* ═══ NEWSLETTER ═══ */}
-        <div style={{
-          marginTop: 40, padding: "28px 24px", borderRadius: 18,
-          background: t.card, border: `1px solid ${t.bdr}`,
-          textAlign: "center",
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.wine, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Nyhetsbrev</div>
-          <h3 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: "'Instrument Serif', serif", fontWeight: 400, color: t.tx }}>Veckans bästa köp</h3>
-          <p style={{ fontSize: 13, color: t.txM, margin: "0 0 16px", lineHeight: 1.5 }}>Smartaste vinvalen direkt i inkorgen — varje torsdag.</p>
-          <a href="https://smakfynd.substack.com" target="_blank" rel="noopener noreferrer"
-            style={{
-              display: "inline-block", padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer",
-              background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-              color: "#fff", fontSize: 14, fontWeight: 600, textDecoration: "none",
-              boxShadow: `0 2px 8px ${t.wine}25`, transition: "opacity 0.2s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >Prenumerera på Substack ↗</a>
-          <p style={{ fontSize: 11, color: t.txL, margin: "10px 0 0" }}>Gratis. Avsluta när du vill.</p>
-        </div>
+        <NewsletterCTA />
 
         {/* ═══ FOOTER ═══ */}
         <footer style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${t.bdr}`, textAlign: "center" }}>

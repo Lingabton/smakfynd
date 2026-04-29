@@ -24,8 +24,6 @@ FILES = [
     "components/SaveButton.jsx",
     "components/AIQuestion.jsx",
     "components/LoginModal.jsx",
-    "components/WeeklyPick.jsx",
-    "components/EditorsPicks.jsx",
     "components/FoodMatch.jsx",
     "components/NewsletterCTA.jsx",
     "components/WineOfDay.jsx",

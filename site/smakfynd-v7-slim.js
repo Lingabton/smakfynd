@@ -852,17 +852,16 @@ function CellarButton({
 // ════════════════════════════════════════════════════════════
 // components/Card.jsx
 // ════════════════════════════════════════════════════════════
-// src/components/Card.jsx
+// src/components/Card.jsx — Redesigned wine card
 function Card({
   p,
   rank,
   delay,
-  totalInCategory,
   allProducts,
   autoOpen,
   auth
 }) {
-  const [open, setOpen] = useState(!!autoOpen);
+  const [open, setOpen] = useState(!!autoOpen || rank === 1 && !autoOpen);
   const handleOpen = () => {
     const next = !open;
     setOpen(next);
@@ -874,26 +873,30 @@ function Card({
     });
   };
   const sv = React.useContext(SavedContext);
-  const icon = {
-    Rött: "🍷",
-    Vitt: "🥂",
-    Rosé: "🌸",
-    Mousserande: "🍾"
-  }[p.category] || "✦";
   const s100 = p.smakfynd_score;
-  const [label, col, emoji] = getScoreInfo(s100);
-  const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
+  const [label, col] = getScoreInfo(s100);
   const sbUrl = `https://www.systembolaget.se/produkt/vin/${p.nr}`;
 
-  // Rank badges
-  const badge = rank === 1 ? "Bästa köpet" : rank <= 3 ? `Topp ${rank}` : null;
-  // Don't show rank numbers — just show wines as "Topp-viner" when scores are close
+  // Split score: approximate kvalitet vs prisvärde contribution
+  const qualPct = 75;
+  const pricePct = 25;
+  const qualBar = Math.min(100, (p.crowd_score || 5) / 10 * 100);
+  const priceBar = Math.min(100, (p.price_score || 5) / 10 * 100);
 
+  // Comparison wine: find expensive wine with similar crowd score
+  const comparison = useMemo(() => {
+    if (!allProducts || !p.crowd_score || p.crowd_score < 7 || p.price > 200) return null;
+    return allProducts.find(w => w.nr !== p.nr && w.category === p.category && w.package === p.package && w.price >= p.price * 2.5 && w.price >= 200 && w.crowd_score && w.crowd_score <= p.crowd_score + 0.3 && w.crowd_score >= p.crowd_score - 0.5) || null;
+  }, [p.nr, allProducts]);
+
+  // Metadata line
+  const meta = [p.country, p.region, p.grape].filter(Boolean).join(" · ");
+  const foodStr = (p.food_pairings || []).slice(0, 3).join(", ");
   return /*#__PURE__*/React.createElement("div", {
     role: "button",
     tabIndex: 0,
     "aria-expanded": open,
-    "aria-label": `${p.name} ${p.sub || ''} — ${s100} poäng, ${p.price} kr`,
+    "aria-label": `${p.name} ${p.sub || ''}, ${s100} poäng, ${p.price}\u00A0kr`,
     onClick: handleOpen,
     onKeyDown: e => {
       if (e.key === "Enter" || e.key === " ") {
@@ -909,45 +912,21 @@ function Card({
       boxShadow: open ? t.sh3 : t.sh1,
       transition: "all 0.25s ease",
       overflow: "hidden",
-      animation: `slideUp 0.35s ease ${delay}s both`,
+      animation: delay ? `slideUp 0.35s ease ${delay}s both` : undefined,
       cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 18px",
+      padding: "14px 16px",
       display: "flex",
-      gap: 14,
+      gap: 12,
       alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      flexShrink: 0
     }
   }, /*#__PURE__*/React.createElement(ProductImage, {
     p: p,
-    size: 52,
+    size: 48,
     eager: rank <= 3
   }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      top: -4,
-      left: -4,
-      width: 20,
-      height: 20,
-      borderRadius: 6,
-      background: rank <= 3 ? `linear-gradient(135deg, ${t.wine}, ${t.wineD})` : t.card,
-      border: rank <= 3 ? "none" : `1px solid ${t.bdr}`,
-      color: rank <= 3 ? "#fff" : t.txM,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: 10,
-      fontWeight: 800,
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-    }
-  }, rank)), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
@@ -955,19 +934,21 @@ function Card({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      justifyContent: "space-between",
-      gap: 10,
-      alignItems: "flex-start"
+      alignItems: "baseline",
+      gap: 6
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      minWidth: 0,
-      flex: 1
+      fontSize: 12,
+      color: t.txL,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      fontWeight: 400,
+      flexShrink: 0
     }
-  }, /*#__PURE__*/React.createElement("h3", {
+  }, "#", rank), /*#__PURE__*/React.createElement("h3", {
     style: {
       margin: 0,
-      fontSize: 17,
+      fontSize: 16,
       fontFamily: "'Instrument Serif', Georgia, serif",
       fontWeight: 400,
       color: t.tx,
@@ -976,123 +957,41 @@ function Card({
       textOverflow: "ellipsis",
       whiteSpace: "nowrap"
     }
-  }, p.name), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "2px 0 0",
-      fontSize: 12,
-      color: t.txL,
-      letterSpacing: "0.01em"
-    }
-  }, p.sub, " \xB7 ", p.country, p.region ? `, ${p.region}` : "")), /*#__PURE__*/React.createElement("div", {
+  }, p.name), p.organic && /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 16 16",
     style: {
       flexShrink: 0,
-      textAlign: "center"
+      marginTop: 2
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M8 1c3.5 2 5 5 5 9-2-1-4-1-5.5.5C6 9 4.5 7 3 6c1-2.5 3-4 5-5z",
+    fill: t.green,
+    opacity: "0.7"
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      position: "relative",
-      display: "inline-block"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "50",
-    height: "50",
-    viewBox: "0 0 50 50",
-    style: {
-      display: "block"
-    }
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "25",
-    r: "22",
-    fill: "#e8f0e4"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "25",
-    r: "22",
-    fill: "none",
-    stroke: "#d4ddd0",
-    strokeWidth: "2.5"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "25",
-    r: "22",
-    fill: "none",
-    stroke: "#2d6b3f",
-    strokeWidth: "2.5",
-    strokeDasharray: `${s100 * 1.38} 138`,
-    strokeLinecap: "round",
-    transform: "rotate(-90 25 25)",
-    style: {
-      transition: "stroke-dasharray 0.8s ease"
-    }
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "25",
-    y: "30",
-    textAnchor: "middle",
-    fontFamily: "'Instrument Serif', Georgia, serif",
-    fontSize: "19",
-    fontWeight: "900",
-    fill: "#2d6b3f"
-  }, s100)), (p.organic || p.price_vs_launch_pct > 0 || p.is_new) && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      top: -6,
-      left: -14,
       display: "flex",
-      gap: 2
-    }
-  }, p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 8,
-      fontWeight: 800,
-      padding: "2px 5px",
-      borderRadius: 4,
-      background: t.deal,
-      color: "#fff",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.15)"
-    }
-  }, "\u2212", p.price_vs_launch_pct, "%"), p.organic && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 800,
-      padding: "3px 7px",
-      borderRadius: 5,
-      background: t.green,
-      color: "#fff",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-      letterSpacing: "0.05em"
-    }
-  }, "EKO"), p.is_new && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 8,
-      fontWeight: 700,
-      padding: "2px 5px",
-      borderRadius: 4,
-      background: t.wine,
-      color: "#fff",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.15)"
-    }
-  }, "NY"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      fontWeight: 600,
-      color: col,
-      marginTop: 3
-    }
-  }, label))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 6,
-      display: "flex",
+      justifyContent: "space-between",
       alignItems: "baseline",
-      gap: 6,
-      flexWrap: "wrap"
+      marginTop: 2
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 18,
+      fontSize: 12,
+      color: t.txL,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, p.sub), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
       fontWeight: 700,
       color: t.tx,
-      fontFamily: "'Instrument Serif', Georgia, serif"
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      flexShrink: 0,
+      marginLeft: 8
     }
   }, p.price, "\u00A0", /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1100,185 +999,120 @@ function Card({
       fontWeight: 400,
       color: t.txL
     }
-  }, "kr")), p.vol && p.price && /*#__PURE__*/React.createElement("span", {
+  }, "kr"))), comparison && /*#__PURE__*/React.createElement("div", {
     style: {
+      marginTop: 4,
       fontSize: 11,
-      fontWeight: 600,
-      color: t.txM,
-      background: t.bg,
+      color: t.green,
+      fontWeight: 500
+    }
+  }, "Smakar som ", comparison.name, " (", Math.round(comparison.price), "\u00A0", "kr)", /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 6,
       padding: "1px 6px",
-      borderRadius: 4
+      borderRadius: 4,
+      background: `${t.green}10`,
+      fontSize: 10
     }
-  }, Math.round(p.price / (p.vol / 1000)), " kr/l"), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
+  }, Math.round(comparison.price / p.price), "x v\xE4rde")), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
-      color: t.txL,
-      textDecoration: "line-through"
-    }
-  }, p.launch_price, "\u00A0", "kr"), (p.grape || foodStr) && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr
-    }
-  }, "\xB7"), p.grape && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: t.txM
-    }
-  }, p.grape), p.grape && foodStr && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr
-    }
-  }, "\xB7"), foodStr && /*#__PURE__*/React.createElement("span", {
-    style: {
+      marginTop: 3,
       fontSize: 11,
       color: t.txL
     }
-  }, foodStr)), /*#__PURE__*/React.createElement("div", {
+  }, meta, foodStr ? ` · ${foodStr}` : "")), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 8
+      flexShrink: 0,
+      textAlign: "center",
+      width: 52
     }
-  }, /*#__PURE__*/React.createElement(ScoreBars, {
-    p: p
-  })), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      fontWeight: 900,
+      color: col,
+      lineHeight: 1,
+      fontFamily: "'Instrument Serif', Georgia, serif"
+    }
+  }, s100), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      color: t.txL,
+      marginTop: 2,
+      marginBottom: 4
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 4,
-      flexWrap: "wrap",
-      marginTop: 5
-    }
-  }, p.expert_score >= 7.5 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
-    }
-  }, "Expertbetyg"), p.price_score >= 8 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
-    }
-  }, "Prisv\xE4rt"), (p.crowd_reviews || 0) >= 5000 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#6b8cce10",
-      color: "#6b8cce"
-    }
-  }, "Popul\xE4rt"), p.organic && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#2d7a3e10",
-      color: "#2d7a3e"
-    }
-  }, "Eko"), p.price_vs_launch_pct > 5 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.dealL,
-      color: t.deal
-    }
-  }, "Priss\xE4nkt"), p.critics && p.critics.length >= 3 && p.critics.every(cr => cr.s >= 85) && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
-    }
-  }, p.critics.length, " av ", p.num_critics || p.critics.length, " kritiker ger 85+"), p.critic_consensus === "stark konsensus" && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#b07d3b10",
-      color: "#b07d3b"
-    }
-  }, "Stark konsensus"), p.critic_consensus === "kontroversiellt" && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: "#ce6b6b10",
-      color: "#ce6b6b"
-    }
-  }, "Delade meningar")), (() => {
-    const chips = [];
-    if (p.food_pairings?.some(f => /lamm|grillat|kött/i.test(f)) && p.taste_body >= 7) chips.push("Fynd till grillat");else if (p.food_pairings?.some(f => /fisk|skaldjur/i.test(f)) && p.category === "Vitt") chips.push("Perfekt till fisk");
-    if (p.price <= 100 && p.smakfynd_score >= 70) chips.push("Tryggt vardagsvin");
-    if (p.crowd_reviews >= 10000 && p.crowd_score >= 7.5) chips.push("Tryggt middagsvin");
-    if (p.price >= 200 && p.expert_score >= 8) chips.push("Imponera på middagen");
-    return chips.length > 0 ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 4,
-        flexWrap: "wrap",
-        marginTop: 3
-      }
-    }, chips.slice(0, 2).map(c => /*#__PURE__*/React.createElement("span", {
-      key: c,
-      style: {
-        fontSize: 9,
-        padding: "2px 7px",
-        borderRadius: 100,
-        background: `${t.wine}08`,
-        color: t.wine,
-        fontWeight: 500
-      }
-    }, c))) : null;
-  })(), p.insight && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 5,
-      fontSize: 11,
-      color: t.wine,
-      lineHeight: 1.4,
-      fontWeight: 500
-    }
-  }, p.insight), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: p.insight ? 2 : 5,
-      fontSize: 11,
-      color: t.txM,
-      lineHeight: 1.4,
-      fontStyle: "italic"
-    }
-  }, (() => {
-    const c = p.crowd_score || 0,
-      e = p.expert_score || 0,
-      pr = p.price_score || 0;
-    const rev = p.crowd_reviews || 0;
-    if (c >= 8.0 && pr >= 8) return "Publikfavorit till bra pris — få viner slår detta i prisklassen";
-    if (c >= 8.0 && e >= 7.5) return "Omtyckt av både crowd och kritiker — tryggt val";
-    if (c >= 8.0) return "Mycket omtyckt bland vindrickare";
-    if (e >= 8.0 && pr >= 8) return "Kritikerfavorit till överraskande lågt pris";
-    if (e >= 7.5 && pr >= 8) return "Bra expertbetyg och mer smak än prislappen antyder";
-    if (e >= 7.5 && c >= 7.0) return "Uppskattat av både publik och kritiker";
-    if (pr >= 9 && c >= 7.0) return "Mycket vin för pengarna — svårslaget i prisklassen";
-    if (pr >= 8 && c >= 7.0) return "Bra köp för priset — bred uppskattning";
-    if (pr >= 8) return "Prisvärt val med rimligt betyg";
-    if (c >= 7.5 && rev >= 5000) return "Tryggt och populärt — många har provat och gillar";
-    if (c >= 7.0) return "Solitt val med god crowd-uppskattning";
-    return null;
-  })()))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "0 18px 12px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center"
+      flexDirection: "column",
+      gap: 2
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 12
+      gap: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 7,
+      color: t.txF,
+      width: 10
+    }
+  }, "K"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 3,
+      borderRadius: 2,
+      background: t.bdrL
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${qualBar}%`,
+      height: "100%",
+      borderRadius: 2,
+      background: "#6b8cce"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 7,
+      color: t.txF,
+      width: 10
+    }
+  }, "P"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 3,
+      borderRadius: 2,
+      background: t.bdrL
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${priceBar}%`,
+      height: "100%",
+      borderRadius: 2,
+      background: t.green
+    }
+  })))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 16px 10px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      opacity: open ? 1 : 0.6,
+      transition: "opacity 0.2s"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
     }
   }, /*#__PURE__*/React.createElement("a", {
     href: sbUrl,
@@ -1293,25 +1127,16 @@ function Card({
       });
     },
     style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
       fontSize: 11,
       color: t.txM,
       textDecoration: "none",
-      transition: "color 0.2s",
       minHeight: 44,
-      padding: "8px 4px"
+      display: "inline-flex",
+      alignItems: "center",
+      padding: "0 4px"
     },
-    onMouseEnter: e => e.currentTarget.style.color = t.wine,
-    onMouseLeave: e => e.currentTarget.style.color = t.txM,
     "aria-label": `Köp ${p.name} på Systembolaget (öppnas i nytt fönster)`
-  }, "Systembolaget ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9
-    },
-    "aria-hidden": "true"
-  }, "\u2197")), sv && /*#__PURE__*/React.createElement(SaveButton, {
+  }, "Systembolaget"), sv && /*#__PURE__*/React.createElement(SaveButton, {
     nr: p.nr || p.id,
     sv: sv,
     auth: auth
@@ -1333,203 +1158,75 @@ function Card({
       } else {
         navigator.clipboard?.writeText(`${text}\n${url}`);
         const btn = e.currentTarget;
-        const orig = btn.textContent;
-        btn.textContent = "✓ Kopierad!";
+        btn.textContent = "Kopierad!";
         btn.style.color = t.green;
         setTimeout(() => {
-          btn.innerHTML = '<span style="font-size:13px;line-height:1">↗</span> Dela';
+          btn.textContent = "Dela";
           btn.style.color = t.txL;
         }, 2000);
       }
     },
     style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
-      fontSize: 12,
+      fontSize: 11,
       color: t.txL,
       background: "none",
       border: "none",
       cursor: "pointer",
-      padding: "8px 4px",
+      padding: "0 4px",
       fontFamily: "inherit",
-      minHeight: 44
+      minHeight: 44,
+      display: "inline-flex",
+      alignItems: "center"
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      lineHeight: 1
-    }
-  }, "\u2197"), " Dela")), /*#__PURE__*/React.createElement("span", {
+  }, "Dela")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: t.txF,
-      display: "flex",
-      alignItems: "center",
-      gap: 3
+      color: t.txF
     }
-  }, open ? "Stäng ▲" : "Se varför ▼")), open && /*#__PURE__*/React.createElement("div", {
+  }, open ? "Stäng" : "Smakprofil & jämförbara")), open && /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "0 18px 18px",
       borderTop: `1px solid ${t.bdrL}`,
-      paddingTop: 14
+      padding: "14px 16px 16px"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 5,
-      flexWrap: "wrap",
-      marginBottom: 10
+      gap: 20,
+      flexWrap: "wrap"
     }
-  }, badge && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      fontWeight: 800,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: rank === 1 ? `linear-gradient(135deg, #b08d40, #d4a84b)` : `${t.wine}15`,
-      color: rank === 1 ? "#fff" : t.wine,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em",
-      boxShadow: rank === 1 ? "0 1px 4px rgba(176,141,64,0.3)" : "none"
+      flex: "1 1 280px",
+      minWidth: 0
     }
-  }, rank === 1 ? "🏆 " : "", badge), p.confidence === "hög" && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 600,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
-    }
-  }, "H\xF6g trygghet"), p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 700,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.dealL,
-      color: t.deal,
-      textTransform: "uppercase"
-    }
-  }, "Priss\xE4nkt \u2212", p.price_vs_launch_pct, "%"), p.organic && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 600,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.greenL,
-      color: t.green
-    }
-  }, "Ekologiskt"), p.food_pairings?.length > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 500,
-      padding: "3px 10px",
-      borderRadius: 100,
-      background: t.bg,
-      color: t.txM,
-      border: `1px solid ${t.bdrL}`
-    }
-  }, "Passar till ", p.food_pairings.slice(0, 2).join(", "))), p.style && /*#__PURE__*/React.createElement("div", {
+  }, p.style && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: t.txM,
       fontStyle: "italic",
-      marginBottom: 10,
+      marginBottom: 12,
       lineHeight: 1.5
     }
-  }, p.style), /*#__PURE__*/React.createElement("div", {
+  }, p.style), (p.taste_body || p.taste_fruit || p.taste_sweet != null) && /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 12,
-      marginBottom: 10
-    }
-  }, /*#__PURE__*/React.createElement(ProductImage, {
-    p: p,
-    size: 56,
-    style: {
-      borderRadius: 10,
-      background: "#faf7f2"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
+      marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      flexWrap: "wrap",
-      fontSize: 11,
-      color: t.txM,
-      marginBottom: 6
-    }
-  }, [p.grape, p.alc ? `${p.alc}%` : null, `${p.vol} ml`, `${p.country}${p.region ? `, ${p.region}` : ""}`].filter(Boolean).map((v, i, arr) => /*#__PURE__*/React.createElement("span", {
-    key: i
-  }, v, i < arr.length - 1 ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.bdr,
-      margin: "0 2px"
-    }
-  }, "\xB7") : ""))), p.food_pairings?.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4,
-      flexWrap: "wrap"
-    }
-  }, p.food_pairings.map((f, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    style: {
-      fontSize: 10,
-      padding: "2px 7px",
-      borderRadius: 100,
-      background: t.bg,
-      color: t.txM,
-      border: `1px solid ${t.bdrL}`
-    }
-  }, f))))), (p.taste_body || p.taste_fruit || p.taste_sweet != null) && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14,
-      padding: "12px 14px",
-      borderRadius: 10,
-      background: t.bg
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9,
       color: t.txL,
       textTransform: "uppercase",
-      letterSpacing: "0.1em"
+      letterSpacing: "0.1em",
+      marginBottom: 8
     }
-  }, "Smakprofil"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: t.txM,
-      fontStyle: "italic"
-    }
-  }, (() => {
-    const words = [];
-    if (p.taste_body >= 9) words.push("fylligt");else if (p.taste_body >= 6) words.push("medelkroppad");else if (p.taste_body && p.taste_body <= 4) words.push("lätt");
-    if (p.taste_fruit >= 9) words.push("fruktigt");else if (p.taste_fruit && p.taste_fruit <= 3) words.push("stramt");
-    if (p.taste_sweet != null && p.taste_sweet <= 2) words.push("torrt");else if (p.taste_sweet >= 8) words.push("sött");
-    return words.length > 0 ? words.join(", ") : null;
-  })())), /*#__PURE__*/React.createElement("div", {
+  }, "Smakprofil"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
       gap: 8
     }
   }, [["Lätt", "Fylligt", p.taste_body, 12], ["Stram", "Fruktigt", p.taste_fruit, 12], ["Torrt", "Sött", p.taste_sweet, 12]].filter(([_a, _b, v]) => v != null && v > 0).map(([lo, hi, val, max]) => /*#__PURE__*/React.createElement("div", {
-    key: lo
-  }, /*#__PURE__*/React.createElement("div", {
+    key: lo,
     style: {
       display: "flex",
       alignItems: "center",
@@ -1539,7 +1236,7 @@ function Card({
     style: {
       fontSize: 10,
       color: t.txL,
-      width: 40,
+      width: 38,
       textAlign: "right",
       flexShrink: 0
     }
@@ -1556,8 +1253,8 @@ function Card({
       position: "absolute",
       top: "50%",
       left: `${val / max * 100}%`,
-      width: 9,
-      height: 9,
+      width: 8,
+      height: 8,
       borderRadius: "50%",
       background: t.wine,
       border: `2px solid ${t.card}`,
@@ -1568,15 +1265,12 @@ function Card({
     style: {
       fontSize: 10,
       color: t.txL,
-      width: 40,
+      width: 38,
       flexShrink: 0
     }
-  }, hi)))))), /*#__PURE__*/React.createElement("div", {
+  }, hi))))), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: 14,
-      padding: "12px 14px",
-      borderRadius: 10,
-      background: t.bg
+      marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1584,46 +1278,36 @@ function Card({
       color: t.txL,
       textTransform: "uppercase",
       letterSpacing: "0.1em",
-      marginBottom: 10
+      marginBottom: 8
     }
   }, "Po\xE4ngf\xF6rdelning"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      display: "flex",
       flexDirection: "column",
-      gap: 8
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "baseline",
+      fontSize: 11,
       marginBottom: 3
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: "#6b8cce"
+      color: "#6b8cce",
+      fontWeight: 600
     }
   }, "Crowd"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 12,
       fontWeight: 700,
-      color: p.crowd_score ? "#6b8cce" : t.txL
+      color: "#6b8cce"
     }
-  }, p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "—")), p.crowd_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "\u2014")), p.crowd_score && /*#__PURE__*/React.createElement("div", {
     style: {
-      height: 4,
+      height: 3,
       borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      background: t.bdr
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1632,46 +1316,34 @@ function Card({
       borderRadius: 2,
       background: "#6b8cce"
     }
-  })), /*#__PURE__*/React.createElement("div", {
+  })), p.crowd_reviews && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
-      color: t.txL
+      color: t.txL,
+      marginTop: 2
     }
-  }, p.crowd_reviews ? `${p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen från vanliga vindrickare` : "", p.crowd_reviews >= 50000 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.green,
-      fontWeight: 600
-    }
-  }, " \u2014 mycket p\xE5litligt"), p.crowd_reviews >= 10000 && p.crowd_reviews < 50000 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.txM
-    }
-  }, " \u2014 p\xE5litligt")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews, " omd\xF6men")), p.expert_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "baseline",
+      fontSize: 11,
       marginBottom: 3
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: "#b07d3b"
+      color: "#b07d3b",
+      fontWeight: 600
     }
   }, "Expert"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 12,
       fontWeight: 700,
-      color: p.expert_score ? "#b07d3b" : t.txL
+      color: "#b07d3b"
     }
-  }, p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "—")), p.expert_score ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.expert_score.toFixed(1), "/10")), /*#__PURE__*/React.createElement("div", {
     style: {
-      height: 4,
+      height: 3,
       borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      background: t.bdr
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1680,7 +1352,7 @@ function Card({
       borderRadius: 2,
       background: "#b07d3b"
     }
-  })), p.critics && p.critics.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  })), p.critics && p.critics.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 4,
@@ -1696,55 +1368,28 @@ function Card({
       background: "#b07d3b10",
       color: "#b07d3b"
     }
-  }, cr.c, ": ", cr.s)), p.num_critics > (p.critics || []).length && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 6px",
-      color: t.txL
-    }
-  }, "+", p.num_critics - p.critics.length, " till"), p.critic_spread != null && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      padding: "2px 6px",
-      color: p.critic_spread <= 4 ? t.green : p.critic_spread >= 12 ? "#ce6b6b" : t.txL
-    }
-  }, "Spridning: ", p.critic_spread, "p")) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txL
-    }
-  }, "Snitt fr\xE5n erk\xE4nda vinkritiker")) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      fontStyle: "italic"
-    }
-  }, "Inga kritikerrecensioner hittade f\xF6r detta vin")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, cr.c, ": ", cr.s)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "baseline",
+      fontSize: 11,
       marginBottom: 3
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: t.txM
+      color: t.txM,
+      fontWeight: 600
     }
   }, "Prisv\xE4rde"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 12,
       fontWeight: 700,
       color: t.txM
     }
-  }, p.price_score ? `${p.price_score.toFixed(1)}/10` : "—")), p.price_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.price_score ? `${p.price_score.toFixed(1)}/10` : "\u2014")), p.price_score && /*#__PURE__*/React.createElement("div", {
     style: {
-      height: 4,
+      height: 3,
       borderRadius: 2,
-      background: t.bdr,
-      overflow: "hidden",
-      marginBottom: 4
+      background: t.bdr
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1753,78 +1398,16 @@ function Card({
       borderRadius: 2,
       background: t.txM
     }
-  })), /*#__PURE__*/React.createElement("div", {
+  }))))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
-      color: t.txL
-    }
-  }, (() => {
-    const catMedians = {
-      "Rött": 279,
-      "Vitt": 239,
-      "Rosé": 160,
-      "Mousserande": 399
-    };
-    const catNames = {
-      "Rött": "rött vin",
-      "Vitt": "vitt vin",
-      "Rosé": "rosévin",
-      "Mousserande": "mousserande"
-    };
-    const median = catMedians[p.category] || 250;
-    return `${p.price}\u00A0kr \u00B7 Medianen för ${catNames[p.category] || "vin"}: ${median}\u00A0kr`;
-  })())))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      flexShrink: 0,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 56,
-      height: 56,
-      borderRadius: 14,
-      background: `linear-gradient(135deg, ${col}18, ${col}08)`,
-      border: `2px solid ${col}30`,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 24,
-      fontWeight: 900,
-      color: col,
-      lineHeight: 1,
-      fontFamily: "'Instrument Serif', Georgia, serif"
-    }
-  }, s100)), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      color: t.txL,
-      marginTop: 4
-    }
-  }, "Smak f\xF6r"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      color: t.txL
-    }
-  }, "pengarna")))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "10px 14px",
-      borderRadius: 10,
+      padding: "8px 12px",
+      borderRadius: 8,
       background: t.dealL,
       marginBottom: 14,
-      fontSize: 13,
-      color: t.deal,
-      lineHeight: 1.5
+      fontSize: 12,
+      color: t.deal
     }
-  }, "Lanserades f\xF6r ", /*#__PURE__*/React.createElement("strong", null, p.launch_price, "\u00A0", "kr"), ", nu ", p.price, "\u00A0", "kr. Du sparar ", p.launch_price - p.price, "\u00A0", "kr per flaska."), allProducts && (() => {
-    // Taste similarity: how close are body, fruit, sweet profiles?
+  }, "Lanserades f\xF6r ", p.launch_price, "\u00A0", "kr, nu ", p.price, "\u00A0", "kr. Du sparar ", p.launch_price - p.price, "\u00A0", "kr.")), allProducts && (() => {
     const tasteSim = (a, b) => {
       let score = 0,
         count = 0;
@@ -1843,51 +1426,31 @@ function Card({
       return count > 0 ? score / count : 0;
     };
     const similar = allProducts.filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id)).map(w => {
-      // Calculate similarity score
-      let sim = 0;
-      const taste = tasteSim(w, p);
-      sim += taste * 40; // taste profile most important (0-40)
-      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20; // same grape
-      if (w.cat3 && p.cat3 && w.cat3 === p.cat3) sim += 15; // same style (e.g. "Fruktigt & Smakrikt")
-      if (w.country && p.country && w.country === p.country) sim += 5; // same country
-      if (w.region && p.region && w.region === p.region) sim += 10; // same region
-      if (Math.abs(w.price - p.price) <= 30) sim += 5; // similar price
-      // Score matters: bonus for better, penalty for worse
+      let sim = tasteSim(w, p) * 40;
+      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) sim += 20;
+      if (w.country === p.country) sim += 5;
+      if (Math.abs(w.price - p.price) <= 30) sim += 5;
       sim += (w.smakfynd_score - p.smakfynd_score) * 2;
       return {
         ...w,
-        _sim: sim,
-        _taste: taste
+        _sim: sim
       };
-    }).filter(w => w._sim >= 20) // minimum similarity threshold
-    .sort((a, b) => b._sim - a._sim).slice(0, 3).map(w => {
-      // Generate reason WHY this is recommended
-      const reasons = [];
-      if (w._taste >= 0.8) reasons.push("Liknande smakprofil");
-      if (w.grape && p.grape && w.grape.toLowerCase() === p.grape.toLowerCase()) reasons.push("Samma druva");
-      if (w.cat3 && p.cat3 && w.cat3 === p.cat3 && !reasons.length) reasons.push("Samma stil");
-      if (w.region && p.region && w.region === p.region) reasons.push("Samma region");
-      if (w.price < p.price - 10) reasons.push(`${Math.round(p.price - w.price)}kr billigare`);
-      if (w.smakfynd_score > p.smakfynd_score + 2) reasons.push("Bättre värde per krona");else if (w.smakfynd_score > p.smakfynd_score) reasons.push("Högre poäng");
-      if ((w.expert_score || 0) > (p.expert_score || 0) + 0.5) reasons.push("Starkare expertstöd");
-      return {
-        ...w,
-        _reason: reasons.slice(0, 2).join(" · ") || "Liknande stil och prisklass"
-      };
-    });
+    }).filter(w => w._sim >= 20).sort((a, b) => b._sim - a._sim).slice(0, 3);
     if (similar.length === 0) return null;
     return /*#__PURE__*/React.createElement("div", {
       style: {
-        marginBottom: 0
+        flex: "1 1 200px",
+        minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 11,
-        fontWeight: 600,
-        color: t.tx,
+        fontSize: 9,
+        color: t.txL,
+        textTransform: "uppercase",
+        letterSpacing: "0.1em",
         marginBottom: 8
       }
-    }, "Gillar du ", p.name, "? Testa \xE4ven"), /*#__PURE__*/React.createElement("div", {
+    }, "J\xE4mf\xF6rbara viner"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
@@ -1906,63 +1469,32 @@ function Card({
       style: {
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "10px 12px",
-        borderRadius: 10,
+        gap: 8,
+        padding: "8px 10px",
+        borderRadius: 8,
         background: t.bg,
-        border: `1px solid ${t.bdrL}`,
-        textDecoration: "none",
-        transition: "border-color 0.2s",
-        cursor: "pointer"
+        cursor: "pointer",
+        transition: "background 0.15s"
       },
-      onMouseEnter: e => e.currentTarget.style.borderColor = t.wine + "40",
-      onMouseLeave: e => e.currentTarget.style.borderColor = t.bdrL
-    }, /*#__PURE__*/React.createElement("svg", {
-      width: "34",
-      height: "34",
-      viewBox: "0 0 50 50",
+      onMouseEnter: e => e.currentTarget.style.background = t.bdrL,
+      onMouseLeave: e => e.currentTarget.style.background = t.bg
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
-        flexShrink: 0
+        fontSize: 16,
+        fontWeight: 900,
+        color: col,
+        fontFamily: "'Instrument Serif', Georgia, serif",
+        width: 28,
+        textAlign: "center"
       }
-    }, /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "#e8f0e4"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "none",
-      stroke: "#d4ddd0",
-      strokeWidth: "2.5"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "none",
-      stroke: "#2d6b3f",
-      strokeWidth: "2.5",
-      strokeDasharray: `${w.smakfynd_score * 1.38} 138`,
-      strokeLinecap: "round",
-      transform: "rotate(-90 25 25)"
-    }), /*#__PURE__*/React.createElement("text", {
-      x: "25",
-      y: "30",
-      textAnchor: "middle",
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      fontSize: "16",
-      fontWeight: "900",
-      fill: "#2d6b3f"
-    }, w.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
+    }, w.smakfynd_score), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 13,
-        fontFamily: "'Instrument Serif', serif",
+        fontSize: 12,
         color: t.tx,
         overflow: "hidden",
         textOverflow: "ellipsis",
@@ -1973,50 +1505,11 @@ function Card({
         fontSize: 10,
         color: t.txL
       }
-    }, w.sub, " \xB7 ", w.country), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: t.green,
-        marginTop: 2,
-        fontWeight: 500
-      }
-    }, w._reason)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flexShrink: 0,
-        textAlign: "right",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        gap: 3
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14,
-        fontWeight: 700,
-        color: t.tx,
-        fontFamily: "'Instrument Serif', serif"
-      }
-    }, w.price, "\u00A0", /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        fontWeight: 400,
-        color: t.txL
-      }
-    }, "kr")), /*#__PURE__*/React.createElement("a", {
-      href: `https://www.systembolaget.se/produkt/vin/${w.nr}`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-      onClick: e => e.stopPropagation(),
-      style: {
-        fontSize: 9,
-        color: t.txL,
-        textDecoration: "none"
-      }
-    }, "SB \u2197"))))));
-  })(), /*#__PURE__*/React.createElement("div", {
+    }, w.country, " \xB7 ", w.price, "\u00A0", "kr"))))));
+  })()), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 14,
-      paddingTop: 12,
+      marginTop: 12,
+      paddingTop: 10,
       borderTop: `1px solid ${t.bdrL}`
     }
   }, /*#__PURE__*/React.createElement(StarRating, {
@@ -2027,7 +1520,7 @@ function Card({
       display: "flex",
       gap: 6,
       flexWrap: "wrap",
-      marginTop: 8
+      marginTop: 6
     }
   }, /*#__PURE__*/React.createElement(AlertButton, {
     nr: p.nr,
@@ -2722,208 +2215,6 @@ function useAuth() {
     getAlerts,
     getCellar
   };
-}
-
-// ════════════════════════════════════════════════════════════
-// components/WeeklyPick.jsx
-// ════════════════════════════════════════════════════════════
-// src/components/WeeklyPick.jsx
-function WeeklyPick({
-  products
-}) {
-  const pick = useMemo(() => {
-    const candidates = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price && p.price <= 150 && p.smakfynd_score >= 75).sort((a, b) => {
-      const aBonus = a.crowd_score && a.expert_score ? 5 : 0;
-      const bBonus = b.crowd_score && b.expert_score ? 5 : 0;
-      return b.smakfynd_score + bBonus - (a.smakfynd_score + aBonus);
-    });
-    return candidates[0] || null;
-  }, [products]);
-  if (!pick) return null;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 20
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: t.wine,
-      textTransform: "uppercase",
-      letterSpacing: "0.1em",
-      marginBottom: 8
-    }
-  }, "Veckans fynd"), /*#__PURE__*/React.createElement(Card, {
-    p: pick,
-    rank: 1,
-    delay: 0,
-    allProducts: products
-  }));
-}
-
-// ════════════════════════════════════════════════════════════
-// components/EditorsPicks.jsx
-// ════════════════════════════════════════════════════════════
-// src/components/EditorsPicks.jsx
-function EditorsPicks({
-  products,
-  onSelect
-}) {
-  const [open, setOpen] = useState(false);
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setOpen(!open),
-    style: {
-      width: "100%",
-      padding: "12px 16px",
-      borderRadius: 12,
-      background: t.card,
-      border: `1px solid ${t.bdr}`,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      textAlign: "left",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14
-    }
-  }, "\uD83C\uDF77"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      color: t.tx
-    }
-  }, /*#__PURE__*/React.createElement("strong", {
-    style: {
-      fontFamily: "'Instrument Serif', serif",
-      fontWeight: 400
-    }
-  }, "Redaktionens val"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.txL
-    }
-  }, " \u2014 3 utvalda fynd vi testat och gillar"))), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      transition: "transform 0.2s",
-      display: "inline-block",
-      transform: open ? "rotate(180deg)" : "rotate(0)"
-    }
-  }, "\u25BC")), open && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8,
-      display: "flex",
-      flexDirection: "column",
-      gap: 8
-    }
-  }, GABRIELS_PICKS.map((pick, i) => {
-    const mp = products.find(pr => String(pr.nr) === String(pick.nr));
-    const [_l, pCol] = getScoreInfo(pick.smakfynd_score);
-    return /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        padding: "14px 16px",
-        borderRadius: 12,
-        background: t.card,
-        border: `1px solid ${t.bdr}`,
-        cursor: mp ? "pointer" : "default"
-      },
-      onClick: () => mp && onSelect(mp.nr || pick.nr)
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        fontWeight: 700,
-        color: t.wine,
-        textTransform: "uppercase",
-        letterSpacing: "0.06em",
-        marginBottom: 6
-      }
-    }, pick.verdict), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 12
-      }
-    }, /*#__PURE__*/React.createElement("svg", {
-      width: "40",
-      height: "40",
-      viewBox: "0 0 50 50",
-      style: {
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "#e8f0e4"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "none",
-      stroke: "#d4ddd0",
-      strokeWidth: "2.5"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "25",
-      cy: "25",
-      r: "22",
-      fill: "none",
-      stroke: "#2d6b3f",
-      strokeWidth: "2.5",
-      strokeDasharray: `${pick.smakfynd_score * 1.38} 138`,
-      strokeLinecap: "round",
-      transform: "rotate(-90 25 25)"
-    }), /*#__PURE__*/React.createElement("text", {
-      x: "25",
-      y: "30",
-      textAnchor: "middle",
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      fontSize: "17",
-      fontWeight: "900",
-      fill: "#2d6b3f"
-    }, pick.smakfynd_score)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 15,
-        fontFamily: "'Instrument Serif', serif",
-        color: t.tx
-      }
-    }, pick.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: t.txL
-      }
-    }, pick.sub, " \xB7 ", pick.price))), /*#__PURE__*/React.createElement("p", {
-      style: {
-        fontSize: 12,
-        color: t.txM,
-        lineHeight: 1.5,
-        margin: "8px 0 0",
-        fontStyle: "italic"
-      }
-    }, pick.note), mp && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: t.wine,
-        marginTop: 6
-      }
-    }, "Klicka f\xF6r att se fullst\xE4ndig profil \u2192"));
-  })));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4100,7 +3391,7 @@ function StoreMode({
       cursor: "pointer",
       fontFamily: "inherit"
     }
-  }, "Tillbaka")), /*#__PURE__*/React.createElement("div", {
+  }, "Tillbaka till Smakfynd")), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       marginBottom: 20
@@ -4234,31 +3525,75 @@ function StoreMode({
       color: t.txL,
       marginTop: 4
     }
-  }, "Prova vinets namn eller artikelnummer (finns p\xE5 hyllkanten)")), !result && /*#__PURE__*/React.createElement("div", {
+  }, "Prova vinets namn eller artikelnummer (finns p\xE5 hyllkanten)")), !result && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
-      padding: "40px 20px",
+      padding: "24px 20px 16px",
       color: t.txL
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 36,
-      marginBottom: 12
-    }
-  }, "\uD83C\uDFEA"), /*#__PURE__*/React.createElement("div", {
-    style: {
       fontSize: 16,
       fontFamily: "'Instrument Serif', Georgia, serif",
       color: t.tx,
-      marginBottom: 6
+      marginBottom: 4
     }
-  }, "St\xE5 i butiken?"), /*#__PURE__*/React.createElement("div", {
+  }, "Skriv in vinets namn"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 13,
-      color: t.txM,
-      lineHeight: 1.6
+      fontSize: 12,
+      color: t.txM
     }
-  }, "Skriv in vinets namn eller artikelnummer.", /*#__PURE__*/React.createElement("br", null), "Vi visar po\xE4ngen och om det finns b\xE4ttre alternativ.")));
+  }, "Vi visar po\xE4ngen och b\xE4ttre alternativ i samma prisklass.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 0 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 8
+    }
+  }, "Topplista just nu"), products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 75).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 5).map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    onClick: () => setQ(p.name),
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "10px 0",
+      borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none",
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
+      fontWeight: 900,
+      color: t.green,
+      fontFamily: "'Instrument Serif', Georgia, serif",
+      width: 28,
+      textAlign: "center"
+    }
+  }, p.smakfynd_score), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: t.tx,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, p.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: t.txL
+    }
+  }, p.sub, " \xB7 ", p.price, "\u00A0", "kr")))))));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4586,7 +3921,7 @@ function SmakfyndApp() {
   return /*#__PURE__*/React.createElement(SavedContext.Provider, {
     value: sv
   }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap",
     rel: "stylesheet"
   }), storeMode && /*#__PURE__*/React.createElement(StoreMode, {
     products: products,
@@ -4618,17 +3953,16 @@ function SmakfyndApp() {
         }
       `), /*#__PURE__*/React.createElement("header", {
     style: {
-      padding: "16px 20px 0",
-      maxWidth: 580,
-      margin: "0 auto",
-      animation: "fadeIn 0.4s ease"
+      padding: "12px 20px 0",
+      maxWidth: 680,
+      margin: "0 auto"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 12
+      marginBottom: 8
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4637,8 +3971,8 @@ function SmakfyndApp() {
       gap: 7
     }
   }, /*#__PURE__*/React.createElement("svg", {
-    width: "24",
-    height: "24",
+    width: "22",
+    height: "22",
     viewBox: "0 0 40 40"
   }, /*#__PURE__*/React.createElement("circle", {
     cx: "20",
@@ -4656,17 +3990,17 @@ function SmakfyndApp() {
   }, "S")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'Instrument Serif', Georgia, serif",
-      fontSize: 22,
+      fontSize: 20,
       color: t.wine
     }
   }, "Smakfynd")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 14,
+      gap: 12,
       fontSize: 12,
       color: t.txL
     }
-  }, [["weekly", "Veckans fynd"], ["food", "Kvällens middag"], ["picks", "Gabriels val"], ["saved", `♥${sv.count ? ` ${sv.count}` : ""}`], ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "👤" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
+  }, [["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`], ["about", "Om"], [auth.user ? "profile" : "login", auth.user ? "Konto" : "Logga in"]].map(([k, l]) => /*#__PURE__*/React.createElement("span", {
     key: k,
     onClick: () => {
       if (k === "login") {
@@ -4677,48 +4011,45 @@ function SmakfyndApp() {
         auth.logout();
         return;
       }
-      if (k === "weekly" || k === "food" || k === "picks") {
-        const el = document.getElementById("section-" + k);
-        if (el) el.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-        return;
-      }
       setPanel(panel === k ? null : k);
     },
     style: {
       cursor: "pointer",
-      color: panel === k ? t.wine : k === "login" ? t.wine : t.txL,
+      color: k === "login" ? t.wine : t.txL,
       fontWeight: panel === k ? 600 : 400,
-      padding: "8px 2px",
+      padding: "8px 0",
       minHeight: 44,
       display: "inline-flex",
       alignItems: "center"
     }
-  }, l)))), /*#__PURE__*/React.createElement("p", {
+  }, l))))), /*#__PURE__*/React.createElement("div", {
     style: {
-      margin: "0 0 4px",
-      fontSize: 14,
-      fontFamily: "'Instrument Serif', Georgia, serif",
-      color: t.txM,
-      textAlign: "center",
-      lineHeight: 1.3
-    }
-  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner rankade efter v\xE4rde."), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 10px",
-      fontSize: 12,
-      fontStyle: "italic",
-      color: t.txL,
-      textAlign: "center",
-      lineHeight: 1.4
-    }
-  }, "Inte \"b\xE4sta vinet\" utan b\xE4sta k\xF6pet i sin kategori.")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      maxWidth: 580,
+      maxWidth: 680,
       margin: "0 auto",
-      padding: "24px 16px 80px"
+      padding: "20px 20px 0",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      margin: "0 0 6px",
+      fontFamily: "'Newsreader', Georgia, serif",
+      fontWeight: 400,
+      fontSize: "clamp(32px, 6vw, 56px)",
+      color: t.tx,
+      lineHeight: 1.1,
+      letterSpacing: "-0.02em"
+    }
+  }, "B\xE4sta k\xF6pet i sin kategori"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 20px",
+      fontSize: 13,
+      color: t.txL
+    }
+  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner p\xE5 Systembolaget, rankade efter v\xE4rde")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 680,
+      margin: "0 auto",
+      padding: "0 16px 80px"
     }
   }, panel === "about" && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5070,6 +4401,110 @@ function SmakfyndApp() {
       textDecoration: "underline"
     }
   }, "St\xE4ng")), /*#__PURE__*/React.createElement("div", {
+    id: "section-food",
+    style: {
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement(FoodMatch, {
+    products: products
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setStoreMode(true),
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      width: "100%",
+      padding: "16px 20px",
+      borderRadius: 16,
+      border: `2px solid ${t.wine}25`,
+      background: t.card,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      marginBottom: 24,
+      transition: "all 0.2s",
+      textAlign: "left"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.borderColor = t.wine + "50";
+      e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}10`;
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = t.wine + "25";
+      e.currentTarget.style.boxShadow = "none";
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      background: `${t.wine}10`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: t.wine,
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "20",
+    height: "15",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "12",
+    x2: "12",
+    y2: "16"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "10",
+    y1: "14",
+    x2: "14",
+    y2: "14"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 600,
+      color: t.tx
+    }
+  }, "Skanna i butiken"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: t.txM
+    }
+  }, "S\xF6k p\xE5 vinets namn, se po\xE4ngen och b\xE4ttre alternativ")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18,
+      color: t.txL
+    }
+  }, "\u2192")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `1px solid ${t.bdrL}`,
+      paddingTop: 20,
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: t.txL,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      marginBottom: 12
+    }
+  }, "Browsa alla viner")), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       marginBottom: 10
@@ -5086,20 +4521,20 @@ function SmakfyndApp() {
   }, "S\xF6k vin"), /*#__PURE__*/React.createElement("input", {
     id: "sf-search",
     type: "search",
-    placeholder: searchCompact ? "Sök..." : "Sök vin, druva, land, stil...",
+    placeholder: "S\xF6k vin, druva, land, stil...",
     value: search,
     onChange: e => setSearch(e.target.value),
     style: {
       width: "100%",
-      padding: searchCompact ? "8px 16px 8px 36px" : "14px 16px 14px 42px",
-      borderRadius: searchCompact ? 10 : 14,
+      padding: "12px 16px 12px 40px",
+      borderRadius: 12,
       border: `1px solid ${t.bdr}`,
       background: t.card,
-      fontSize: searchCompact ? 13 : 14,
+      fontSize: 14,
       color: t.tx,
       outline: "none",
       boxSizing: "border-box",
-      transition: "padding 0.25s ease, font-size 0.25s ease, border-color 0.2s, box-shadow 0.2s"
+      transition: "border-color 0.2s, box-shadow 0.2s"
     },
     onFocus: e => {
       setSearchFocused(true);
@@ -5114,70 +4549,14 @@ function SmakfyndApp() {
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       position: "absolute",
-      left: searchCompact ? 12 : 14,
+      left: 14,
       top: "50%",
       transform: "translateY(-50%)",
-      fontSize: searchCompact ? 14 : 16,
+      fontSize: 15,
       color: t.txL,
-      pointerEvents: "none",
-      transition: "left 0.25s ease"
+      pointerEvents: "none"
     }
   }, "\u2315")), /*#__PURE__*/React.createElement("div", {
-    role: "button",
-    tabIndex: 0,
-    "aria-label": "\xD6ppna butiksl\xE4ge \u2014 s\xF6k p\xE5 vinets namn och se po\xE4ng direkt",
-    onKeyDown: e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        setStoreMode(true);
-      }
-    },
-    onClick: () => setStoreMode(true),
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      padding: "12px 16px",
-      borderRadius: 14,
-      background: `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`,
-      border: `1px solid ${t.wine}20`,
-      marginBottom: 14,
-      cursor: "pointer",
-      transition: "all 0.2s"
-    },
-    onMouseEnter: e => {
-      e.currentTarget.style.borderColor = t.wine + "40";
-      e.currentTarget.style.background = t.wine + "10";
-    },
-    onMouseLeave: e => {
-      e.currentTarget.style.borderColor = t.wine + "20";
-      e.currentTarget.style.background = `linear-gradient(135deg, ${t.wine}08, ${t.wine}04)`;
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 24
-    }
-  }, "\uD83C\uDFEA"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14,
-      fontWeight: 600,
-      color: t.tx
-    }
-  }, "St\xE5r du i butiken?"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txM
-    }
-  }, "S\xF6k p\xE5 vinets namn \u2014 se po\xE4ngen och b\xE4ttre alternativ direkt")), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 16,
-      color: t.txL
-    }
-  }, "\u2192")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -5195,62 +4574,7 @@ function SmakfyndApp() {
       });
     },
     style: pill(cat === ct.k)
-  }, ct.l))), !search && !showAdvanced && cat === "Rött" && price === "all" && !showDeals && !showNew && !showEco && !selCountry && selFoods.length === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 6,
-      overflowX: "auto",
-      paddingBottom: 4,
-      marginBottom: 10
-    }
-  }, [["🔥", "Till grillat", () => {
-    setSelFoods(["Kött"]);
-    setShowAdvanced(true);
-  }], ["🐟", "Till fisk", () => {
-    setCat("Vitt");
-    setSelFoods(["Fisk"]);
-    setShowAdvanced(true);
-  }], ["💰", "Under 100 kr", () => {
-    setPrice("0-79");
-    setShowAdvanced(true);
-  }], ["📉", "Prissänkt", () => {
-    setShowDeals(true);
-    setSortBy("drop");
-    setShowAdvanced(true);
-  }], ["🌿", "Ekologiskt", () => {
-    setShowEco(true);
-  }]].map(([icon, label, fn]) => /*#__PURE__*/React.createElement("button", {
-    key: label,
-    onClick: fn,
-    style: {
-      padding: "8px 14px",
-      borderRadius: 10,
-      border: `1px solid ${t.bdrL}`,
-      background: t.card,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      fontSize: 12,
-      color: t.txM,
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      whiteSpace: "nowrap",
-      transition: "all 0.2s",
-      boxShadow: t.sh1
-    },
-    onMouseEnter: e => {
-      e.currentTarget.style.borderColor = t.wine + "40";
-      e.currentTarget.style.color = t.wine;
-    },
-    onMouseLeave: e => {
-      e.currentTarget.style.borderColor = t.bdrL;
-      e.currentTarget.style.color = t.txM;
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14
-    }
-  }, icon), " ", label))), /*#__PURE__*/React.createElement("div", {
+  }, ct.l))), hasNonCatFilters ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -5258,41 +4582,124 @@ function SmakfyndApp() {
       marginBottom: 10,
       alignItems: "center"
     }
+  }, price !== "all" && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setPrice("all"),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, PRICES.find(p => p.k === price)?.l, " \u2715"), pkg !== "Flaska" && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setPkg("Flaska"),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, pkg === "BiB" ? "Bag-in-box" : "Storpack", " \u2715"), showEco && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setShowEco(false),
+    style: {
+      ...pill(true, t.green),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, "Ekologiskt \u2715"), showDeals && /*#__PURE__*/React.createElement("span", {
+    onClick: () => {
+      setShowDeals(false);
+      if (sortBy === "drop") setSortBy("smakfynd");
+    },
+    style: {
+      ...pill(true, t.deal),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, "Priss\xE4nkt \u2715"), showNew && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setShowNew(false),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, "Nyheter \u2715"), selCountry && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setSelCountry(null),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, selCountry, " \u2715"), selRegion && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setSelRegion(null),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, selRegion, " \u2715"), selTaste && /*#__PURE__*/React.createElement("span", {
+    onClick: () => setSelTaste(null),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, selTaste, " \u2715"), selFoods.map(f => /*#__PURE__*/React.createElement("span", {
+    key: f,
+    onClick: () => toggleFood(f),
+    style: {
+      ...pill(true),
+      cursor: "pointer",
+      fontSize: 11
+    }
+  }, f, " \u2715")), /*#__PURE__*/React.createElement("button", {
+    onClick: clearAll,
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      fontFamily: "inherit",
+      textDecoration: "underline"
+    }
+  }, "Rensa alla"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowAdvanced(!showAdvanced),
+    style: {
+      fontSize: 11,
+      color: t.txM,
+      background: "none",
+      border: `1px solid ${t.bdrL}`,
+      borderRadius: 8,
+      padding: "4px 10px",
+      cursor: "pointer",
+      fontFamily: "inherit",
+      marginLeft: "auto"
+    }
+  }, showAdvanced ? "Dölj filter" : "+ Filter")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap",
+      marginBottom: 10
+    }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowAdvanced(!showAdvanced),
     style: {
-      ...pill(showAdvanced || price !== "all" || pkg !== "Flaska" || showEco || showDeals || showNew || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd"),
+      ...pill(showAdvanced),
       display: "flex",
       alignItems: "center",
       gap: 4
     }
-  }, "Filter ", (() => {
-    const n = (price !== "all" ? 1 : 0) + (pkg !== "Flaska" ? 1 : 0) + (showEco ? 1 : 0) + (showDeals ? 1 : 0) + (showNew ? 1 : 0) + (selCountry ? 1 : 0) + (selFoods.length > 0 ? 1 : 0) + (selRegion ? 1 : 0) + (selTaste ? 1 : 0) + (sortBy !== "smakfynd" ? 1 : 0);
-    return n > 0 ? `(${n})` : "";
-  })(), " ", /*#__PURE__*/React.createElement("span", {
+  }, "Filter ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       transition: "transform 0.2s",
       display: "inline-block",
       transform: showAdvanced ? "rotate(180deg)" : "rotate(0)"
     }
-  }, "\u25BC")), hasFilters && /*#__PURE__*/React.createElement("button", {
-    onClick: clearAll,
-    style: {
-      padding: "8px 14px",
-      borderRadius: 100,
-      border: `1px solid ${t.bdr}`,
-      background: "transparent",
-      color: t.txL,
-      fontSize: 12,
-      cursor: "pointer",
-      fontFamily: "inherit"
-    }
-  }, "Rensa filter \u2715")), showAdvanced && /*#__PURE__*/React.createElement("div", {
+  }, "\u25BC"))), showAdvanced && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
-      gap: 8,
+      gap: 10,
       marginBottom: 12,
       padding: "14px 16px",
       borderRadius: 14,
@@ -5329,8 +4736,7 @@ function SmakfyndApp() {
       fontFamily: "inherit",
       background: pkg === k ? t.card : "transparent",
       color: pkg === k ? t.tx : t.txL,
-      boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-      transition: "all 0.2s"
+      boxShadow: pkg === k ? "0 1px 3px rgba(0,0,0,0.1)" : "none"
     }
   }, l)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5343,26 +4749,41 @@ function SmakfyndApp() {
   }, "Pris"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
-  }, PRICES.filter(p => p.k !== "all").map(({
+  }, PRICES.filter(pr => pr.k !== "all").map(({
     k,
     l
-  }) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    onClick: () => {
-      setPrice(price === k ? "all" : k);
-      track("filter", {
-        type: "price",
-        value: k
-      });
-    },
-    style: pill(price === k)
-  }, l)))), /*#__PURE__*/React.createElement("div", {
+  }) => {
+    const cnt = products.filter(w => {
+      const [a, b] = k.split("-").map(Number);
+      return w.price >= a && w.price <= b;
+    }).length;
+    return /*#__PURE__*/React.createElement("button", {
+      key: k,
+      onClick: () => {
+        setPrice(price === k ? "all" : k);
+      },
+      style: pill(price === k)
+    }, l, " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: t.txF
+      }
+    }, "(", cnt, ")"));
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Filter"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("button", {
@@ -5374,22 +4795,17 @@ function SmakfyndApp() {
       if (!showNew) setShowDeals(false);
     },
     style: pill(showNew)
-  }, "Nyheter"), /*#__PURE__*/React.createElement("button", {
+  }, "Nyheter (", products.filter(p => p.is_new).length, ")"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       const next = !showDeals;
       setShowDeals(next);
       if (next) {
         setShowNew(false);
         setSortBy("drop");
-      } else if (sortBy === "drop") {
-        setSortBy("smakfynd");
-      }
+      } else if (sortBy === "drop") setSortBy("smakfynd");
     },
     style: pill(showDeals, t.deal)
-  }, "Priss\xE4nkt"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBest(!showBest),
-    style: pill(showBest)
-  }, "Best\xE4llning")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "Priss\xE4nkt (", products.filter(p => p.price_vs_launch_pct > 0).length, ")"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txL,
@@ -5400,14 +4816,40 @@ function SmakfyndApp() {
   }, "Land"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
-  }, ["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => /*#__PURE__*/React.createElement("button", {
-    key: c,
-    onClick: () => setSelCountry(selCountry === c ? null : c),
-    style: pill(selCountry === c)
-  }, c)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, ["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
+    const cnt = products.filter(w => w.country === c).length;
+    return /*#__PURE__*/React.createElement("button", {
+      key: c,
+      onClick: () => {
+        setSelCountry(selCountry === c ? null : c);
+        setSelRegion(null);
+      },
+      style: pill(selCountry === c)
+    }, c, " (", cnt, ")");
+  })), selCountry && (() => {
+    const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
+    if (regions.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 6,
+        paddingLeft: 12,
+        borderLeft: `2px solid ${t.wine}30`
+      }
+    }, regions.slice(0, 10).map(rg => {
+      const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
+      return /*#__PURE__*/React.createElement("button", {
+        key: rg,
+        onClick: () => setSelRegion(selRegion === rg ? null : rg),
+        style: pill(selRegion === rg)
+      }, rg, " (", cnt, ")");
+    }));
+  })()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txL,
@@ -5418,7 +4860,7 @@ function SmakfyndApp() {
   }, "Passar till"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
   }, ["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => /*#__PURE__*/React.createElement("button", {
@@ -5436,32 +4878,19 @@ function SmakfyndApp() {
   }, "Smak"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
   }, ["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => /*#__PURE__*/React.createElement("button", {
     key: ts,
     onClick: () => setSelTaste(selTaste === ts ? null : ts),
     style: pill(selTaste === ts)
-  }, ts)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, ts)))), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
-      color: t.txL,
-      marginBottom: 6,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em"
+      borderTop: `1px solid ${t.bdrL}`,
+      paddingTop: 10
     }
-  }, "Region"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 6,
-      flexWrap: "wrap"
-    }
-  }, ["Bordeaux", "Toscana", "Rioja", "Piemonte", "Bourgogne", "Rhonedalen", "Champagne", "Kalifornien"].map(rg => /*#__PURE__*/React.createElement("button", {
-    key: rg,
-    onClick: () => setSelRegion(selRegion === rg ? null : rg),
-    style: pill(selRegion === rg)
-  }, rg)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txL,
@@ -5472,13 +4901,23 @@ function SmakfyndApp() {
   }, "Sortera"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 6,
+      gap: 5,
       flexWrap: "wrap"
     }
   }, [["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
     key: k,
     onClick: () => setSortBy(k),
-    style: pill(sortBy === k)
+    style: {
+      padding: "7px 14px",
+      borderRadius: 8,
+      border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
+      background: sortBy === k ? `${t.wine}08` : "transparent",
+      color: sortBy === k ? t.wine : t.txM,
+      fontSize: 12,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: sortBy === k ? 600 : 400
+    }
   }, l))))), !search && !showDeals && !showNew && cat === "Rött" && /*#__PURE__*/React.createElement(WineOfDay, {
     products: products,
     onSelect: nr => {
@@ -5777,387 +5216,7 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txL
     }
-  }, "Anv\xE4nd filter f\xF6r att hitta fler, eller logga in f\xF6r att se hela listan."))), /*#__PURE__*/React.createElement("div", {
-    id: "section-weekly"
-  }, /*#__PURE__*/React.createElement(WeeklyPick, {
-    products: products
-  })), /*#__PURE__*/React.createElement("div", {
-    id: "section-food"
-  }, /*#__PURE__*/React.createElement(FoodMatch, {
-    products: products
-  })), /*#__PURE__*/React.createElement(NewsletterCTA, null), /*#__PURE__*/React.createElement("div", {
-    id: "section-picks"
-  }, /*#__PURE__*/React.createElement(EditorsPicks, {
-    products: products,
-    onSelect: nr => {
-      window.location.hash = `vin/${nr}`;
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-  })), (() => {
-    const month = new Date().getMonth(); // 0-11
-    const season = month >= 4 && month <= 8 ? "sommar" : month >= 2 && month <= 4 ? "vår" : month >= 9 && month <= 10 ? "höst" : "vinter";
-    const seasonConfig = {
-      vår: {
-        title: "Vårviner",
-        sub: "Lätta, friska viner för ljusare kvällar",
-        emoji: "🌸",
-        filter: p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 7
-      },
-      sommar: {
-        title: "Sommarviner",
-        sub: "Kylda favoriter till grillkvällar och picknick",
-        emoji: "☀️",
-        filter: p => (p.category === "Vitt" || p.category === "Rosé" || p.category === "Mousserande") && p.price <= 200
-      },
-      höst: {
-        title: "Höstviner",
-        sub: "Fylliga röda till mörka kvällar",
-        emoji: "🍂",
-        filter: p => p.category === "Rött" && (p.taste_body || 0) >= 7
-      },
-      vinter: {
-        title: "Vinterviner",
-        sub: "Värmande röda och festliga bubbel",
-        emoji: "❄️",
-        filter: p => p.category === "Rött" && (p.taste_body || 0) >= 8 || p.category === "Mousserande"
-      }
-    };
-    const cfg = seasonConfig[season];
-    const seasonWines = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && cfg.filter(p)).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 4);
-    if (seasonWines.length === 0) return null;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 40
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 12
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 20
-      }
-    }, cfg.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
-      style: {
-        margin: 0,
-        fontSize: 18,
-        fontFamily: "'Instrument Serif', serif",
-        fontWeight: 400,
-        color: t.tx
-      }
-    }, cfg.title), /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: 0,
-        fontSize: 12,
-        color: t.txL
-      }
-    }, cfg.sub))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 8
-      }
-    }, seasonWines.map((p, i) => /*#__PURE__*/React.createElement(Card, {
-      key: p.id || i,
-      p: p,
-      rank: i + 1,
-      delay: 0,
-      allProducts: products,
-      auth: auth
-    }))));
-  })(), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40
-    }
-  }, /*#__PURE__*/React.createElement("h3", {
-    style: {
-      margin: "0 0 14px",
-      fontSize: 18,
-      fontFamily: "'Instrument Serif', serif",
-      fontWeight: 400,
-      color: t.tx
-    }
-  }, "Hitta vin till tillf\xE4llet"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 8
-    }
-  }, [["Dejt", "Romantisk middag", p => p.expert_score >= 7 && p.price >= 120 && p.price <= 300], ["Grillkväll", "Sommar & BBQ", p => p.taste_body >= 7 && (p.food_pairings || []).some(f => /kött|grillat|fläsk/i.test(f))], ["Svärföräldrarna", "Tryggt & imponerande", p => p.expert_score >= 7.5 && p.crowd_score >= 7 && p.price >= 150], ["Fredagsmys", "Under 120 kr", p => p.price <= 120 && p.smakfynd_score >= 70], ["Picknick", "Lätt & friskt", p => (p.category === "Vitt" || p.category === "Rosé") && (p.taste_body || 12) <= 6], ["After work", "Bubbel & lättviner", p => p.category === "Mousserande" || (p.taste_body || 12) <= 5 && p.category === "Vitt"]].map(([title, sub, filterFn]) => {
-    const matches = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && filterFn(p)).slice(0, 3);
-    return /*#__PURE__*/React.createElement("button", {
-      key: title,
-      onClick: () => {
-        setSearch("");
-        setCat("all");
-        setShowAdvanced(false);
-        const best = matches[0];
-        if (best) {
-          window.location.hash = `vin/${best.nr}`;
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-        }
-      },
-      style: {
-        padding: "16px",
-        borderRadius: 14,
-        background: t.card,
-        border: `1px solid ${t.bdr}`,
-        cursor: "pointer",
-        textAlign: "left",
-        fontFamily: "inherit",
-        transition: "all 0.2s"
-      },
-      onMouseEnter: e => e.currentTarget.style.borderColor = t.wine + "40",
-      onMouseLeave: e => e.currentTarget.style.borderColor = t.bdr
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 14,
-        fontWeight: 600,
-        color: t.tx
-      }
-    }, title), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: t.txL,
-        marginTop: 2
-      }
-    }, sub), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: t.txF,
-        marginTop: 6
-      }
-    }, matches.length, " viner"));
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40
-    }
-  }, /*#__PURE__*/React.createElement("h3", {
-    style: {
-      margin: "0 0 6px",
-      fontSize: 18,
-      fontFamily: "'Instrument Serif', serif",
-      fontWeight: 400,
-      color: t.tx
-    }
-  }, "Ge bort vin"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 14px",
-      fontSize: 12,
-      color: t.txL
-    }
-  }, "Kurerade val per budget \u2014 trygga presenter."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 10
-    }
-  }, [["Under 100 kr", 0, 100, "Trevlig gest"], ["100–200 kr", 100, 200, "Uppskattad present"], ["200–400 kr", 200, 400, "Lyxig gåva"]].map(([label, lo, hi, desc]) => {
-    const picks = products.filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.expert_score >= 7).sort((a, b) => b.smakfynd_score - a.smakfynd_score).slice(0, 3);
-    if (picks.length === 0) return null;
-    return /*#__PURE__*/React.createElement("div", {
-      key: label,
-      style: {
-        padding: "14px 16px",
-        borderRadius: 14,
-        background: t.card,
-        border: `1px solid ${t.bdr}`
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "baseline",
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14,
-        fontWeight: 600,
-        color: t.tx
-      }
-    }, label), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11,
-        color: t.txL
-      }
-    }, desc)), picks.map((p, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      onClick: () => {
-        window.location.hash = `vin/${p.nr}`;
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-      },
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "6px 0",
-        cursor: "pointer",
-        borderTop: i > 0 ? `1px solid ${t.bdrL}` : "none"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 13,
-        color: t.txM
-      }
-    }, p.name, " ", /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: t.txL
-      }
-    }, p.sub)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 13,
-        fontWeight: 600,
-        color: t.tx,
-        fontFamily: "'Instrument Serif', serif"
-      }
-    }, p.price, "\u00A0", "kr"))));
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40,
-      padding: "24px 20px",
-      borderRadius: 18,
-      background: t.card,
-      border: `1px solid ${t.bdr}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: t.wine,
-      textTransform: "uppercase",
-      letterSpacing: "0.14em",
-      marginBottom: 8
-    }
-  }, "Ny p\xE5 vin?"), /*#__PURE__*/React.createElement("h3", {
-    style: {
-      margin: "0 0 8px",
-      fontSize: 20,
-      fontFamily: "'Instrument Serif', serif",
-      fontWeight: 400,
-      color: t.tx
-    }
-  }, "B\xF6rja h\xE4r"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 13,
-      color: t.txM,
-      margin: "0 0 16px",
-      lineHeight: 1.6
-    }
-  }, "Du beh\xF6ver inte kunna n\xE5got om vin. Smakfynd har redan gjort jobbet \u2014 vi har analyserat tusentals viner och rankat dem efter kvalitet per krona. H\xF6gst po\xE4ng = mest smak f\xF6r pengarna."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 10
-    }
-  }, [["1. Börja med ett rött under 100 kr", "Rött", 0, 100, "Tryggt och prisvärt — de flesta gillar dessa."], ["2. Testa ett vitt till fisk eller kyckling", "Vitt", 0, 150, "Fräscht och enkelt — passar till vardagsmiddag."], ["3. Prova bubbel till fredagen", "Mousserande", 0, 200, "Inte bara för fest — perfekt till fredagsmys."]].map(([title, cat, lo, hi, tip]) => {
-    const pick = products.find(p => p.category === cat && p.assortment === "Fast sortiment" && p.package === "Flaska" && p.price >= lo && p.price < hi && p.smakfynd_score >= 70);
-    return /*#__PURE__*/React.createElement("div", {
-      key: title,
-      style: {
-        padding: "12px 14px",
-        borderRadius: 12,
-        background: t.bg
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        fontWeight: 600,
-        color: t.tx,
-        marginBottom: 4
-      }
-    }, title), /*#__PURE__*/React.createElement("p", {
-      style: {
-        fontSize: 12,
-        color: t.txL,
-        margin: "0 0 6px"
-      }
-    }, tip), pick && /*#__PURE__*/React.createElement("div", {
-      onClick: () => {
-        window.location.hash = `vin/${pick.nr}`;
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-      },
-      style: {
-        fontSize: 12,
-        color: t.wine,
-        cursor: "pointer",
-        fontWeight: 600
-      }
-    }, "V\xE5rt tips: ", pick.name, " (", pick.price, "\u00A0", "kr, ", pick.smakfynd_score, "/100) \u2192"));
-  }))), /*#__PURE__*/React.createElement(Methodology, null), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40,
-      padding: "28px 24px",
-      borderRadius: 18,
-      background: t.card,
-      border: `1px solid ${t.bdr}`,
-      textAlign: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: t.wine,
-      textTransform: "uppercase",
-      letterSpacing: "0.14em",
-      marginBottom: 8
-    }
-  }, "Nyhetsbrev"), /*#__PURE__*/React.createElement("h3", {
-    style: {
-      margin: "0 0 6px",
-      fontSize: 22,
-      fontFamily: "'Instrument Serif', serif",
-      fontWeight: 400,
-      color: t.tx
-    }
-  }, "Veckans b\xE4sta k\xF6p"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 13,
-      color: t.txM,
-      margin: "0 0 16px",
-      lineHeight: 1.5
-    }
-  }, "Smartaste vinvalen direkt i inkorgen \u2014 varje torsdag."), /*#__PURE__*/React.createElement("a", {
-    href: "https://smakfynd.substack.com",
-    target: "_blank",
-    rel: "noopener noreferrer",
-    style: {
-      display: "inline-block",
-      padding: "12px 28px",
-      borderRadius: 12,
-      border: "none",
-      cursor: "pointer",
-      background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-      color: "#fff",
-      fontSize: 14,
-      fontWeight: 600,
-      textDecoration: "none",
-      boxShadow: `0 2px 8px ${t.wine}25`,
-      transition: "opacity 0.2s"
-    },
-    onMouseEnter: e => e.currentTarget.style.opacity = "0.9",
-    onMouseLeave: e => e.currentTarget.style.opacity = "1"
-  }, "Prenumerera p\xE5 Substack \u2197"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 11,
-      color: t.txL,
-      margin: "10px 0 0"
-    }
-  }, "Gratis. Avsluta n\xE4r du vill.")), /*#__PURE__*/React.createElement("footer", {
+  }, "Anv\xE4nd filter f\xF6r att hitta fler, eller logga in f\xF6r att se hela listan."))), /*#__PURE__*/React.createElement(Methodology, null), /*#__PURE__*/React.createElement(NewsletterCTA, null), /*#__PURE__*/React.createElement("footer", {
     style: {
       marginTop: 40,
       paddingTop: 24,
