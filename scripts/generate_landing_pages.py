@@ -1127,12 +1127,20 @@ def render_page(page, all_pages=None):
     # JSON-LD for the wine list
     items_ld = []
     for i, w in enumerate(page['wines'][:10]):
+        nr = w.get('nr', '')
+        img_url = w.get('image_url', '') or f"https://smakfynd.se/og-image.svg"
+        style_desc = (w.get('style', '') or '')[:200]
+        grape = w.get('grape', '')
+        country = w.get('country', '')
+        desc = style_desc if style_desc else f"{grape} från {country}" if grape else f"Vin från {country}"
         items_ld.append({
             "@type": "ListItem",
             "position": i + 1,
             "item": {
                 "@type": "Product",
                 "name": f"{w.get('name','')} {w.get('sub','')}".strip(),
+                "image": img_url,
+                "description": desc,
                 "brand": {"@type": "Brand", "name": w.get('name', '')},
                 "category": "Wine",
                 "offers": {
@@ -1140,7 +1148,7 @@ def render_page(page, all_pages=None):
                     "price": str(w.get('price', 0)),
                     "priceCurrency": "SEK",
                     "availability": "https://schema.org/InStock",
-                    "url": f"https://www.systembolaget.se/produkt/vin/{w.get('nr','')}",
+                    "url": f"https://www.systembolaget.se/produkt/vin/{nr}",
                 },
                 "aggregateRating": {
                     "@type": "AggregateRating",
