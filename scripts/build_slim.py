@@ -78,6 +78,19 @@ print(f"Price drops (5%+): {drops}")
 # Filter: must have a score, default to "Fast sortiment"
 data = [p for p in data if p.get('smakfynd_score') and p.get('smakfynd_score') > 0]
 print(f"After score filter: {len(data)} products")
+
+# Deduplicate: keep highest-scored wine when name+sub is identical
+seen_keys = {}
+deduped = []
+for p in sorted(data, key=lambda x: -(x.get('smakfynd_score', 0))):
+    key = (p.get('name', '').strip().lower(), (p.get('sub', '') or '').strip().lower())
+    if key not in seen_keys:
+        seen_keys[key] = True
+        deduped.append(p)
+removed = len(data) - len(deduped)
+if removed:
+    print(f"Deduplication: removed {removed} duplicates")
+data = deduped
 fast = [p for p in data if p.get('assortment') == 'Fast sortiment']
 tillfälligt = [p for p in data if p.get('assortment') != 'Fast sortiment']
 print(f"Fast sortiment: {len(fast)} | Tillfälligt/övrigt: {len(tillfälligt)}")

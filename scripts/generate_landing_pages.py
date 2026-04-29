@@ -201,9 +201,10 @@ def make_pages():
                 ]
             },
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('taste_body') or 0) >= 7
                            and any(k in (f or '').lower() for k in ['kött', 'grillat', 'nöt', 'lamm', 'biff', 'vilt', 'fläsk']
                                    for f in (w.get('food_pairings') or []))],
-                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+                          key=lambda x: -(x.get('smakfynd_score', 0) + (3 if (x.get('taste_body') or 0) >= 9 else 0)))[:20],
         },
         {
             "slug": "vin-till-fisk",
@@ -1331,12 +1332,28 @@ def update_sitemap(pages):
     <priority>1.0</priority>
   </url>''']
 
+    # Collect slugs from generated pages
+    slugs = set()
     for p in pages:
+        slugs.add(p["slug"])
         urls.append(f'''  <url>
     <loc>https://smakfynd.se/{p["slug"]}/</loc>
     <lastmod>{today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>''')
+
+    # Also include any other landing page directories (from other generators)
+    skip = {'integritet', 'tack', 'sw.js', 'manifest.json'}
+    for d in sorted(os.listdir(DOCS)):
+        full = os.path.join(DOCS, d)
+        if os.path.isdir(full) and d not in slugs and d not in skip and os.path.exists(os.path.join(full, 'index.html')):
+            slugs.add(d)
+            urls.append(f'''  <url>
+    <loc>https://smakfynd.se/{d}/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>''')
 
     sitemap = f'''<?xml version="1.0" encoding="UTF-8"?>
