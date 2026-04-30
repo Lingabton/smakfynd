@@ -256,6 +256,7 @@ function LabelScanner({ products, onMatch, onClose }) {
       setStatus("results");
       if (navigator.vibrate) navigator.vibrate(50);
     } catch(e) {
+      setOcrText("Fel: " + String(e).slice(0, 200));
       setStatus("error");
     }
   };
@@ -263,7 +264,8 @@ function LabelScanner({ products, onMatch, onClose }) {
   if (status === "error") {
     return (
       <div style={{ position: "fixed", inset: 0, background: t.bg, zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ fontSize: 14, color: t.txM, textAlign: "center", marginBottom: 16 }}>Kunde inte starta kameran eller läsa etiketten.</div>
+        <div style={{ fontSize: 14, color: t.txM, textAlign: "center", marginBottom: 16 }}>Kunde inte läsa etiketten. Prova igen eller skriv vinets namn.</div>
+        {ocrText && <div style={{ fontSize: 10, color: t.txF, textAlign: "center", marginBottom: 12, maxWidth: 300 }}>{ocrText}</div>}
         <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Tillbaka</button>
       </div>
     );

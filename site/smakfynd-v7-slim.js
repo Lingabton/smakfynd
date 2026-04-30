@@ -3639,6 +3639,7 @@ function LabelScanner({
       setStatus("results");
       if (navigator.vibrate) navigator.vibrate(50);
     } catch (e) {
+      setOcrText("Fel: " + String(e).slice(0, 200));
       setStatus("error");
     }
   };
@@ -3662,7 +3663,15 @@ function LabelScanner({
         textAlign: "center",
         marginBottom: 16
       }
-    }, "Kunde inte starta kameran eller l\xE4sa etiketten."), /*#__PURE__*/React.createElement("button", {
+    }, "Kunde inte l\xE4sa etiketten. Prova igen eller skriv vinets namn."), ocrText && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: t.txF,
+        textAlign: "center",
+        marginBottom: 12,
+        maxWidth: 300
+      }
+    }, ocrText), /*#__PURE__*/React.createElement("button", {
       onClick: onClose,
       style: {
         padding: "12px 24px",

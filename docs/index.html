@@ -8,7 +8,7 @@
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://product-cdn.systembolaget.se data:; connect-src 'self' https://*.smakfynd.workers.dev; media-src 'self' blob:; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://product-cdn.systembolaget.se data:; connect-src 'self' https://*.smakfynd.workers.dev https://unpkg.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; media-src 'self' blob:; frame-ancestors 'none'">
   <link rel="canonical" href="https://smakfynd.se">
 
   <!-- Preconnect for faster loading -->
@@ -3812,6 +3812,7 @@ function LabelScanner({
       setStatus("results");
       if (navigator.vibrate) navigator.vibrate(50);
     } catch (e) {
+      setOcrText("Fel: " + String(e).slice(0, 200));
       setStatus("error");
     }
   };
@@ -3835,7 +3836,15 @@ function LabelScanner({
         textAlign: "center",
         marginBottom: 16
       }
-    }, "Kunde inte starta kameran eller l\xE4sa etiketten."), /*#__PURE__*/React.createElement("button", {
+    }, "Kunde inte l\xE4sa etiketten. Prova igen eller skriv vinets namn."), ocrText && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: t.txF,
+        textAlign: "center",
+        marginBottom: 12,
+        maxWidth: 300
+      }
+    }, ocrText), /*#__PURE__*/React.createElement("button", {
       onClick: onClose,
       style: {
         padding: "12px 24px",
