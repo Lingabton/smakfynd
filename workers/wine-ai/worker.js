@@ -122,10 +122,16 @@ export default {
 
       // Label reading endpoint — Gemini Flash vision
       if (url.pathname === "/label" && body.image) {
+        // Validate image size (max 10MB base64 ≈ 7.5MB raw)
+        if (body.image.length > 10_000_000) {
+          return new Response(JSON.stringify({ error: "Image too large (max 10MB)" }), {
+            status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         const GEMINI_KEY = env.GEMINI_API_KEY;
         if (!GEMINI_KEY) {
           return new Response(JSON.stringify({ error: "Vision API not configured" }), {
-            status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
@@ -139,7 +145,14 @@ export default {
           usage++;
           if (env.AI_KV) await env.AI_KV.put(usageKey, String(usage), { expirationTtl: 172800 });
 
-          // Alert at 80% of free tier (1500 req/day free, warn at 1200)
+          // Hard block at daily limit
+          if (usage > 1500) {
+            return new Response(JSON.stringify({ error: "Etikettläsningen har nått sin dagliga gräns. Prova igen imorgon.", _gemini_status: 429 }), {
+              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          // Alert at 80%/93% of free tier
           if (usage === 1200 || usage === 1400) {
             // Send alert via Resend if configured
             if (env.RESEND_API_KEY && env.ALERT_EMAIL) {
@@ -160,10 +173,10 @@ export default {
           console.log(`Label scan: image base64 length=${imageData.length}`);
 
           const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_KEY },
               body: JSON.stringify({
                 contents: [{
                   parts: [
@@ -183,6 +196,8 @@ export default {
 
           // Parse plain text response: "Wine Name, Producer"
           let cleaned = text.replace(/```[a-z]*\s*/g, "").replace(/```/g, "").replace(/["\n]/g, "").trim();
+          // Sanitize: only allow reasonable wine name characters
+          cleaned = cleaned.replace(/[<>{}]/g, "").slice(0, 200);
           // Try JSON first
           let result;
           try {

@@ -166,8 +166,10 @@ export default {
           }), { headers });
         }
 
-        // Step 1: generate and store 6-digit code
-        const verifyCode = String(Math.floor(100000 + Math.random() * 900000));
+        // Step 1: generate cryptographically secure 6-digit code
+        const codeArr = new Uint32Array(1);
+        crypto.getRandomValues(codeArr);
+        const verifyCode = String(100000 + (codeArr[0] % 900000));
         await env.DB.prepare("DELETE FROM verification_codes WHERE email = ?").bind(cleanEmail).run();
         await env.DB.prepare(
           "INSERT INTO verification_codes (email, code, expires_at) VALUES (?, ?, datetime('now', '+10 minutes'))"
@@ -208,12 +210,15 @@ export default {
       // POST /save — save wine to list
       if (request.method === "POST" && url.pathname === "/save") {
         const { token, nr, list } = await request.json();
+        if (!nr || !/^\d{3,10}$/.test(String(nr))) return new Response(JSON.stringify({ error: "Ogiltigt vinnummer" }), { status: 400, headers });
+        const validLists = ["favoriter", "att-testa", "budget", "middag", "helg", "fest"];
+        const safeList = validLists.includes(list) ? list : "favoriter";
         const user = await getUserByToken(env.DB, token);
         if (!user) return new Response(JSON.stringify({ error: "Inte inloggad" }), { status: 401, headers });
 
         await env.DB.prepare(
           "INSERT OR IGNORE INTO saved_wines (user_id, wine_nr, list) VALUES (?, ?, ?)"
-        ).bind(user.id, nr, list || "favoriter").run();
+        ).bind(user.id, nr, safeList).run();
 
         return new Response(JSON.stringify({ ok: true }), { headers });
       }
@@ -311,7 +316,8 @@ export default {
         const email = url.searchParams.get("email");
         const unsubToken = url.searchParams.get("token");
         if (email && unsubToken) {
-          const secret = env.ADMIN_KEY || "smakfynd-unsub";
+          const secret = env.ADMIN_KEY;
+          if (!secret) return new Response(JSON.stringify({ error: "Server misconfigured" }), { status: 500, headers });
           const valid = await verifyUnsubToken(email.toLowerCase().trim(), unsubToken, secret);
           if (valid) {
             await env.DB.prepare("UPDATE users SET newsletter = 0 WHERE email = ?").bind(email.toLowerCase().trim()).run();
@@ -351,7 +357,8 @@ export default {
         }
         const email = url.searchParams.get("email");
         if (!email) return new Response(JSON.stringify({ error: "email required" }), { status: 400, headers });
-        const secret = env.ADMIN_KEY || "smakfynd-unsub";
+        const secret = env.ADMIN_KEY;
+          if (!secret) return new Response(JSON.stringify({ error: "Server misconfigured" }), { status: 500, headers });
         const token = await generateUnsubToken(email.toLowerCase().trim(), secret);
         return new Response(JSON.stringify({ email: email.toLowerCase().trim(), token }), { headers });
       }
