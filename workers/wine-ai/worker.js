@@ -160,18 +160,18 @@ export default {
           console.log(`Label scan: image base64 length=${imageData.length}`);
 
           const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 contents: [{
                   parts: [
-                    { text: 'This is a photo of a wine bottle label. Read the label carefully and identify the wine. Return ONLY valid JSON: {"wine_name": "the wine name as printed on the label", "producer": "producer or winery name", "region": "region or country if visible", "vintage": "year if visible"}. Read the actual text on the label, do not guess.' },
+                    { text: 'Read this wine label. Reply with ONLY: wine name, producer. Example: "Rubesco, Lungarotti" — nothing else, no JSON, no markdown.' },
                     { inline_data: { mime_type: "image/jpeg", data: imageData } }
                   ]
                 }],
-                generationConfig: { maxOutputTokens: 256, temperature: 0.1 }
+                generationConfig: { maxOutputTokens: 200, temperature: 0.1, thinkingConfig: { thinkingBudget: 0 } }
               }),
             }
           );
@@ -181,12 +181,18 @@ export default {
           const geminiData = JSON.parse(geminiRaw);
           const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
+          // Parse plain text response: "Wine Name, Producer"
+          let cleaned = text.replace(/```[a-z]*\s*/g, "").replace(/```/g, "").replace(/["\n]/g, "").trim();
+          // Try JSON first
           let result;
           try {
-            const match = text.match(/\{[\s\S]*\}/);
-            result = match ? JSON.parse(match[0]) : { wine_name: text.trim() };
-          } catch(e) {
-            result = { wine_name: text.trim().slice(0, 100) };
+            const match = cleaned.match(/\{[\s\S]*\}/);
+            result = match ? JSON.parse(match[0]) : null;
+          } catch(e) { result = null; }
+          // Fallback: plain text "Name, Producer"
+          if (!result) {
+            const parts = cleaned.split(/[,;]/);
+            result = { wine_name: parts[0]?.trim() || cleaned, producer: parts[1]?.trim() || "" };
           }
           result._raw = text.slice(0, 200);
           result._gemini_status = geminiRes.status;
