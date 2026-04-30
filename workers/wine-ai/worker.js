@@ -195,8 +195,6 @@ export default {
             result = { wine_name: parts[0]?.trim() || cleaned, producer: parts[1]?.trim() || "" };
           }
           result._raw = text.slice(0, 200);
-          result._gemini_status = geminiRes.status;
-          result._gemini_debug = geminiRaw.slice(0, 300);
 
           return new Response(JSON.stringify(result), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
