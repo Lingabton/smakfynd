@@ -3607,12 +3607,207 @@ function availLabel(avail) {
     color: t.txL
   };
 }
+function BarcodeScanner({
+  onScan,
+  onClose
+}) {
+  const videoRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [scanning, setScanning] = useState(true);
+  const detectorRef = useRef(null);
+  const streamRef = useRef(null);
+  const lastScanRef = useRef("");
+  useEffect(() => {
+    // Check BarcodeDetector support
+    if (!("BarcodeDetector" in window)) {
+      setError("Din webbläsare stödjer inte streckkodsskanning. Använd Chrome på Android eller Safari 17.2+ på iOS.");
+      return;
+    }
+    detectorRef.current = new BarcodeDetector({
+      formats: ["ean_13", "ean_8", "code_128", "code_39", "itf"]
+    });
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "environment",
+            width: {
+              ideal: 1280
+            },
+            height: {
+              ideal: 720
+            }
+          }
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      } catch (e) {
+        setError("Kunde inte starta kameran. Kontrollera att du gett tillåtelse.");
+      }
+    };
+    startCamera();
+    return () => {
+      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  // Scan loop
+  useEffect(() => {
+    if (!scanning || error) return;
+    let animId;
+    const scan = async () => {
+      if (!videoRef.current || !detectorRef.current || videoRef.current.readyState < 2) {
+        animId = requestAnimationFrame(scan);
+        return;
+      }
+      try {
+        const barcodes = await detectorRef.current.detect(videoRef.current);
+        if (barcodes.length > 0) {
+          const code = barcodes[0].rawValue;
+          if (code && code !== lastScanRef.current) {
+            lastScanRef.current = code;
+            setScanning(false);
+            // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(50);
+            onScan(code, barcodes[0].format);
+            return;
+          }
+        }
+      } catch (e) {}
+      animId = requestAnimationFrame(scan);
+    };
+    animId = requestAnimationFrame(scan);
+    return () => cancelAnimationFrame(animId);
+  }, [scanning, error, onScan]);
+  if (error) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.9)",
+        zIndex: 1000,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "#fff",
+        fontSize: 14,
+        textAlign: "center",
+        maxWidth: 320,
+        lineHeight: 1.6
+      }
+    }, error), /*#__PURE__*/React.createElement("button", {
+      onClick: onClose,
+      style: {
+        marginTop: 20,
+        padding: "12px 24px",
+        borderRadius: 10,
+        border: "none",
+        background: "#fff",
+        color: "#000",
+        fontSize: 14,
+        cursor: "pointer",
+        fontFamily: "inherit"
+      }
+    }, "Tillbaka till s\xF6kning"));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "#000",
+      zIndex: 1000
+    }
+  }, /*#__PURE__*/React.createElement("video", {
+    ref: videoRef,
+    style: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover"
+    },
+    playsInline: true,
+    muted: true
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "70%",
+      maxWidth: 300,
+      height: 120,
+      borderRadius: 12,
+      border: "2px solid rgba(255,255,255,0.6)",
+      boxShadow: "0 0 0 9999px rgba(0,0,0,0.4)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(255,255,255,0.8)",
+      fontSize: 13,
+      marginTop: 16,
+      textAlign: "center"
+    }
+  }, "Rikta mot streckkoden", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      opacity: 0.7
+    }
+  }, "P\xE5 flaskan eller hyllkanten"))), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      position: "absolute",
+      top: 16,
+      right: 16,
+      padding: "8px 16px",
+      borderRadius: 100,
+      background: "rgba(0,0,0,0.5)",
+      color: "#fff",
+      border: "1px solid rgba(255,255,255,0.3)",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit"
+    }
+  }, "Avbryt"), !scanning && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      lastScanRef.current = "";
+      setScanning(true);
+    },
+    style: {
+      position: "absolute",
+      bottom: 40,
+      left: "50%",
+      transform: "translateX(-50%)",
+      padding: "12px 24px",
+      borderRadius: 12,
+      background: "#fff",
+      color: "#000",
+      fontSize: 14,
+      fontWeight: 600,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      border: "none"
+    }
+  }, "Skanna n\xE4sta"));
+}
 function StoreMode({
   products,
   onClose
 }) {
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
   const sv = React.useContext(SavedContext);
   const inputRef = useRef(null);
 
@@ -3636,8 +3831,33 @@ function StoreMode({
     } catch (e) {}
   };
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!showScanner) inputRef.current?.focus();
+  }, [showScanner]);
+  const handleBarcodeScan = (code, format) => {
+    track("snabbkoll_scan", {
+      code,
+      format
+    });
+    // Try matching as productNumber (shelf label)
+    const byNr = products.find(p => String(p.nr) === code || String(p.nr) === code.replace(/^0+/, ""));
+    if (byNr) {
+      setQ(byNr.name);
+      handleSelect(byNr);
+      setShowScanner(false);
+      return;
+    }
+    // Try short product number (productNumberShort = first 4-5 digits)
+    const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
+    if (shortMatch) {
+      setQ(shortMatch.name);
+      handleSelect(shortMatch);
+      setShowScanner(false);
+      return;
+    }
+    // EAN not in our database — show code and fall back to search
+    setQ(code);
+    setShowScanner(false);
+  };
   const results = useMemo(() => {
     return fuzzySearch(products, q, ["name", "sub", "country", "grape", "region"]);
   }, [q, products]);
@@ -3813,7 +4033,66 @@ function StoreMode({
       color: t.txL,
       pointerEvents: "none"
     }
-  }, "\u2315")), !q && !selected && recent.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "\u2315")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowScanner(true),
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      width: "100%",
+      padding: "14px 20px",
+      borderRadius: 12,
+      border: `2px solid ${t.wine}25`,
+      background: t.card,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 14,
+      fontWeight: 600,
+      color: t.tx,
+      marginBottom: 16,
+      transition: "all 0.2s"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.borderColor = t.wine + "50";
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = t.wine + "25";
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "20",
+    height: "20",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: t.wine,
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "7",
+    y1: "12",
+    x2: "17",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "7",
+    y1: "8",
+    x2: "10",
+    y2: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "14",
+    y1: "8",
+    x2: "17",
+    y2: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "7",
+    y1: "16",
+    x2: "12",
+    y2: "16"
+  })), "Skanna streckkod"), showScanner && /*#__PURE__*/React.createElement(BarcodeScanner, {
+    onScan: handleBarcodeScan,
+    onClose: () => setShowScanner(false)
+  }), !q && !selected && recent.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 16
     }
