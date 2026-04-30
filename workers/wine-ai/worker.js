@@ -156,6 +156,9 @@ export default {
             }
           }
 
+          // Debug: log image size
+          console.log(`Label scan: image base64 length=${imageData.length}`);
+
           const geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
             {
@@ -173,7 +176,9 @@ export default {
             }
           );
 
-          const geminiData = await geminiRes.json();
+          const geminiRaw = await geminiRes.text();
+          console.log(`Gemini response status=${geminiRes.status}, body=${geminiRaw.slice(0, 300)}`);
+          const geminiData = JSON.parse(geminiRaw);
           const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
           let result;
@@ -184,6 +189,8 @@ export default {
             result = { wine_name: text.trim().slice(0, 100) };
           }
           result._raw = text.slice(0, 200);
+          result._gemini_status = geminiRes.status;
+          result._gemini_debug = geminiRaw.slice(0, 300);
 
           return new Response(JSON.stringify(result), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },

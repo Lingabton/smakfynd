@@ -1942,7 +1942,9 @@ function LabelScanner({ products, onMatch, onClose }) {
       setOcrText(`AI läste: ${searchQuery}${data.region ? ` (${data.region})` : ""}${data.vintage ? ` ${data.vintage}` : ""}${data._raw ? `\n\nRåsvar: ${data._raw.slice(0,150)}` : ""}`);
 
       if (!searchQuery) {
-        setOcrText("Kunde inte läsa etiketten. Prova en tydligare bild.");
+        setOcrText(data._gemini_status === 429
+          ? "Etikettläsningen har nått sin dagliga gräns. Prova igen imorgon, eller skriv vinets namn."
+          : "Kunde inte läsa etiketten. Prova en tydligare bild.");
         setStatus("error");
         return;
       }
