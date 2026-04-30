@@ -120,60 +120,55 @@ export default {
       const body = await request.json();
       const url = new URL(request.url);
 
-      // Label reading endpoint — try multiple vision models
+      // Label reading endpoint — Gemini Flash vision
       if (url.pathname === "/label" && body.image) {
-        const imageData = body.image.replace(/^data:image\/\w+;base64,/, "");
-        const imageBytes = [...Uint8Array.from(atob(imageData), c => c.charCodeAt(0))];
-
-        // Try models in order of quality
-        const models = [
-          "@cf/microsoft/florence-2-large",
-          "@cf/unum/uform-gen2-qwen-500m",
-        ];
-
-        let text = "";
-        for (const model of models) {
-          try {
-            const response = await env.AI.run(model, {
-              prompt: "OCR: Read all text visible on this wine bottle label. Return only the text you can read.",
-              image: imageBytes,
-            });
-            text = (response.description || response.response || response.text || response.output || "").trim();
-            if (text && text.length > 3) break;
-          } catch(e) {
-            continue;
-          }
+        const GEMINI_KEY = env.GEMINI_API_KEY;
+        if (!GEMINI_KEY) {
+          return new Response(JSON.stringify({ error: "Vision API not configured" }), {
+            status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
 
-        if (!text || text.length < 3) {
-          return new Response(JSON.stringify({ wine_name: "", error: "Could not read label" }), {
+        const imageData = body.image.replace(/^data:image\/\w+;base64,/, "");
+
+        try {
+          const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: 'This is a photo of a wine bottle label. Read the label carefully and identify the wine. Return ONLY valid JSON: {"wine_name": "the wine name as printed on the label", "producer": "producer or winery name", "region": "region or country if visible", "vintage": "year if visible"}. Read the actual text on the label, do not guess.' },
+                    { inline_data: { mime_type: "image/jpeg", data: imageData } }
+                  ]
+                }],
+                generationConfig: { maxOutputTokens: 256, temperature: 0.1 }
+              }),
+            }
+          );
+
+          const geminiData = await geminiRes.json();
+          const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+          let result;
+          try {
+            const match = text.match(/\{[\s\S]*\}/);
+            result = match ? JSON.parse(match[0]) : { wine_name: text.trim() };
+          } catch(e) {
+            result = { wine_name: text.trim().slice(0, 100) };
+          }
+          result._raw = text.slice(0, 200);
+
+          return new Response(JSON.stringify(result), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
-        }
-
-        // Use text model to extract wine name from OCR output
-        try {
-          const extract = await env.AI.run(MODEL, {
-            messages: [
-              { role: "system", content: "You extract wine information from OCR text. Reply ONLY with JSON: {\"wine_name\": \"...\", \"producer\": \"...\"}" },
-              { role: "user", content: `OCR text from a wine label: "${text}"\n\nWhat wine is this? JSON only.` },
-            ],
-            max_tokens: 128,
+        } catch(e) {
+          return new Response(JSON.stringify({ error: "Vision failed: " + e.message }), {
+            status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
-          const aiText = extract.response || "";
-          const match = aiText.match(/\{[\s\S]*\}/);
-          if (match) {
-            const parsed = JSON.parse(match[0]);
-            parsed._ocr = text;
-            return new Response(JSON.stringify(parsed), {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-          }
-        } catch(e) {}
-
-        return new Response(JSON.stringify({ wine_name: text, _ocr: text }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        }
       }
 
       // Expert endpoint
