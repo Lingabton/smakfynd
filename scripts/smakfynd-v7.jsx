@@ -1819,8 +1819,12 @@ function BarcodeScanner({ onScan, onClose }) {
           { fps: 10, qrbox: { width: 280, height: 120 }, aspectRatio: 1.777 },
           (decodedText, result) => {
             if (navigator.vibrate) navigator.vibrate(50);
-            scanner.stop().catch(() => {});
-            onScan(decodedText, result?.result?.format?.formatName || "unknown");
+            scanner.stop().then(() => {
+              scanner.clear().catch(() => {});
+              onScan(decodedText, result?.result?.format?.formatName || "unknown");
+            }).catch(() => {
+              onScan(decodedText, "unknown");
+            });
           },
           () => {} // ignore scan failures (normal)
         );
@@ -1917,26 +1921,27 @@ function StoreMode({ products, onClose }) {
   useEffect(() => { if (!showScanner) inputRef.current?.focus(); }, [showScanner]);
 
   const handleBarcodeScan = (code, format) => {
-    track("snabbkoll_scan", { code, format });
-    // Try matching as productNumber (shelf label)
-    const byNr = products.find(p => String(p.nr) === code || String(p.nr) === code.replace(/^0+/, ""));
-    if (byNr) {
-      setQ(byNr.name);
-      handleSelect(byNr);
-      setShowScanner(false);
-      return;
-    }
-    // Try short product number (productNumberShort = first 4-5 digits)
-    const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
-    if (shortMatch) {
-      setQ(shortMatch.name);
-      handleSelect(shortMatch);
-      setShowScanner(false);
-      return;
-    }
-    // EAN not in our database — show code and fall back to search
-    setQ(code);
+    // Close scanner first, then process result after unmount
     setShowScanner(false);
+    setTimeout(() => {
+      track("snabbkoll_scan", { code, format });
+      // Try matching as productNumber (shelf label)
+      const byNr = products.find(p => String(p.nr) === code || String(p.nr) === code.replace(/^0+/, ""));
+      if (byNr) {
+        setQ(byNr.name);
+        handleSelect(byNr);
+        return;
+      }
+      // Try short product number
+      const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
+      if (shortMatch) {
+        setQ(shortMatch.name);
+        handleSelect(shortMatch);
+        return;
+      }
+      // EAN not in our database — fuzzy search by code
+      setQ(code);
+    }, 100);
   };
 
   const results = useMemo(() => {
