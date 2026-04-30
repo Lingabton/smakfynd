@@ -111,7 +111,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
         {/* Score with split bars + "?" */}
         <div style={{ flexShrink: 0, textAlign: "center", width: 52, position: "relative" }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
-          <div style={{ fontSize: 8, color: t.txL, marginTop: 2, marginBottom: 4 }}>{label}</div>
+          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 4, fontWeight: 600 }}>{label}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
               <span style={{ fontSize: 7, color: t.txF, width: 10 }}>K</span>
@@ -130,8 +130,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             style={{ fontSize: 9, color: t.txF, background: "none", border: "none", cursor: "pointer", fontFamily: t.sans, marginTop: 3, padding: 0 }}>?</button>
           {showScoreInfo && (
             <div onClick={e => e.stopPropagation()} style={{
-              position: "absolute", top: "100%", right: -8, marginTop: 6, zIndex: 10,
-              width: 260, padding: 14, borderRadius: 12,
+              position: "absolute", bottom: "100%", right: -4, marginBottom: 6, zIndex: 10,
+              width: 240, padding: 12, borderRadius: 10,
               background: t.card, border: `1px solid ${t.bdr}`, boxShadow: t.sh3,
               textAlign: "left", fontSize: 11, color: t.txM, lineHeight: 1.5,
             }}>

@@ -145,12 +145,9 @@ function FoodMatch({ products }) {
 
   return (
     <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 18 }}>🍽</span>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
-          <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta — vi föreslår vinet.</div>
-        </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 15, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
+        <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta, vi föreslår vinet.</div>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <label htmlFor="sf-meal" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Beskriv din måltid</label>
