@@ -120,6 +120,44 @@ export default {
       const body = await request.json();
       const url = new URL(request.url);
 
+      // Label reading endpoint — vision model reads wine label
+      if (url.pathname === "/label" && body.image) {
+        const VISION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct";
+        const imageData = body.image.replace(/^data:image\/\w+;base64,/, "");
+
+        const response = await env.AI.run(VISION_MODEL, {
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "This is a photo of a wine bottle label. Read the label and identify the wine. Return ONLY valid JSON with these fields: {\"wine_name\": \"the wine name\", \"producer\": \"producer/winery name\", \"region\": \"region or country\", \"grape\": \"grape variety if visible\", \"vintage\": \"year if visible\"}. If you can't read it clearly, make your best guess. JSON only, no other text."
+                },
+                {
+                  type: "image",
+                  image: Array.from(Uint8Array.from(atob(imageData), c => c.charCodeAt(0)))
+                }
+              ]
+            }
+          ],
+          max_tokens: 256,
+        });
+
+        const text = response.response || "";
+        try {
+          const match = text.match(/\{[\s\S]*\}/);
+          const result = match ? JSON.parse(match[0]) : { wine_name: text.trim() };
+          return new Response(JSON.stringify(result), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } catch(e) {
+          return new Response(JSON.stringify({ wine_name: text.trim().slice(0, 100) }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // Expert endpoint
       if (url.pathname === "/expert" && body.wines) {
         const prompt = `Uppskatta kvalitetspoäng (80-100) för varje vin. Svara BARA med JSON-array: [{"name":"...","points":88},...]\n\nViner:\n` + JSON.stringify(body.wines);

@@ -1886,66 +1886,48 @@ function LabelScanner({ products, onMatch, onClose }) {
     return () => { if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); };
   }, []);
 
-  const captureAndOCR = async () => {
+  const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current) return;
     setStatus("processing");
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.width = Math.min(video.videoWidth, 1024);
+    canvas.height = Math.round(canvas.width * video.videoHeight / video.videoWidth);
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Stop camera while processing
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
 
     try {
-      // Load Tesseract if needed
-      if (!window.Tesseract) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://unpkg.com/tesseract.js@5.1.1/dist/tesseract.min.js";
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
-        });
-      }
+      const imageBase64 = canvas.toDataURL("image/jpeg", 0.8);
 
-      const result = await window.Tesseract.recognize(canvas, "eng+fra+ita+spa+deu", {
-        logger: () => {},
+      const res = await fetch("https://smakfynd-wine-ai.smakfynd.workers.dev/label", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imageBase64 }),
       });
-      const text = result.data.text;
-      setOcrText(text);
+      const data = await res.json();
 
-      // Extract meaningful words (skip short, numeric-only, common words)
-      const stopwords = new Set(["wine","vin","vino","doc","docg","aoc","aop","igp","igt","product","of","the","and","red","white","rose","brut","sec","dry","ml","cl","vol","alc"]);
-      const words = text.split(/[\s\n\r,.;:!?()\[\]{}|/\\]+/)
-        .map(w => w.trim())
-        .filter(w => w.length >= 3 && !/^\d+$/.test(w) && !stopwords.has(w.toLowerCase()));
+      const wineName = data.wine_name || "";
+      const producer = data.producer || "";
+      const searchQuery = `${wineName} ${producer}`.trim();
+      setOcrText(`AI läste: ${searchQuery}${data.region ? ` (${data.region})` : ""}${data.vintage ? ` ${data.vintage}` : ""}`);
 
-      // Build search queries: try pairs and individual words
-      const queries = [];
-      // Try consecutive pairs first (most likely to be wine name)
-      for (let i = 0; i < words.length - 1; i++) {
-        queries.push(words[i] + " " + words[i + 1]);
-      }
-      // Then individual longer words
-      for (const w of words) {
-        if (w.length >= 4) queries.push(w);
+      if (!searchQuery) {
+        setStatus("error");
+        setOcrText("Kunde inte läsa etiketten. Prova en tydligare bild.");
+        return;
       }
 
-      // Fuzzy search each query
+      // Fuzzy search with AI-extracted name
+      const queries = [searchQuery, wineName, producer].filter(q => q.length >= 3);
       const seen = new Set();
       const allMatches = [];
-      for (const query of queries.slice(0, 15)) {
-        const results = fuzzySearch(products, query, ["name", "sub", "country", "grape", "region"], 3);
+      for (const query of queries) {
+        const results = fuzzySearch(products, query, ["name", "sub", "country", "grape", "region"], 5);
         for (const r of results) {
-          if (!seen.has(r.nr)) {
-            seen.add(r.nr);
-            allMatches.push(r);
-          }
+          if (!seen.has(r.nr)) { seen.add(r.nr); allMatches.push(r); }
         }
-        if (allMatches.length >= 5) break;
       }
 
       setMatches(allMatches.slice(0, 5));
@@ -2017,7 +1999,7 @@ function LabelScanner({ products, onMatch, onClose }) {
         <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginBottom: 12 }}>
           Rikta kameran mot vinets etikett
         </div>
-        <button onClick={captureAndOCR} disabled={status === "processing"} style={{
+        <button onClick={captureAndAnalyze} disabled={status === "processing"} style={{
           padding: "14px 32px", borderRadius: 12, border: "none",
           background: status === "processing" ? "#666" : "#fff", color: "#000",
           fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
