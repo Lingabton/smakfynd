@@ -122,40 +122,29 @@ export default {
 
       // Label reading endpoint — vision model reads wine label
       if (url.pathname === "/label" && body.image) {
-        const VISION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct";
+        const VISION_MODEL = "@cf/unum/uform-gen2-qwen-500m";
         const imageData = body.image.replace(/^data:image\/\w+;base64,/, "");
+        const imageBytes = Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
 
         const response = await env.AI.run(VISION_MODEL, {
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "This is a photo of a wine bottle label. Read the label and identify the wine. Return ONLY valid JSON with these fields: {\"wine_name\": \"the wine name\", \"producer\": \"producer/winery name\", \"region\": \"region or country\", \"grape\": \"grape variety if visible\", \"vintage\": \"year if visible\"}. If you can't read it clearly, make your best guess. JSON only, no other text."
-                },
-                {
-                  type: "image",
-                  image: Array.from(Uint8Array.from(atob(imageData), c => c.charCodeAt(0)))
-                }
-              ]
-            }
-          ],
-          max_tokens: 256,
+          prompt: "Read this wine bottle label. What is the wine name and producer? Reply with just the wine name and producer.",
+          image: [...imageBytes],
         });
 
-        const text = response.response || "";
+        const text = (response.description || response.response || response.text || "").trim();
+
+        // Try to parse as JSON, otherwise use raw text
+        let result;
         try {
           const match = text.match(/\{[\s\S]*\}/);
-          const result = match ? JSON.parse(match[0]) : { wine_name: text.trim() };
-          return new Response(JSON.stringify(result), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          result = match ? JSON.parse(match[0]) : { wine_name: text };
         } catch(e) {
-          return new Response(JSON.stringify({ wine_name: text.trim().slice(0, 100) }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          result = { wine_name: text };
         }
+
+        return new Response(JSON.stringify(result), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       // Expert endpoint
