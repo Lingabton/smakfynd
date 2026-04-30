@@ -171,6 +171,7 @@ function StoreMode({ products, onClose }) {
   const [selected, setSelected] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
   const [scanMsg, setScanMsg] = useState(null);
+  const [scanCode, setScanCode] = useState(null);
   const sv = React.useContext(SavedContext);
   const inputRef = useRef(null);
 
@@ -187,30 +188,62 @@ function StoreMode({ products, onClose }) {
 
   useEffect(() => { if (!showScanner) inputRef.current?.focus(); }, [showScanner]);
 
+  // EAN → productNumber lookup (built over time from successful scans)
+  const [eanMap] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("sf_ean_map") || "{}"); } catch(e) { return {}; }
+  });
+  const saveEanMapping = (ean, nr) => {
+    eanMap[ean] = nr;
+    try { localStorage.setItem("sf_ean_map", JSON.stringify(eanMap)); } catch(e) {}
+  };
+
   const handleBarcodeScan = (code, format) => {
     setShowScanner(false);
     setTimeout(() => {
       track("snabbkoll_scan", { code, format });
-      // 1. Try matching as productNumber (shelf label barcode)
+
+      // 1. Direct productNumber match (shelf label)
       const byNr = products.find(p => String(p.nr) === code || String(p.nr) === code.replace(/^0+/, ""));
       if (byNr) {
         setQ(byNr.name);
         handleSelect(byNr);
         return;
       }
-      // 2. Try partial productNumber match
+
+      // 2. Check local EAN mapping (learned from previous successful manual matches)
+      if (eanMap[code]) {
+        const mapped = products.find(p => String(p.nr) === eanMap[code]);
+        if (mapped) {
+          setQ(mapped.name);
+          handleSelect(mapped);
+          return;
+        }
+      }
+
+      // 3. Partial productNumber match
       const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
       if (shortMatch) {
         setQ(shortMatch.name);
         handleSelect(shortMatch);
         return;
       }
-      // 3. EAN not in our database — show a helpful message and pre-fill search
+
+      // 4. Not found — focus search input with helpful message
       setQ("");
       setSelected(null);
-      // Show the code so user knows it was read
-      setScanMsg(`Streckkod ${code} hittades inte i databasen. Skriv vinets namn istället.`);
+      setScanMsg(`Streckkoden ${code} kunde inte matchas automatiskt. Skriv vinets namn så hittar vi det.`);
+      setScanCode(code); // Save for learning
+      inputRef.current?.focus();
     }, 150);
+  };
+
+  // When user manually finds the wine after failed scan, learn the mapping
+  const handleSelectWithLearn = (wine) => {
+    handleSelect(wine);
+    if (scanCode && wine.nr) {
+      saveEanMapping(scanCode, String(wine.nr));
+      setScanCode(null);
+    }
   };
 
   const results = useMemo(() => {
@@ -333,7 +366,7 @@ function StoreMode({ products, onClose }) {
           {results.map(p => {
             const [_l, col] = getScoreInfo(p.smakfynd_score);
             return (
-              <div key={p.nr} onClick={() => { handleSelect(p); setQ(p.name); }}
+              <div key={p.nr} onClick={() => { handleSelectWithLearn(p); setQ(p.name); setScanMsg(null); }}
                 style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, cursor: "pointer", transition: "background 0.15s", marginBottom: 2 }}
                 onMouseEnter={e => e.currentTarget.style.background = t.card}
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}
