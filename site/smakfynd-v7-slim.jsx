@@ -1769,13 +1769,13 @@ function getRecommendations(wine, products) {
     }
   }
 
-  // Type C: Worth upgrading (poäng +8, price 30-100% higher, only if wine < 75)
-  if (recs.length < 3 && wine.smakfynd_score < 75) {
+  // Type C: Worth upgrading (poäng +5, price 30-100% higher)
+  if (recs.length < 3) {
     const typeC = same
-      .filter(p => p.smakfynd_score >= wine.smakfynd_score + 8 && p.price > wine.price * 1.3 && p.price <= wine.price * 2)
+      .filter(p => p.smakfynd_score >= wine.smakfynd_score + 5 && p.price > wine.price * 1.3 && p.price <= wine.price * 2.5)
       .sort((a, b) => b.smakfynd_score - a.smakfynd_score);
     for (const p of typeC.slice(0, 1)) {
-      recs.push({ ...p, _recType: "C", _recLabel: `Märkbart bättre för ${Math.round(p.price - wine.price)}\u00A0kr extra` });
+      recs.push({ ...p, _recType: "C", _recLabel: `Ett steg upp, +${p.smakfynd_score - wine.smakfynd_score} poäng för ${Math.round(p.price - wine.price)}\u00A0kr extra` });
     }
   }
 
@@ -1989,7 +1989,7 @@ function StoreMode({ products, onClose }) {
                     if (w.taste_body && selected.taste_body) sim += (1 - Math.abs(w.taste_body - selected.taste_body) / 12) * 15;
                     return { ...w, _sim: sim };
                   })
-                  .filter(w => w._sim >= 15)
+                  .filter(w => w._sim >= 8)
                   .sort((a, b) => b._sim - a._sim || b.smakfynd_score - a.smakfynd_score)
                   .slice(0, 3);
                 if (similar.length === 0) return null;
