@@ -166,10 +166,182 @@ function BarcodeScanner({ onScan, onClose }) {
   );
 }
 
+function LabelScanner({ products, onMatch, onClose }) {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const [status, setStatus] = useState("camera"); // camera | processing | results | error
+  const [matches, setMatches] = useState([]);
+  const [ocrText, setOcrText] = useState("");
+
+  useEffect(() => {
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        streamRef.current = stream;
+        if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
+      } catch(e) {
+        setStatus("error");
+      }
+    };
+    startCamera();
+    return () => { if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); };
+  }, []);
+
+  const captureAndOCR = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    setStatus("processing");
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+
+    // Stop camera while processing
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+
+    try {
+      // Load Tesseract if needed
+      if (!window.Tesseract) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://unpkg.com/tesseract.js@5.1.1/dist/tesseract.min.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      const result = await window.Tesseract.recognize(canvas, "eng+fra+ita+spa+deu", {
+        logger: () => {},
+      });
+      const text = result.data.text;
+      setOcrText(text);
+
+      // Extract meaningful words (skip short, numeric-only, common words)
+      const stopwords = new Set(["wine","vin","vino","doc","docg","aoc","aop","igp","igt","product","of","the","and","red","white","rose","brut","sec","dry","ml","cl","vol","alc"]);
+      const words = text.split(/[\s\n\r,.;:!?()\[\]{}|/\\]+/)
+        .map(w => w.trim())
+        .filter(w => w.length >= 3 && !/^\d+$/.test(w) && !stopwords.has(w.toLowerCase()));
+
+      // Build search queries: try pairs and individual words
+      const queries = [];
+      // Try consecutive pairs first (most likely to be wine name)
+      for (let i = 0; i < words.length - 1; i++) {
+        queries.push(words[i] + " " + words[i + 1]);
+      }
+      // Then individual longer words
+      for (const w of words) {
+        if (w.length >= 4) queries.push(w);
+      }
+
+      // Fuzzy search each query
+      const seen = new Set();
+      const allMatches = [];
+      for (const query of queries.slice(0, 15)) {
+        const results = fuzzySearch(products, query, ["name", "sub", "country", "grape", "region"], 3);
+        for (const r of results) {
+          if (!seen.has(r.nr)) {
+            seen.add(r.nr);
+            allMatches.push(r);
+          }
+        }
+        if (allMatches.length >= 5) break;
+      }
+
+      setMatches(allMatches.slice(0, 5));
+      setStatus("results");
+      if (navigator.vibrate) navigator.vibrate(50);
+    } catch(e) {
+      setStatus("error");
+    }
+  };
+
+  if (status === "error") {
+    return (
+      <div style={{ position: "fixed", inset: 0, background: t.bg, zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ fontSize: 14, color: t.txM, textAlign: "center", marginBottom: 16 }}>Kunde inte starta kameran eller läsa etiketten.</div>
+        <button onClick={onClose} style={{ padding: "12px 24px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Tillbaka</button>
+      </div>
+    );
+  }
+
+  if (status === "results") {
+    return (
+      <div style={{ position: "fixed", inset: 0, background: t.bg, zIndex: 1000, overflowY: "auto" }}>
+        <div style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx }}>Resultat från etikett</div>
+          <button onClick={onClose} style={{ padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Stäng</button>
+        </div>
+        {matches.length > 0 ? (
+          <div style={{ padding: "0 16px" }}>
+            <div style={{ fontSize: 11, color: t.txL, marginBottom: 8 }}>Hittade {matches.length} möjliga matchningar:</div>
+            {matches.map((p, i) => {
+              const [_l, col] = getScoreInfo(p.smakfynd_score);
+              return (
+                <div key={p.nr} onClick={() => { onMatch(p); onClose(); }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px", borderRadius: 10, background: t.card, border: `1px solid ${t.bdrL}`, marginBottom: 6, cursor: "pointer" }}>
+                  <ProductImage p={p} size={40} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: t.txL }}>{p.sub} · {p.country} · {p.price}{"\u00A0"}kr</div>
+                  </div>
+                  <span style={{ fontSize: 20, fontWeight: 900, color: col, fontFamily: t.serif }}>{p.smakfynd_score}</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ padding: "32px 16px", textAlign: "center" }}>
+            <div style={{ fontSize: 14, color: t.txM, marginBottom: 4 }}>Kunde inte matcha etiketten</div>
+            <div style={{ fontSize: 12, color: t.txL }}>Prova att skriva vinets namn istället</div>
+          </div>
+        )}
+        {ocrText && (
+          <div style={{ padding: "16px", marginTop: 8 }}>
+            <div style={{ fontSize: 10, color: t.txL, marginBottom: 4 }}>Avläst text:</div>
+            <div style={{ fontSize: 10, color: t.txF, fontFamily: "monospace", lineHeight: 1.4, maxHeight: 80, overflow: "hidden" }}>{ocrText.slice(0, 300)}</div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#000", zIndex: 1000, display: "flex", flexDirection: "column" }}>
+      <video ref={videoRef} style={{ flex: 1, width: "100%", objectFit: "cover" }} playsInline muted />
+      <canvas ref={canvasRef} style={{ display: "none" }} />
+
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", textAlign: "center" }}>
+        <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginBottom: 12 }}>
+          Rikta kameran mot vinets etikett
+        </div>
+        <button onClick={captureAndOCR} disabled={status === "processing"} style={{
+          padding: "14px 32px", borderRadius: 12, border: "none",
+          background: status === "processing" ? "#666" : "#fff", color: "#000",
+          fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+        }}>
+          {status === "processing" ? "Läser etikett..." : "Ta bild"}
+        </button>
+      </div>
+
+      <button onClick={onClose} style={{
+        position: "absolute", top: 16, right: 16, padding: "8px 16px", borderRadius: 100,
+        background: "rgba(0,0,0,0.5)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)",
+        fontSize: 13, cursor: "pointer", fontFamily: "inherit", zIndex: 10,
+      }}>Avbryt</button>
+    </div>
+  );
+}
+
 function StoreMode({ products, onClose }) {
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [showLabelScanner, setShowLabelScanner] = useState(false);
   const [scanMsg, setScanMsg] = useState(null);
   const [scanCode, setScanCode] = useState(null);
   const sv = React.useContext(SavedContext);
@@ -317,26 +489,39 @@ function StoreMode({ products, onClose }) {
         <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 18, color: t.txL, pointerEvents: "none" }}>⌕</span>
       </div>
 
-      {/* Scan button */}
-      <button onClick={() => setShowScanner(true)} style={{
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        width: "100%", padding: "14px 20px", borderRadius: 12,
-        border: `2px solid ${t.wine}25`, background: t.card,
-        cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 600, color: t.tx,
-        marginBottom: 16, transition: "all 0.2s",
-      }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "25"; }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round">
-          <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/>
-          <line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="17" y2="8"/><line x1="7" y1="16" x2="12" y2="16"/>
-        </svg>
-        Skanna streckkod
-      </button>
+      {/* Scan buttons */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <button onClick={() => setShowScanner(true)} style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          padding: "14px 12px", borderRadius: 12,
+          border: `1.5px solid ${t.wine}25`, background: t.card,
+          cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: t.tx,
+          transition: "all 0.2s",
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round">
+            <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/>
+            <line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="17" y2="8"/>
+          </svg>
+          Skanna hyllkant
+        </button>
+        <button onClick={() => setShowLabelScanner(true)} style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          padding: "14px 12px", borderRadius: 12,
+          border: `1.5px solid ${t.bdr}`, background: t.card,
+          cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: t.txM,
+          transition: "all 0.2s",
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.txM} strokeWidth="2" strokeLinecap="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M5 21c0-3 3-5 7-5s7 2 7 5"/>
+          </svg>
+          Skanna etikett
+          <span style={{ fontSize: 9, background: t.bg, padding: "1px 5px", borderRadius: 4, color: t.txL, fontWeight: 600 }}>BETA</span>
+        </button>
+      </div>
 
-      {/* Scanner overlay */}
+      {/* Scanner overlays */}
       {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} />}
+      {showLabelScanner && <LabelScanner products={products} onMatch={p => { setQ(p.name); handleSelectWithLearn(p); }} onClose={() => setShowLabelScanner(false)} />}
 
       {/* Scan message */}
       {scanMsg && (
