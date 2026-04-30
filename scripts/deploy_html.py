@@ -222,7 +222,7 @@ html = f"""<!DOCTYPE html>
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://product-cdn.systembolaget.se data:; connect-src 'self' https://*.smakfynd.workers.dev; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://product-cdn.systembolaget.se data:; connect-src 'self' https://*.smakfynd.workers.dev; media-src 'self' blob:; frame-ancestors 'none'">
   <link rel="canonical" href="https://smakfynd.se">
 
   <!-- Preconnect for faster loading -->
