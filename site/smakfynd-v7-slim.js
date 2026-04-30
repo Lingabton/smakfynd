@@ -3454,29 +3454,26 @@ function BarcodeScanner({
         initScanner();
       }
     };
-    const initScanner = () => {
+    const initScanner = async () => {
       try {
-        const scanner = new window.Html5QrcodeScanner("sf-scanner-region", {
+        const scanner = new window.Html5Qrcode("sf-scanner-region");
+        scannerRef.current = scanner;
+        await scanner.start({
+          facingMode: "environment"
+        }, {
           fps: 15,
           qrbox: {
             width: 320,
             height: 150
           },
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true,
           formatsToSupport: [window.Html5QrcodeSupportedFormats.EAN_13, window.Html5QrcodeSupportedFormats.EAN_8, window.Html5QrcodeSupportedFormats.CODE_128, window.Html5QrcodeSupportedFormats.CODE_39, window.Html5QrcodeSupportedFormats.ITF]
-        });
-        scannerRef.current = scanner;
-        scanner.render(decodedText => {
+        }, decodedText => {
           if (doneRef.current) return;
           doneRef.current = true;
           if (navigator.vibrate) navigator.vibrate(50);
-          try {
-            scanner.clear();
-          } catch (e) {}
+          scanner.stop().then(() => scanner.clear()).catch(() => {});
           onScan(decodedText, "barcode");
-        }, errorMessage => {} // ignore continuous scan misses
-        );
+        }, () => {});
       } catch (e) {
         onClose();
       }
@@ -3484,7 +3481,10 @@ function BarcodeScanner({
     loadAndStart();
     return () => {
       try {
-        if (scannerRef.current) scannerRef.current.clear();
+        if (scannerRef.current) {
+          scannerRef.current.stop().catch(() => {});
+          scannerRef.current.clear().catch(() => {});
+        }
       } catch (e) {}
     };
   }, []);
@@ -3512,7 +3512,8 @@ function BarcodeScanner({
   }, "Skanna streckkod"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       try {
-        scannerRef.current?.clear();
+        scannerRef.current?.stop().catch(() => {});
+        scannerRef.current?.clear().catch(() => {});
       } catch (e) {}
       onClose();
     },

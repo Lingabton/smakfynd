@@ -111,31 +111,31 @@ function BarcodeScanner({ onScan, onClose }) {
       }
     };
 
-    const initScanner = () => {
+    const initScanner = async () => {
       try {
-        const scanner = new window.Html5QrcodeScanner("sf-scanner-region", {
-          fps: 15,
-          qrbox: { width: 320, height: 150 },
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true,
-          formatsToSupport: [
-            window.Html5QrcodeSupportedFormats.EAN_13,
-            window.Html5QrcodeSupportedFormats.EAN_8,
-            window.Html5QrcodeSupportedFormats.CODE_128,
-            window.Html5QrcodeSupportedFormats.CODE_39,
-            window.Html5QrcodeSupportedFormats.ITF,
-          ],
-        });
+        const scanner = new window.Html5Qrcode("sf-scanner-region");
         scannerRef.current = scanner;
-        scanner.render(
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 15,
+            qrbox: { width: 320, height: 150 },
+            formatsToSupport: [
+              window.Html5QrcodeSupportedFormats.EAN_13,
+              window.Html5QrcodeSupportedFormats.EAN_8,
+              window.Html5QrcodeSupportedFormats.CODE_128,
+              window.Html5QrcodeSupportedFormats.CODE_39,
+              window.Html5QrcodeSupportedFormats.ITF,
+            ],
+          },
           (decodedText) => {
             if (doneRef.current) return;
             doneRef.current = true;
             if (navigator.vibrate) navigator.vibrate(50);
-            try { scanner.clear(); } catch(e) {}
+            scanner.stop().then(() => scanner.clear()).catch(() => {});
             onScan(decodedText, "barcode");
           },
-          (errorMessage) => {} // ignore continuous scan misses
+          () => {}
         );
       } catch(e) {
         onClose();
@@ -145,7 +145,7 @@ function BarcodeScanner({ onScan, onClose }) {
     loadAndStart();
 
     return () => {
-      try { if (scannerRef.current) scannerRef.current.clear(); } catch(e) {}
+      try { if (scannerRef.current) { scannerRef.current.stop().catch(() => {}); scannerRef.current.clear().catch(() => {}); } } catch(e) {}
     };
   }, []);
 
@@ -153,7 +153,7 @@ function BarcodeScanner({ onScan, onClose }) {
     <div style={{ position: "fixed", inset: 0, background: t.bg, zIndex: 1000, overflowY: "auto" }}>
       <div style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx }}>Skanna streckkod</div>
-        <button onClick={() => { try { scannerRef.current?.clear(); } catch(e) {} onClose(); }} style={{
+        <button onClick={() => { try { scannerRef.current?.stop().catch(() => {}); scannerRef.current?.clear().catch(() => {}); } catch(e) {} onClose(); }} style={{
           padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`,
           background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
         }}>Avbryt</button>
