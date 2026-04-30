@@ -1061,12 +1061,12 @@ function Card({
     style: {
       flexShrink: 0,
       textAlign: "center",
-      width: 52,
+      width: 58,
       position: "relative"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 24,
+      fontSize: 26,
       fontWeight: 900,
       color: col,
       lineHeight: 1,
@@ -1077,65 +1077,65 @@ function Card({
       fontSize: 10,
       color: col,
       marginTop: 3,
-      marginBottom: 4,
+      marginBottom: 5,
       fontWeight: 600
     }
   }, label), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
-      gap: 2
+      gap: 3
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 3
+      gap: 4
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 7,
-      color: t.txF,
-      width: 10
+      fontSize: 9,
+      color: t.txL,
+      width: 12
     }
   }, "K"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      height: 3,
-      borderRadius: 2,
+      height: 5,
+      borderRadius: 3,
       background: t.bdrL
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       width: `${qualBar}%`,
       height: "100%",
-      borderRadius: 2,
+      borderRadius: 3,
       background: "#6b8cce"
     }
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 3
+      gap: 4
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 7,
-      color: t.txF,
-      width: 10
+      fontSize: 9,
+      color: t.txL,
+      width: 12
     }
   }, "P"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      height: 3,
-      borderRadius: 2,
+      height: 5,
+      borderRadius: 3,
       background: t.bdrL
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       width: `${priceBar}%`,
       height: "100%",
-      borderRadius: 2,
+      borderRadius: 3,
       background: t.green
     }
   })))), /*#__PURE__*/React.createElement("button", {
@@ -1144,14 +1144,16 @@ function Card({
       setShowScoreInfo(!showScoreInfo);
     },
     style: {
-      fontSize: 9,
-      color: t.txF,
+      fontSize: 11,
+      color: t.txL,
       background: "none",
-      border: "none",
+      border: `1px solid ${t.bdrL}`,
+      borderRadius: 4,
       cursor: "pointer",
       fontFamily: t.sans,
-      marginTop: 3,
-      padding: 0
+      marginTop: 5,
+      padding: "1px 6px",
+      lineHeight: 1.4
     }
   }, "?"), showScoreInfo && /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),

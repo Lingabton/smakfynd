@@ -610,25 +610,25 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
         </div>
 
         {/* Score with split bars + "?" */}
-        <div style={{ flexShrink: 0, textAlign: "center", width: 52, position: "relative" }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
-          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 4, fontWeight: 600 }}>{label}</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <span style={{ fontSize: 7, color: t.txF, width: 10 }}>K</span>
-              <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdrL }}>
-                <div style={{ width: `${qualBar}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} />
+        <div style={{ flexShrink: 0, textAlign: "center", width: 58, position: "relative" }}>
+          <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
+          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 5, fontWeight: 600 }}>{label}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 9, color: t.txL, width: 12 }}>K</span>
+              <div style={{ flex: 1, height: 5, borderRadius: 3, background: t.bdrL }}>
+                <div style={{ width: `${qualBar}%`, height: "100%", borderRadius: 3, background: "#6b8cce" }} />
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <span style={{ fontSize: 7, color: t.txF, width: 10 }}>P</span>
-              <div style={{ flex: 1, height: 3, borderRadius: 2, background: t.bdrL }}>
-                <div style={{ width: `${priceBar}%`, height: "100%", borderRadius: 2, background: t.green }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 9, color: t.txL, width: 12 }}>P</span>
+              <div style={{ flex: 1, height: 5, borderRadius: 3, background: t.bdrL }}>
+                <div style={{ width: `${priceBar}%`, height: "100%", borderRadius: 3, background: t.green }} />
               </div>
             </div>
           </div>
           <button onClick={e => { e.stopPropagation(); setShowScoreInfo(!showScoreInfo); }}
-            style={{ fontSize: 9, color: t.txF, background: "none", border: "none", cursor: "pointer", fontFamily: t.sans, marginTop: 3, padding: 0 }}>?</button>
+            style={{ fontSize: 11, color: t.txL, background: "none", border: `1px solid ${t.bdrL}`, borderRadius: 4, cursor: "pointer", fontFamily: t.sans, marginTop: 5, padding: "1px 6px", lineHeight: 1.4 }}>?</button>
           {showScoreInfo && (
             <div onClick={e => e.stopPropagation()} style={{
               position: "absolute", bottom: "100%", right: -4, marginBottom: 6, zIndex: 10,
