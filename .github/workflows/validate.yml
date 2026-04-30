@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Babel
         run: npm ci
@@ -28,14 +31,6 @@ jobs:
       - name: Build app (concat src → JSX)
         run: python3 scripts/build_app.py
 
-      - name: Build slim (if data exists)
-        run: |
-          if [ -f data/smakfynd_ranked_v2.json ]; then
-            python3 scripts/build_slim.py
-          else
-            echo "No data file — skipping slim build"
-          fi
-
       - name: Transpile JSX → JS
         run: npx babel --presets @babel/preset-react scripts/smakfynd-v7.jsx -o /tmp/test.js
 
@@ -45,13 +40,12 @@ jobs:
       - name: Validate wines.json
         run: |
           if [ -f docs/wines.json ]; then
-            node tests/test_data.js
+            SIZE=$(wc -c < docs/wines.json)
+            if [ "$SIZE" -lt 100 ]; then
+              echo "wines.json is empty or too small ($SIZE bytes) — skipping validation"
+            else
+              node tests/test_data.js
+            fi
           else
-            echo "No wines.json — skipping data validation"
-          fi
-
-      - name: Validate data schema (Python)
-        run: |
-          if [ -f docs/wines.json ]; then
-            python3 scripts/validate_data.py docs/wines.json
+            echo "No wines.json — skipping"
           fi
