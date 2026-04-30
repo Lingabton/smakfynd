@@ -1814,8 +1814,8 @@ function BarcodeScanner({ onScan, onClose }) {
         await scanner.start(
           { facingMode: "environment" },
           {
-            fps: 15,
-            qrbox: { width: 320, height: 150 },
+            fps: 20,
+            qrbox: { width: 250, height: 80 },
             formatsToSupport: [
               window.Html5QrcodeSupportedFormats.EAN_13,
               window.Html5QrcodeSupportedFormats.EAN_8,
@@ -1866,6 +1866,7 @@ function StoreMode({ products, onClose }) {
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [scanMsg, setScanMsg] = useState(null);
   const sv = React.useContext(SavedContext);
   const inputRef = useRef(null);
 
@@ -1883,27 +1884,29 @@ function StoreMode({ products, onClose }) {
   useEffect(() => { if (!showScanner) inputRef.current?.focus(); }, [showScanner]);
 
   const handleBarcodeScan = (code, format) => {
-    // Close scanner first, then process result after unmount
     setShowScanner(false);
     setTimeout(() => {
       track("snabbkoll_scan", { code, format });
-      // Try matching as productNumber (shelf label)
+      // 1. Try matching as productNumber (shelf label barcode)
       const byNr = products.find(p => String(p.nr) === code || String(p.nr) === code.replace(/^0+/, ""));
       if (byNr) {
         setQ(byNr.name);
         handleSelect(byNr);
         return;
       }
-      // Try short product number
+      // 2. Try partial productNumber match
       const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
       if (shortMatch) {
         setQ(shortMatch.name);
         handleSelect(shortMatch);
         return;
       }
-      // EAN not in our database — fuzzy search by code
-      setQ(code);
-    }, 100);
+      // 3. EAN not in our database — show a helpful message and pre-fill search
+      setQ("");
+      setSelected(null);
+      // Show the code so user knows it was read
+      setScanMsg(`Streckkod ${code} hittades inte i databasen. Skriv vinets namn istället.`);
+    }, 150);
   };
 
   const results = useMemo(() => {
@@ -1964,7 +1967,7 @@ function StoreMode({ products, onClose }) {
       {/* Search */}
       <div style={{ position: "relative", marginBottom: 16 }}>
         <input ref={inputRef} type="search" inputMode="search" value={q}
-          onChange={e => { setQ(e.target.value); setSelected(null); }}
+          onChange={e => { setQ(e.target.value); setSelected(null); setScanMsg(null); }}
           placeholder="Skriv vinets namn, druva eller artikelnummer..."
           style={{
             width: "100%", padding: "16px 16px 16px 46px", borderRadius: 14,
@@ -1997,6 +2000,13 @@ function StoreMode({ products, onClose }) {
 
       {/* Scanner overlay */}
       {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} />}
+
+      {/* Scan message */}
+      {scanMsg && (
+        <div style={{ padding: "12px 16px", borderRadius: 10, background: `${t.deal}08`, border: `1px solid ${t.deal}20`, marginBottom: 12, fontSize: 12, color: t.deal }}>
+          {scanMsg}
+        </div>
+      )}
 
       {/* Recent searches */}
       {!q && !selected && recent.length > 0 && (
