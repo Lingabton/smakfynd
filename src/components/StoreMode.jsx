@@ -247,11 +247,11 @@ function StoreMode({ products, onClose }) {
               <div style={{ textAlign: "center", flexShrink: 0 }}>
                 <div style={{ fontSize: 32, fontWeight: 900, color: getScoreInfo(selected.smakfynd_score)[1], fontFamily: t.serif }}>{selected.smakfynd_score}</div>
                 <div style={{ fontSize: 10, fontWeight: 600, color: getScoreInfo(selected.smakfynd_score)[1] }}>{getScoreInfo(selected.smakfynd_score)[0]}</div>
-                {/* Compact score breakdown */}
-                <div style={{ marginTop: 6, fontSize: 10, color: t.txL }}>
-                  {selected.crowd_score && <div>Crowd {selected.crowd_score.toFixed(1)}/10</div>}
-                  {selected.expert_score && <div>Expert {selected.expert_score.toFixed(1)}/10</div>}
-                  {selected.price_score && <div>Prisvärde {selected.price_score.toFixed(1)}/10</div>}
+                {/* Score breakdown */}
+                <div style={{ marginTop: 8, fontSize: 12, color: t.txM, textAlign: "right" }}>
+                  {selected.crowd_score && <div><span style={{ color: "#6b8cce", fontWeight: 600 }}>Crowd</span> {selected.crowd_score.toFixed(1)}/10</div>}
+                  {selected.expert_score && <div><span style={{ color: "#b07d3b", fontWeight: 600 }}>Expert</span> {selected.expert_score.toFixed(1)}/10</div>}
+                  {selected.price_score && <div><span style={{ color: t.green, fontWeight: 600 }}>Prisvärde</span> {selected.price_score.toFixed(1)}/10</div>}
                 </div>
               </div>
             </div>
@@ -276,9 +276,36 @@ function StoreMode({ products, onClose }) {
               {recs.map((r, i) => <RecCard key={i} p={r} label={r._recLabel} type={r._recType} />)}
             </div>
           ) : (
-            <div style={{ padding: "16px 18px", borderRadius: 12, background: `${t.green}08`, border: `1px solid ${t.green}20` }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: t.green }}>Du gjorde rätt val</div>
-              <div style={{ fontSize: 12, color: t.txM, marginTop: 2 }}>Inget bättre i prisklassen just nu.</div>
+            <div>
+              <div style={{ padding: "16px 18px", borderRadius: 12, background: `${t.green}08`, border: `1px solid ${t.green}20`, marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: t.green }}>Du gjorde rätt val</div>
+                <div style={{ fontSize: 12, color: t.txM, marginTop: 2 }}>Inget bättre i prisklassen just nu.</div>
+              </div>
+              {/* Similar wines you might like */}
+              {(() => {
+                const similar = products
+                  .filter(w => w.nr !== selected.nr && w.category === selected.category && w.package === "Flaska" && w.assortment === "Fast sortiment")
+                  .map(w => {
+                    let sim = 0;
+                    if (w.grape && selected.grape && w.grape.toLowerCase() === selected.grape.toLowerCase()) sim += 20;
+                    if (w.country === selected.country) sim += 10;
+                    if (w.region && selected.region && w.region === selected.region) sim += 15;
+                    if (w.taste_body && selected.taste_body) sim += (1 - Math.abs(w.taste_body - selected.taste_body) / 12) * 15;
+                    return { ...w, _sim: sim };
+                  })
+                  .filter(w => w._sim >= 15)
+                  .sort((a, b) => b._sim - a._sim || b.smakfynd_score - a.smakfynd_score)
+                  .slice(0, 3);
+                if (similar.length === 0) return null;
+                return (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: t.txL, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                      Du kanske också gillar
+                    </div>
+                    {similar.map((r, i) => <RecCard key={i} p={r} label={`Liknande stil${r.grape && selected.grape && r.grape.toLowerCase() === selected.grape.toLowerCase() ? ", samma druva" : ""}`} type="A" />)}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>

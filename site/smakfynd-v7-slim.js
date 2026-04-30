@@ -3830,11 +3830,27 @@ function StoreMode({
     }
   }, getScoreInfo(selected.smakfynd_score)[0]), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 6,
-      fontSize: 10,
-      color: t.txL
+      marginTop: 8,
+      fontSize: 12,
+      color: t.txM,
+      textAlign: "right"
     }
-  }, selected.crowd_score && /*#__PURE__*/React.createElement("div", null, "Crowd ", selected.crowd_score.toFixed(1), "/10"), selected.expert_score && /*#__PURE__*/React.createElement("div", null, "Expert ", selected.expert_score.toFixed(1), "/10"), selected.price_score && /*#__PURE__*/React.createElement("div", null, "Prisv\xE4rde ", selected.price_score.toFixed(1), "/10")))), /*#__PURE__*/React.createElement("div", {
+  }, selected.crowd_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#6b8cce",
+      fontWeight: 600
+    }
+  }, "Crowd"), " ", selected.crowd_score.toFixed(1), "/10"), selected.expert_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b07d3b",
+      fontWeight: 600
+    }
+  }, "Expert"), " ", selected.expert_score.toFixed(1), "/10"), selected.price_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: t.green,
+      fontWeight: 600
+    }
+  }, "Prisv\xE4rde"), " ", selected.price_score.toFixed(1), "/10")))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10,
       display: "flex",
@@ -3882,12 +3898,13 @@ function StoreMode({
     p: r,
     label: r._recLabel,
     type: r._recType
-  }))) : /*#__PURE__*/React.createElement("div", {
+  }))) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "16px 18px",
       borderRadius: 12,
       background: `${t.green}08`,
-      border: `1px solid ${t.green}20`
+      border: `1px solid ${t.green}20`,
+      marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3901,7 +3918,35 @@ function StoreMode({
       color: t.txM,
       marginTop: 2
     }
-  }, "Inget b\xE4ttre i prisklassen just nu."))), !q && !selected && /*#__PURE__*/React.createElement("div", {
+  }, "Inget b\xE4ttre i prisklassen just nu.")), (() => {
+    const similar = products.filter(w => w.nr !== selected.nr && w.category === selected.category && w.package === "Flaska" && w.assortment === "Fast sortiment").map(w => {
+      let sim = 0;
+      if (w.grape && selected.grape && w.grape.toLowerCase() === selected.grape.toLowerCase()) sim += 20;
+      if (w.country === selected.country) sim += 10;
+      if (w.region && selected.region && w.region === selected.region) sim += 15;
+      if (w.taste_body && selected.taste_body) sim += (1 - Math.abs(w.taste_body - selected.taste_body) / 12) * 15;
+      return {
+        ...w,
+        _sim: sim
+      };
+    }).filter(w => w._sim >= 15).sort((a, b) => b._sim - a._sim || b.smakfynd_score - a.smakfynd_score).slice(0, 3);
+    if (similar.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 600,
+        color: t.txL,
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        marginBottom: 8
+      }
+    }, "Du kanske ocks\xE5 gillar"), similar.map((r, i) => /*#__PURE__*/React.createElement(RecCard, {
+      key: i,
+      p: r,
+      label: `Liknande stil${r.grape && selected.grape && r.grape.toLowerCase() === selected.grape.toLowerCase() ? ", samma druva" : ""}`,
+      type: "A"
+    })));
+  })())), !q && !selected && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 8
     }
