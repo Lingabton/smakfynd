@@ -1745,39 +1745,90 @@ function fuzzySearch(items, query, keys, limit = 10) {
 function getRecommendations(wine, products) {
   if (!wine || !products) return [];
   const wineVol = wine.vol || 750;
-  const same = products.filter(p =>
+  const wineGrape = (wine.grape || "").toLowerCase().split(",")[0].trim();
+  const wineCat3 = (wine.cat3 || "").toLowerCase();
+  const wineRegion = (wine.region || "").toLowerCase();
+
+  // Base pool: same type + volume
+  const base = products.filter(p =>
     p.nr !== wine.nr && p.category === wine.category && p.package === wine.package
     && p.assortment === "Fast sortiment"
-    && Math.abs((p.vol || 750) - wineVol) / wineVol < 0.3 // Same-ish volume (±30%)
+    && Math.abs((p.vol || 750) - wineVol) / wineVol < 0.3
   );
-  const recs = [];
 
-  // Type A: Better in same price range (±20%, +5 poäng)
-  const priceRange = wine.price * 0.2;
-  const typeA = same
-    .filter(p => Math.abs(p.price - wine.price) <= priceRange && p.smakfynd_score >= wine.smakfynd_score + 5)
+  // Narrow pool: same grape/style/region (prioritized)
+  const narrow = base.filter(p => {
+    const g = (p.grape || "").toLowerCase().split(",")[0].trim();
+    const c = (p.cat3 || "").toLowerCase();
+    const r = (p.region || "").toLowerCase();
+    return (wineGrape && g === wineGrape) || (wineCat3 && c === wineCat3) || (wineRegion && r === wineRegion);
+  });
+
+  const recs = [];
+  const used = new Set();
+
+  const addRec = (p, type, label) => {
+    if (used.has(p.nr)) return false;
+    used.add(p.nr);
+    recs.push({ ...p, _recType: type, _recLabel: label });
+    return true;
+  };
+
+  // Helper: describe what's similar
+  const similarity = (p) => {
+    const g = (p.grape || "").toLowerCase().split(",")[0].trim();
+    if (wineGrape && g === wineGrape) return `Samma druva (${wine.grape.split(",")[0].trim()})`;
+    const r = (p.region || "").toLowerCase();
+    if (wineRegion && r === wineRegion) return `Samma region (${wine.region})`;
+    const c = (p.cat3 || "").toLowerCase();
+    if (wineCat3 && c === wineCat3) return `Samma stil`;
+    return `Samma typ`;
+  };
+
+  // 1. Best in same sort/style — prioritize narrow pool
+  const pool1 = narrow.length >= 3 ? narrow : base;
+  const priceRange = wine.price * 0.25;
+
+  // 1a. Better in same price range
+  const betterSame = pool1
+    .filter(p => Math.abs(p.price - wine.price) <= priceRange && p.smakfynd_score >= wine.smakfynd_score + 3)
     .sort((a, b) => b.smakfynd_score - a.smakfynd_score);
-  for (const p of typeA.slice(0, 2)) {
-    recs.push({ ...p, _recType: "A", _recLabel: `Liknande, +${p.smakfynd_score - wine.smakfynd_score} poäng` });
+  for (const p of betterSame.slice(0, 2)) {
+    addRec(p, "A", `${similarity(p)}, +${p.smakfynd_score - wine.smakfynd_score} poäng`);
   }
 
-  // Type B: Same quality, lower price (poäng ±3, price -25%)
+  // 1b. Same quality, lower price
   if (recs.length < 3) {
-    const typeB = same
-      .filter(p => Math.abs(p.smakfynd_score - wine.smakfynd_score) <= 3 && p.price <= wine.price * 0.75)
+    const cheaper = pool1
+      .filter(p => !used.has(p.nr) && Math.abs(p.smakfynd_score - wine.smakfynd_score) <= 3 && p.price <= wine.price * 0.75)
       .sort((a, b) => a.price - b.price);
-    for (const p of typeB.slice(0, 1)) {
-      recs.push({ ...p, _recType: "B", _recLabel: `Samma kvalitet, ${Math.round(wine.price - p.price)}\u00A0kr billigare` });
+    for (const p of cheaper.slice(0, 1)) {
+      addRec(p, "B", `${similarity(p)}, ${Math.round(wine.price - p.price)}\u00A0kr billigare`);
     }
   }
 
-  // Type C: Worth upgrading (poäng +5, price 30-100% higher)
+  // 1c. Worth upgrading
   if (recs.length < 3) {
-    const typeC = same
-      .filter(p => p.smakfynd_score >= wine.smakfynd_score + 5 && p.price > wine.price * 1.3 && p.price <= wine.price * 2.5)
+    const upgrade = pool1
+      .filter(p => !used.has(p.nr) && p.smakfynd_score >= wine.smakfynd_score + 5 && p.price > wine.price * 1.3 && p.price <= wine.price * 2.5)
       .sort((a, b) => b.smakfynd_score - a.smakfynd_score);
-    for (const p of typeC.slice(0, 1)) {
-      recs.push({ ...p, _recType: "C", _recLabel: `Ett steg upp, +${p.smakfynd_score - wine.smakfynd_score} poäng för ${Math.round(p.price - wine.price)}\u00A0kr extra` });
+    for (const p of upgrade.slice(0, 1)) {
+      addRec(p, "C", `${similarity(p)}, +${p.smakfynd_score - wine.smakfynd_score} poäng för ${Math.round(p.price - wine.price)}\u00A0kr extra`);
+    }
+  }
+
+  // 2. If we used narrow pool, also show one broader "liknande smak" from base
+  if (recs.length < 4 && narrow.length >= 3) {
+    const broader = base
+      .filter(p => !used.has(p.nr) && !narrow.includes(p) && p.smakfynd_score >= wine.smakfynd_score)
+      .sort((a, b) => {
+        let sa = 0, sb = 0;
+        if (a.taste_body && wine.taste_body) sa += (1 - Math.abs(a.taste_body - wine.taste_body) / 12) * 10;
+        if (b.taste_body && wine.taste_body) sb += (1 - Math.abs(b.taste_body - wine.taste_body) / 12) * 10;
+        return sb - sa || b.smakfynd_score - a.smakfynd_score;
+      });
+    for (const p of broader.slice(0, 1)) {
+      addRec(p, "D", `Liknande smak, annan sort`);
     }
   }
 
