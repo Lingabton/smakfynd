@@ -402,7 +402,7 @@ function SmakfyndApp() {
           <FoodMatch products={products} />
         </div>
 
-        {/* ═══ JOB 2: STÅ I BUTIKEN ═══ */}
+        {/* ═══ JOB 2: SNABBKOLLEN ═══ */}
         <button onClick={() => setStoreMode(true)}
           style={{
             display: "flex", alignItems: "center", gap: 14, width: "100%",
@@ -414,11 +414,11 @@ function SmakfyndApp() {
           onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "25"; e.currentTarget.style.boxShadow = "none"; }}
         >
           <div style={{ width: 44, height: 44, borderRadius: 12, background: `${t.wine}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx }}>Skanna i butiken</div>
-            <div style={{ fontSize: 12, color: t.txM }}>Sök på vinets namn, se poängen och bättre alternativ</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx }}>Snabbkollen</div>
+            <div style={{ fontSize: 12, color: t.txM }}>Kolla snabbt — i butik, hemma, eller på restaurang</div>
           </div>
           <span style={{ fontSize: 18, color: t.txL }}>→</span>
         </button>

@@ -103,6 +103,20 @@ fast_count = sum(1 for p in slim if p.get('assortment') == 'Fast sortiment')
 other_count = len(slim) - fast_count
 print(f"  All wines: {len(slim)} (fast: {fast_count}, övrigt: {other_count})")
 
+# Calculate availability_score
+AVAIL_BASE = {
+    "Fast sortiment": 1.0,
+    "Tillfälligt sortiment": 0.7,
+    "Lokalt & Småskaligt": 0.5,
+    "Webblanseringar": 0.3,
+}
+for p in slim:
+    base = AVAIL_BASE.get(p.get("assortment", ""), 0.25)
+    if p.get("is_out_of_stock"): base *= 0.5
+    elif p.get("is_temp_out"): base *= 0.7
+    if p.get("is_regional"): base *= 0.9
+    p["availability"] = round(base, 2)
+
 # Build JSON — full data for ALL wines (fast + ordervaror treated equally)
 mini = []
 for p in slim:
@@ -128,6 +142,8 @@ for p in slim:
     img = p.get("image_url", "")
     if img:
         m["image_url"] = img
+    # Availability
+    if p.get("availability"): m["avail"] = p["availability"]
     # Optional fields — include for all wines that have the data
     if p.get("organic"): m["organic"] = True
     if p.get("cat3"): m["cat3"] = p["cat3"]
