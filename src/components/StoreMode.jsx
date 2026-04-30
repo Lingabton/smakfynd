@@ -192,13 +192,22 @@ function LabelScanner({ products, onMatch, onClose }) {
 
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    setStatus("processing");
 
     const video = videoRef.current;
+    // Wait for video to be ready
+    if (video.readyState < 2 || video.videoWidth === 0) {
+      setOcrText("Kameran är inte redo ännu. Vänta en sekund och försök igen.");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("processing");
     const canvas = canvasRef.current;
-    canvas.width = Math.min(video.videoWidth, 1024);
-    canvas.height = Math.round(canvas.width * video.videoHeight / video.videoWidth);
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+    const w = Math.min(video.videoWidth, 1024);
+    const h = Math.round(w * video.videoHeight / video.videoWidth);
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(video, 0, 0, w, h);
 
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
 
