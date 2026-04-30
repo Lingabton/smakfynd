@@ -132,6 +132,30 @@ export default {
         const imageData = body.image.replace(/^data:image\/\w+;base64,/, "");
 
         try {
+          // Track daily usage
+          const today = new Date().toISOString().slice(0, 10);
+          const usageKey = `gemini_usage_${today}`;
+          let usage = parseInt(await env.AI_KV?.get(usageKey) || "0");
+          usage++;
+          if (env.AI_KV) await env.AI_KV.put(usageKey, String(usage), { expirationTtl: 172800 });
+
+          // Alert at 80% of free tier (1500 req/day free, warn at 1200)
+          if (usage === 1200 || usage === 1400) {
+            // Send alert via Resend if configured
+            if (env.RESEND_API_KEY && env.ALERT_EMAIL) {
+              fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  from: "Smakfynd <onboarding@resend.dev>",
+                  to: [env.ALERT_EMAIL],
+                  subject: `Gemini API: ${usage}/1500 anrop idag`,
+                  html: `<p>Smakfynds etikett-skanning har använt <strong>${usage}</strong> av 1 500 gratis Gemini-anrop idag (${today}).</p><p>Om detta fortsätter behöver du uppgradera till betald plan.</p>`,
+                }),
+              }).catch(() => {});
+            }
+          }
+
           const geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
             {

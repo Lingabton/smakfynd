@@ -3763,6 +3763,8 @@ function LabelScanner({
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
     try {
       const imageBase64 = canvas.toDataURL("image/jpeg", 0.8);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
       const res = await fetch("https://smakfynd-wine-ai.smakfynd.workers.dev/label", {
         method: "POST",
         headers: {
@@ -3770,16 +3772,29 @@ function LabelScanner({
         },
         body: JSON.stringify({
           image: imageBase64
-        })
+        }),
+        signal: controller.signal
       });
+      clearTimeout(timeout);
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        setOcrText(`Server-fel: ${res.status} ${errText.slice(0, 100)}`);
+        setStatus("error");
+        return;
+      }
       const data = await res.json();
+      if (data.error) {
+        setOcrText(`AI-fel: ${data.error}`);
+        setStatus("error");
+        return;
+      }
       const wineName = data.wine_name || "";
       const producer = data.producer || "";
       const searchQuery = `${wineName} ${producer}`.trim();
-      setOcrText(`AI läste: ${searchQuery}${data.region ? ` (${data.region})` : ""}${data.vintage ? ` ${data.vintage}` : ""}`);
+      setOcrText(`AI läste: ${searchQuery}${data.region ? ` (${data.region})` : ""}${data.vintage ? ` ${data.vintage}` : ""}${data._raw ? `\n\nRåsvar: ${data._raw.slice(0, 150)}` : ""}`);
       if (!searchQuery) {
-        setStatus("error");
         setOcrText("Kunde inte läsa etiketten. Prova en tydligare bild.");
+        setStatus("error");
         return;
       }
 
