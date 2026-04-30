@@ -1792,110 +1792,72 @@ function availLabel(avail) {
 
 function BarcodeScanner({ onScan, onClose }) {
   const scannerRef = useRef(null);
-  const containerRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const doneRef = useRef(false);
 
   useEffect(() => {
-    // Load html5-qrcode from CDN if not already loaded
-    const loadAndStart = async () => {
-      if (!window.Html5Qrcode) {
+    const loadAndStart = () => {
+      if (!window.Html5QrcodeScanner) {
         const script = document.createElement("script");
         script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
-        script.onload = () => startScanner();
-        script.onerror = () => setError("Kunde inte ladda skannerbiblioteket.");
+        script.onload = () => initScanner();
+        script.onerror = () => onClose();
         document.head.appendChild(script);
       } else {
-        startScanner();
+        initScanner();
       }
     };
 
-    const startScanner = async () => {
+    const initScanner = () => {
       try {
-        const scanner = new window.Html5Qrcode("sf-scanner-container");
+        const scanner = new window.Html5QrcodeScanner("sf-scanner-region", {
+          fps: 15,
+          qrbox: { width: 320, height: 150 },
+          rememberLastUsedCamera: true,
+          showTorchButtonIfSupported: true,
+          formatsToSupport: [
+            window.Html5QrcodeSupportedFormats.EAN_13,
+            window.Html5QrcodeSupportedFormats.EAN_8,
+            window.Html5QrcodeSupportedFormats.CODE_128,
+            window.Html5QrcodeSupportedFormats.CODE_39,
+            window.Html5QrcodeSupportedFormats.ITF,
+          ],
+        });
         scannerRef.current = scanner;
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 280, height: 120 }, aspectRatio: 1.777 },
-          (decodedText, result) => {
+        scanner.render(
+          (decodedText) => {
+            if (doneRef.current) return;
+            doneRef.current = true;
             if (navigator.vibrate) navigator.vibrate(50);
-            scanner.stop().then(() => {
-              scanner.clear().catch(() => {});
-              onScan(decodedText, result?.result?.format?.formatName || "unknown");
-            }).catch(() => {
-              onScan(decodedText, "unknown");
-            });
+            try { scanner.clear(); } catch(e) {}
+            onScan(decodedText, "barcode");
           },
-          () => {} // ignore scan failures (normal)
+          (errorMessage) => {} // ignore continuous scan misses
         );
-        setLoading(false);
-      } catch (e) {
-        const msg = String(e);
-        if (msg.includes("Permission") || msg.includes("NotAllowed")) {
-          setError("Ge tillåtelse att använda kameran i din webbläsare.");
-        } else if (msg.includes("NotFound") || msg.includes("device")) {
-          setError("Ingen kamera hittades.");
-        } else {
-          setError("Kunde inte starta kameran: " + msg.slice(0, 80));
-        }
+      } catch(e) {
+        onClose();
       }
     };
 
     loadAndStart();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
-        scannerRef.current.clear().catch(() => {});
-      }
+      try { if (scannerRef.current) scannerRef.current.clear(); } catch(e) {}
     };
   }, []);
 
-  // Timeout after 30s
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) return; // still starting
-      setError("Hittade ingen streckkod. Prova att skriva in vinets namn istället.");
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [loading]);
-
-  if (error) {
-    return (
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ color: "#fff", fontSize: 14, textAlign: "center", maxWidth: 320, lineHeight: 1.6 }}>{error}</div>
-        <button onClick={onClose} style={{ marginTop: 20, padding: "12px 24px", borderRadius: 10, border: "none", background: "#fff", color: "#000", fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Tillbaka till sökning</button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#000", zIndex: 1000, display: "flex", flexDirection: "column" }}>
-      {/* Scanner container */}
-      <div id="sf-scanner-container" ref={containerRef} style={{ flex: 1, width: "100%" }} />
-
-      {/* Instruction overlay */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 16px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", textAlign: "center" }}>
-        <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, marginBottom: 4 }}>
-          Rikta mot streckkoden
-        </div>
-        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
-          På flaskan eller hyllkanten
-        </div>
+    <div style={{ position: "fixed", inset: 0, background: t.bg, zIndex: 1000, overflowY: "auto" }}>
+      <div style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: 16, fontFamily: t.serif, color: t.tx }}>Skanna streckkod</div>
+        <button onClick={() => { try { scannerRef.current?.clear(); } catch(e) {} onClose(); }} style={{
+          padding: "8px 16px", borderRadius: 100, border: `1px solid ${t.bdr}`,
+          background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
+        }}>Avbryt</button>
       </div>
-
-      {/* Close button */}
-      <button onClick={onClose} style={{
-        position: "absolute", top: 16, right: 16, padding: "8px 16px", borderRadius: 100,
-        background: "rgba(0,0,0,0.5)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)",
-        fontSize: 13, cursor: "pointer", fontFamily: "inherit", zIndex: 10,
-      }}>Avbryt</button>
-
-      {loading && (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ color: "#fff", fontSize: 14 }}>Startar kamera...</div>
-        </div>
-      )}
+      <div style={{ padding: "0 16px 8px", fontSize: 12, color: t.txL }}>
+        Rikta kameran mot streckkoden på flaskan eller hyllkanten
+      </div>
+      <div id="sf-scanner-region" style={{ padding: "0 16px" }} />
     </div>
   );
 }

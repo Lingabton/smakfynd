@@ -3441,177 +3441,103 @@ function BarcodeScanner({
   onClose
 }) {
   const scannerRef = useRef(null);
-  const containerRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const doneRef = useRef(false);
   useEffect(() => {
-    // Load html5-qrcode from CDN if not already loaded
-    const loadAndStart = async () => {
-      if (!window.Html5Qrcode) {
+    const loadAndStart = () => {
+      if (!window.Html5QrcodeScanner) {
         const script = document.createElement("script");
         script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
-        script.onload = () => startScanner();
-        script.onerror = () => setError("Kunde inte ladda skannerbiblioteket.");
+        script.onload = () => initScanner();
+        script.onerror = () => onClose();
         document.head.appendChild(script);
       } else {
-        startScanner();
+        initScanner();
       }
     };
-    const startScanner = async () => {
+    const initScanner = () => {
       try {
-        const scanner = new window.Html5Qrcode("sf-scanner-container");
-        scannerRef.current = scanner;
-        await scanner.start({
-          facingMode: "environment"
-        }, {
-          fps: 10,
+        const scanner = new window.Html5QrcodeScanner("sf-scanner-region", {
+          fps: 15,
           qrbox: {
-            width: 280,
-            height: 120
+            width: 320,
+            height: 150
           },
-          aspectRatio: 1.777
-        }, (decodedText, result) => {
+          rememberLastUsedCamera: true,
+          showTorchButtonIfSupported: true,
+          formatsToSupport: [window.Html5QrcodeSupportedFormats.EAN_13, window.Html5QrcodeSupportedFormats.EAN_8, window.Html5QrcodeSupportedFormats.CODE_128, window.Html5QrcodeSupportedFormats.CODE_39, window.Html5QrcodeSupportedFormats.ITF]
+        });
+        scannerRef.current = scanner;
+        scanner.render(decodedText => {
+          if (doneRef.current) return;
+          doneRef.current = true;
           if (navigator.vibrate) navigator.vibrate(50);
-          scanner.stop().then(() => {
-            scanner.clear().catch(() => {});
-            onScan(decodedText, result?.result?.format?.formatName || "unknown");
-          }).catch(() => {
-            onScan(decodedText, "unknown");
-          });
-        }, () => {} // ignore scan failures (normal)
+          try {
+            scanner.clear();
+          } catch (e) {}
+          onScan(decodedText, "barcode");
+        }, errorMessage => {} // ignore continuous scan misses
         );
-        setLoading(false);
       } catch (e) {
-        const msg = String(e);
-        if (msg.includes("Permission") || msg.includes("NotAllowed")) {
-          setError("Ge tillåtelse att använda kameran i din webbläsare.");
-        } else if (msg.includes("NotFound") || msg.includes("device")) {
-          setError("Ingen kamera hittades.");
-        } else {
-          setError("Kunde inte starta kameran: " + msg.slice(0, 80));
-        }
+        onClose();
       }
     };
     loadAndStart();
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
-        scannerRef.current.clear().catch(() => {});
-      }
+      try {
+        if (scannerRef.current) scannerRef.current.clear();
+      } catch (e) {}
     };
   }, []);
-
-  // Timeout after 30s
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) return; // still starting
-      setError("Hittade ingen streckkod. Prova att skriva in vinets namn istället.");
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [loading]);
-  if (error) {
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.9)",
-        zIndex: 1000,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        color: "#fff",
-        fontSize: 14,
-        textAlign: "center",
-        maxWidth: 320,
-        lineHeight: 1.6
-      }
-    }, error), /*#__PURE__*/React.createElement("button", {
-      onClick: onClose,
-      style: {
-        marginTop: 20,
-        padding: "12px 24px",
-        borderRadius: 10,
-        border: "none",
-        background: "#fff",
-        color: "#000",
-        fontSize: 14,
-        cursor: "pointer",
-        fontFamily: "inherit"
-      }
-    }, "Tillbaka till s\xF6kning"));
-  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       inset: 0,
-      background: "#000",
+      background: t.bg,
       zIndex: 1000,
+      overflowY: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px",
       display: "flex",
-      flexDirection: "column"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    id: "sf-scanner-container",
-    ref: containerRef,
-    style: {
-      flex: 1,
-      width: "100%"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: "20px 16px",
-      background: "linear-gradient(transparent, rgba(0,0,0,0.8))",
-      textAlign: "center"
+      justifyContent: "space-between",
+      alignItems: "center"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      color: "rgba(255,255,255,0.9)",
-      fontSize: 13,
-      marginBottom: 4
+      fontSize: 16,
+      fontFamily: t.serif,
+      color: t.tx
     }
-  }, "Rikta mot streckkoden"), /*#__PURE__*/React.createElement("div", {
+  }, "Skanna streckkod"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      try {
+        scannerRef.current?.clear();
+      } catch (e) {}
+      onClose();
+    },
     style: {
-      color: "rgba(255,255,255,0.6)",
-      fontSize: 11
-    }
-  }, "P\xE5 flaskan eller hyllkanten")), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    style: {
-      position: "absolute",
-      top: 16,
-      right: 16,
       padding: "8px 16px",
       borderRadius: 100,
-      background: "rgba(0,0,0,0.5)",
-      color: "#fff",
-      border: "1px solid rgba(255,255,255,0.3)",
-      fontSize: 13,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      color: t.txM,
+      fontSize: 12,
       cursor: "pointer",
-      fontFamily: "inherit",
-      zIndex: 10
+      fontFamily: "inherit"
     }
-  }, "Avbryt"), loading && /*#__PURE__*/React.createElement("div", {
+  }, "Avbryt")), /*#__PURE__*/React.createElement("div", {
     style: {
-      position: "absolute",
-      inset: 0,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
+      padding: "0 16px 8px",
+      fontSize: 12,
+      color: t.txL
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, "Rikta kameran mot streckkoden p\xE5 flaskan eller hyllkanten"), /*#__PURE__*/React.createElement("div", {
+    id: "sf-scanner-region",
     style: {
-      color: "#fff",
-      fontSize: 14
+      padding: "0 16px"
     }
-  }, "Startar kamera...")));
+  }));
 }
 function StoreMode({
   products,
