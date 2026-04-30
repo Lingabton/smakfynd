@@ -4002,12 +4002,20 @@ function StoreMode({
   const recs = useMemo(() => {
     return selected ? getRecommendations(selected, products) : [];
   }, [selected, products]);
+
+  // Log Snabbkollen searches (debounced)
+  useEffect(() => {
+    if (!q || q.length < 2) return;
+    const timer = setTimeout(() => trackSearch(q, results?.length || 0), 1500);
+    return () => clearTimeout(timer);
+  }, [q]);
   const handleSelect = wine => {
     setSelected(wine);
     addRecent(wine);
     track("snabbkoll_lookup", {
       nr: wine.nr,
-      name: wine.name
+      name: wine.name,
+      source: "snabbkoll"
     });
   };
   const RecCard = ({
