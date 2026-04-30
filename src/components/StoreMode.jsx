@@ -48,9 +48,11 @@ function fuzzySearch(items, query, keys, limit = 10) {
 
 function getRecommendations(wine, products) {
   if (!wine || !products) return [];
+  const wineVol = wine.vol || 750;
   const same = products.filter(p =>
     p.nr !== wine.nr && p.category === wine.category && p.package === wine.package
     && p.assortment === "Fast sortiment"
+    && Math.abs((p.vol || 750) - wineVol) / wineVol < 0.3 // Same-ish volume (±30%)
   );
   const recs = [];
 
@@ -93,71 +95,70 @@ function availLabel(avail) {
 }
 
 function BarcodeScanner({ onScan, onClose }) {
-  const videoRef = useRef(null);
+  const scannerRef = useRef(null);
+  const containerRef = useRef(null);
   const [error, setError] = useState(null);
-  const [scanning, setScanning] = useState(true);
-  const detectorRef = useRef(null);
-  const streamRef = useRef(null);
-  const lastScanRef = useRef("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check BarcodeDetector support
-    if (!("BarcodeDetector" in window)) {
-      setError("Din webbläsare stödjer inte streckkodsskanning. Använd Chrome på Android eller Safari 17.2+ på iOS.");
-      return;
-    }
-
-    detectorRef.current = new BarcodeDetector({ formats: ["ean_13", "ean_8", "code_128", "code_39", "itf"] });
-
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        }
-      } catch (e) {
-        setError("Kunde inte starta kameran. Kontrollera att du gett tillåtelse.");
+    // Load html5-qrcode from CDN if not already loaded
+    const loadAndStart = async () => {
+      if (!window.Html5Qrcode) {
+        const script = document.createElement("script");
+        script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+        script.onload = () => startScanner();
+        script.onerror = () => setError("Kunde inte ladda skannerbiblioteket.");
+        document.head.appendChild(script);
+      } else {
+        startScanner();
       }
     };
-    startCamera();
+
+    const startScanner = async () => {
+      try {
+        const scanner = new window.Html5Qrcode("sf-scanner-container");
+        scannerRef.current = scanner;
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 280, height: 120 }, aspectRatio: 1.777 },
+          (decodedText, result) => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            scanner.stop().catch(() => {});
+            onScan(decodedText, result?.result?.format?.formatName || "unknown");
+          },
+          () => {} // ignore scan failures (normal)
+        );
+        setLoading(false);
+      } catch (e) {
+        const msg = String(e);
+        if (msg.includes("Permission") || msg.includes("NotAllowed")) {
+          setError("Ge tillåtelse att använda kameran i din webbläsare.");
+        } else if (msg.includes("NotFound") || msg.includes("device")) {
+          setError("Ingen kamera hittades.");
+        } else {
+          setError("Kunde inte starta kameran: " + msg.slice(0, 80));
+        }
+      }
+    };
+
+    loadAndStart();
 
     return () => {
-      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {});
+        scannerRef.current.clear().catch(() => {});
+      }
     };
   }, []);
 
-  // Scan loop
+  // Timeout after 30s
   useEffect(() => {
-    if (!scanning || error) return;
-    let animId;
-    const scan = async () => {
-      if (!videoRef.current || !detectorRef.current || videoRef.current.readyState < 2) {
-        animId = requestAnimationFrame(scan);
-        return;
-      }
-      try {
-        const barcodes = await detectorRef.current.detect(videoRef.current);
-        if (barcodes.length > 0) {
-          const code = barcodes[0].rawValue;
-          if (code && code !== lastScanRef.current) {
-            lastScanRef.current = code;
-            setScanning(false);
-            // Haptic feedback
-            if (navigator.vibrate) navigator.vibrate(50);
-            onScan(code, barcodes[0].format);
-            return;
-          }
-        }
-      } catch (e) {}
-      animId = requestAnimationFrame(scan);
-    };
-    animId = requestAnimationFrame(scan);
-    return () => cancelAnimationFrame(animId);
-  }, [scanning, error, onScan]);
+    const timer = setTimeout(() => {
+      if (loading) return; // still starting
+      setError("Hittade ingen streckkod. Prova att skriva in vinets namn istället.");
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   if (error) {
     return (
@@ -169,33 +170,31 @@ function BarcodeScanner({ onScan, onClose }) {
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#000", zIndex: 1000 }}>
-      <video ref={videoRef} style={{ width: "100%", height: "100%", objectFit: "cover" }} playsInline muted />
-      {/* Scan target overlay */}
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          width: "70%", maxWidth: 300, height: 120, borderRadius: 12,
-          border: "2px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 0 0 9999px rgba(0,0,0,0.4)",
-        }} />
-        <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 16, textAlign: "center" }}>
+    <div style={{ position: "fixed", inset: 0, background: "#000", zIndex: 1000, display: "flex", flexDirection: "column" }}>
+      {/* Scanner container */}
+      <div id="sf-scanner-container" ref={containerRef} style={{ flex: 1, width: "100%" }} />
+
+      {/* Instruction overlay */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 16px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", textAlign: "center" }}>
+        <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, marginBottom: 4 }}>
           Rikta mot streckkoden
-          <br /><span style={{ fontSize: 11, opacity: 0.7 }}>På flaskan eller hyllkanten</span>
+        </div>
+        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
+          På flaskan eller hyllkanten
         </div>
       </div>
+
       {/* Close button */}
       <button onClick={onClose} style={{
         position: "absolute", top: 16, right: 16, padding: "8px 16px", borderRadius: 100,
         background: "rgba(0,0,0,0.5)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)",
-        fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+        fontSize: 13, cursor: "pointer", fontFamily: "inherit", zIndex: 10,
       }}>Avbryt</button>
-      {/* Scan again button (shown after successful scan) */}
-      {!scanning && (
-        <button onClick={() => { lastScanRef.current = ""; setScanning(true); }} style={{
-          position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)",
-          padding: "12px 24px", borderRadius: 12, background: "#fff", color: "#000",
-          fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", border: "none",
-        }}>Skanna nästa</button>
+
+      {loading && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ color: "#fff", fontSize: 14 }}>Startar kamera...</div>
+        </div>
       )}
     </div>
   );
@@ -437,8 +436,9 @@ function StoreMode({ products, onClose }) {
               </div>
               {/* Similar wines you might like */}
               {(() => {
+                const selVol = selected.vol || 750;
                 const similar = products
-                  .filter(w => w.nr !== selected.nr && w.category === selected.category && w.package === "Flaska" && w.assortment === "Fast sortiment")
+                  .filter(w => w.nr !== selected.nr && w.category === selected.category && w.package === selected.package && w.assortment === "Fast sortiment" && Math.abs((w.vol || 750) - selVol) / selVol < 0.3)
                   .map(w => {
                     let sim = 0;
                     if (w.grape && selected.grape && w.grape.toLowerCase() === selected.grape.toLowerCase()) sim += 20;
