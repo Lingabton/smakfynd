@@ -632,7 +632,7 @@ function AlertButton({
       fontFamily: "inherit",
       transition: "all 0.2s"
     }
-  }, "\uD83D\uDD14 ", alertSet ? "Larm aktivt" : "Fynd-larm"), showMenu && /*#__PURE__*/React.createElement("div", {
+  }, alertSet ? "Larm aktivt" : "Fynd-larm"), showMenu && /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),
     style: {
       position: "absolute",
@@ -720,7 +720,7 @@ function CellarButton({
         color: t.tx,
         marginBottom: 8
       }
-    }, "\uD83D\uDCDD Provningsanteckning"), /*#__PURE__*/React.createElement("input", {
+    }, "Provningsanteckning"), /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: occasion,
       onChange: e => setOccasion(e.target.value),
@@ -846,7 +846,7 @@ function CellarButton({
       padding: "6px 10px",
       fontFamily: "inherit"
     }
-  }, "\uD83C\uDF7E L\xE4gg i k\xE4llaren"), status === "added" && /*#__PURE__*/React.createElement("span", {
+  }, "L\xE4gg i k\xE4llaren"), status === "added" && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: t.green,
@@ -870,7 +870,7 @@ function CellarButton({
       padding: "6px 10px",
       fontFamily: "inherit"
     }
-  }, "\uD83D\uDCDD Har provats"));
+  }, "Har provats"));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2722,10 +2722,11 @@ function FoodMatch({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 24,
+      fontSize: 13,
+      color: t.txL,
       marginBottom: 6
     }
-  }, "\uD83C\uDF77"), /*#__PURE__*/React.createElement("div", {
+  }, "Analyserar..."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontStyle: "italic"
@@ -2947,7 +2948,7 @@ function NewsletterCTA({
         fontWeight: 600,
         color: t.tx
       }
-    }, "\uD83D\uDCEC Veckans b\xE4sta vink\xF6p i din inbox"), /*#__PURE__*/React.createElement("div", {
+    }, "Veckans b\xE4sta vink\xF6p i din inbox"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         gap: 6,
@@ -3010,7 +3011,7 @@ function NewsletterCTA({
       color: t.tx,
       marginBottom: 4
     }
-  }, "\uD83D\uDCEC Missa inte veckans vink\xF6p"), /*#__PURE__*/React.createElement("p", {
+  }, "Missa inte veckans vink\xF6p"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 13,
       color: t.txM,
@@ -5174,7 +5175,7 @@ function SmakfyndApp() {
       color: t.tx,
       marginBottom: 4
     }
-  }, "\uD83C\uDF77 St\xF6d Smakfynd"), /*#__PURE__*/React.createElement("p", {
+  }, "St\xF6d Smakfynd"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txM,
@@ -6094,11 +6095,11 @@ function SmakfyndApp() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 36,
-      marginBottom: 12,
-      opacity: 0.4
+      fontSize: 14,
+      color: t.txL,
+      marginBottom: 8
     }
-  }, "\uD83D\uDD0D"), /*#__PURE__*/React.createElement("p", {
+  }, "Inga resultat"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 17,
       fontFamily: t.serif,

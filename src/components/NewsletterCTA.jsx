@@ -46,7 +46,7 @@ function NewsletterCTA({ compact = false }) {
         alignItems: "center",
       }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>📬 Veckans bästa vinköp i din inbox</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>Veckans bästa vinköp i din inbox</div>
           <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="din@email.se"
@@ -71,7 +71,7 @@ function NewsletterCTA({ compact = false }) {
       border: `1px solid ${t.wine}15`,
     }}>
       <div style={{ fontSize: 18, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>
-        📬 Missa inte veckans vinköp
+        Missa inte veckans vinköp
       </div>
       <p style={{ fontSize: 13, color: t.txM, margin: "0 0 12px", lineHeight: 1.5 }}>
         Varje vecka skickar vi de bästa fynden — prissänkta viner, nya topprankade och Gabriels personliga val. Gratis, ingen spam.

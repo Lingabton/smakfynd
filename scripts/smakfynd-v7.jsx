@@ -372,7 +372,7 @@ function AlertButton({ nr, wine, auth }) {
           border: `1px solid ${alertSet ? t.wine + "30" : t.bdrL}`, borderRadius: 8,
           cursor: "pointer", padding: "6px 10px", fontFamily: "inherit", transition: "all 0.2s",
         }}>
-        🔔 {alertSet ? "Larm aktivt" : "Fynd-larm"}
+        {alertSet ? "Larm aktivt" : "Fynd-larm"}
       </button>
       {showMenu && (
         <div onClick={e => e.stopPropagation()} style={{
@@ -426,7 +426,7 @@ function CellarButton({ nr, auth }) {
       <div onClick={e => e.stopPropagation()} style={{
         padding: 14, borderRadius: 12, background: t.bg, border: `1px solid ${t.bdrL}`, marginTop: 8,
       }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>📝 Provningsanteckning</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Provningsanteckning</div>
         <input type="text" value={occasion} onChange={e => setOccasion(e.target.value)}
           placeholder="Tillfälle (t.ex. fredagsmiddag, dejt)"
           style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 12, color: t.tx, outline: "none", boxSizing: "border-box", marginBottom: 6 }}
@@ -479,7 +479,7 @@ function CellarButton({ nr, auth }) {
             border: `1px solid ${t.bdrL}`, borderRadius: 8,
             cursor: "pointer", padding: "6px 10px", fontFamily: "inherit",
           }}>
-          🍾 Lägg i källaren
+          Lägg i källaren
         </button>
       )}
       {status === "added" && <span style={{ fontSize: 11, color: t.green, padding: "6px 10px" }}>✓ I källaren</span>}
@@ -490,7 +490,7 @@ function CellarButton({ nr, auth }) {
           border: `1px solid ${t.bdrL}`, borderRadius: 8,
           cursor: "pointer", padding: "6px 10px", fontFamily: "inherit",
         }}>
-        📝 Har provats
+        Har provats
       </button>
     </div>
   );
@@ -1392,7 +1392,7 @@ function FoodMatch({ products }) {
 
       {loading && (
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
-          <div style={{ fontSize: 24, marginBottom: 6 }}>🍷</div>
+          <div style={{ fontSize: 13, color: t.txL, marginBottom: 6 }}>Analyserar...</div>
           <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid...</div>
         </div>
       )}
@@ -1523,7 +1523,7 @@ function NewsletterCTA({ compact = false }) {
         alignItems: "center",
       }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>📬 Veckans bästa vinköp i din inbox</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: t.tx }}>Veckans bästa vinköp i din inbox</div>
           <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="din@email.se"
@@ -1548,7 +1548,7 @@ function NewsletterCTA({ compact = false }) {
       border: `1px solid ${t.wine}15`,
     }}>
       <div style={{ fontSize: 18, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>
-        📬 Missa inte veckans vinköp
+        Missa inte veckans vinköp
       </div>
       <p style={{ fontSize: 13, color: t.txM, margin: "0 0 12px", lineHeight: 1.5 }}>
         Varje vecka skickar vi de bästa fynden — prissänkta viner, nya topprankade och Gabriels personliga val. Gratis, ingen spam.
@@ -2781,7 +2781,7 @@ function SmakfyndApp() {
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
 
             <div style={{ padding: 16, borderRadius: 12, background: `${t.wine}06`, border: `1px solid ${t.wine}12`, marginTop: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>🍷 Stöd Smakfynd</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Stöd Smakfynd</div>
               <p style={{ fontSize: 12, color: t.txM, margin: "0 0 8px", lineHeight: 1.5 }}>
                 Smakfynd är gratis och oberoende — inga annonser, inga sponsrade placeringar. Om du tycker om tjänsten kan du bjuda oss på ett glas.
               </p>
@@ -3106,7 +3106,7 @@ function SmakfyndApp() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
-            <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.4 }}>🔍</div>
+            <div style={{ fontSize: 14, color: t.txL, marginBottom: 8 }}>Inga resultat</div>
             <p style={{ fontSize: 17, fontFamily: t.serif, fontStyle: "italic", color: t.txM }}>Inga produkter matchade din sökning.</p>
             <button onClick={clearAll}
               style={{ marginTop: 10, fontSize: 13, color: t.wine, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>

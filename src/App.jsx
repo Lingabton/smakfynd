@@ -291,7 +291,7 @@ function SmakfyndApp() {
             <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
 
             <div style={{ padding: 16, borderRadius: 12, background: `${t.wine}06`, border: `1px solid ${t.wine}12`, marginTop: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>🍷 Stöd Smakfynd</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Stöd Smakfynd</div>
               <p style={{ fontSize: 12, color: t.txM, margin: "0 0 8px", lineHeight: 1.5 }}>
                 Smakfynd är gratis och oberoende — inga annonser, inga sponsrade placeringar. Om du tycker om tjänsten kan du bjuda oss på ett glas.
               </p>
@@ -616,7 +616,7 @@ function SmakfyndApp() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 20px", color: t.txL }}>
-            <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.4 }}>🔍</div>
+            <div style={{ fontSize: 14, color: t.txL, marginBottom: 8 }}>Inga resultat</div>
             <p style={{ fontSize: 17, fontFamily: t.serif, fontStyle: "italic", color: t.txM }}>Inga produkter matchade din sökning.</p>
             <button onClick={clearAll}
               style={{ marginTop: 10, fontSize: 13, color: t.wine, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>

@@ -52,7 +52,7 @@ function AlertButton({ nr, wine, auth }) {
           border: `1px solid ${alertSet ? t.wine + "30" : t.bdrL}`, borderRadius: 8,
           cursor: "pointer", padding: "6px 10px", fontFamily: "inherit", transition: "all 0.2s",
         }}>
-        🔔 {alertSet ? "Larm aktivt" : "Fynd-larm"}
+        {alertSet ? "Larm aktivt" : "Fynd-larm"}
       </button>
       {showMenu && (
         <div onClick={e => e.stopPropagation()} style={{
@@ -106,7 +106,7 @@ function CellarButton({ nr, auth }) {
       <div onClick={e => e.stopPropagation()} style={{
         padding: 14, borderRadius: 12, background: t.bg, border: `1px solid ${t.bdrL}`, marginTop: 8,
       }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>📝 Provningsanteckning</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: t.tx, marginBottom: 8 }}>Provningsanteckning</div>
         <input type="text" value={occasion} onChange={e => setOccasion(e.target.value)}
           placeholder="Tillfälle (t.ex. fredagsmiddag, dejt)"
           style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 12, color: t.tx, outline: "none", boxSizing: "border-box", marginBottom: 6 }}
@@ -159,7 +159,7 @@ function CellarButton({ nr, auth }) {
             border: `1px solid ${t.bdrL}`, borderRadius: 8,
             cursor: "pointer", padding: "6px 10px", fontFamily: "inherit",
           }}>
-          🍾 Lägg i källaren
+          Lägg i källaren
         </button>
       )}
       {status === "added" && <span style={{ fontSize: 11, color: t.green, padding: "6px 10px" }}>✓ I källaren</span>}
@@ -170,7 +170,7 @@ function CellarButton({ nr, auth }) {
           border: `1px solid ${t.bdrL}`, borderRadius: 8,
           cursor: "pointer", padding: "6px 10px", fontFamily: "inherit",
         }}>
-        📝 Har provats
+        Har provats
       </button>
     </div>
   );

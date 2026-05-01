@@ -188,7 +188,7 @@ function FoodMatch({ products }) {
 
       {loading && (
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
-          <div style={{ fontSize: 24, marginBottom: 6 }}>🍷</div>
+          <div style={{ fontSize: 13, color: t.txL, marginBottom: 6 }}>Analyserar...</div>
           <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid...</div>
         </div>
       )}
