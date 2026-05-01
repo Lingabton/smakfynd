@@ -2347,40 +2347,15 @@ function StoreMode({ products, onClose }) {
       {/* Selected wine + recommendations */}
       {selected && (
         <div>
-          {/* Main card */}
-          <div style={{ padding: "16px 18px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 16 }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              <ProductImage p={selected} size={56} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 18, fontFamily: t.serif, color: t.tx, lineHeight: 1.2 }}>{selected.name}</div>
-                <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{selected.sub}</div>
-                <div style={{ fontSize: 12, color: t.txL, marginTop: 2 }}>{selected.country}{selected.region ? `, ${selected.region}` : ""} · {selected.grape}</div>
-                <div style={{ display: "flex", gap: 8, alignItems: "baseline", marginTop: 6 }}>
-                  <span style={{ fontSize: 22, fontWeight: 700, fontFamily: t.serif, color: t.tx }}>{selected.price}{"\u00A0"}<span style={{ fontSize: 12, color: t.txL, fontWeight: 400 }}>kr</span></span>
-                  {selected.avail && <span style={{ fontSize: 10, color: availLabel(selected.avail).color }}>{availLabel(selected.avail).text}</span>}
-                </div>
-              </div>
-              <div style={{ textAlign: "center", flexShrink: 0 }}>
-                <div style={{ fontSize: 32, fontWeight: 900, color: getScoreInfo(selected.smakfynd_score)[1], fontFamily: t.serif }}>{selected.smakfynd_score}</div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: getScoreInfo(selected.smakfynd_score)[1] }}>{getScoreInfo(selected.smakfynd_score)[0]}</div>
-                {/* Score breakdown */}
-                <div style={{ marginTop: 8, fontSize: 12, color: t.txM, textAlign: "right" }}>
-                  {selected.crowd_score && <div><span style={{ color: "#6b8cce", fontWeight: 600 }}>Crowd</span> {selected.crowd_score.toFixed(1)}/10</div>}
-                  {selected.expert_score && <div><span style={{ color: "#b07d3b", fontWeight: 600 }}>Expert</span> {selected.expert_score.toFixed(1)}/10</div>}
-                  {selected.price_score && <div><span style={{ color: t.green, fontWeight: 600 }}>Prisvärde</span> {selected.price_score.toFixed(1)}/10</div>}
-                </div>
-              </div>
-            </div>
-            <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-              <a href={`https://www.systembolaget.se/produkt/vin/${selected.nr}`} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 12, color: t.txM, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: `1px solid ${t.bdrL}` }}>
-                Systembolaget
-              </a>
-              <button onClick={() => { setSelected(null); setQ(""); inputRef.current?.focus(); }}
-                style={{ fontSize: 12, color: t.wine, background: "none", border: `1px solid ${t.wine}30`, borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>
-                Sök nytt vin
-              </button>
-            </div>
+          {/* Main card — use the full Card component */}
+          <div style={{ marginBottom: 12 }}>
+            <Card p={selected} rank={1} delay={0} allProducts={products} autoOpen={true} auth={{}} />
+          </div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <button onClick={() => { setSelected(null); setQ(""); inputRef.current?.focus(); }}
+              style={{ fontSize: 12, color: t.wine, background: "none", border: `1px solid ${t.wine}30`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+              Sök nytt vin
+            </button>
           </div>
 
           {/* Recommendations */}

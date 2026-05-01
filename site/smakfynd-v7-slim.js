@@ -4444,129 +4444,22 @@ function StoreMode({
     }
   }, "Prova vinets namn, druva eller artikelnummer")), selected && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 18px",
-      borderRadius: 14,
-      background: t.card,
-      border: `1px solid ${t.bdr}`,
-      marginBottom: 16
+      marginBottom: 12
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement(ProductImage, {
+  }, /*#__PURE__*/React.createElement(Card, {
     p: selected,
-    size: 56
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 18,
-      fontFamily: t.serif,
-      color: t.tx,
-      lineHeight: 1.2
-    }
-  }, selected.name), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      marginTop: 2
-    }
-  }, selected.sub), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      marginTop: 2
-    }
-  }, selected.country, selected.region ? `, ${selected.region}` : "", " \xB7 ", selected.grape), /*#__PURE__*/React.createElement("div", {
+    rank: 1,
+    delay: 0,
+    allProducts: products,
+    autoOpen: true,
+    auth: {}
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
-      alignItems: "baseline",
-      marginTop: 6
+      marginBottom: 16
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 22,
-      fontWeight: 700,
-      fontFamily: t.serif,
-      color: t.tx
-    }
-  }, selected.price, "\u00A0", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: t.txL,
-      fontWeight: 400
-    }
-  }, "kr")), selected.avail && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: availLabel(selected.avail).color
-    }
-  }, availLabel(selected.avail).text))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 32,
-      fontWeight: 900,
-      color: getScoreInfo(selected.smakfynd_score)[1],
-      fontFamily: t.serif
-    }
-  }, selected.smakfynd_score), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      fontWeight: 600,
-      color: getScoreInfo(selected.smakfynd_score)[1]
-    }
-  }, getScoreInfo(selected.smakfynd_score)[0]), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8,
-      fontSize: 12,
-      color: t.txM,
-      textAlign: "right"
-    }
-  }, selected.crowd_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "#6b8cce",
-      fontWeight: 600
-    }
-  }, "Crowd"), " ", selected.crowd_score.toFixed(1), "/10"), selected.expert_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "#b07d3b",
-      fontWeight: 600
-    }
-  }, "Expert"), " ", selected.expert_score.toFixed(1), "/10"), selected.price_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: t.green,
-      fontWeight: 600
-    }
-  }, "Prisv\xE4rde"), " ", selected.price_score.toFixed(1), "/10")))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 10,
-      display: "flex",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("a", {
-    href: `https://www.systembolaget.se/produkt/vin/${selected.nr}`,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    style: {
-      fontSize: 12,
-      color: t.txM,
-      textDecoration: "none",
-      padding: "6px 12px",
-      borderRadius: 8,
-      border: `1px solid ${t.bdrL}`
-    }
-  }, "Systembolaget"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setSelected(null);
       setQ("");
@@ -4578,11 +4471,11 @@ function StoreMode({
       background: "none",
       border: `1px solid ${t.wine}30`,
       borderRadius: 8,
-      padding: "6px 12px",
+      padding: "8px 14px",
       cursor: "pointer",
       fontFamily: "inherit"
     }
-  }, "S\xF6k nytt vin"))), recs.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "S\xF6k nytt vin")), recs.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       fontWeight: 600,
