@@ -1,19 +1,10 @@
-// Smakfynd Service Worker — cache app shell + wine data
-const CACHE_NAME = 'smakfynd-v1';
-const SHELL_ASSETS = [
-  '/',
-  '/wines.json',
-];
+// Smakfynd Service Worker v2 — network first for everything
+const CACHE_NAME = 'smakfynd-v2';
 
-// Install: cache app shell
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL_ASSETS))
-  );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -23,28 +14,20 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: network first for data, cache first for shell
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // wines.json: network first, fallback to cache (data updates weekly)
-  if (url.pathname === '/wines.json') {
-    event.respondWith(
-      fetch(event.request)
-        .then(res => {
+  // Network first for everything — cache as fallback for offline
+  event.respondWith(
+    fetch(event.request)
+      .then(res => {
+        if (res.ok) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Everything else: cache first, fallback to network
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      caches.match(event.request).then(cached => cached || fetch(event.request))
-    );
-  }
+        }
+        return res;
+      })
+      .catch(() => caches.match(event.request))
+  );
 });
