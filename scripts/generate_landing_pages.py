@@ -953,6 +953,155 @@ def make_pages():
                            and 'carm' in (w.get('grape') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+        # ─── Rosé-kluster (breakout-kategori) ───
+        {
+            "slug": "basta-rose-under-100-kr",
+            "title": f"Bästa rosé under 100 kr {YEAR} — Systembolaget",
+            "meta": f"Bästa rosévin under 100 kr på Systembolaget {YEAR}. Fräscha, prisvärda roséer rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa rosé under 100 kr — {DATE_STR}",
+            "intro": f"Du behöver inte betala 150 kr för bra rosé. Här är de rosévinerna under hundralappen som faktiskt levererar — fräscha, torra och perfekta till vardagen.",
+            "intro2": "De billigaste roséerna på Systembolaget är ofta överraskande bra. Spanien och Sydafrika producerar prisvärda roséer med ren frukt och bra syra. Vi har filtrerat på pris och rankat efter crowd-betyg, expertrecensioner och prisvärde — inte bara lägst pris.",
+            "guide": {
+                "title": "Rosé under 100 kr — vad ska man tänka på?",
+                "points": [
+                    "Spanska roséer från Navarra och Rioja ger ofta bäst prisvärdhet under 100 kr.",
+                    "Sydafrikanska roséer av Pinotage eller Cinsault är ofta fräscha och fruktigare.",
+                    "Undvik rosé som ser för mörk ut i denna prisklass — ljusare färg signalerar oftare torr, elegant stil.",
+                    "Kyl ner ordentligt — 6°C är inte för kallt för billig rosé. Det gömmer eventuella svagheter.",
+                ]
+            },
+            "faq_visible": [
+                ("Finns det bra rosé under 100 kr?", f"Ja. Flera roséer under hundralappen får över 75 av 100 i Smakfynd-poäng, vilket innebär att de slår betydligt dyrare alternativ i blind provning. De bästa kommer ofta från Spanien och Sydafrika."),
+                ("Vad skiljer billig rosé från dyr?", "Främst producent och region. Provence-rosé kostar mer pga varumärke och efterfrågan, inte nödvändigtvis kvalitet. Spanska roséer görs med samma metoder men har lägre marknadspris."),
+            ],
+            "wines": sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+                           and (w.get('price', 999) or 999) < 100],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-provence-rose",
+            "title": f"Bästa Provence-rosé på Systembolaget {YEAR}",
+            "meta": f"Bästa Provence-rosé {YEAR}. Topp roséer från Provence, Frankrike — ljusa, torra och eleganta. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Provence-rosé — {DATE_STR}",
+            "intro": "Provence sätter standarden för rosé — ljus, torr, elegant. Men inte alla Provence-roséer är lika bra, och prisskillnaderna är stora. Här är de som faktiskt är värda pengarna.",
+            "intro2": "Provence i södra Frankrike producerar världens mest eftertraktade roséer. Druvorna Grenache, Cinsault och Mourvèdre ger den karaktäristiska ljusa färgen och den torra, mineraliska smaken. Men kvaliteten varierar — och priset speglar inte alltid vad som finns i flaskan. Vi rankar efter faktisk kvalitet, inte etikettens status.",
+            "guide": {
+                "title": "Guide till Provence-rosé",
+                "points": [
+                    "Appellation spelar roll: Côtes de Provence är störst, Bandol är mest prestigefull, Cassis mest mineralisk.",
+                    "Ljusare färg = oftast torrare. De bästa Provence-roséerna har en nästan genomskinlig laxrosa nyans.",
+                    "Årgång spelar stor roll — köp senaste eller näst senaste årgången. Rosé är inte gjort för lagring.",
+                    "Servera vid 6-8°C. Använd gärna en ishink — rosé värms snabbt i solen.",
+                ]
+            },
+            "faq_visible": [
+                ("Är Provence-rosé värt det högre priset?", "Ibland. De bästa Provence-roséerna har en elegans och mineralitet som är svår att matcha. Men under 130 kr hittar du spanska och italienska roséer som kommer mycket nära. Över 150 kr börjar Provence-kvaliteten verkligen skilja sig."),
+                ("Vilka druvor används i Provence-rosé?", "Grenache, Cinsault, Mourvèdre och Syrah är de vanligaste. Blandningen varierar — mer Grenache ger frukt, mer Mourvèdre ger struktur, mer Cinsault ger lätthet."),
+            ],
+            "wines": sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+                           and ('provence' in (w.get('region') or '').lower() or 'frankrike' == w.get('country','').lower())],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "rose-till-grillat",
+            "title": f"Bästa rosé till grillat {YEAR} — Systembolaget",
+            "meta": f"Vilken rosé passar till grillat? Topp 20 roséer till BBQ, grillad kyckling och sommarmat. {DATE_STR}.",
+            "h1": f"Bästa rosé till grillat — {DATE_STR}",
+            "intro": "Rosé och grillat är en perfekt kombination — syran klipper igenom fett, och kylan balanserar sommarhettan. Här är de bästa roséerna till grillkvällen.",
+            "intro2": "De bästa grillroséerna har lite mer kropp och frukt än en standard aperitif-rosé. Tavel från Rhône, mörka Provence-roséer och spanska Garnacha-roséer fungerar alla utmärkt. Nyckeln är att hitta en rosé med tillräcklig kropp för att matcha grillat kött, men tillräcklig syra för att inte bli tung.",
+            "guide": {
+                "title": "Hur väljer man rosé till grillat?",
+                "points": [
+                    "Till grillad kyckling och fisk: välj en lättare, torr rosé från Provence eller Loire.",
+                    "Till grillat kött och korv: välj en rosé med mer kropp — Tavel, spansk Garnacha eller sydafrikansk Pinotage-rosé.",
+                    "Till grillad halloumi och grönsaker: nästan vilken rosé som helst fungerar — välj det du gillar.",
+                    "Ha alltid rosén i ishink vid grillen. Den värms snabbt utomhus.",
+                ]
+            },
+            "wines": sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+                           and (w.get('taste_body') or 0) >= 4],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+
+        # ─── Bubbel-kluster ───
+        {
+            "slug": "champagne-under-300-kr",
+            "title": f"Bästa champagne under 300 kr {YEAR} — Systembolaget",
+            "meta": f"Riktig champagne under 300 kr. Finns det? Ja. Här är de bästa — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa champagne under 300 kr — {DATE_STR}",
+            "intro": "Riktig champagne behöver inte kosta en förmögenhet. Under 300 kr finns överraskande bra champagner — från små grower-producenter till välkända hus som ger mer än Veuve och Moët.",
+            "intro2": "Champagne under 300 kr är en av de mest undervärderade kategorierna på Systembolaget. Många väljer Cava eller Prosecco för att spara pengar, men missar att det finns riktig champagne i samma prisklass. Vi har hittat de champagner som faktiskt levererar — med den komplexitet, finheten och mousset som gör champagne till champagne.",
+            "guide": {
+                "title": "Champagne under 300 kr — vad ska man leta efter?",
+                "points": [
+                    "Grower-champagne (RM på etiketten) ger ofta bäst kvalitet per krona. De gör vin från egna druvor, inte inköpta.",
+                    "Blanc de Blancs (100% Chardonnay) ger elegans och citrus. Blanc de Noirs (Pinot Noir/Meunier) ger fylligare, fruktigare stil.",
+                    "Brut Nature eller Extra Brut har ingen tillsatt socker — renare smak, bättre till mat.",
+                    "Årgångschampagne under 300 kr är sällsynt men finns — håll ögonen öppna.",
+                ]
+            },
+            "faq_visible": [
+                ("Finns det bra champagne under 300 kr?", "Ja. Flera champagner i denna prisklass får höga betyg från både crowd och experter. Hemligheten är att leta efter mindre kända producenter (grower-champagne) snarare än de stora husen."),
+                ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris. Kvalitetsmässigt kan bra Cava matcha billig champagne, men riktig champagne har en komplexitet som är svår att replikera."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and 'frankrike' == (w.get('country') or '').lower()
+                           and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
+                           and (w.get('price', 999) or 999) < 300],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-prosecco",
+            "title": f"Bästa Prosecco på Systembolaget {YEAR}",
+            "meta": f"Bästa Prosecco {YEAR}. Topp Prosecco och Prosecco Superiore DOCG — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Prosecco — {DATE_STR}",
+            "intro": "Prosecco är Italiens svar på festbubbel — lättare, fruktigare och billigare än champagne. Men kvaliteten varierar enormt. Här är de som faktiskt är värda pengarna.",
+            "intro2": "Prosecco delas i två kategorier: vanlig DOC (produceras i ett stort område) och Superiore DOCG (från Conegliano-Valdobbiadene, striktare regler, högre kvalitet). Druvan Glera ger de karaktäristiska tonerna av grönt äpple, päron och blommor. Vi har rankat alla Prosecco på Systembolaget — DOC och DOCG — efter kvalitet per krona.",
+            "guide": {
+                "title": "Hur väljer man Prosecco?",
+                "points": [
+                    "Prosecco Superiore DOCG är nästan alltid bättre än vanlig DOC — det är värt de extra kronorna.",
+                    "Extra Dry är faktiskt sötare än Brut. Vill du ha torrast möjligt, välj Brut eller Brut Nature.",
+                    "Col Fondo-prosecco är naturligt grumlig och har mer karaktär — ett spännande alternativ om du hittar den.",
+                    "Drick Prosecco kallt (6-8°C) och ungt. Den är inte gjord för lagring.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad är skillnaden mellan Prosecco DOC och DOCG?", "DOCG (Denominazione di Origine Controllata e Garantita) är den högsta kvalitetsnivån. Prosecco DOCG kommer från det begränsade området Conegliano-Valdobbiadene i Veneto och har striktare produktionsregler. DOC-prosecco kan produceras i ett mycket större område."),
+                ("Är Prosecco lika bra som champagne?", "Det är olika stilar. Prosecco är lättare, fruktigare och gjord för att drickas ung. Champagne har mer komplexitet, jästighet och åldringskapacitet. Prosecco är perfekt som aperitif, champagne fungerar bättre till mat."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and w.get('country') == 'Italien'],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+        {
+            "slug": "basta-cremant",
+            "title": f"Bästa Crémant på Systembolaget {YEAR}",
+            "meta": f"Bästa Crémant {YEAR} — champagnekvalitet till halva priset. Alsace, Loire, Bourgogne. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Crémant — champagnekvalitet till halva priset",
+            "intro": "Crémant är Frankrikes bäst bevarade vinhemlighet — samma metod som champagne, ofta samma druvor, men till halva priset. Här är de bästa Crémant-köpen just nu.",
+            "intro2": "Crémant produceras med méthode traditionnelle (samma flaskjäsning som champagne) i flera franska regioner: Alsace, Loire, Bourgogne, Limoux och Jura. Crémant d'Alsace ger ofta bäst prisvärdhet, medan Crémant de Bourgogne kommer närmast champagnestilen. Crémant de Loire är fruktigare och lättare. Alla ger champagneupplevelse utan champagnepriset.",
+            "guide": {
+                "title": "Guide till Crémant",
+                "points": [
+                    "Crémant d'Alsace: Ofta Pinot Blanc eller Riesling. Ren, fräsch, citrusdriven. Bäst prisvärdhet.",
+                    "Crémant de Bourgogne: Chardonnay och Pinot Noir. Närmast champagne i stil. Lite dyrare men värt det.",
+                    "Crémant de Loire: Chenin Blanc. Fruktigare, blommigare, mer lekfull.",
+                    "Crémant de Limoux: Frankrikes äldsta mousserande — sedan 1531. Mauzac-druvan ger unik karaktär.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad är Crémant?", "Crémant är franskt mousserande vin som görs med samma metod som champagne (flaskjäsning) men utanför Champagne-regionen. Namnet kommer från 'crème' — den krämiga mousset. Det är juridiskt skyddat och har strikta kvalitetskrav."),
+                ("Är Crémant lika bra som champagne?", "De bästa Crémant-vinerna kan mäta sig med ingångs-champagne, och slår ofta champagne i samma prisklass. Skillnaden är subtil — champagne har generellt mer komplexitet och jästkaraktär, men Crémant ger 80-90% av upplevelsen till 40-60% av priset."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and w.get('country') == 'Frankrike'
+                           and 'champagne' not in (w.get('region') or '').lower()],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
     ]
 
 def score_label(score):
@@ -1020,7 +1169,7 @@ def get_cross_links(current_slug, all_pages):
         'druva': ['basta-malbec', 'basta-merlot', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel', 'basta-grenache', 'basta-carmenere'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin', 'basta-argentinska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
-        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr'],
+        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr', 'basta-rose-under-100-kr', 'basta-provence-rose', 'rose-till-grillat', 'champagne-under-300-kr', 'basta-prosecco', 'basta-cremant'],
         'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
@@ -1070,7 +1219,7 @@ def render_page(page, all_pages=None):
         'druva': ['basta-malbec', 'basta-merlot', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel', 'basta-grenache', 'basta-carmenere'],
         'land': ['basta-italienska-vin', 'basta-franska-vin', 'basta-spanska-vin', 'basta-chilenska-vin', 'basta-sydafrikanska-vin', 'basta-australiska-vin', 'basta-portugisiska-vin', 'basta-argentinska-vin'],
         'region': ['basta-vin-fran-bordeaux', 'basta-vin-fran-toscana', 'basta-vin-fran-rioja', 'basta-vin-fran-bourgogne', 'basta-vin-fran-rhonedalen', 'basta-vin-fran-champagne', 'basta-vin-fran-languedoc', 'basta-vin-fran-alsace', 'basta-kaliforniska-vin'],
-        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr'],
+        'typ': ['basta-roda-vin', 'basta-vita-vin', 'basta-bubbel', 'basta-rose', 'basta-cava', 'mousserande-vin-under-150-kr', 'basta-rose-under-100-kr', 'basta-provence-rose', 'rose-till-grillat', 'champagne-under-300-kr', 'basta-prosecco', 'basta-cremant'],
         'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
