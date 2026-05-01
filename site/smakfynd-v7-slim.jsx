@@ -1340,7 +1340,7 @@ function FoodMatch({ products }) {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), 25000);
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2969,8 +2969,8 @@ function SmakfyndApp() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: t.serif }}>Snabbkollen</div>
-            <div style={{ fontSize: 12, color: t.txM }}>Kolla snabbt — i butik, hemma, eller på restaurang</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: t.serif }}>Sök eller skanna vin</div>
+            <div style={{ fontSize: 12, color: t.txM }}>Hitta poäng, pris och bättre alternativ direkt</div>
           </div>
           <span style={{ fontSize: 18, color: t.txL }}>→</span>
         </button>

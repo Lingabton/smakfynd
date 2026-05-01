@@ -91,7 +91,7 @@ function FoodMatch({ products }) {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), 25000);
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

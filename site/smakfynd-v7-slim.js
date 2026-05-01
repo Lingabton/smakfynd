@@ -2570,7 +2570,7 @@ function FoodMatch({
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), 25000);
         const res = await fetch(WINE_AI_URL, {
           method: "POST",
           headers: {
@@ -5561,12 +5561,12 @@ function SmakfyndApp() {
       color: t.tx,
       fontFamily: t.serif
     }
-  }, "Snabbkollen"), /*#__PURE__*/React.createElement("div", {
+  }, "S\xF6k eller skanna vin"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: t.txM
     }
-  }, "Kolla snabbt \u2014 i butik, hemma, eller p\xE5 restaurang")), /*#__PURE__*/React.createElement("span", {
+  }, "Hitta po\xE4ng, pris och b\xE4ttre alternativ direkt")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 18,
       color: t.txL
