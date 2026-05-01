@@ -1043,7 +1043,9 @@ function Card({
     const cGrape = (comparison.grape || "").toLowerCase().split(",")[0].trim();
     const pGrape = (p.grape || "").toLowerCase().split(",")[0].trim();
     const sameGrape = pGrape && cGrape && cGrape === pGrape;
-    const label = sameGrape ? `Jämförbar med ${comparison.name} (${Math.round(comparison.price)}\u00A0kr), samma druva` : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr)`;
+    const savings = Math.round(comparison.price - p.price);
+    const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
+    const label = sameGrape ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr` : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 4,
@@ -1051,15 +1053,13 @@ function Card({
         color: t.green,
         fontWeight: 500
       }
-    }, label, /*#__PURE__*/React.createElement("span", {
+    }, label, cCrowd && /*#__PURE__*/React.createElement("span", {
       style: {
-        marginLeft: 6,
-        padding: "1px 6px",
-        borderRadius: 4,
-        background: `${t.green}10`,
-        fontSize: 10
+        marginLeft: 4,
+        fontSize: 10,
+        color: t.txL
       }
-    }, Math.round(comparison.price / p.price), "x v\xE4rde"));
+    }, "(crowd ", cCrowd, "/10)"));
   })(), (() => {
     const vibes = [];
     if (p.price_score >= 8) vibes.push("Prisvärt");
@@ -1690,7 +1690,7 @@ function Card({
         fontSize: 10,
         color: t.txL
       }
-    }, w.country, " \xB7 ", w.price, "\u00A0", "kr"))))));
+    }, w.country, " \xB7 ", w.price, "\u00A0", "kr", w._sameGrape ? " · samma druva" : w._sameRegion ? " · samma region" : ""))))));
   })()), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 12,

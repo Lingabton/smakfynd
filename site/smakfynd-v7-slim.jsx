@@ -605,15 +605,15 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const cGrape = (comparison.grape || "").toLowerCase().split(",")[0].trim();
             const pGrape = (p.grape || "").toLowerCase().split(",")[0].trim();
             const sameGrape = pGrape && cGrape && cGrape === pGrape;
+            const savings = Math.round(comparison.price - p.price);
+            const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
-              ? `Jämförbar med ${comparison.name} (${Math.round(comparison.price)}\u00A0kr), samma druva`
-              : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr)`;
+              ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`
+              : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
-              <span style={{ marginLeft: 6, padding: "1px 6px", borderRadius: 4, background: `${t.green}10`, fontSize: 10 }}>
-                {Math.round(comparison.price / p.price)}x värde
-              </span>
+              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(crowd {cCrowd}/10)</span>}
             </div>
             );
           })()}
@@ -851,7 +851,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                         <span style={{ fontSize: 16, fontWeight: 900, color: col, fontFamily: t.serif, width: 28, textAlign: "center" }}>{w.smakfynd_score}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, color: t.tx, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.name}</div>
-                          <div style={{ fontSize: 10, color: t.txL }}>{w.country} · {w.price}{"\u00A0"}kr</div>
+                          <div style={{ fontSize: 10, color: t.txL }}>{w.country} · {w.price}{"\u00A0"}kr{w._sameGrape ? " · samma druva" : w._sameRegion ? " · samma region" : ""}</div>
                         </div>
                       </div>
                     ))}
