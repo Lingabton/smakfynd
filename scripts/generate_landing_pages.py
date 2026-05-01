@@ -966,42 +966,50 @@ def render_wine_row(w, rank, sortable=False):
     name = w.get('name', '')
     sub = w.get('sub', '')
     score = w.get('smakfynd_score', 0)
-    price = w.get('price', 0)
+    price = int(w.get('price', 0))
     country = w.get('country', '')
     grape = w.get('grape', '')
     nr = w.get('nr', '')
     label = score_label(score)
-    organic = ' 🌿' if w.get('organic') else ''
+    organic = '<span style="display:inline-block;width:14px;height:14px;vertical-align:middle;margin-left:4px" title="Ekologiskt"><svg viewBox="0 0 16 16"><path d="M8 1c3.5 2 5 5 5 9-2-1-4-1-5.5.5C6 9 4.5 7 3 6c1-2.5 3-4 5-5z" fill="#3d7a4a" opacity="0.7"/></svg></span>' if w.get('organic') else ''
     expert = f" · Expert: {w['expert_score']:.1f}/10" if w.get('expert_score') else ""
     crowd = f"Crowd: {w['crowd_score']:.1f}/10" if w.get('crowd_score') else ""
+    meta = f"{country}"
+    if grape:
+        meta += f" · {grape}"
     style = w.get('style', '')
-    style_text = f'<p style="margin:4px 0 0;font-size:13px;color:#7a7060;font-style:italic">{style[:120]}{"…" if len(style)>120 else ""}</p>' if style else ''
+    style_text = f'<p style="margin:4px 0 0;font-size:12px;color:#7a7060;font-style:italic;line-height:1.4">{style[:100]}{"…" if len(style)>100 else ""}</p>' if style else ''
     drop_pct = w.get('price_vs_launch_pct', 0) or 0
     data_attrs = f' data-score="{score}" data-price="{price}" data-drop="{drop_pct}"' if sortable else ''
+    img_url = w.get('image_url', '')
+    img_html = f'<img src="{img_url}" alt="{name}" loading="lazy" style="width:44px;height:44px;object-fit:contain;border-radius:8px;background:#faf7f2">' if img_url else f'<div style="width:44px;height:44px;border-radius:8px;background:#f0ebe3;display:flex;align-items:center;justify-content:center;font-size:18px;color:#c5bdb3">🍷</div>'
 
-    return f'''<li style="padding:16px 0;border-bottom:1px solid #e6ddd0"{data_attrs}>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start">
-    <div>
-      <strong style="font-size:17px;font-family:Georgia,serif">{rank}. {name}</strong>
-      <span style="color:#7a7060;font-size:14px"> — {sub}</span>{organic}
-      <div style="font-size:13px;color:#4a4238;margin-top:2px">{country} · {grape}</div>
-      <div style="font-size:13px;color:#7a7060;margin-top:2px">{crowd}{expert}</div>
-      {style_text}
-    </div>
-    <div style="text-align:center;flex-shrink:0;margin-left:16px">
-      <div style="width:50px;height:50px;border-radius:50%;background:#e8f0e4;border:2px solid #2d6b3f;display:flex;align-items:center;justify-content:center">
-        <span style="font-size:19px;font-weight:900;color:#2d6b3f;font-family:Georgia,serif">{score}</span>
+    return f'''<li style="padding:0;border-bottom:1px solid #e6ddd0"{data_attrs}>
+  <a href="https://smakfynd.se/#vin/{nr}" style="display:flex;gap:12px;align-items:flex-start;padding:14px 0;text-decoration:none;color:inherit;transition:background 0.15s" onmouseover="this.style.background='#fdfbf7'" onmouseout="this.style.background='transparent'">
+    {img_html}
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span style="font-size:12px;color:#9e9588;font-family:Georgia,serif">#{rank}</span>
+        <strong style="font-size:16px;font-family:Georgia,serif;color:#1a1510">{name}</strong>{organic}
       </div>
-      <div style="font-size:10px;color:#2d6b3f;margin-top:2px">{label}</div>
+      <div style="font-size:12px;color:#6b6355;margin-top:1px">{sub}</div>
+      <div style="font-size:11px;color:#9e9588;margin-top:2px">{meta}</div>
+      <div style="font-size:11px;color:#7a7060;margin-top:2px">{crowd}{expert}</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px">
+        <span style="font-size:18px;font-weight:700;font-family:Georgia,serif;color:#1a1510">{price}\u00A0kr</span>
+        {f'<span style="font-size:11px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 6px;border-radius:4px">-{drop_pct}%</span>' if drop_pct > 0 else ''}
+      </div>
     </div>
-  </div>
-  <div style="margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap">
-    <span style="font-size:20px;font-weight:700;font-family:Georgia,serif">{price} kr</span>
-    {f'<span style="font-size:12px;font-weight:600;color:#c0392b;background:#c0392b10;padding:2px 8px;border-radius:6px">-{drop_pct}%</span>' if drop_pct > 0 else ''}
-    <a href="https://www.systembolaget.se/produkt/vin/{nr}" target="_blank" rel="noopener"
-       style="font-size:13px;color:#8b2332;text-decoration:none">Köp på Systembolaget →</a>
-    <a href="https://smakfynd.se/#vin/{nr}"
-       style="font-size:13px;color:#4a4238;text-decoration:none;margin-left:8px">Se detaljer →</a>
+    <div style="text-align:center;flex-shrink:0">
+      <div style="width:48px;height:48px;border-radius:50%;background:#e8f0e4;border:2px solid #2d6b3f;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:18px;font-weight:900;color:#2d6b3f;font-family:Georgia,serif">{score}</span>
+      </div>
+      <div style="font-size:9px;color:#2d6b3f;margin-top:2px;font-weight:600">{label}</div>
+    </div>
+  </a>
+  <div style="display:flex;gap:12px;padding:0 0 10px 56px;font-size:12px">
+    <a href="https://www.systembolaget.se/produkt/vin/{nr}" target="_blank" rel="noopener" style="color:#3a2a1f;text-decoration:none">Systembolaget</a>
+    <a href="https://smakfynd.se/#vin/{nr}" style="color:#8b2332;text-decoration:none;font-weight:500">Se poäng & detaljer →</a>
   </div>
 </li>'''
 
