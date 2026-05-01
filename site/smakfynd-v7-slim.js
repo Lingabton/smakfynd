@@ -5511,7 +5511,8 @@ function SmakfyndApp() {
     style: {
       fontSize: 15,
       fontWeight: 600,
-      color: t.tx
+      color: t.tx,
+      fontFamily: t.serif
     }
   }, "Snabbkollen"), /*#__PURE__*/React.createElement("div", {
     style: {
