@@ -2766,15 +2766,9 @@ function FoodMatch({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      color: t.txL,
-      marginBottom: 6
-    }
-  }, "Analyserar..."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
       fontStyle: "italic"
     }
-  }, "Analyserar din m\xE5ltid...")), error && /*#__PURE__*/React.createElement("p", {
+  }, "Analyserar din m\xE5ltid, kan ta n\xE5gra sekunder...")), error && /*#__PURE__*/React.createElement("p", {
     style: {
       marginTop: 10,
       fontSize: 12,
