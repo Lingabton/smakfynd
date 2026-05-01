@@ -2585,6 +2585,11 @@ function SmakfyndApp() {
       if (wine) {
         setSearch(wine.name);
         setCat("all");
+        // Scroll to wine card after render
+        setTimeout(() => {
+          const el = document.querySelector('[aria-expanded]');
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 500);
       }
       setOpenWineNr(null);
     }
@@ -2600,6 +2605,11 @@ function SmakfyndApp() {
           setSearch(wine.name);
           setCat("all");
           setAutoOpenNr(h.openWine);
+          // Scroll to wine list after render
+          setTimeout(() => {
+            const el = document.querySelector('[aria-expanded]');
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 300);
         }
       }
     };
