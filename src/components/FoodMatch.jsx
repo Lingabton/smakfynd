@@ -224,7 +224,7 @@ function FoodMatch({ products }) {
                       return matchedP
                         ? <div key={i}>
                             {m._why && <div style={{ fontSize: 10, color: t.txM, marginBottom: 3, fontStyle: "italic" }}>{m._why}</div>}
-                            <Card p={matchedP} rank={i + 1} delay={0} allProducts={products} />
+                            <Card p={matchedP} rank={i + 1} delay={0} allProducts={products} auth={{}} />
                           </div>
                         : <WineResult key={i} m={m} />;
                     })}

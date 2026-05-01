@@ -2835,7 +2835,8 @@ function FoodMatch({
       p: matchedP,
       rank: i + 1,
       delay: 0,
-      allProducts: products
+      allProducts: products,
+      auth: {}
     })) : /*#__PURE__*/React.createElement(WineResult, {
       key: i,
       m: m
