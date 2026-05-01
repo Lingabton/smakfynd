@@ -19,15 +19,19 @@ function matchWinesForCourses(courses, products) {
         .filter(p => p.category === wineType && p.package === "Flaska" && p.assortment === "Fast sortiment")
         .map(p => {
           let fit = 0;
-          const body = p.taste_body || 6;
-          if (body >= bMin && body <= bMax) fit += 3;
-          else if (Math.abs(body - (bMin + bMax) / 2) <= 3) fit += 1;
-          const haystack = [p.name, p.sub, p.grape, p.style, p.cat3, ...(p.food_pairings || [])].join(" ").toLowerCase();
-          for (const k of kw) { if (haystack.includes(k)) fit += 2; }
+          // Body match — skip wines without taste data instead of defaulting
+          const body = p.taste_body;
+          if (body) {
+            if (body >= bMin && body <= bMax) fit += 3;
+            else if (Math.abs(body - (bMin + bMax) / 2) <= 2) fit += 1;
+          }
+          // Keyword matching with word boundaries
+          const haystack = " " + [p.name, p.sub, p.grape, p.style, p.cat3, ...(p.food_pairings || [])].join(" ").toLowerCase() + " ";
+          for (const k of kw) { if (haystack.includes(" " + k) || haystack.includes(k + " ")) fit += 2; }
           return { ...p, _fit: fit, _why: c.why, _label: c.label || "" };
         })
-        .filter(p => p._fit >= 2 && !usedNrs.has(p.nr))
-        .sort((a, b) => (b._fit * 10 + b.smakfynd_score) - (a._fit * 10 + a.smakfynd_score));
+        .filter(p => p._fit >= 3 && !usedNrs.has(p.nr))
+        .sort((a, b) => (b._fit * 3 + b.smakfynd_score) - (a._fit * 3 + a.smakfynd_score));
 
       // Pick best match for this criterion
       if (scored.length > 0) {

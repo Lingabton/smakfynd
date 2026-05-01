@@ -33,10 +33,11 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
         if (!w.crowd_score || w.crowd_score < p.crowd_score - 0.5) return false;
 
         // Must share grape OR similar taste profile
-        const wGrape = (w.grape || "").toLowerCase().split(",")[0].trim();
-        const sameGrape = myGrape && wGrape && wGrape === myGrape;
-        const similarTaste = myBody && w.taste_body && Math.abs(w.taste_body - myBody) <= 2
-          && (!myFruit || !w.taste_fruit || Math.abs(w.taste_fruit - myFruit) <= 3);
+        const wGrapes = (w.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+        const myGrapes = (p.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+        const sameGrape = myGrapes.length > 0 && wGrapes.some(g => myGrapes.includes(g));
+        const similarTaste = myBody && w.taste_body && Math.abs(w.taste_body - myBody) <= 1
+          && (!myFruit || !w.taste_fruit || Math.abs(w.taste_fruit - myFruit) <= 2);
 
         return sameGrape || similarTaste;
       })
@@ -306,14 +307,14 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                 if (a.taste_sweet != null && b.taste_sweet != null) { score += 1 - Math.abs(a.taste_sweet - b.taste_sweet) / 12; count++; }
                 return count > 0 ? score / count : 0;
               };
-              const myGrape = (p.grape || "").toLowerCase().split(",")[0].trim();
+              const myGrapes = (p.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
               const myRegion = (p.region || "").toLowerCase();
               const myCat3 = (p.cat3 || "").toLowerCase();
               const similar = allProducts
                 .filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id))
                 .map(w => {
-                  const wGrape = (w.grape || "").toLowerCase().split(",")[0].trim();
-                  const sameGrape = myGrape && wGrape && wGrape === myGrape;
+                  const wGrapes = (w.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+                  const sameGrape = myGrapes.length > 0 && wGrapes.some(g => myGrapes.includes(g));
                   const sameRegion = myRegion && (w.region || "").toLowerCase() === myRegion;
                   const sameCat3 = myCat3 && (w.cat3 || "").toLowerCase() === myCat3;
                   let sim = 0;

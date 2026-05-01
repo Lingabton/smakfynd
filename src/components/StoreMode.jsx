@@ -49,7 +49,8 @@ function fuzzySearch(items, query, keys, limit = 10) {
 function getRecommendations(wine, products) {
   if (!wine || !products) return [];
   const wineVol = wine.vol || 750;
-  const wineGrape = (wine.grape || "").toLowerCase().split(",")[0].trim();
+  const wineGrapes = (wine.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+  const wineGrape = wineGrapes[0] || "";
   const wineCat3 = (wine.cat3 || "").toLowerCase();
   const wineRegion = (wine.region || "").toLowerCase();
 
@@ -62,10 +63,10 @@ function getRecommendations(wine, products) {
 
   // Narrow pool: same grape/style/region (prioritized)
   const narrow = base.filter(p => {
-    const g = (p.grape || "").toLowerCase().split(",")[0].trim();
+    const pGrapes = (p.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
     const c = (p.cat3 || "").toLowerCase();
     const r = (p.region || "").toLowerCase();
-    return (wineGrape && g === wineGrape) || (wineCat3 && c === wineCat3) || (wineRegion && r === wineRegion);
+    return (wineGrapes.length > 0 && pGrapes.some(g => wineGrapes.includes(g))) || (wineCat3 && c === wineCat3) || (wineRegion && r === wineRegion);
   });
 
   const recs = [];
@@ -132,7 +133,7 @@ function getRecommendations(wine, products) {
         return sb - sa || b.smakfynd_score - a.smakfynd_score;
       });
     for (const p of broader.slice(0, 1)) {
-      addRec(p, "D", `Liknande smak, annan sort`);
+      addRec(p, "D", `Liknande smakprofil, annan druva`);
     }
   }
 
@@ -698,13 +699,15 @@ function StoreMode({ products, onClose }) {
                   .filter(w => w.nr !== selected.nr && w.category === selected.category && w.package === selected.package && w.assortment === "Fast sortiment" && Math.abs((w.vol || 750) - selVol) / selVol < 0.3)
                   .map(w => {
                     let sim = 0;
-                    if (w.grape && selected.grape && w.grape.toLowerCase() === selected.grape.toLowerCase()) sim += 20;
+                    const selGrapes = (selected.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+                  const wGrapes = (w.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+                  if (selGrapes.length > 0 && wGrapes.some(g => selGrapes.includes(g))) sim += 20;
                     if (w.country === selected.country) sim += 10;
                     if (w.region && selected.region && w.region === selected.region) sim += 15;
                     if (w.taste_body && selected.taste_body) sim += (1 - Math.abs(w.taste_body - selected.taste_body) / 12) * 15;
                     return { ...w, _sim: sim };
                   })
-                  .filter(w => w._sim >= 8)
+                  .filter(w => w._sim >= 15)
                   .sort((a, b) => b._sim - a._sim || b.smakfynd_score - a.smakfynd_score)
                   .slice(0, 3);
                 if (similar.length === 0) return null;
