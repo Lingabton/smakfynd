@@ -31,6 +31,7 @@ Svarsformat:
 {
   "mode": "recommend",
   "reasoning": "2-3 meningar på naturlig svenska om varför dessa viner passar.",
+  "format": "flaska|lådvin|any",
   "courses": [
     {
       "dish": "Rättens namn",
@@ -53,7 +54,10 @@ REGLER:
 - Naturlig svenska. Korta meningar. Som en kunnig kompis.
 - FÖRBJUDET: "rensar munnen", "karaktär" (generiskt), "klarar både X och Y"
 - Keywords MÅSTE vara på svenska: druvor (Malbec, Cabernet, Riesling) och svenska smakord (kryddigt, fruktigt, fylligt, fräscht, torrt)
-- Skriv ALLTID på svenska. Aldrig engelska ord som "perhaps", "light", "full-bodied". Säg "vitt vin" inte "vitvin".`;
+- Skriv ALLTID på svenska. Aldrig engelska ord som "perhaps", "light", "full-bodied". Säg "vitt vin" inte "vitvin".
+- Om användaren nämner "lådvin", "box", "BiB" eller "bag-in-box" → sätt "format": "lådvin"
+- Om användaren nämner budget, billigt, fest (stora mängder) → överväg lådvin
+- Om inget format nämns → sätt "format": "any"`;
 
 const QUESTION_PROMPT = `Du är en kunnig svensk vinrådgivare. Ställ en kort följdfråga. Svara BARA med giltig JSON.
 

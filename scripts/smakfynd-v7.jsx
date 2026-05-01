@@ -1250,22 +1250,25 @@ function useAuth() {
 // src/components/FoodMatch.jsx
 const WINE_AI_URL = "https://smakfynd-wine-ai.smakfynd.workers.dev";
 
-function matchWinesForCourses(courses, products) {
+function matchWinesForCourses(courses, products, format) {
   if (!courses || !courses.length) return [];
   const bodyRange = { light: [0, 4], medium: [5, 8], full: [9, 12], lätt: [0, 4], medelkroppad: [5, 8], fylligt: [9, 12], "fyllig": [9, 12], "medel": [5, 8] };
   const usedNrs = new Set();
 
+  // Format filter: "lådvin" → BiB, "flaska" → Flaska, "any" → both
+  const pkgFilter = format === "lådvin" ? "BiB" : format === "flaska" ? "Flaska" : null;
+
   return courses.map(course => {
     const wines = [];
     for (const c of (course.criteria || [])) {
-      if (wines.length >= 3) break; // Max 3 wines per course
-      const typeMap = { "Rött": "Rött", "Vitt": "Vitt", "Rosé": "Rosé", "Mousserande": "Mousserande" };
+      if (wines.length >= 3) break;
+      const typeMap = { "Rött": "Rött", "Vitt": "Vitt", "Rosé": "Rosé", "Mousserande": "Mousserande", "Red": "Rött", "White": "Vitt" };
       const wineType = typeMap[c.type] || c.type;
       const [bMin, bMax] = bodyRange[c.body] || [0, 12];
       const kw = (c.keywords || []).map(k => k.toLowerCase());
 
       const scored = products
-        .filter(p => p.category === wineType && p.package === "Flaska" && p.assortment === "Fast sortiment")
+        .filter(p => p.category === wineType && (pkgFilter ? p.package === pkgFilter : true) && p.assortment === "Fast sortiment")
         .map(p => {
           let fit = 0;
           // Body match — skip wines without taste data instead of defaulting
@@ -1279,8 +1282,14 @@ function matchWinesForCourses(courses, products) {
           for (const k of kw) { if (haystack.includes(" " + k) || haystack.includes(k + " ")) fit += 2; }
           return { ...p, _fit: fit, _why: c.why, _label: c.label || "" };
         })
-        .filter(p => p._fit >= 3 && !usedNrs.has(p.nr))
-        .sort((a, b) => (b._fit * 3 + b.smakfynd_score) - (a._fit * 3 + a.smakfynd_score));
+        .filter(p => p._fit >= 2 && !usedNrs.has(p.nr))
+        .sort((a, b) => {
+          // Prioritize: good fit first, then highest smakfynd score
+          const aFitOk = a._fit >= 3 ? 1 : 0;
+          const bFitOk = b._fit >= 3 ? 1 : 0;
+          if (aFitOk !== bFitOk) return bFitOk - aFitOk;
+          return b.smakfynd_score - a.smakfynd_score;
+        });
 
       // Pick best match for this criterion
       if (scored.length > 0) {
@@ -1360,12 +1369,13 @@ function FoodMatch({ products }) {
       setAiResult(data);
       trackAI(userMessage, data, Date.now() - t0);
 
+      const fmt = data.format || (meal.toLowerCase().match(/lådvin|box|bib|bag.in.box/) ? "lådvin" : "any");
       if (data.mode === "recommend" && data.courses) {
-        setCourseResults(matchWinesForCourses(data.courses, products));
+        setCourseResults(matchWinesForCourses(data.courses, products, fmt));
       } else if (data.courses) {
-        setCourseResults(matchWinesForCourses(data.courses, products));
+        setCourseResults(matchWinesForCourses(data.courses, products, fmt));
       } else if (data.criteria) {
-        setCourseResults(matchWinesForCourses([{ dish: meal, criteria: data.criteria }], products));
+        setCourseResults(matchWinesForCourses([{ dish: meal, criteria: data.criteria }], products, fmt));
       }
     } catch (e) {
       setError("Kunde inte hämta vinförslag just nu. Försök igen.");
