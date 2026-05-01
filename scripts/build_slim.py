@@ -323,3 +323,11 @@ WINES_JSON = str(BASE / "docs" / "wines.json")
 open(WINES_JSON, 'w').write(js_data)
 json_size = os.path.getsize(WINES_JSON) / 1024
 print(f"Built: {WINES_JSON} ({json_size:.0f} KB)")
+
+# Validate wines.json is not empty/corrupted
+validation = json.loads(open(WINES_JSON).read())
+if not isinstance(validation, list) or len(validation) < 100:
+    print(f"FATAL: wines.json has only {len(validation) if isinstance(validation, list) else 0} wines — aborting!")
+    os.remove(WINES_JSON)
+    exit(1)
+print(f"QA: {len(validation)} wines validated")

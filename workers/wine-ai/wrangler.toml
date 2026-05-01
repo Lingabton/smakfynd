@@ -11,4 +11,3 @@ id = "f274107880a44d38a7d29a75e184f8dd"
 
 [vars]
 ALLOWED_ORIGIN = "https://smakfynd.se"
-ALERT_EMAIL = "gabriel.linton@gmail.com"

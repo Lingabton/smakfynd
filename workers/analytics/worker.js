@@ -187,6 +187,26 @@ export default {
         }), { headers });
       }
 
+      // POST /ean — store EAN→productNumber mapping (crowdsourced)
+      if (request.method === "POST" && url.pathname === "/ean") {
+        const { ean, nr } = await request.json();
+        if (!ean || !nr || !/^\d{8,14}$/.test(ean) || !/^\d{3,10}$/.test(String(nr))) {
+          return new Response(JSON.stringify({ error: "Invalid ean/nr" }), { status: 400, headers });
+        }
+        await env.DB.prepare(
+          "INSERT OR IGNORE INTO ean_map (ean, wine_nr) VALUES (?, ?)"
+        ).bind(ean, String(nr)).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+
+      // GET /ean?code=X — lookup EAN
+      if (request.method === "GET" && url.pathname === "/ean") {
+        const code = url.searchParams.get("code");
+        if (!code) return new Response(JSON.stringify({ error: "code required" }), { status: 400, headers });
+        const row = await env.DB.prepare("SELECT wine_nr FROM ean_map WHERE ean = ?").bind(code).first();
+        return new Response(JSON.stringify({ nr: row?.wine_nr || null }), { headers });
+      }
+
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     } catch (e) {

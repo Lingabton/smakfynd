@@ -7,5 +7,9 @@ binding = "DB"
 database_name = "smakfynd-users"
 database_id = "6c6b2fa4-043d-4bf6-97b5-92d8bf4b0382"
 
+[[kv_namespaces]]
+binding = "AUTH_KV"
+id = "80e6cc8bea7f4d5ab8fe03d31b95b334"
+
 [vars]
 ALLOWED_ORIGIN = "https://smakfynd.se"

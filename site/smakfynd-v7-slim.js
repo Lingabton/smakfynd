@@ -3983,6 +3983,18 @@ function StoreMode({
     try {
       localStorage.setItem("sf_ean_map", JSON.stringify(eanMap));
     } catch (e) {}
+    // Also save server-side for all users
+    fetch("https://smakfynd-analytics.smakfynd.workers.dev/ean", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        ean,
+        nr
+      }),
+      keepalive: true
+    }).catch(() => {});
   };
   const handleBarcodeScan = (code, format) => {
     setShowScanner(false);
@@ -4010,7 +4022,19 @@ function StoreMode({
         }
       }
 
-      // 3. Partial productNumber match
+      // 3. Check server-side EAN map (crowdsourced from all users)
+      fetch(`https://smakfynd-analytics.smakfynd.workers.dev/ean?code=${code}`).then(r => r.json()).then(eanData => {
+        if (eanData.nr) {
+          const serverMatch = products.find(p => String(p.nr) === eanData.nr);
+          if (serverMatch && !selected) {
+            setQ(serverMatch.name);
+            handleSelect(serverMatch);
+            setScanMsg(null);
+          }
+        }
+      }).catch(() => {});
+
+      // 4. Partial productNumber match
       const shortMatch = products.find(p => String(p.nr).startsWith(code) || code.startsWith(String(p.nr)));
       if (shortMatch) {
         setQ(shortMatch.name);
@@ -4018,11 +4042,11 @@ function StoreMode({
         return;
       }
 
-      // 4. Not found — focus search input with helpful message
+      // 5. Not found — focus search input with helpful message
       setQ("");
       setSelected(null);
       setScanMsg(`Streckkoden ${code} kunde inte matchas automatiskt. Skriv vinets namn så hittar vi det.`);
-      setScanCode(code); // Save for learning
+      setScanCode(code);
       inputRef.current?.focus();
     }, 150);
   };

@@ -11,16 +11,19 @@
  *   GET  /profile?token=X              → { user }
  */
 
-// Rate limiter for login attempts (per email)
-const loginAttempts = new Map();
-function checkLoginRate(email, maxAttempts = 5, windowMs = 600000) {
+// Distributed rate limiter via KV (survives restarts, works across instances)
+async function checkLoginRate(email, env, maxAttempts = 5, windowMs = 600000) {
+  if (!env.AUTH_KV) return true; // Fallback: allow if KV not configured
+  const key = `rate_${email}`;
+  const raw = await env.AUTH_KV.get(key);
+  const entry = raw ? JSON.parse(raw) : null;
   const now = Date.now();
-  const entry = loginAttempts.get(email);
   if (!entry || now - entry.start > windowMs) {
-    loginAttempts.set(email, { start: now, count: 1 });
+    await env.AUTH_KV.put(key, JSON.stringify({ start: now, count: 1 }), { expirationTtl: Math.ceil(windowMs / 1000) });
     return true;
   }
   entry.count++;
+  await env.AUTH_KV.put(key, JSON.stringify(entry), { expirationTtl: Math.ceil((entry.start + windowMs - now) / 1000) });
   return entry.count <= maxAttempts;
 }
 
@@ -84,7 +87,7 @@ export default {
           return new Response(JSON.stringify({ error: "Ogiltig email" }), { status: 400, headers });
         }
         const cleanEmail = email.toLowerCase().trim();
-        if (!checkLoginRate(cleanEmail, 3)) {
+        if (!await checkLoginRate(cleanEmail, env, 3)) {
           return new Response(JSON.stringify({ error: "För många försök" }), { status: 429, headers });
         }
         const existing = await env.DB.prepare("SELECT id, newsletter FROM users WHERE email = ?").bind(cleanEmail).first();
@@ -111,7 +114,7 @@ export default {
         const cleanEmail = email.toLowerCase().trim();
 
         // Rate limit: max 5 login attempts per email per 10 minutes
-        if (!checkLoginRate(cleanEmail)) {
+        if (!await checkLoginRate(cleanEmail, env)) {
           return new Response(JSON.stringify({ error: "För många försök. Vänta några minuter." }), { status: 429, headers });
         }
 
@@ -368,6 +371,10 @@ export default {
         const adminKey = request.headers.get("X-Admin-Key");
         if (!adminKey || adminKey !== env.ADMIN_KEY) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+        }
+        // Rate limit admin endpoints: 10 req/hour
+        if (!await checkLoginRate("admin_subscribers", env, 10, 3600000)) {
+          return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers });
         }
         const result = await env.DB.prepare(
           "SELECT email, newsletter_consent_at FROM users WHERE newsletter = 1 ORDER BY newsletter_consent_at DESC"
