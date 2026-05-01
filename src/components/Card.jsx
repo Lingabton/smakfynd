@@ -109,11 +109,11 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
               ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`
-              : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
+              : `Liknande smakmönster som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
-              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(crowd {cCrowd}/10)</span>}
+              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(vindrickare ger {cCrowd}/10)</span>}
             </div>
             );
           })()}
@@ -300,37 +300,16 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
 
             {/* Right: similar wines */}
             {allProducts && (() => {
-              const tasteSim = (a, b) => {
-                let score = 0, count = 0;
-                if (a.taste_body && b.taste_body) { score += 1 - Math.abs(a.taste_body - b.taste_body) / 12; count++; }
-                if (a.taste_fruit && b.taste_fruit) { score += 1 - Math.abs(a.taste_fruit - b.taste_fruit) / 12; count++; }
-                if (a.taste_sweet != null && b.taste_sweet != null) { score += 1 - Math.abs(a.taste_sweet - b.taste_sweet) / 12; count++; }
-                return count > 0 ? score / count : 0;
-              };
               const myGrapes = (p.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
-              const myRegion = (p.region || "").toLowerCase();
-              const myCat3 = (p.cat3 || "").toLowerCase();
               const similar = allProducts
                 .filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id))
                 .map(w => {
+                  let sim = wineSimilarity(w, p);
+                  if (Math.abs(w.price - p.price) <= 40) sim += 5;
+                  sim += Math.max(0, (w.smakfynd_score - p.smakfynd_score)) * 1;
                   const wGrapes = (w.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
                   const sameGrape = myGrapes.length > 0 && wGrapes.some(g => myGrapes.includes(g));
-                  const sameRegion = myRegion && (w.region || "").toLowerCase() === myRegion;
-                  const sameCat3 = myCat3 && (w.cat3 || "").toLowerCase() === myCat3;
-                  let sim = 0;
-                  // Grape is king — same grape is the strongest signal
-                  if (sameGrape) sim += 40;
-                  // Same region/style is strong
-                  if (sameRegion) sim += 20;
-                  if (sameCat3) sim += 15;
-                  // Taste similarity as tiebreaker
-                  sim += tasteSim(w, p) * 15;
-                  // Same country minor bonus
-                  if (w.country === p.country) sim += 5;
-                  // Similar price
-                  if (Math.abs(w.price - p.price) <= 40) sim += 5;
-                  // Better score is a plus
-                  sim += Math.max(0, (w.smakfynd_score - p.smakfynd_score)) * 1;
+                  const sameRegion = p.region && w.region && p.region.toLowerCase() === w.region.toLowerCase();
                   return { ...w, _sim: sim, _sameGrape: sameGrape, _sameRegion: sameRegion };
                 })
                 .filter(w => w._sim >= 15)

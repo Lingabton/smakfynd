@@ -5,7 +5,7 @@ function WineOfDay({ products, onSelect }) {
     const today = new Date().toISOString().slice(0, 10);
     const hash = [...today].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0);
     const top = products
-      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 72 && p.price <= 200)
+      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 70 && p.price <= 250)
       .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
       .slice(0, 80);
     return top.length > 0 ? top[Math.abs(hash) % top.length] : null;

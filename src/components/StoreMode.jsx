@@ -87,12 +87,12 @@ function getRecommendations(wine, products) {
     if (wineRegion && r === wineRegion) return `Samma region (${wine.region})`;
     const c = (p.cat3 || "").toLowerCase();
     if (wineCat3 && c === wineCat3) return `Samma stil`;
-    return `Samma typ`;
+    return `Liknande vin`;
   };
 
   // 1. Best in same sort/style — prioritize narrow pool
   const pool1 = narrow.length >= 3 ? narrow : base;
-  const priceRange = wine.price * 0.25;
+  const priceRange = wine.price < 150 ? wine.price * 0.25 : wine.price < 300 ? wine.price * 0.15 : wine.price * 0.10;
 
   // 1a. Better in same price range
   const betterSame = pool1

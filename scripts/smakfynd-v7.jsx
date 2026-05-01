@@ -174,6 +174,25 @@ function rescale(raw) {
   return Math.max(1, Math.round(raw * 2.75));
 }
 
+// Shared wine similarity scoring — used by Card, StoreMode, and FoodMatch
+function wineSimilarity(a, b) {
+  const aGrapes = (a.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+  const bGrapes = (b.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
+  let sim = 0;
+  // Grape is strongest signal
+  if (aGrapes.length > 0 && bGrapes.some(g => aGrapes.includes(g))) sim += 40;
+  // Region
+  if (a.region && b.region && a.region.toLowerCase() === b.region.toLowerCase()) sim += 20;
+  // Style category
+  if (a.cat3 && b.cat3 && a.cat3.toLowerCase() === b.cat3.toLowerCase()) sim += 15;
+  // Taste profile
+  if (a.taste_body && b.taste_body) sim += (1 - Math.abs(a.taste_body - b.taste_body) / 12) * 15;
+  if (a.taste_fruit && b.taste_fruit) sim += (1 - Math.abs(a.taste_fruit - b.taste_fruit) / 12) * 5;
+  // Country
+  if (a.country && b.country && a.country === b.country) sim += 5;
+  return sim;
+}
+
 function getScoreInfo(s100) {
   if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
   if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
@@ -610,11 +629,11 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
               ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`
-              : `Liknande stil som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
+              : `Liknande smakmönster som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
-              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(crowd {cCrowd}/10)</span>}
+              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(vindrickare ger {cCrowd}/10)</span>}
             </div>
             );
           })()}
@@ -801,37 +820,16 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
 
             {/* Right: similar wines */}
             {allProducts && (() => {
-              const tasteSim = (a, b) => {
-                let score = 0, count = 0;
-                if (a.taste_body && b.taste_body) { score += 1 - Math.abs(a.taste_body - b.taste_body) / 12; count++; }
-                if (a.taste_fruit && b.taste_fruit) { score += 1 - Math.abs(a.taste_fruit - b.taste_fruit) / 12; count++; }
-                if (a.taste_sweet != null && b.taste_sweet != null) { score += 1 - Math.abs(a.taste_sweet - b.taste_sweet) / 12; count++; }
-                return count > 0 ? score / count : 0;
-              };
               const myGrapes = (p.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
-              const myRegion = (p.region || "").toLowerCase();
-              const myCat3 = (p.cat3 || "").toLowerCase();
               const similar = allProducts
                 .filter(w => w.category === p.category && w.package === p.package && w.assortment === "Fast sortiment" && (w.nr || w.id) !== (p.nr || p.id))
                 .map(w => {
+                  let sim = wineSimilarity(w, p);
+                  if (Math.abs(w.price - p.price) <= 40) sim += 5;
+                  sim += Math.max(0, (w.smakfynd_score - p.smakfynd_score)) * 1;
                   const wGrapes = (w.grape || "").toLowerCase().split(",").map(g => g.trim()).filter(Boolean);
                   const sameGrape = myGrapes.length > 0 && wGrapes.some(g => myGrapes.includes(g));
-                  const sameRegion = myRegion && (w.region || "").toLowerCase() === myRegion;
-                  const sameCat3 = myCat3 && (w.cat3 || "").toLowerCase() === myCat3;
-                  let sim = 0;
-                  // Grape is king — same grape is the strongest signal
-                  if (sameGrape) sim += 40;
-                  // Same region/style is strong
-                  if (sameRegion) sim += 20;
-                  if (sameCat3) sim += 15;
-                  // Taste similarity as tiebreaker
-                  sim += tasteSim(w, p) * 15;
-                  // Same country minor bonus
-                  if (w.country === p.country) sim += 5;
-                  // Similar price
-                  if (Math.abs(w.price - p.price) <= 40) sim += 5;
-                  // Better score is a plus
-                  sim += Math.max(0, (w.smakfynd_score - p.smakfynd_score)) * 1;
+                  const sameRegion = p.region && w.region && p.region.toLowerCase() === w.region.toLowerCase();
                   return { ...w, _sim: sim, _sameGrape: sameGrape, _sameRegion: sameRegion };
                 })
                 .filter(w => w._sim >= 15)
@@ -1633,7 +1631,7 @@ function WineOfDay({ products, onSelect }) {
     const today = new Date().toISOString().slice(0, 10);
     const hash = [...today].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0);
     const top = products
-      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 72 && p.price <= 200)
+      .filter(p => p.assortment === "Fast sortiment" && p.package === "Flaska" && p.smakfynd_score >= 70 && p.price <= 250)
       .sort((a, b) => b.smakfynd_score - a.smakfynd_score)
       .slice(0, 80);
     return top.length > 0 ? top[Math.abs(hash) % top.length] : null;
@@ -1834,12 +1832,12 @@ function getRecommendations(wine, products) {
     if (wineRegion && r === wineRegion) return `Samma region (${wine.region})`;
     const c = (p.cat3 || "").toLowerCase();
     if (wineCat3 && c === wineCat3) return `Samma stil`;
-    return `Samma typ`;
+    return `Liknande vin`;
   };
 
   // 1. Best in same sort/style — prioritize narrow pool
   const pool1 = narrow.length >= 3 ? narrow : base;
-  const priceRange = wine.price * 0.25;
+  const priceRange = wine.price < 150 ? wine.price * 0.25 : wine.price < 300 ? wine.price * 0.15 : wine.price * 0.10;
 
   // 1a. Better in same price range
   const betterSame = pool1
