@@ -2401,7 +2401,12 @@ function matchWinesForCourses(courses, products) {
   const bodyRange = {
     light: [0, 4],
     medium: [5, 8],
-    full: [9, 12]
+    full: [9, 12],
+    lätt: [0, 4],
+    medelkroppad: [5, 8],
+    fylligt: [9, 12],
+    "fyllig": [9, 12],
+    "medel": [5, 8]
   };
   const usedNrs = new Set();
   return courses.map(course => {
