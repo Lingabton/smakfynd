@@ -2628,10 +2628,11 @@ function matchWinesForCourses(courses, products, format) {
         return b.smakfynd_score - a.smakfynd_score;
       });
 
-      // Pick best match for this criterion
-      if (scored.length > 0) {
-        usedNrs.add(scored[0].nr);
-        wines.push(scored[0]);
+      // Pick top 2 matches per criterion (gives user a choice)
+      for (const pick of scored.slice(0, 2)) {
+        if (wines.length >= 3) break;
+        usedNrs.add(pick.nr);
+        wines.push(pick);
       }
     }
     return {
