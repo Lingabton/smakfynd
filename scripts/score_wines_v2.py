@@ -57,6 +57,7 @@ def expert_to_10(points):
 
 def compute_price_scores(wines):
     groups = {}
+    # Group by type + package for base median
     for w in wines:
         key = (w.get('cat2', ''), w.get('_pkg', ''))
         groups.setdefault(key, []).append(w)
@@ -65,17 +66,45 @@ def compute_price_scores(wines):
         prices = [w['price'] / (w['vol'] / 1000) for w in group if w.get('vol', 0) > 0 and w.get('price', 0) > 0]
         if prices:
             medians[key] = statistics.median(prices)
+
+    # Price tier medians: compare within price bracket, not across all
+    price_tiers = [(0, 100), (100, 200), (200, 400), (400, 9999)]
+    tier_medians = {}
+    for key, group in groups.items():
+        for lo, hi in price_tiers:
+            tier_wines = [w for w in group if lo <= (w.get('price', 0) or 0) < hi and w.get('vol', 0) > 0 and w.get('price', 0) > 0]
+            tier_prices = [w['price'] / (w['vol'] / 1000) for w in tier_wines]
+            if tier_prices:
+                tier_medians[(key, lo, hi)] = statistics.median(tier_prices)
+
     for w in wines:
         key = (w.get('cat2', ''), w.get('_pkg', ''))
-        median = medians.get(key)
         vol = w.get('vol', 750)
         price = w.get('price', 0)
-        if not median or vol <= 0 or price <= 0:
+        if vol <= 0 or price <= 0:
             w['_price_score'] = None
             continue
-        ratio = (price / (vol / 1000)) / median
-        # Steeper curve: a wine at half median price → 8.0, at median → 5.5, at double → 1.0
-        w['_price_score'] = round(max(1.0, min(10.0, 10.5 - ratio * 5.0)), 1)
+
+        # Blended approach: 60% tier median (fair within prisklass) + 40% category median (rewards low price)
+        tier_med = None
+        for lo, hi in price_tiers:
+            if lo <= price < hi:
+                tier_med = tier_medians.get((key, lo, hi))
+                break
+        cat_median = medians.get(key)
+        if not cat_median:
+            w['_price_score'] = None
+            continue
+
+        liter_price = price / (vol / 1000)
+        # Tier score: how good within your price bracket
+        tier_ratio = liter_price / (tier_med or cat_median)
+        tier_score = max(1.0, min(10.0, 10.5 - tier_ratio * 5.0))
+        # Category score: how good vs all wines (rewards absolute cheapness)
+        cat_ratio = liter_price / cat_median
+        cat_score = max(1.0, min(10.0, 10.5 - cat_ratio * 5.0))
+        # Blend: 60% tier + 40% category
+        w['_price_score'] = round(max(1.0, min(10.0, tier_score * 0.6 + cat_score * 0.4)), 1)
 
 # Critic reliability weights based on correlation with crowd scores
 # Higher weight = more aligned with crowd opinion = more trustworthy for value scoring
