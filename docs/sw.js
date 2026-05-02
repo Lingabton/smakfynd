@@ -1,5 +1,5 @@
 // Smakfynd Service Worker v2 — network first for everything
-const CACHE_NAME = 'smakfynd-v2';
+const CACHE_NAME = 'smakfynd-v3';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
