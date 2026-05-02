@@ -223,8 +223,12 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {/* Left: taste profile + details */}
             <div style={{ flex: "1 1 280px", minWidth: 0 }}>
-              {/* Taste description */}
-              {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 12, lineHeight: 1.5 }}>{p.style}</div>}
+              {/* Taste description + serving temp */}
+              {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 8, lineHeight: 1.5 }}>{p.style}</div>}
+              <div style={{ fontSize: 11, color: t.txL, marginBottom: 10 }}>
+                {p.category === "Rött" ? "Serveras vid 16-18°C" : p.category === "Mousserande" ? "Serveras vid 6-8°C" : p.category === "Rosé" ? "Serveras vid 8-10°C" : "Serveras vid 8-10°C"}
+                {p.vintage ? ` · Årgång ${p.vintage}` : ""}
+              </div>
 
               {/* Taste sliders */}
               {(p.taste_body || p.taste_fruit || p.taste_sweet != null) && (

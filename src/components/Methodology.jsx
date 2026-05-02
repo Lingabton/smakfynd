@@ -49,6 +49,9 @@ function Methodology() {
       <p style={{ margin: "0 0 0", fontSize: 14, color: t.tx, lineHeight: 1.7, fontWeight: 500 }}>
         Resultatet: en enda siffra som säger hur mycket smak du får per krona — inte hur prestigefullt vinet är.
       </p>
+      <p style={{ margin: "12px 0 0", fontSize: 12, color: t.txL, lineHeight: 1.6 }}>
+        Prisvärdet jämförs inom prisklasser, så ett vin för 250 kr tävlar mot andra i samma spann, inte mot 79-kronorsviner. Billiga fynd har fortfarande en fördel, men dyra viner med hög kvalitet kan också nå toppen.
+      </p>
 
       <hr style={{ border: "none", borderTop: `1px solid ${t.bdrL}`, margin: "28px 0 20px" }} />
 

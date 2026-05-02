@@ -1397,10 +1397,16 @@ function Card({
       fontSize: 12,
       color: t.txM,
       fontStyle: "italic",
-      marginBottom: 12,
+      marginBottom: 8,
       lineHeight: 1.5
     }
-  }, p.style), (p.taste_body || p.taste_fruit || p.taste_sweet != null) && /*#__PURE__*/React.createElement("div", {
+  }, p.style), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      marginBottom: 10
+    }
+  }, p.category === "Rött" ? "Serveras vid 16-18°C" : p.category === "Mousserande" ? "Serveras vid 6-8°C" : p.category === "Rosé" ? "Serveras vid 8-10°C" : "Serveras vid 8-10°C", p.vintage ? ` · Årgång ${p.vintage}` : ""), (p.taste_body || p.taste_fruit || p.taste_sweet != null) && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14
     }
@@ -3380,7 +3386,14 @@ function Methodology() {
       lineHeight: 1.7,
       fontWeight: 500
     }
-  }, "Resultatet: en enda siffra som s\xE4ger hur mycket smak du f\xE5r per krona \u2014 inte hur prestigefullt vinet \xE4r."), /*#__PURE__*/React.createElement("hr", {
+  }, "Resultatet: en enda siffra som s\xE4ger hur mycket smak du f\xE5r per krona \u2014 inte hur prestigefullt vinet \xE4r."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "12px 0 0",
+      fontSize: 12,
+      color: t.txL,
+      lineHeight: 1.6
+    }
+  }, "Prisv\xE4rdet j\xE4mf\xF6rs inom prisklasser, s\xE5 ett vin f\xF6r 250 kr t\xE4vlar mot andra i samma spann, inte mot 79-kronorsviner. Billiga fynd har fortfarande en f\xF6rdel, men dyra viner med h\xF6g kvalitet kan ocks\xE5 n\xE5 toppen."), /*#__PURE__*/React.createElement("hr", {
     style: {
       border: "none",
       borderTop: `1px solid ${t.bdrL}`,

@@ -743,8 +743,12 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {/* Left: taste profile + details */}
             <div style={{ flex: "1 1 280px", minWidth: 0 }}>
-              {/* Taste description */}
-              {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 12, lineHeight: 1.5 }}>{p.style}</div>}
+              {/* Taste description + serving temp */}
+              {p.style && <div style={{ fontSize: 12, color: t.txM, fontStyle: "italic", marginBottom: 8, lineHeight: 1.5 }}>{p.style}</div>}
+              <div style={{ fontSize: 11, color: t.txL, marginBottom: 10 }}>
+                {p.category === "Rött" ? "Serveras vid 16-18°C" : p.category === "Mousserande" ? "Serveras vid 6-8°C" : p.category === "Rosé" ? "Serveras vid 8-10°C" : "Serveras vid 8-10°C"}
+                {p.vintage ? ` · Årgång ${p.vintage}` : ""}
+              </div>
 
               {/* Taste sliders */}
               {(p.taste_body || p.taste_fruit || p.taste_sweet != null) && (
@@ -1756,6 +1760,9 @@ function Methodology() {
 
       <p style={{ margin: "0 0 0", fontSize: 14, color: t.tx, lineHeight: 1.7, fontWeight: 500 }}>
         Resultatet: en enda siffra som säger hur mycket smak du får per krona — inte hur prestigefullt vinet är.
+      </p>
+      <p style={{ margin: "12px 0 0", fontSize: 12, color: t.txL, lineHeight: 1.6 }}>
+        Prisvärdet jämförs inom prisklasser, så ett vin för 250 kr tävlar mot andra i samma spann, inte mot 79-kronorsviner. Billiga fynd har fortfarande en fördel, men dyra viner med hög kvalitet kan också nå toppen.
       </p>
 
       <hr style={{ border: "none", borderTop: `1px solid ${t.bdrL}`, margin: "28px 0 20px" }} />
