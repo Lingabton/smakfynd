@@ -2438,6 +2438,8 @@ function matchWinesForCourses(courses, products, format) {
         const haystack = " " + [p.name, p.sub, p.grape, p.style, p.cat3, ...(p.food_pairings || [])].join(" ").toLowerCase() + " ";
         for (const k of kw) {
           if (haystack.includes(" " + k) || haystack.includes(k + " ")) fit += 2;
+          // Special: taste keywords match numeric fields
+          else if ((k === "sött" || k === "söt") && p.taste_sweet && p.taste_sweet >= 6) fit += 3;else if ((k === "torrt" || k === "torr") && p.taste_sweet != null && p.taste_sweet <= 3) fit += 2;else if ((k === "fylligt" || k === "fyllig") && p.taste_body && p.taste_body >= 8) fit += 2;else if ((k === "lätt" || k === "fräscht") && p.taste_body && p.taste_body <= 4) fit += 2;else if ((k === "fruktigt" || k === "fruktig") && p.taste_fruit && p.taste_fruit >= 8) fit += 2;
         }
         return {
           ...p,
