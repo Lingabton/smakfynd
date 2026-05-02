@@ -580,8 +580,6 @@ function SmakfyndApp() {
           </div>
         )}
 
-        {/* ═══ WINE OF THE DAY ═══ */}
-        {!search && !showDeals && !showNew && cat === "Rött" && <WineOfDay products={products} onSelect={nr => { window.location.hash = `vin/${nr}`; window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
 
         {/* ═══ RESULTS ═══ */}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
