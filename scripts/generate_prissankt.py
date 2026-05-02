@@ -142,7 +142,7 @@ def render_drop_row(d, rank):
     drop_date = d.get('drop_date', '')
     date_str = f' · Sänkt {drop_date}' if drop_date else ''
 
-    return f'''<li style="padding:18px 0;border-bottom:1px solid #e6ddd0">
+    return f'''<li style="padding:18px 0;border-bottom:1px solid #e6ddd0" data-score="{score}" data-price="{price}" data-drop="{pct}">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
     <div style="flex:1">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
@@ -160,7 +160,7 @@ def render_drop_row(d, rank):
         <span style="font-size:11px;color:#7a7060">{date_str}</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:10px">
-        <a href="https://smakfynd.se/#vin/{nr}" style="font-size:13px;color:#8b2332;text-decoration:none;font-weight:500">Se vinkort →</a>
+        {'<a href="https://smakfynd.se/#vin/' + nr + '" style="font-size:13px;color:#8b2332;text-decoration:none;font-weight:500">Se vinkort →</a>' if d.get('assortment') == 'Fast sortiment' else ''}
         <a href="https://www.systembolaget.se/produkt/vin/{nr}" target="_blank" rel="noopener" style="font-size:13px;color:#4a4238;text-decoration:none">Köp på Systembolaget →</a>
       </div>
     </div>
@@ -282,6 +282,31 @@ html = f'''<!DOCTYPE html>
         Uppdaterad {DATE_STR} · Priser jämförs dagligen · <a href="https://smakfynd.se" style="color:#8b2332">Utforska alla viner →</a>
       </p>
     </header>
+
+    <div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#7a7060;align-self:center;margin-right:4px">Sortera:</span>
+      <button onclick="sortDrops('drop')" class="sf-sort" data-key="drop" style="padding:6px 12px;border-radius:8px;border:1px solid #8b2332;background:#8b2332;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">Sänkning</button>
+      <button onclick="sortDrops('score')" class="sf-sort" data-key="score" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Poäng</button>
+      <button onclick="sortDrops('price')" class="sf-sort" data-key="price" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Pris</button>
+    </div>
+    <script>
+    function sortDrops(key) {{
+      var ol = document.querySelector("ol");
+      var items = Array.from(ol.querySelectorAll("li[data-score]"));
+      items.sort(function(a, b) {{
+        var av = parseFloat(a.dataset[key]) || 0;
+        var bv = parseFloat(b.dataset[key]) || 0;
+        return key === "price" ? av - bv : bv - av;
+      }});
+      items.forEach(function(li) {{ ol.appendChild(li); }});
+      document.querySelectorAll(".sf-sort").forEach(function(btn) {{
+        var active = btn.dataset.key === key;
+        btn.style.background = active ? "#8b2332" : "#fefcf8";
+        btn.style.color = active ? "#fff" : "#4a4238";
+        btn.style.borderColor = active ? "#8b2332" : "#e6ddd0";
+      }});
+    }}
+    </script>
 
     {"<ol style='list-style:none;padding:0;margin:0'>" + wines_html + "</ol>" if drops else "<p style='font-size:15px;color:#7a7060;text-align:center;padding:40px 0'>Inga prissänkningar hittade just nu. Kom tillbaka snart!</p>"}
 

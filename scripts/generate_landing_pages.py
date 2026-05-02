@@ -953,6 +953,31 @@ def make_pages():
                            and 'carm' in (w.get('grape') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
+        # ─── Norska besökare ───
+        {
+            "slug": "basta-vin-for-norrmand",
+            "title": f"Bästa vinköpen på Systembolaget för norrmän {YEAR}",
+            "meta": f"Norsk i Sverige? Här är de bästa vinerna på Systembolaget {YEAR}. Billigare och bättre urval än Vinmonopolet. Rankade efter kvalitet per krona.",
+            "h1": f"Bästa vinköpen på Systembolaget — för norska besökare",
+            "intro": "Svenska Systembolaget har ofta lägre priser och bredare sortiment än Vinmonopolet. Här är vinerna som ger mest valuta, särskilt utvalda för dig som handlar på Systembolaget under Sverigebesöket.",
+            "intro2": "Priserna på Systembolaget ligger i genomsnitt 20-40% lägre än Vinmonopolet i samma kvalitetsklass. Dessutom har Systembolaget ett bredare fast sortiment. Vi har rankat alla viner efter kvalitet i förhållande till priset. Passa på att fylla bilen med dessa fynd.",
+            "guide": {
+                "title": "Tips för norrmän som handlar på Systembolaget",
+                "points": [
+                    "Röda viner från Chile och Argentina ger extremt bra prisvärdhet på Systembolaget, ofta 30-50% billigare än samma viner i Norge.",
+                    "Bag-in-box (lådvin) är betydligt billigare i Sverige. Ta med några lådor hem.",
+                    "Systembolaget har öppet till 19:00 vardagar (20:00 i vissa butiker) och till 15:00 på lördagar. Stängt söndagar.",
+                    "Ta med legitimation. Åldersgräns 20 år för att handla på Systembolaget.",
+                ]
+            },
+            "faq_visible": [
+                ("Hur mycket billigare är Systembolaget jämfört med Vinmonopolet?", "I genomsnitt 20-40% billigare, beroende på vinkategori. Röda viner och lådvin har störst prisskillnad. Champagne och premium-viner kan vara 100-300 kr billigare per flaska."),
+                ("Hur mycket vin får man ta med till Norge?", "Kvoten för skattefri införsel är begränsad. Kontrollera aktuella regler på toll.no innan du åker. Du kan ta med mer men betalar avgift."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+
         # ─── Rosé-kluster (breakout-kategori) ───
         {
             "slug": "basta-rose-under-100-kr",
