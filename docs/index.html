@@ -29,7 +29,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
-  <meta property="article:modified_time" content="2026-05-01">
+  <meta property="article:modified_time" content="2026-05-02">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -1112,7 +1112,7 @@ function Card({
     // Find expensive wines with similar taste profile
     const candidates = allProducts.filter(w => {
       if (w.nr === p.nr || w.category !== p.category || w.package !== p.package) return false;
-      if (w.price < p.price * 2 || w.price < 180) return false;
+      if (w.price < p.price * 2 || w.price > p.price * 5 || w.price < 180) return false;
       if (!w.crowd_score || w.crowd_score < p.crowd_score - 0.5) return false;
 
       // Must share grape OR similar taste profile

@@ -549,7 +549,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
     const candidates = allProducts
       .filter(w => {
         if (w.nr === p.nr || w.category !== p.category || w.package !== p.package) return false;
-        if (w.price < p.price * 2 || w.price < 180) return false;
+        if (w.price < p.price * 2 || w.price > p.price * 5 || w.price < 180) return false;
         if (!w.crowd_score || w.crowd_score < p.crowd_score - 0.5) return false;
 
         // Must share grape OR similar taste profile
