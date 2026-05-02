@@ -409,7 +409,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://smakfynd.se/basta-vin-for-norrmand/</loc>
+    <loc>https://smakfynd.se/basta-vin-for-norrman/</loc>
+    <lastmod>2026-05-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://smakfynd.se/gode-kjop-pa-systembolaget/</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

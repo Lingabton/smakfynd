@@ -955,7 +955,7 @@ def make_pages():
         },
         # ─── Norska besökare ───
         {
-            "slug": "basta-vin-for-norrmand",
+            "slug": "basta-vin-for-norrman",
             "title": f"Bästa vinköpen på Systembolaget för norrmän {YEAR}",
             "meta": f"Norsk i Sverige? Här är de bästa vinerna på Systembolaget {YEAR}. Billigare och bättre urval än Vinmonopolet. Rankade efter kvalitet per krona.",
             "h1": f"Bästa vinköpen på Systembolaget — för norska besökare",
@@ -973,6 +973,30 @@ def make_pages():
             "faq_visible": [
                 ("Hur mycket billigare är Systembolaget jämfört med Vinmonopolet?", "I genomsnitt 20-40% billigare, beroende på vinkategori. Röda viner och lådvin har störst prisskillnad. Champagne och premium-viner kan vara 100-300 kr billigare per flaska."),
                 ("Hur mycket vin får man ta med till Norge?", "Kvoten för skattefri införsel är begränsad. Kontrollera aktuella regler på toll.no innan du åker. Du kan ta med mer men betalar avgift."),
+            ],
+            "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
+                          key=lambda x: -x.get('smakfynd_score', 0))[:20],
+        },
+
+        {
+            "slug": "gode-kjop-pa-systembolaget",
+            "title": f"Gode kjøp på Systembolaget {YEAR} — for nordmenn",
+            "meta": f"Gode vinkjøp på Systembolaget {YEAR}. Billigere og bedre utvalg enn Vinmonopolet. Rangert etter kvalitet per krone.",
+            "h1": f"Gode kjøp på Systembolaget — for nordmenn",
+            "intro": "Svenske Systembolaget har ofte lavere priser og bredere sortiment enn Vinmonopolet. Her er vinene som gir mest valuta, spesielt utvalgt for deg som handler på Systembolaget under Sverigeturen.",
+            "intro2": "Prisene på Systembolaget ligger i gjennomsnitt 20-40% lavere enn Vinmonopolet i samme kvalitetsklasse. I tillegg har Systembolaget et bredere fast sortiment. Vi har rangert alle viner etter kvalitet i forhold til prisen. Pass på å fylle bilen med disse funnene.",
+            "guide": {
+                "title": "Tips for nordmenn som handler på Systembolaget",
+                "points": [
+                    "Røde viner fra Chile og Argentina gir ekstremt god prisverdi på Systembolaget, ofte 30-50% billigere enn samme viner i Norge.",
+                    "Bag-in-box (pappvin) er betydelig billigere i Sverige. Ta med noen bokser hjem.",
+                    "Systembolaget har åpent til 19:00 hverdager (20:00 i noen butikker) og til 15:00 på lørdager. Stengt søndager.",
+                    "Ta med legitimasjon. Aldersgrense 20 år for å handle på Systembolaget.",
+                ]
+            },
+            "faq_visible": [
+                ("Hvor mye billigere er Systembolaget enn Vinmonopolet?", "I gjennomsnitt 20-40% billigere, avhengig av vinkategori. Røde viner og pappvin har størst prisforskjell. Champagne og premium-viner kan være 100-300 kr billigere per flaske."),
+                ("Hvor mye vin kan man ta med til Norge?", "Kvoten for avgiftsfri innførsel er begrenset. Sjekk gjeldende regler på toll.no før du reiser. Du kan ta med mer, men betaler avgift."),
             ],
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
