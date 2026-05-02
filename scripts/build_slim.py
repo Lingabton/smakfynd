@@ -145,6 +145,7 @@ for p in slim:
     # Availability
     if p.get("availability"): m["avail"] = p["availability"]
     # Optional fields — include for all wines that have the data
+    if p.get("vintage"): m["vintage"] = p["vintage"]
     if p.get("organic"): m["organic"] = True
     if p.get("cat3"): m["cat3"] = p["cat3"]
     if p.get("food_pairings"): m["food_pairings"] = p["food_pairings"]

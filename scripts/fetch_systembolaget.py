@@ -65,6 +65,7 @@ def normalize(p):
         "taste_bitter": p.get("tasteClockBitter"),
         "food_pairings": [t if isinstance(t, str) else t.get("name", "") for t in (p.get("tasteSymbols") or [])],
         "image_url": (p.get("images", [{}])[0].get("imageUrl", "") + "_400.webp") if p.get("images") else "",
+        "vintage": p.get("vintage"),
         "is_out_of_stock": p.get("isCompletelyOutOfStock", False),
         "is_temp_out": p.get("isTemporaryOutOfStock", False),
         "is_regional": p.get("isRegionalRestricted", False),

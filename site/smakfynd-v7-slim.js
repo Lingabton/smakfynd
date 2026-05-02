@@ -386,7 +386,7 @@ function ScoreBars({
       gap: 3
     }
   }, /*#__PURE__*/React.createElement(MiniBar, {
-    label: "Crowd",
+    label: "Vindrickare",
     value: p.crowd_score,
     color: "#6b8cce"
   }), p.expert_score && /*#__PURE__*/React.createElement(MiniBar, {
@@ -1044,7 +1044,7 @@ function Card({
       textOverflow: "ellipsis",
       whiteSpace: "nowrap"
     }
-  }, p.sub), /*#__PURE__*/React.createElement("span", {
+  }, p.sub, p.vintage ? ` · ${p.vintage}` : ""), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 16,
       fontWeight: 700,
@@ -1065,7 +1065,7 @@ function Card({
     const sameGrape = pGrape && cGrape && cGrape === pGrape;
     const savings = Math.round(comparison.price - p.price);
     const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
-    const label = sameGrape ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr` : `Liknande smakmönster som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
+    const label = sameGrape ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr` : `Jämförbar kvalitet med ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 4,
@@ -1104,7 +1104,7 @@ function Card({
       fontSize: 11,
       color: t.txL
     }
-  }, meta, foodStr ? ` · ${foodStr}` : "")), /*#__PURE__*/React.createElement("div", {
+  }, meta, foodStr ? ` · ${foodStr}` : "", p.assortment && p.assortment !== "Fast sortiment" ? ` · ${p.assortment}` : "")), /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       textAlign: "center",
@@ -1124,10 +1124,16 @@ function Card({
       fontSize: 10,
       color: col,
       marginTop: 3,
-      marginBottom: 5,
+      marginBottom: 2,
       fontWeight: 600
     }
-  }, label), /*#__PURE__*/React.createElement("div", {
+  }, label), p.confidence && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 7,
+      color: p.confidence === "hög" ? t.green : t.txF,
+      marginBottom: 3
+    }
+  }, p.confidence === "hög" ? "Säkert betyg" : p.confidence === "medel" ? "" : "Osäkert"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -1141,11 +1147,11 @@ function Card({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 9,
+      fontSize: 7,
       color: t.txL,
-      width: 12
+      width: 14
     }
-  }, "K"), /*#__PURE__*/React.createElement("div", {
+  }, "Kval"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       height: 5,
@@ -1167,11 +1173,11 @@ function Card({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 9,
+      fontSize: 7,
       color: t.txL,
-      width: 12
+      width: 14
     }
-  }, "P"), /*#__PURE__*/React.createElement("div", {
+  }, "Pris"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       height: 5,
@@ -1485,7 +1491,7 @@ function Card({
       color: "#6b8cce",
       fontWeight: 600
     }
-  }, "Crowd"), /*#__PURE__*/React.createElement("span", {
+  }, "Vindrickare"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontWeight: 700,
       color: "#6b8cce"

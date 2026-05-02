@@ -222,7 +222,7 @@ function MiniBar({ label, value, max = 10, color }) {
 function ScoreBars({ p }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <MiniBar label="Crowd" value={p.crowd_score} color="#6b8cce" />
+      <MiniBar label="Vindrickare" value={p.crowd_score} color="#6b8cce" />
       {p.expert_score && <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />}
     </div>
   );
@@ -610,10 +610,10 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             {!p.organic && s100 >= 70 && s100 < 80 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
-          {/* Row 2: Sub + Price */}
+          {/* Row 2: Sub + Vintage + Price */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 2 }}>
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {p.sub}
+              {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}
             </span>
             <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: t.serif, flexShrink: 0, marginLeft: 8 }}>
               {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
@@ -628,8 +628,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const savings = Math.round(comparison.price - p.price);
             const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
-              ? `Samma druva som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`
-              : `Liknande smakmönster som ${comparison.name} (${Math.round(comparison.price)}\u00A0kr) — du sparar ${savings}\u00A0kr`;
+              ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr`
+              : `Jämförbar kvalitet med ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
@@ -655,23 +655,24 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
 
           {/* Row 5: Metadata */}
           <div style={{ marginTop: 3, fontSize: 11, color: t.txL }}>
-            {meta}{foodStr ? ` · ${foodStr}` : ""}
+            {meta}{foodStr ? ` · ${foodStr}` : ""}{p.assortment && p.assortment !== "Fast sortiment" ? ` · ${p.assortment}` : ""}
           </div>
         </div>
 
         {/* Score with split bars + "?" */}
         <div style={{ flexShrink: 0, textAlign: "center", width: 58, position: "relative" }}>
           <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
-          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 5, fontWeight: 600 }}>{label}</div>
+          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
+          {p.confidence && <div style={{ fontSize: 7, color: p.confidence === "hög" ? t.green : t.txF, marginBottom: 3 }}>{p.confidence === "hög" ? "Säkert betyg" : p.confidence === "medel" ? "" : "Osäkert"}</div>}
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ fontSize: 9, color: t.txL, width: 12 }}>K</span>
+              <span style={{ fontSize: 7, color: t.txL, width: 14 }}>Kval</span>
               <div style={{ flex: 1, height: 5, borderRadius: 3, background: t.bdrL }}>
                 <div style={{ width: `${qualBar}%`, height: "100%", borderRadius: 3, background: "#6b8cce" }} />
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ fontSize: 9, color: t.txL, width: 12 }}>P</span>
+              <span style={{ fontSize: 7, color: t.txL, width: 14 }}>Pris</span>
               <div style={{ flex: 1, height: 5, borderRadius: 3, background: t.bdrL }}>
                 <div style={{ width: `${priceBar}%`, height: "100%", borderRadius: 3, background: t.green }} />
               </div>
@@ -778,7 +779,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Crowd</span>
+                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Vindrickare</span>
                       <span style={{ fontWeight: 700, color: "#6b8cce" }}>{p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "\u2014"}</span>
                     </div>
                     {p.crowd_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} /></div>}
