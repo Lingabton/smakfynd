@@ -27,6 +27,7 @@ FILES = [
     "components/FoodMatch.jsx",
     "components/NewsletterCTA.jsx",
     "components/Methodology.jsx",
+    "components/Profile.jsx",
     "components/StoreMode.jsx",
     "components/AgeGate.jsx",
     "App.jsx",

@@ -241,10 +241,10 @@ function SmakfyndApp() {
           </div>
           <div style={{ display: "flex", gap: 12, fontSize: 12, color: t.txL }}>
             {[["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`], ["about", "Om"],
-              [auth.user ? "profile" : "login", auth.user ? "Konto" : "Logga in"]].map(([k, l]) => (
+              [auth.user ? "profile" : "login", auth.user ? "Min sida" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }
-                  if (k === "profile") { auth.logout(); return; }
+                  if (k === "profile") { setPanel(panel === "profile" ? null : "profile"); return; }
                   setPanel(panel === k ? null : k);
                 }}
                 style={{ cursor: "pointer", color: k === "login" ? t.wine : t.txL, fontWeight: panel === k ? 600 : 400, padding: "8px 0", minHeight: 44, display: "inline-flex", alignItems: "center" }}
@@ -406,6 +406,8 @@ function SmakfyndApp() {
             <button onClick={() => setPanel(null)} style={{ marginTop: 12, fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Stäng</button>
           </div>
         )}
+
+        {panel === "profile" && <Profile products={products} auth={auth} onClose={() => setPanel(null)} />}
 
         {/* ═══ JOB 1: VIN TILL IKVÄLL ═══ */}
         <div id="section-food" style={{ marginBottom: 20 }}>
