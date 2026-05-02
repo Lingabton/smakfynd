@@ -331,7 +331,7 @@ html = f"""<!DOCTYPE html>
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(React.createElement({comp}));
   </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(w){w.unregister()})});navigator.serviceWorker.register('/sw.js')}</script>
+<script>if('serviceWorker' in navigator){{navigator.serviceWorker.getRegistrations().then(function(r){{r.forEach(function(w){{w.unregister()}})}}); navigator.serviceWorker.register('/sw.js')}}</script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>"""
