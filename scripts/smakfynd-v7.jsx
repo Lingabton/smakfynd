@@ -1267,8 +1267,10 @@ function matchWinesForCourses(courses, products, format) {
       const [bMin, bMax] = bodyRange[c.body] || [0, 12];
       const kw = (c.keywords || []).map(k => k.toLowerCase());
 
-      const scored = products
-        .filter(p => p.category === wineType && (pkgFilter ? p.package === pkgFilter : true) && p.assortment === "Fast sortiment")
+      // Try preferred format first, fall back to any format if too few results
+      const withPkg = pkgFilter ? products.filter(p => p.category === wineType && p.package === pkgFilter && p.assortment === "Fast sortiment") : [];
+      const pool = withPkg.length >= 5 ? withPkg : products.filter(p => p.category === wineType && p.assortment === "Fast sortiment");
+      const scored = pool
         .map(p => {
           let fit = 0;
           // Body match — skip wines without taste data instead of defaulting
