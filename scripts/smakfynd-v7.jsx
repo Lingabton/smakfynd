@@ -194,11 +194,11 @@ function wineSimilarity(a, b) {
 }
 
 function getScoreInfo(s100) {
-  if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
-  if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
+  if (s100 >= 90) return ["Exceptionellt", "#1a7a2e", ""];
+  if (s100 >= 80) return ["Toppköp", t.green, ""];
   if (s100 >= 70) return ["Starkt fynd", "#5a7542", ""];
-  if (s100 >= 60) return ["Bra köp", "#7a7054", ""];
-  if (s100 >= 50) return ["Okej värde", "#8a7a6a", ""];
+  if (s100 >= 55) return ["Bra köp", "#7a7054", ""];
+  if (s100 >= 40) return ["Okej värde", "#8a7a6a", ""];
   return ["Svagt värde", "#8a7a6a", ""];
 }
 
@@ -606,8 +606,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{p.name}</h3>
             {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
-            {!p.organic && s100 >= 80 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
-            {!p.organic && s100 >= 70 && s100 < 80 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
+            {!p.organic && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.organic && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
           {/* Row 2: Sub + Vintage + Price */}
@@ -644,7 +644,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             if (p.price_score >= 8) vibes.push("Prisvärt");
             if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
             if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
-            if (p.price <= 100 && s100 >= 70) vibes.push("Budgetfavorit");
+            if (p.price <= 100 && s100 >= 65) vibes.push("Budgetfavorit");
             if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
             return vibes.length > 0 ? (
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>

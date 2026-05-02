@@ -191,15 +191,16 @@ def smakfynd_score(crowd, expert, price_val, organic=False, consensus_bonus=0):
         quality += consensus_bonus
 
     # Final blend: quality 75%, price 25%
-    # This ensures quality dominates, but a 100kr wine with same quality
-    # as a 300kr wine will clearly win
     raw = quality * 0.75 + price_val * 0.25
 
-    # Map to 1-99 scale
-    if raw >= 8: score = round(min(99, 80 + (raw - 8) * 10))
-    elif raw >= 6: score = round(55 + (raw - 6) * 12.5)
-    elif raw >= 4: score = round(30 + (raw - 4) * 12.5)
-    else: score = round(max(1, raw * 7.5))
+    # Map to 25-95 scale using sigmoid curve
+    # Centered at raw=6.4 (median), spreads the 5.5-7.5 range across 40-85
+    import math
+    clamped = max(4.0, min(9.0, raw))
+    x = (clamped - 6.4) * 3.0  # steepness
+    sig = 1 / (1 + math.exp(-x))
+    score = round(25 + sig * 70)
+    score = max(25, min(95, score))
 
     # Apply quality floor
     if not quality_floor and score > 50:

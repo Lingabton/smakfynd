@@ -28,10 +28,10 @@ function wineSimilarity(a, b) {
 }
 
 function getScoreInfo(s100) {
-  if (s100 >= 90) return ["Exceptionellt fynd", "#1a7a2e", "🏆"];
-  if (s100 >= 80) return ["Toppköp", t.green, "⭐"];
+  if (s100 >= 90) return ["Exceptionellt", "#1a7a2e", ""];
+  if (s100 >= 80) return ["Toppköp", t.green, ""];
   if (s100 >= 70) return ["Starkt fynd", "#5a7542", ""];
-  if (s100 >= 60) return ["Bra köp", "#7a7054", ""];
-  if (s100 >= 50) return ["Okej värde", "#8a7a6a", ""];
+  if (s100 >= 55) return ["Bra köp", "#7a7054", ""];
+  if (s100 >= 40) return ["Okej värde", "#8a7a6a", ""];
   return ["Svagt värde", "#8a7a6a", ""];
 }
