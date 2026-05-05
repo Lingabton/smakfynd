@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Deploy smakfynd JSX to docs/index.html with full SEO."""
 import os, re, json, subprocess
+from datetime import datetime
 from pathlib import Path
 
 BASE = str(Path(__file__).parent.parent)
@@ -21,6 +22,7 @@ if result.returncode != 0:
 print(f"  {os.path.getsize(JS_PATH)/1024:.0f} KB transpiled")
 
 js = open(JS_PATH).read()
+js = js.replace("__BUILD_TS__", str(int(datetime.now().timestamp())))
 js = re.sub(r'^import\s+\{[^}]+\}\s+from\s+"react";\s*\n', '', js)
 
 m = re.search(r'export\s+default\s+function\s+(\w+)', js)
@@ -127,8 +129,6 @@ faq_ld = json.dumps({
 
 num_wines = len(all_wines) if os.path.exists(DATA_PATH) else 800
 num_countries = len(set(w.get('country','') for w in all_wines if w.get('country'))) if os.path.exists(DATA_PATH) else 18
-
-from datetime import datetime
 TODAY = datetime.now().strftime('%Y-%m-%d')
 MONTH_SV = ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'][datetime.now().month - 1]
 

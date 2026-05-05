@@ -5,8 +5,8 @@
 // By Olav Innovation AB · Gabriel Linton
 // ═══════════════════════════════════════════════════════════════
 
-// Data: loaded async from wines.json, or embedded at build time as fallback
-const DATA_URL = "wines.json";
+// Data: loaded async from wines.json, cache-busted at build time
+const DATA_URL = "wines.json?v=__BUILD_TS__";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
