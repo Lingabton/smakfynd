@@ -86,8 +86,9 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{p.name}</h3>
             {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
-            {!p.organic && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
-            {!p.organic && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
+            {p.price_vs_launch_pct > 0 && <span style={statusPill(`−${p.price_vs_launch_pct}%`, t.deal)}>−{p.price_vs_launch_pct}%</span>}
+            {!p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
           {/* Row 2: Sub + Vintage + Price */}
@@ -95,8 +96,11 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: t.serif, flexShrink: 0, marginLeft: 8 }}>
-              {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+            <span style={{ flexShrink: 0, marginLeft: 8, textAlign: "right" }}>
+              {p.launch_price && <span style={{ fontSize: 11, color: t.txL, textDecoration: "line-through", marginRight: 4 }}>{p.launch_price}</span>}
+              <span style={{ fontSize: 16, fontWeight: 700, color: p.price_vs_launch_pct ? t.deal : t.tx, fontFamily: t.serif }}>
+                {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+              </span>
             </span>
           </div>
 
