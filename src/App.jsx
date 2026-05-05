@@ -192,9 +192,16 @@ function SmakfyndApp() {
     return r;
   }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
-  const newN = products.filter(p => p.is_new).length;
-  const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
-  const ecoN = products.filter(p => p.organic).length;
+  const baseFiltered = useMemo(() => {
+    let r = products;
+    if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
+    r = r.filter(p => p.package === pkg);
+    if (cat !== "all") r = r.filter(p => p.category === cat);
+    return r;
+  }, [products, showBest, pkg, cat]);
+  const newN = baseFiltered.filter(p => p.is_new).length;
+  const dealN = baseFiltered.filter(p => p.price_vs_launch_pct > 0).length;
+  const ecoN = baseFiltered.filter(p => p.organic).length;
   const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd";
   const hasNonCatFilters = price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || pkg !== "Flaska";
   const searchCompact = hasNonCatFilters && !search && !searchFocused;
@@ -522,8 +529,8 @@ function SmakfyndApp() {
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Filter</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
-                <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({products.filter(p => p.is_new).length})</button>
-                <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({products.filter(p => p.price_vs_launch_pct > 0).length})</button>
+                <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({newN})</button>
+                <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({dealN})</button>
               </div>
             </div>
             {/* Country → Region hierarchical */}
