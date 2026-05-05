@@ -45,8 +45,6 @@ jobs:
           path: |
             data/vivino_cache.json
             data/expert_cache.json
-            data/history/first_seen_prices.json
-            data/prissankt_bootstrap.json
           key: wine-data-${{ github.run_number }}
           restore-keys: |
             wine-data-
@@ -88,15 +86,13 @@ jobs:
           path: |
             data/vivino_cache.json
             data/expert_cache.json
-            data/history/first_seen_prices.json
-            data/prissankt_bootstrap.json
           key: wine-data-${{ github.run_number }}
 
       - name: Commit and push
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/
+          git add docs/ site/ data/history/first_seen_prices.json data/prissankt_bootstrap.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

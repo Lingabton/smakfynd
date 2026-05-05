@@ -1,6 +1,10 @@
-data/
+data/*
 !data/vivino_cache.json
 !data/expert_cache.json
+!data/prissankt_bootstrap.json
+!data/history
+data/history/*
+!data/history/first_seen_prices.json
 vivino_log.txt
 node_modules/
 
