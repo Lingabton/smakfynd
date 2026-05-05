@@ -71,6 +71,9 @@ for p in data:
         if drop_pct >= 5:
             p['launch_price'] = old_price
             p['price_vs_launch_pct'] = drop_pct
+            # Add drop date if available
+            if nr in price_hist and isinstance(price_hist[nr], dict) and price_hist[nr].get('drop_date'):
+                p['drop_date'] = price_hist[nr]['drop_date']
             drops += 1
 
 print(f"Price drops (5%+): {drops}")
@@ -163,6 +166,7 @@ for p in slim:
     if p.get("critic_consensus"): m["critic_consensus"] = p["critic_consensus"]
     if p.get("launch_price"): m["launch_price"] = p["launch_price"]
     if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
+    if p.get("drop_date"): m["drop_date"] = p["drop_date"]
     mini.append(m)
 
 # ── Generate contextual insights ──

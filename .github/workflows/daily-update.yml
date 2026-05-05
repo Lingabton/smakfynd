@@ -92,7 +92,7 @@ jobs:
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/ data/history/first_seen_prices.json data/prissankt_bootstrap.json
+          git add docs/ site/ data/history/ data/prissankt_bootstrap.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

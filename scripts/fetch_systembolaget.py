@@ -139,13 +139,22 @@ def save_price_snapshot(products):
         first_seen = json.load(open(first_seen_file))
 
     new_count = 0
+    drop_count = 0
     for nr, price in prices.items():
         if nr not in first_seen:
             first_seen[nr] = {"price": price, "date": today}
             new_count += 1
+        else:
+            entry = first_seen[nr]
+            old_price = entry.get("price", 0) if isinstance(entry, dict) else entry
+            if price < old_price:
+                pct = round((old_price - price) / old_price * 100)
+                if pct >= 5:
+                    first_seen[nr] = {"price": old_price, "date": entry.get("date", today) if isinstance(entry, dict) else today, "drop_date": today, "drop_price": price}
+                    drop_count += 1
 
     json.dump(first_seen, open(first_seen_file, "w"))
-    print(f"  First-seen: {len(first_seen)} total, {new_count} new")
+    print(f"  First-seen: {len(first_seen)} total, {new_count} new, {drop_count} new drops")
 
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)
