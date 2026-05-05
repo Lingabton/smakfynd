@@ -531,6 +531,7 @@ function SmakfyndApp() {
                 <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
                 <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({newN})</button>
                 <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({dealN})</button>
+                {showDeals && <a href="/prissankt/" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: t.deal, textDecoration: "none", alignSelf: "center", fontWeight: 500 }}>Se alla {products.filter(p => p.price_vs_launch_pct > 0).length} prissänkta →</a>}
               </div>
             </div>
             {/* Country → Region hierarchical */}
