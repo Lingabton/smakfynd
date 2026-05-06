@@ -184,7 +184,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 // Data: loaded async from wines.json, cache-busted at build time
-const DATA_URL = "wines.json?v=1778025983";
+const DATA_URL = "wines.json?v=1778026151";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
@@ -3494,8 +3494,7 @@ function Profile({
       setRatings(r);
       setAlerts(a);
       setCellar(c);
-      setLoading(false);
-    });
+    }).catch(() => {}).finally(() => setLoading(false));
   }, [auth.token]);
   const findWine = nr => products.find(p => String(p.nr) === String(nr));
   const WineRow = ({

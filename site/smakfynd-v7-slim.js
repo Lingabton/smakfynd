@@ -3319,8 +3319,7 @@ function Profile({
       setRatings(r);
       setAlerts(a);
       setCellar(c);
-      setLoading(false);
-    });
+    }).catch(() => {}).finally(() => setLoading(false));
   }, [auth.token]);
   const findWine = nr => products.find(p => String(p.nr) === String(nr));
   const WineRow = ({
