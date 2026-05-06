@@ -5180,29 +5180,29 @@ function SmakfyndApp() {
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
 
   // Load data with retry
-  useEffect(() => {
-    async function loadData(attempt = 1) {
-      // Try fetching from URL
-      if (DATA_URL) {
-        try {
-          const res = await fetch(DATA_URL);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
-          setAllData(data);
-          setLoading(false);
-          setLoadError(null);
-          return;
-        } catch (e) {
-          if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * attempt));
-            return loadData(attempt + 1);
-          }
-          setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
+  const loadData = async (attempt = 1) => {
+    setLoading(true);
+    setLoadError(null);
+    if (DATA_URL) {
+      try {
+        const res = await fetch(DATA_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
+        setAllData(data);
+        setLoading(false);
+        return;
+      } catch (e) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          return loadData(attempt + 1);
         }
+        setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
       }
-      setLoading(false);
     }
+    setLoading(false);
+  };
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -5317,7 +5317,7 @@ function SmakfyndApp() {
     let r = [...products];
     if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
-    if (cat !== "all") r = r.filter(p => p.category === cat);
+    if (cat !== "all" && !search) r = r.filter(p => p.category === cat);
     if (price !== "all") {
       const [a, b] = price.split("-").map(Number);
       r = r.filter(p => p.price >= a && p.price <= b);
@@ -5802,7 +5802,7 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txL
     }
-  }, "Sparas i webbl\xE4saren. Logga in (kommer snart) f\xF6r att synka."), /*#__PURE__*/React.createElement("div", {
+  }, "Sparas i webbl\xE4saren. Logga in f\xF6r att synka mellan enheter."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 4,
@@ -5840,7 +5840,7 @@ function SmakfyndApp() {
       flexDirection: "column",
       gap: 8
     }
-  }, savedWines.filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter)).map((p, i) => /*#__PURE__*/React.createElement(Card, {
+  }, savedWines.filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter)).slice(0, 20).map((p, i) => /*#__PURE__*/React.createElement(Card, {
     key: p.id || i,
     p: p,
     rank: i + 1,
@@ -6406,11 +6406,7 @@ function SmakfyndApp() {
       marginBottom: 8
     }
   }, loadError), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setLoading(true);
-      setLoadError(null);
-      window.location.reload();
-    },
+    onClick: () => loadData(),
     style: {
       padding: "10px 20px",
       borderRadius: 10,
@@ -6765,11 +6761,10 @@ function SmakfyndApp() {
       auth.login(data);
       setShowLogin(false);
       // Sync local wines to server
+      const merged = {
+        ...sv.data
+      };
       if (data.wines && Object.keys(data.wines).length > 0) {
-        // Server has wines — merge into local
-        const merged = {
-          ...sv.data
-        };
         for (const [nr, lists] of Object.entries(data.wines)) {
           merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
         }
@@ -6777,8 +6772,7 @@ function SmakfyndApp() {
           localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged));
         } catch (e) {}
       }
-      // Sync local to server
-      auth.syncWines(sv.data);
+      auth.syncWines(merged);
     }
   }));
 }

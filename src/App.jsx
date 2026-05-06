@@ -44,32 +44,29 @@ function SmakfyndApp() {
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
 
   // Load data with retry
-  useEffect(() => {
-    async function loadData(attempt = 1) {
-      // Try fetching from URL
-      if (DATA_URL) {
-        try {
-          const res = await fetch(DATA_URL);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
-          setAllData(data);
-          setLoading(false);
-          setLoadError(null);
-          return;
-        } catch(e) {
-          if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * attempt));
-            return loadData(attempt + 1);
-          }
-          setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
+  const loadData = async (attempt = 1) => {
+    setLoading(true);
+    setLoadError(null);
+    if (DATA_URL) {
+      try {
+        const res = await fetch(DATA_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
+        setAllData(data);
+        setLoading(false);
+        return;
+      } catch(e) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          return loadData(attempt + 1);
         }
+        setLoadError(navigator.onLine ? "Kunde inte ladda vindata." : "Ingen internetanslutning.");
       }
-
-      setLoading(false);
     }
-    loadData();
-  }, []);
+    setLoading(false);
+  };
+  useEffect(() => { loadData(); }, []);
 
   // Map fields from web JSON format to component format
   const products = useMemo(() => {
@@ -171,7 +168,7 @@ function SmakfyndApp() {
     let r = [...products];
     if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
-    if (cat !== "all") r = r.filter(p => p.category === cat);
+    if (cat !== "all" && !search) r = r.filter(p => p.category === cat);
     if (price !== "all") { const [a, b] = price.split("-").map(Number); r = r.filter(p => p.price >= a && p.price <= b); }
     if (search) { const q = search.toLowerCase(); r = r.filter(p => [p.name, p.sub, p.country, p.grape, p.style, p.organic ? "eko ekologisk organic" : ""].some(f => (f || "").toLowerCase().includes(q))); }
     if (showNew) r = r.filter(p => p.is_new);
@@ -381,7 +378,7 @@ function SmakfyndApp() {
         {panel === "saved" && (
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 4px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Mina viner</h2>
-            <p style={{ margin: "0 0 12px", fontSize: 12, color: t.txL }}>Sparas i webbläsaren. Logga in (kommer snart) för att synka.</p>
+            <p style={{ margin: "0 0 12px", fontSize: 12, color: t.txL }}>Sparas i webbläsaren. Logga in för att synka mellan enheter.</p>
 
             {/* List tabs */}
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 14 }}>
@@ -407,6 +404,7 @@ function SmakfyndApp() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {savedWines
                   .filter(p => savedListFilter === "all" || sv.isInList(p.nr || p.id, savedListFilter))
+                  .slice(0, 20)
                   .map((p, i) => <Card key={p.id || i} p={p} rank={i + 1} delay={0} allProducts={products} auth={auth} />)}
               </div>
             )}
@@ -598,7 +596,7 @@ function SmakfyndApp() {
           <div style={{ textAlign: "center", padding: "48px 20px" }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>📡</div>
             <p style={{ fontSize: 15, color: t.deal, marginBottom: 8 }}>{loadError}</p>
-            <button onClick={() => { setLoading(true); setLoadError(null); window.location.reload(); }}
+            <button onClick={() => loadData()}
               style={{ padding: "10px 20px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 13, color: t.txM }}>
               Försök igen
             </button>
@@ -730,16 +728,14 @@ function SmakfyndApp() {
       auth.login(data);
       setShowLogin(false);
       // Sync local wines to server
+      const merged = { ...sv.data };
       if (data.wines && Object.keys(data.wines).length > 0) {
-        // Server has wines — merge into local
-        const merged = { ...sv.data };
         for (const [nr, lists] of Object.entries(data.wines)) {
           merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
         }
         try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged)); } catch(e) {}
       }
-      // Sync local to server
-      auth.syncWines(sv.data);
+      auth.syncWines(merged);
     }} />}
     </SavedContext.Provider>
   );
