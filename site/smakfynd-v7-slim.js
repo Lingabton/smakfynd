@@ -8,8 +8,8 @@
 // By Olav Innovation AB · Gabriel Linton
 // ═══════════════════════════════════════════════════════════════
 
-// Data: loaded async from wines.json, or embedded at build time as fallback
-const DATA_URL = "wines.json";
+// Data: loaded async from wines.json, cache-busted at build time
+const DATA_URL = "wines.json?v=__BUILD_TS__";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
@@ -1025,9 +1025,11 @@ function Card({
     }
   }, p.name), p.organic && /*#__PURE__*/React.createElement("span", {
     style: statusPill("EKO", t.green)
-  }, "EKO"), !p.organic && s100 >= 85 && /*#__PURE__*/React.createElement("span", {
+  }, "EKO"), p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("span", {
+    style: statusPill(`−${p.price_vs_launch_pct}%`, t.deal)
+  }, "\u2212", p.price_vs_launch_pct, "%"), !p.organic && !p.price_vs_launch_pct && s100 >= 85 && /*#__PURE__*/React.createElement("span", {
     style: statusPill("Toppköp", t.green)
-  }, "Toppk\xF6p"), !p.organic && s100 >= 75 && s100 < 85 && /*#__PURE__*/React.createElement("span", {
+  }, "Toppk\xF6p"), !p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && /*#__PURE__*/React.createElement("span", {
     style: statusPill("Starkt fynd", "#5a7542")
   }, "Starkt fynd")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1046,12 +1048,23 @@ function Card({
     }
   }, p.sub, p.vintage ? ` · ${p.vintage}` : ""), /*#__PURE__*/React.createElement("span", {
     style: {
+      flexShrink: 0,
+      marginLeft: 8,
+      textAlign: "right"
+    }
+  }, p.launch_price && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      textDecoration: "line-through",
+      marginRight: 4
+    }
+  }, p.launch_price), /*#__PURE__*/React.createElement("span", {
+    style: {
       fontSize: 16,
       fontWeight: 700,
-      color: t.tx,
-      fontFamily: t.serif,
-      flexShrink: 0,
-      marginLeft: 8
+      color: p.price_vs_launch_pct ? t.deal : t.tx,
+      fontFamily: t.serif
     }
   }, p.price, "\u00A0", /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1059,7 +1072,7 @@ function Card({
       fontWeight: 400,
       color: t.txL
     }
-  }, "kr"))), comparison && (() => {
+  }, "kr")))), comparison && (() => {
     const cGrape = (comparison.grape || "").toLowerCase().split(",")[0].trim();
     const pGrape = (p.grape || "").toLowerCase().split(",")[0].trim();
     const sameGrape = pGrape && cGrape && cGrape === pGrape;
@@ -1959,6 +1972,7 @@ function LoginModal({
   const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const handleSendCode = async () => {
     if (!email.includes("@")) {
       setError("Ange en giltig email");
@@ -1981,6 +1995,7 @@ function LoginModal({
       if (data.error) throw new Error(data.error);
       if (data.status === "code_sent") {
         setStep(2);
+        setResendCooldown(30);
       }
     } catch (e) {
       setError(e.message || "Kunde inte skicka kod");
@@ -2018,6 +2033,11 @@ function LoginModal({
     }
     setLoading(false);
   };
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
   useEffect(() => {
     const handleEsc = e => {
       if (e.key === "Escape") onClose();
@@ -2183,7 +2203,24 @@ function LoginModal({
       border: "none",
       cursor: "pointer"
     }
-  }, "Byt email")), error && /*#__PURE__*/React.createElement("p", {
+  }, "Byt email"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (resendCooldown <= 0) {
+        handleSendCode();
+      }
+    },
+    disabled: resendCooldown > 0 || loading,
+    style: {
+      display: "block",
+      margin: "6px auto 0",
+      fontSize: 12,
+      color: resendCooldown > 0 ? t.txF : t.wine,
+      background: "none",
+      border: "none",
+      cursor: resendCooldown > 0 ? "default" : "pointer",
+      fontFamily: "inherit"
+    }
+  }, resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : "Skicka kod igen")), error && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.deal,
@@ -2666,34 +2703,30 @@ function FoodMatch({
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "20px 22px",
+      padding: "14px 18px",
       borderRadius: 16,
       background: t.surface,
       border: `1px solid ${t.bdr}`,
-      marginBottom: 24
+      marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: 12
+      display: "flex",
+      gap: 8,
+      alignItems: "center"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 15,
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
       fontWeight: 400,
       fontFamily: t.serif,
       color: t.tx
     }
-  }, "Kv\xE4llens middag?"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txL
-    }
-  }, "Beskriv vad du ska \xE4ta, vi f\xF6resl\xE5r vinet.")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("label", {
+  }, "Kv\xE4llens middag?")), /*#__PURE__*/React.createElement("label", {
     htmlFor: "sf-meal",
     style: {
       position: "absolute",
@@ -2707,15 +2740,15 @@ function FoodMatch({
     type: "text",
     value: meal,
     onChange: e => setMeal(e.target.value),
-    placeholder: "T.ex. toast skagen, sedan oxfil\xE9 med r\xF6dvinssky...",
+    placeholder: "T.ex. oxfil\xE9, lax, tacos...",
     onKeyDown: e => e.key === "Enter" && handleSubmit(),
     style: {
-      flex: 1,
-      padding: "12px 16px",
-      borderRadius: 12,
+      flex: 2,
+      padding: "10px 14px",
+      borderRadius: 10,
       border: `1px solid ${t.bdr}`,
       background: t.card,
-      fontSize: 14,
+      fontSize: 13,
       color: t.tx,
       outline: "none",
       boxSizing: "border-box",
@@ -2727,60 +2760,36 @@ function FoodMatch({
     onClick: handleSubmit,
     disabled: loading || meal.length < 3,
     style: {
-      padding: "12px 18px",
-      borderRadius: 12,
+      padding: "10px 16px",
+      borderRadius: 10,
       border: "none",
       cursor: loading ? "wait" : "pointer",
       background: t.wine,
       color: "#fff",
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: 600,
       fontFamily: "inherit",
       opacity: loading || meal.length < 3 ? 0.5 : 1,
       transition: "opacity 0.2s",
       flexShrink: 0
     }
-  }, loading ? "Tänker..." : "Hitta vin")), /*#__PURE__*/React.createElement("div", {
+  }, loading ? "..." : "Hitta vin")), !aiResult && !loading && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 5,
+      gap: 4,
       flexWrap: "wrap",
-      marginTop: 8
+      marginTop: 6
     }
-  }, [["Under 100 kr", "0-100"], ["100–200 kr", "100-200"], ["200+ kr", "200-999"]].map(([l, k]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    onClick: () => {
-      const cur = meal.replace(/\s*\(budget:.*?\)\s*/g, "").trim();
-      setMeal(cur ? `${cur} (budget: ${k} kr)` : "");
-    },
-    style: {
-      padding: "5px 10px",
-      borderRadius: 100,
-      border: `1px solid ${t.green}40`,
-      background: `${t.green}08`,
-      color: t.green,
-      fontSize: 11,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      fontWeight: 600
-    }
-  }, l))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 5,
-      flexWrap: "wrap",
-      marginTop: 5
-    }
-  }, ["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => /*#__PURE__*/React.createElement("button", {
+  }, ["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Skaldjur", "Dejt"].map(s => /*#__PURE__*/React.createElement("button", {
     key: s,
     onClick: () => setMeal(s),
     style: {
-      padding: "5px 12px",
+      padding: "3px 10px",
       borderRadius: 100,
       border: `1px solid ${t.bdr}`,
       background: t.card,
-      color: t.txM,
-      fontSize: 12,
+      color: t.txL,
+      fontSize: 11,
       cursor: "pointer",
       fontFamily: "inherit",
       fontWeight: 500,
@@ -2792,7 +2801,7 @@ function FoodMatch({
     },
     onMouseLeave: e => {
       e.currentTarget.style.borderColor = t.bdr;
-      e.currentTarget.style.color = t.txM;
+      e.currentTarget.style.color = t.txL;
     }
   }, s))), loading && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2801,6 +2810,16 @@ function FoodMatch({
       color: t.txL
     }
   }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 24,
+      height: 24,
+      margin: "0 auto 8px",
+      border: `3px solid ${t.bdr}`,
+      borderTopColor: t.wine,
+      borderRadius: "50%",
+      animation: "sfSpin 0.8s linear infinite"
+    }
+  }), /*#__PURE__*/React.createElement("style", null, `@keyframes sfSpin { to { transform: rotate(360deg) } }`), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontStyle: "italic"
@@ -5325,9 +5344,16 @@ function SmakfyndApp() {
     if (sortBy === "expert") r.sort((a, b) => (b.expert_score || 0) - (a.expert_score || 0));else if (sortBy === "crowd") r.sort((a, b) => (b.crowd_score || 0) - (a.crowd_score || 0));else if (sortBy === "price_asc") r.sort((a, b) => (a.price || 0) - (b.price || 0));else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));else if (sortBy === "drop") r.sort((a, b) => (b.price_vs_launch_pct || 0) - (a.price_vs_launch_pct || 0));
     return r;
   }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
-  const newN = products.filter(p => p.is_new).length;
-  const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
-  const ecoN = products.filter(p => p.organic).length;
+  const baseFiltered = useMemo(() => {
+    let r = products;
+    if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
+    r = r.filter(p => p.package === pkg);
+    if (cat !== "all") r = r.filter(p => p.category === cat);
+    return r;
+  }, [products, showBest, pkg, cat]);
+  const newN = baseFiltered.filter(p => p.is_new).length;
+  const dealN = baseFiltered.filter(p => p.price_vs_launch_pct > 0).length;
+  const ecoN = baseFiltered.filter(p => p.organic).length;
   const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd";
   const hasNonCatFilters = price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || pkg !== "Flaska";
   const searchCompact = hasNonCatFilters && !search && !searchFocused;
@@ -5848,40 +5874,27 @@ function SmakfyndApp() {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 14,
+      gap: 10,
       width: "100%",
-      padding: "16px 20px",
-      borderRadius: 16,
-      border: `2px solid ${t.wine}25`,
+      padding: "10px 16px",
+      borderRadius: 12,
+      border: `1px solid ${t.bdr}`,
       background: t.card,
       cursor: "pointer",
       fontFamily: "inherit",
-      marginBottom: 24,
+      marginBottom: 16,
       transition: "all 0.2s",
       textAlign: "left"
     },
     onMouseEnter: e => {
       e.currentTarget.style.borderColor = t.wine + "50";
-      e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}10`;
     },
     onMouseLeave: e => {
-      e.currentTarget.style.borderColor = t.wine + "25";
-      e.currentTarget.style.boxShadow = "none";
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      background: `${t.wine}10`,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexShrink: 0
+      e.currentTarget.style.borderColor = t.bdr;
     }
   }, /*#__PURE__*/React.createElement("svg", {
-    width: "22",
-    height: "22",
+    width: "18",
+    height: "18",
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: t.wine,
@@ -5896,26 +5909,17 @@ function SmakfyndApp() {
     y1: "21",
     x2: "16.65",
     y2: "16.65"
-  }))), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("span", {
     style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 600,
-      color: t.tx,
-      fontFamily: t.serif
-    }
-  }, "S\xF6k eller skanna vin"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
+      fontSize: 13,
+      fontWeight: 500,
       color: t.txM
     }
-  }, "Hitta po\xE4ng, pris och b\xE4ttre alternativ direkt")), /*#__PURE__*/React.createElement("span", {
+  }, "S\xF6k eller skanna vin i butiken"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 18,
-      color: t.txL
+      fontSize: 14,
+      color: t.txL,
+      marginLeft: "auto"
     }
   }, "\u2192")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6223,7 +6227,7 @@ function SmakfyndApp() {
       if (!showNew) setShowDeals(false);
     },
     style: pill(showNew)
-  }, "Nyheter (", products.filter(p => p.is_new).length, ")"), /*#__PURE__*/React.createElement("button", {
+  }, "Nyheter (", newN, ")"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       const next = !showDeals;
       setShowDeals(next);
@@ -6233,7 +6237,17 @@ function SmakfyndApp() {
       } else if (sortBy === "drop") setSortBy("smakfynd");
     },
     style: pill(showDeals, t.deal)
-  }, "Priss\xE4nkt (", products.filter(p => p.price_vs_launch_pct > 0).length, ")"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "Priss\xE4nkt (", dealN, ")"), showDeals && /*#__PURE__*/React.createElement("a", {
+    href: "/prissankt/",
+    onClick: e => e.stopPropagation(),
+    style: {
+      fontSize: 11,
+      color: t.deal,
+      textDecoration: "none",
+      alignSelf: "center",
+      fontWeight: 500
+    }
+  }, "Se alla ", products.filter(p => p.price_vs_launch_pct > 0).length, " priss\xE4nkta \u2192"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: t.txL,
@@ -6352,6 +6366,7 @@ function SmakfyndApp() {
       padding: "0 4px"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    "aria-live": "polite",
     style: {
       display: "flex",
       justifyContent: "space-between",

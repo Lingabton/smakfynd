@@ -8,6 +8,7 @@ function LoginModal({ onClose, onLogin }) {
   const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleSendCode = async () => {
     if (!email.includes("@")) { setError("Ange en giltig email"); return; }
@@ -23,6 +24,7 @@ function LoginModal({ onClose, onLogin }) {
       if (data.error) throw new Error(data.error);
       if (data.status === "code_sent") {
         setStep(2);
+        setResendCooldown(30);
       }
     } catch (e) {
       setError(e.message || "Kunde inte skicka kod");
@@ -49,6 +51,12 @@ function LoginModal({ onClose, onLogin }) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     const handleEsc = e => { if (e.key === "Escape") onClose(); };
@@ -127,6 +135,11 @@ function LoginModal({ onClose, onLogin }) {
             <button onClick={() => { setStep(1); setCode(""); setError(null); }}
               style={{ display: "block", margin: "10px auto 0", fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer" }}>
               Byt email
+            </button>
+            <button onClick={() => { if (resendCooldown <= 0) { handleSendCode(); } }}
+              disabled={resendCooldown > 0 || loading}
+              style={{ display: "block", margin: "6px auto 0", fontSize: 12, color: resendCooldown > 0 ? t.txF : t.wine, background: "none", border: "none", cursor: resendCooldown > 0 ? "default" : "pointer", fontFamily: "inherit" }}>
+              {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : "Skicka kod igen"}
             </button>
           </>
         )}

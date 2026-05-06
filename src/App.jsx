@@ -424,22 +424,17 @@ function SmakfyndApp() {
         {/* ═══ JOB 2: SNABBKOLLEN ═══ */}
         <button onClick={() => setStoreMode(true)}
           style={{
-            display: "flex", alignItems: "center", gap: 14, width: "100%",
-            padding: "16px 20px", borderRadius: 16, border: `2px solid ${t.wine}25`,
+            display: "flex", alignItems: "center", gap: 10, width: "100%",
+            padding: "10px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`,
             background: t.card, cursor: "pointer", fontFamily: "inherit",
-            marginBottom: 24, transition: "all 0.2s", textAlign: "left",
+            marginBottom: 16, transition: "all 0.2s", textAlign: "left",
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}10`; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "25"; e.currentTarget.style.boxShadow = "none"; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; }}
         >
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${t.wine}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: t.serif }}>Sök eller skanna vin</div>
-            <div style={{ fontSize: 12, color: t.txM }}>Hitta poäng, pris och bättre alternativ direkt</div>
-          </div>
-          <span style={{ fontSize: 18, color: t.txL }}>→</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span style={{ fontSize: 13, fontWeight: 500, color: t.txM }}>Sök eller skanna vin i butiken</span>
+          <span style={{ fontSize: 14, color: t.txL, marginLeft: "auto" }}>→</span>
         </button>
 
         {/* ═══ JOB 3: BROWSA TOPPEN — search + filters + list ═══ */}
@@ -593,7 +588,7 @@ function SmakfyndApp() {
 
         {/* ═══ RESULTS ═══ */}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div aria-live="polite" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
             <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", drop: "Störst prissänkning först", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
           </div>

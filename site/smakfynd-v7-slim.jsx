@@ -8,8 +8,8 @@
 // By Olav Innovation AB · Gabriel Linton
 // ═══════════════════════════════════════════════════════════════
 
-// Data: loaded async from wines.json, or embedded at build time as fallback
-const DATA_URL = "wines.json";
+// Data: loaded async from wines.json, cache-busted at build time
+const DATA_URL = "wines.json?v=__BUILD_TS__";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
@@ -606,8 +606,9 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{p.name}</h3>
             {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
-            {!p.organic && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
-            {!p.organic && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
+            {p.price_vs_launch_pct > 0 && <span style={statusPill(`−${p.price_vs_launch_pct}%`, t.deal)}>−{p.price_vs_launch_pct}%</span>}
+            {!p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
           {/* Row 2: Sub + Vintage + Price */}
@@ -615,8 +616,11 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: t.tx, fontFamily: t.serif, flexShrink: 0, marginLeft: 8 }}>
-              {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+            <span style={{ flexShrink: 0, marginLeft: 8, textAlign: "right" }}>
+              {p.launch_price && <span style={{ fontSize: 11, color: t.txL, textDecoration: "line-through", marginRight: 4 }}>{p.launch_price}</span>}
+              <span style={{ fontSize: 16, fontWeight: 700, color: p.price_vs_launch_pct ? t.deal : t.tx, fontFamily: t.serif }}>
+                {p.price}{"\u00A0"}<span style={{ fontSize: 11, fontWeight: 400, color: t.txL }}>kr</span>
+              </span>
             </span>
           </div>
 
@@ -988,6 +992,7 @@ function LoginModal({ onClose, onLogin }) {
   const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleSendCode = async () => {
     if (!email.includes("@")) { setError("Ange en giltig email"); return; }
@@ -1003,6 +1008,7 @@ function LoginModal({ onClose, onLogin }) {
       if (data.error) throw new Error(data.error);
       if (data.status === "code_sent") {
         setStep(2);
+        setResendCooldown(30);
       }
     } catch (e) {
       setError(e.message || "Kunde inte skicka kod");
@@ -1029,6 +1035,12 @@ function LoginModal({ onClose, onLogin }) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     const handleEsc = e => { if (e.key === "Escape") onClose(); };
@@ -1107,6 +1119,11 @@ function LoginModal({ onClose, onLogin }) {
             <button onClick={() => { setStep(1); setCode(""); setError(null); }}
               style={{ display: "block", margin: "10px auto 0", fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer" }}>
               Byt email
+            </button>
+            <button onClick={() => { if (resendCooldown <= 0) { handleSendCode(); } }}
+              disabled={resendCooldown > 0 || loading}
+              style={{ display: "block", margin: "6px auto 0", fontSize: 12, color: resendCooldown > 0 ? t.txF : t.wine, background: "none", border: "none", cursor: resendCooldown > 0 ? "default" : "pointer", fontFamily: "inherit" }}>
+              {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : "Skicka kod igen"}
             </button>
           </>
         )}
@@ -1429,50 +1446,43 @@ function FoodMatch({ products }) {
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
 
   return (
-    <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 15, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
-        <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta, vi föreslår vinet.</div>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
+    <div style={{ padding: "14px 18px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
+        </div>
         <label htmlFor="sf-meal" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Beskriv din måltid</label>
         <input id="sf-meal" type="text" value={meal} onChange={e => setMeal(e.target.value)}
-          placeholder="T.ex. toast skagen, sedan oxfilé med rödvinssky..."
+          placeholder="T.ex. oxfilé, lax, tacos..."
           onKeyDown={e => e.key === "Enter" && handleSubmit()}
-          style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
+          style={{ flex: 2, padding: "10px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 13, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
           onFocus={e => e.target.style.borderColor = t.wine + "55"}
           onBlur={e => e.target.style.borderColor = t.bdr}
         />
         <button onClick={handleSubmit} disabled={loading || meal.length < 3}
           style={{
-            padding: "12px 18px", borderRadius: 12, border: "none", cursor: loading ? "wait" : "pointer",
-            background: t.wine, color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "inherit",
+            padding: "10px 16px", borderRadius: 10, border: "none", cursor: loading ? "wait" : "pointer",
+            background: t.wine, color: "#fff", fontSize: 12, fontWeight: 600, fontFamily: "inherit",
             opacity: loading || meal.length < 3 ? 0.5 : 1, transition: "opacity 0.2s", flexShrink: 0,
-          }}>{loading ? "Tänker..." : "Hitta vin"}</button>
+          }}>{loading ? "..." : "Hitta vin"}</button>
       </div>
 
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
-        {[["Under 100 kr", "0-100"], ["100–200 kr", "100-200"], ["200+ kr", "200-999"]].map(([l, k]) => (
-          <button key={k} onClick={() => {
-            const cur = meal.replace(/\s*\(budget:.*?\)\s*/g, "").trim();
-            setMeal(cur ? `${cur} (budget: ${k} kr)` : "");
-          }}
-            style={{ padding: "5px 10px", borderRadius: 100, border: `1px solid ${t.green}40`, background: `${t.green}08`, color: t.green, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
-          >{l}</button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}>
-        {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => (
-          <button key={s} onClick={() => setMeal(s)}
-            style={{ padding: "5px 12px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine; e.currentTarget.style.color = t.wine; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
-          >{s}</button>
-        ))}
-      </div>
+      {!aiResult && !loading && (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
+          {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Skaldjur", "Dejt"].map(s => (
+            <button key={s} onClick={() => setMeal(s)}
+              style={{ padding: "3px 10px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine; e.currentTarget.style.color = t.wine; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txL; }}
+            >{s}</button>
+          ))}
+        </div>
+      )}
 
       {loading && (
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
+          <div style={{ width: 24, height: 24, margin: "0 auto 8px", border: `3px solid ${t.bdr}`, borderTopColor: t.wine, borderRadius: "50%", animation: "sfSpin 0.8s linear infinite" }} />
+          <style>{`@keyframes sfSpin { to { transform: rotate(360deg) } }`}</style>
           <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid, kan ta några sekunder...</div>
         </div>
       )}
@@ -2946,9 +2956,16 @@ function SmakfyndApp() {
     return r;
   }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
-  const newN = products.filter(p => p.is_new).length;
-  const dealN = products.filter(p => p.price_vs_launch_pct > 0).length;
-  const ecoN = products.filter(p => p.organic).length;
+  const baseFiltered = useMemo(() => {
+    let r = products;
+    if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
+    r = r.filter(p => p.package === pkg);
+    if (cat !== "all") r = r.filter(p => p.category === cat);
+    return r;
+  }, [products, showBest, pkg, cat]);
+  const newN = baseFiltered.filter(p => p.is_new).length;
+  const dealN = baseFiltered.filter(p => p.price_vs_launch_pct > 0).length;
+  const ecoN = baseFiltered.filter(p => p.organic).length;
   const hasFilters = search || cat !== "all" || price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || sortBy !== "smakfynd";
   const hasNonCatFilters = price !== "all" || showNew || showDeals || showEco || selCountry || selFoods.length > 0 || selRegion || selTaste || pkg !== "Flaska";
   const searchCompact = hasNonCatFilters && !search && !searchFocused;
@@ -3171,22 +3188,17 @@ function SmakfyndApp() {
         {/* ═══ JOB 2: SNABBKOLLEN ═══ */}
         <button onClick={() => setStoreMode(true)}
           style={{
-            display: "flex", alignItems: "center", gap: 14, width: "100%",
-            padding: "16px 20px", borderRadius: 16, border: `2px solid ${t.wine}25`,
+            display: "flex", alignItems: "center", gap: 10, width: "100%",
+            padding: "10px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`,
             background: t.card, cursor: "pointer", fontFamily: "inherit",
-            marginBottom: 24, transition: "all 0.2s", textAlign: "left",
+            marginBottom: 16, transition: "all 0.2s", textAlign: "left",
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; e.currentTarget.style.boxShadow = `0 4px 16px ${t.wine}10`; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = t.wine + "25"; e.currentTarget.style.boxShadow = "none"; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine + "50"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; }}
         >
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${t.wine}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: t.tx, fontFamily: t.serif }}>Sök eller skanna vin</div>
-            <div style={{ fontSize: 12, color: t.txM }}>Hitta poäng, pris och bättre alternativ direkt</div>
-          </div>
-          <span style={{ fontSize: 18, color: t.txL }}>→</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.wine} strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span style={{ fontSize: 13, fontWeight: 500, color: t.txM }}>Sök eller skanna vin i butiken</span>
+          <span style={{ fontSize: 14, color: t.txL, marginLeft: "auto" }}>→</span>
         </button>
 
         {/* ═══ JOB 3: BROWSA TOPPEN — search + filters + list ═══ */}
@@ -3276,8 +3288,9 @@ function SmakfyndApp() {
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Filter</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 <button onClick={() => setShowEco(!showEco)} style={pill(showEco, t.green)}>Ekologiskt ({ecoN})</button>
-                <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({products.filter(p => p.is_new).length})</button>
-                <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({products.filter(p => p.price_vs_launch_pct > 0).length})</button>
+                <button onClick={() => { setShowNew(!showNew); if (!showNew) setShowDeals(false); }} style={pill(showNew)}>Nyheter ({newN})</button>
+                <button onClick={() => { const next = !showDeals; setShowDeals(next); if (next) { setShowNew(false); setSortBy("drop"); } else if (sortBy === "drop") setSortBy("smakfynd"); }} style={pill(showDeals, t.deal)}>Prissänkt ({dealN})</button>
+                {showDeals && <a href="/prissankt/" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: t.deal, textDecoration: "none", alignSelf: "center", fontWeight: 500 }}>Se alla {products.filter(p => p.price_vs_launch_pct > 0).length} prissänkta →</a>}
               </div>
             </div>
             {/* Country → Region hierarchical */}
@@ -3339,7 +3352,7 @@ function SmakfyndApp() {
 
         {/* ═══ RESULTS ═══ */}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div aria-live="polite" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>
             <span style={{ fontSize: 11, color: t.txF }}>{{ smakfynd: "Mest smak för pengarna", drop: "Störst prissänkning först", expert: "Sorterat efter expertbetyg", crowd: "Sorterat efter crowd-betyg", price_asc: "Lägst pris först", price_desc: "Högst pris först" }[sortBy]}</span>
           </div>

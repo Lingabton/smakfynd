@@ -175,50 +175,43 @@ function FoodMatch({ products }) {
   const dishColors = ["#6b2a3a", "#2a5a6b", "#5a6b2a", "#6b4a2a"];
 
   return (
-    <div style={{ padding: "20px 22px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 24 }}>
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 15, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
-        <div style={{ fontSize: 12, color: t.txL }}>Beskriv vad du ska äta, vi föreslår vinet.</div>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
+    <div style={{ padding: "14px 18px", borderRadius: 16, background: t.surface, border: `1px solid ${t.bdr}`, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 400, fontFamily: t.serif, color: t.tx }}>Kvällens middag?</div>
+        </div>
         <label htmlFor="sf-meal" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>Beskriv din måltid</label>
         <input id="sf-meal" type="text" value={meal} onChange={e => setMeal(e.target.value)}
-          placeholder="T.ex. toast skagen, sedan oxfilé med rödvinssky..."
+          placeholder="T.ex. oxfilé, lax, tacos..."
           onKeyDown={e => e.key === "Enter" && handleSubmit()}
-          style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 14, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
+          style={{ flex: 2, padding: "10px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, fontSize: 13, color: t.tx, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
           onFocus={e => e.target.style.borderColor = t.wine + "55"}
           onBlur={e => e.target.style.borderColor = t.bdr}
         />
         <button onClick={handleSubmit} disabled={loading || meal.length < 3}
           style={{
-            padding: "12px 18px", borderRadius: 12, border: "none", cursor: loading ? "wait" : "pointer",
-            background: t.wine, color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "inherit",
+            padding: "10px 16px", borderRadius: 10, border: "none", cursor: loading ? "wait" : "pointer",
+            background: t.wine, color: "#fff", fontSize: 12, fontWeight: 600, fontFamily: "inherit",
             opacity: loading || meal.length < 3 ? 0.5 : 1, transition: "opacity 0.2s", flexShrink: 0,
-          }}>{loading ? "Tänker..." : "Hitta vin"}</button>
+          }}>{loading ? "..." : "Hitta vin"}</button>
       </div>
 
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
-        {[["Under 100 kr", "0-100"], ["100–200 kr", "100-200"], ["200+ kr", "200-999"]].map(([l, k]) => (
-          <button key={k} onClick={() => {
-            const cur = meal.replace(/\s*\(budget:.*?\)\s*/g, "").trim();
-            setMeal(cur ? `${cur} (budget: ${k} kr)` : "");
-          }}
-            style={{ padding: "5px 10px", borderRadius: 100, border: `1px solid ${t.green}40`, background: `${t.green}08`, color: t.green, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
-          >{l}</button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}>
-        {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Pizza", "Skaldjur", "Ost & chark", "Dejt"].map(s => (
-          <button key={s} onClick={() => setMeal(s)}
-            style={{ padding: "5px 12px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine; e.currentTarget.style.color = t.wine; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txM; }}
-          >{s}</button>
-        ))}
-      </div>
+      {!aiResult && !loading && (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
+          {["Fredagstacos", "Grillat kött", "Pasta", "Lax", "Skaldjur", "Dejt"].map(s => (
+            <button key={s} onClick={() => setMeal(s)}
+              style={{ padding: "3px 10px", borderRadius: 100, border: `1px solid ${t.bdr}`, background: t.card, color: t.txL, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = t.wine; e.currentTarget.style.color = t.wine; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = t.bdr; e.currentTarget.style.color = t.txL; }}
+            >{s}</button>
+          ))}
+        </div>
+      )}
 
       {loading && (
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
+          <div style={{ width: 24, height: 24, margin: "0 auto 8px", border: `3px solid ${t.bdr}`, borderTopColor: t.wine, borderRadius: "50%", animation: "sfSpin 0.8s linear infinite" }} />
+          <style>{`@keyframes sfSpin { to { transform: rotate(360deg) } }`}</style>
           <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid, kan ta några sekunder...</div>
         </div>
       )}
