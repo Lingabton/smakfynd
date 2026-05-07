@@ -10,8 +10,19 @@
 - [x] Sökfältet: synlig X-knapp för att rensa (2026-05-07)
 - [x] Fontinkonsistens: alla 75 landing pages nu Newsreader + Inter (2026-05-07)
 
-### Kritiker-data
+### Vivino-data
+- [ ] Kör vivino_playwright.py --refresh-top 500 (kräver manuell CAPTCHA-lösning)
+- [ ] Kör score_wines_v2.py + full rebuild efter lyckad scrape
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
+
+### Plattform (pågående)
+- [ ] Supabase-integration på huvudsajten (shared auth med quiz)
+- [ ] Login/Min profil i headern (magic link)
+- [ ] "Spara vin"-funktion (Supabase saved_wines-tabell)
+- [ ] Profilsida /profil (email, sparade viner, quiz-länk, premium-placeholder)
+- [ ] Sparade-viner-sida /sparade (listvy med sortering)
+- [ ] Snabbkollen synligare (CTA i header/hero)
+- [ ] AI-vinmatchare som interaktiv input på framsidan
 
 ### Stora features
 - [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
