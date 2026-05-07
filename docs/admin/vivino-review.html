@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Vivino Match Review — Smakfynd Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: -apple-system, sans-serif; background: #f5f1ea; color: #1a1510; padding: 20px; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .stats { font-size: 13px; color: #6b6355; margin-bottom: 20px; }
+    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .controls button { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2d8c8; background: #fff; cursor: pointer; font-size: 13px; }
+    .controls button.active { background: #8b2332; color: #fff; border-color: #8b2332; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2d8c8; padding: 16px; margin-bottom: 8px; }
+    .card.approved { border-color: #2d6b3f; background: #f0f8f0; }
+    .card.rejected { border-color: #c44020; background: #fdf5f3; opacity: 0.6; }
+    .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .info { flex: 1; }
+    .sb-name { font-size: 15px; font-weight: 600; }
+    .vivino-name { font-size: 13px; color: #6b6355; margin-top: 2px; }
+    .meta { font-size: 12px; color: #9e9588; margin-top: 4px; }
+    .match-bar { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .match-low { background: #c4402020; color: #c44020; }
+    .match-mid { background: #b08d4020; color: #b08d40; }
+    .actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .actions button { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-approve { background: #2d6b3f; color: #fff; }
+    .btn-reject { background: #c44020; color: #fff; }
+    .btn-undo { background: #e2d8c8; color: #1a1510; }
+    .export { margin-top: 20px; padding: 16px; background: #fff; border-radius: 12px; border: 1px solid #e2d8c8; }
+    .export textarea { width: 100%; height: 100px; font-size: 11px; font-family: monospace; margin-top: 8px; }
+    #drop-zone { border: 2px dashed #e2d8c8; border-radius: 12px; padding: 40px; text-align: center; color: #9e9588; margin-bottom: 20px; cursor: pointer; }
+    #drop-zone.hover { border-color: #8b2332; background: #8b233208; }
+  </style>
+</head>
+<body>
+  <h1>Vivino Match Review</h1>
+  <div class="stats" id="stats">Ladda vivino_flagged.json</div>
+
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+    Dra vivino_flagged.json hit eller klicka för att välja fil
+    <input type="file" id="file-input" accept=".json" style="display:none">
+  </div>
+
+  <div class="controls" id="controls" style="display:none">
+    <button onclick="filterCards('all')" class="active" data-filter="all">Alla</button>
+    <button onclick="filterCards('pending')" data-filter="pending">Att granska</button>
+    <button onclick="filterCards('approved')" data-filter="approved">Godkända</button>
+    <button onclick="filterCards('rejected')" data-filter="rejected">Avvisade</button>
+    <button onclick="approveAll()" style="margin-left:auto; background:#2d6b3f; color:#fff; border-color:#2d6b3f">Godkänn alla kvar</button>
+    <button onclick="rejectAll()" style="background:#c44020; color:#fff; border-color:#c44020">Avvisa alla kvar</button>
+  </div>
+
+  <div id="cards"></div>
+
+  <div class="export" id="export" style="display:none">
+    <strong>Exportera beslut</strong>
+    <p style="font-size:12px; color:#6b6355; margin:4px 0">
+      Kopiera och spara som <code>data/vivino_approved.json</code> resp <code>data/vivino_rejected.json</code>,
+      kör sedan <code>python3 scripts/validate_vivino.py</code> för att tillämpa.
+    </p>
+    <div style="font-size:12px; font-weight:600; margin-top:12px">vivino_approved.json</div>
+    <textarea id="approved-json" readonly></textarea>
+    <div style="font-size:12px; font-weight:600; margin-top:8px">vivino_rejected.json</div>
+    <textarea id="rejected-json" readonly></textarea>
+    <button onclick="downloadFile('vivino_approved.json', document.getElementById('approved-json').value)" style="margin-top:8px; padding:8px 16px; border-radius:8px; border:1px solid #2d6b3f; background:#2d6b3f; color:#fff; cursor:pointer; font-size:12px">Ladda ner approved</button>
+    <button onclick="downloadFile('vivino_rejected.json', document.getElementById('rejected-json').value)" style="margin-left:8px; padding:8px 16px; border-radius:8px; border:1px solid #c44020; background:#c44020; color:#fff; cursor:pointer; font-size:12px">Ladda ner rejected</button>
+  </div>
+
+<script>
+let data = {};
+let decisions = {}; // key → "approved" | "rejected"
+
+function loadData(flagged) {
+  data = flagged;
+  decisions = {};
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('export').style.display = 'block';
+  document.getElementById('drop-zone').style.display = 'none';
+  renderCards();
+  updateStats();
+}
+
+function renderCards() {
+  const container = document.getElementById('cards');
+  const entries = Object.entries(data).sort((a, b) => (a[1].match_quality || 0) - (b[1].match_quality || 0));
+
+  container.innerHTML = entries.map(([key, v]) => {
+    const status = decisions[key] || 'pending';
+    const quality = v.match_quality || 0;
+    const barClass = quality < 50 ? 'match-low' : 'match-mid';
+    const sbName = key.split('|')[0];
+    const sbSub = key.split('|')[1] || '';
+    const country = key.split('|')[2] || '';
+
+    return `<div class="card ${status}" data-key="${key}" data-status="${status}">
+      <div class="row">
+        <div class="info">
+          <div class="sb-name">${sbName} <span style="font-weight:400;color:#6b6355">${sbSub}</span></div>
+          <div class="vivino-name">→ Vivino: ${(v.vivino_name || '').substring(0, 80)}</div>
+          <div class="meta">
+            <span class="match-bar ${barClass}">${quality}% match</span>
+            Rating: ${v.vivino_rating || 0} · Reviews: ${v.vivino_reviews || 0} · ${country}
+          </div>
+        </div>
+        <div class="actions">
+          ${status === 'pending' ? `
+            <button class="btn-approve" onclick="decide('${key}','approved')">Godkänn</button>
+            <button class="btn-reject" onclick="decide('${key}','rejected')">Avvisa</button>
+          ` : `
+            <button class="btn-undo" onclick="decide('${key}','pending')">${status === 'approved' ? '✓ Godkänd' : '✗ Avvisad'} — ångra</button>
+          `}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function decide(key, status) {
+  if (status === 'pending') {
+    delete decisions[key];
+  } else {
+    decisions[key] = status;
+  }
+  renderCards();
+  updateStats();
+  updateExport();
+  filterCards(document.querySelector('.controls button.active')?.dataset?.filter || 'all');
+}
+
+function approveAll() {
+  Object.keys(data).forEach(k => { if (!decisions[k]) decisions[k] = 'approved'; });
+  renderCards(); updateStats(); updateExport();
+}
+
+function rejectAll() {
+  Object.keys(data).forEach(k => { if (!decisions[k]) decisions[k] = 'rejected'; });
+  renderCards(); updateStats(); updateExport();
+}
+
+function filterCards(filter) {
+  document.querySelectorAll('.controls button[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+  document.querySelectorAll('.card').forEach(c => {
+    const status = c.dataset.status;
+    c.style.display = (filter === 'all' || filter === status) ? 'block' : 'none';
+  });
+}
+
+function updateStats() {
+  const total = Object.keys(data).length;
+  const approved = Object.values(decisions).filter(d => d === 'approved').length;
+  const rejected = Object.values(decisions).filter(d => d === 'rejected').length;
+  const pending = total - approved - rejected;
+  document.getElementById('stats').textContent = `${total} flaggade matchningar · ${pending} kvar · ${approved} godkända · ${rejected} avvisade`;
+}
+
+function updateExport() {
+  const approved = {}, rejected = {};
+  for (const [key, status] of Object.entries(decisions)) {
+    if (status === 'approved' && data[key]) {
+      const { sb_key, match_quality, flagged_reason, ...clean } = data[key];
+      approved[key] = clean;
+    }
+    if (status === 'rejected') rejected[key] = true;
+  }
+  document.getElementById('approved-json').value = JSON.stringify(approved, null, 2);
+  document.getElementById('rejected-json').value = JSON.stringify(rejected, null, 2);
+}
+
+function downloadFile(name, content) {
+  const blob = new Blob([content], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+}
+
+// File input handler
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => { try { loadData(JSON.parse(ev.target.result)); } catch(err) { alert('Ogiltig JSON'); } };
+    reader.readAsText(file);
+  }
+});
+
+// Drag and drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('hover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('hover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('hover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => { try { loadData(JSON.parse(ev.target.result)); } catch(err) { alert('Ogiltig JSON'); } };
+    reader.readAsText(file);
+  }
+});
+</script>
+</body>
+</html>

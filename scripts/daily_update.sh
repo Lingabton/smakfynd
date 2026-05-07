@@ -117,6 +117,11 @@ print(len(gaps))
     fi
 fi
 
+# ── Step 3.5: Validate Vivino matches ──
+echo ""
+echo "→ Step 3.5: Validating Vivino matches..."
+$PYTHON scripts/validate_vivino.py 2>&1 | tail -8
+
 # ── Step 4: Score all wines ──
 echo ""
 echo "→ Step 4: Scoring wines..."
