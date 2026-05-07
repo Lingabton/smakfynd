@@ -18,12 +18,11 @@
 ### Plattform (pågående)
 - [x] Supabase-integration på huvudsajten (shared auth med quiz) (2026-05-07)
 - [x] KRÄVER: Lägg till https://smakfynd.se i Supabase redirect URLs (Gabriel manuellt)
-- [ ] Login/Min profil i headern (magic link) — redan implementerat, behöver testas
-- [ ] "Spara vin"-funktion (Supabase saved_wines-tabell) — backend klar, behöver UI-uppdatering
-- [ ] Profilsida /profil (email, sparade viner, quiz-länk, premium-placeholder)
-- [ ] Sparade-viner-sida /sparade (listvy med sortering)
-- [ ] Snabbkollen synligare (CTA i header/hero)
-- [ ] AI-vinmatchare som interaktiv input på framsidan
+- [x] Login/Min profil i headern (magic link) (2026-05-07)
+- [x] "Spara vin"-funktion (Supabase saved_wines) (2026-05-07)
+- [x] Profilsida: email, sparade viner med sortering, quiz-länk, premium-placeholder (2026-05-07)
+- [x] Snabbkollen synligare: "Skanna" CTA i headern (2026-05-07)
+- [x] AI-vinmatchare som interaktiv input på framsidan (redan klar från Round 1)
 
 ### Stora features
 - [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
