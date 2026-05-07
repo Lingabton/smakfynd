@@ -25,6 +25,14 @@ function parseHash() {
 function SmakfyndApp() {
   const sv = useSaved();
   const auth = useAuth();
+
+  // Clean up Supabase auth code from URL after magic link redirect
+  useEffect(() => {
+    if (window.location.search.includes("code=")) {
+      const hash = window.location.hash;
+      window.history.replaceState(null, "", window.location.pathname + hash);
+    }
+  }, []);
   const [showLogin, setShowLogin] = useState(false);
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
@@ -743,19 +751,7 @@ function SmakfyndApp() {
           }}>↑</button>
       )}
     </div>
-    {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={(data) => {
-      auth.login(data);
-      setShowLogin(false);
-      // Sync local wines to server
-      const merged = { ...sv.data };
-      if (data.wines && Object.keys(data.wines).length > 0) {
-        for (const [nr, lists] of Object.entries(data.wines)) {
-          merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
-        }
-        try { localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged)); } catch(e) {}
-      }
-      auth.syncWines(merged);
-    }} />}
+    {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </SavedContext.Provider>
   );
 }

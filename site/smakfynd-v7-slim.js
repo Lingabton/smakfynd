@@ -1,4 +1,56 @@
 // ════════════════════════════════════════════════════════════
+// supabase.jsx
+// ════════════════════════════════════════════════════════════
+// src/supabase.jsx — Supabase client + auth hook (shared with quiz.smakfynd.se)
+const SUPABASE_URL = "https://bfzzsniebwxwrnkmeymg.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenpzbmllYnd4d3Jua21leW1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjMzMzgsImV4cCI6MjA5Mjc5OTMzOH0.DxlxqgJ8ANtAaOS95wX1hr6Cd7oEP7l3pJQAy52L778";
+const isProduction = window.location.hostname.endsWith(".smakfynd.se");
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+function setCookie(name, value, opts) {
+  let c = name + "=" + encodeURIComponent(value) + "; path=" + (opts.path || "/");
+  if (opts.domain) c += "; domain=" + opts.domain;
+  if (opts.sameSite) c += "; SameSite=" + opts.sameSite;
+  if (opts.secure) c += "; Secure";
+  c += "; max-age=" + 60 * 60 * 24 * 365;
+  document.cookie = c;
+}
+function removeCookie(name, opts) {
+  document.cookie = name + "=; path=/; max-age=0" + (opts.domain ? "; domain=" + opts.domain : "");
+}
+const cookieStorage = {
+  getItem: function (key) {
+    return getCookie(key);
+  },
+  setItem: function (key, value) {
+    setCookie(key, value, {
+      domain: ".smakfynd.se",
+      sameSite: "lax",
+      secure: true,
+      path: "/"
+    });
+  },
+  removeItem: function (key) {
+    removeCookie(key, {
+      domain: ".smakfynd.se"
+    });
+  }
+};
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storageKey: "smakfynd-auth",
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: "pkce",
+    ...(isProduction && {
+      storage: cookieStorage
+    })
+  }
+});
+
+// ════════════════════════════════════════════════════════════
 // constants.jsx
 // ════════════════════════════════════════════════════════════
 // src/constants.jsx
@@ -1970,20 +2022,18 @@ function AIQuestion({
 // ════════════════════════════════════════════════════════════
 // components/LoginModal.jsx
 // ════════════════════════════════════════════════════════════
-// src/components/LoginModal.jsx
-const AUTH_URL = "https://smakfynd-auth.smakfynd.workers.dev";
+// src/components/LoginModal.jsx — Supabase magic link auth
+
 function LoginModal({
   onClose,
   onLogin
 }) {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState(1); // 1=email, 2=code
-  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const handleSendCode = async () => {
+  const [newsletter, setNewsletter] = useState(false);
+  const handleSend = async () => {
     if (!email.includes("@")) {
       setError("Ange en giltig email");
       return;
@@ -1991,63 +2041,32 @@ function LoginModal({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(AUTH_URL + "/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          newsletter
-        })
+      const {
+        error: sbError
+      } = await sb.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
       });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      if (data.status === "code_sent") {
-        setStep(2);
-        setResendCooldown(30);
+      if (sbError) throw sbError;
+      if (newsletter) {
+        fetch("https://smakfynd-auth.smakfynd.workers.dev/subscribe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email
+          })
+        }).catch(() => {});
       }
+      setSent(true);
     } catch (e) {
-      setError(e.message || "Kunde inte skicka kod");
+      setError(e.message || "Kunde inte skicka länk");
     }
     setLoading(false);
   };
-  const handleVerify = async () => {
-    if (code.length < 6) {
-      setError("Ange 6-siffrig kod");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(AUTH_URL + "/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          code,
-          newsletter
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      try {
-        localStorage.setItem("sf_token", data.token);
-        localStorage.setItem("sf_user", JSON.stringify(data.user));
-      } catch (e) {}
-      onLogin(data);
-    } catch (e) {
-      setError(e.message || "Felaktig kod");
-    }
-    setLoading(false);
-  };
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
   useEffect(() => {
     const handleEsc = e => {
       if (e.key === "Escape") onClose();
@@ -2089,19 +2108,47 @@ function LoginModal({
       fontWeight: 400,
       color: t.tx
     }
-  }, step === 1 ? "Logga in" : "Ange kod"), step === 1 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }, sent ? "Kolla din inbox" : "Logga in"), sent ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: {
       margin: "0 0 16px",
       fontSize: 13,
       color: t.txL,
       lineHeight: 1.5
     }
-  }, "Vi skickar en verifieringskod till din email. Inget l\xF6senord beh\xF6vs."), /*#__PURE__*/React.createElement("input", {
+  }, "Vi har skickat en inloggningsl\xE4nk till ", /*#__PURE__*/React.createElement("strong", null, email), ". Klicka p\xE5 l\xE4nken f\xF6r att logga in."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 16px",
+      fontSize: 12,
+      color: t.txF,
+      lineHeight: 1.5
+    }
+  }, "Kolla din skr\xE4ppost om du inte ser mailet inom en minut."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setSent(false);
+      setError(null);
+    },
+    style: {
+      display: "block",
+      margin: "0 auto",
+      fontSize: 12,
+      color: t.txL,
+      background: "none",
+      border: "none",
+      cursor: "pointer"
+    }
+  }, "Byt email")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 16px",
+      fontSize: 13,
+      color: t.txL,
+      lineHeight: 1.5
+    }
+  }, "Vi skickar en inloggningsl\xE4nk till din email. Inget l\xF6senord beh\xF6vs."), /*#__PURE__*/React.createElement("input", {
     type: "email",
     value: email,
     onChange: e => setEmail(e.target.value),
     placeholder: "din@email.se",
-    onKeyDown: e => e.key === "Enter" && handleSendCode(),
+    onKeyDown: e => e.key === "Enter" && handleSend(),
     style: {
       width: "100%",
       padding: "14px 16px",
@@ -2137,7 +2184,7 @@ function LoginModal({
       lineHeight: 1.5
     }
   }, "Ja, jag vill f\xE5 veckans b\xE4sta vink\xF6p via email")), /*#__PURE__*/React.createElement("button", {
-    onClick: handleSendCode,
+    onClick: handleSend,
     disabled: loading,
     style: {
       width: "100%",
@@ -2152,85 +2199,7 @@ function LoginModal({
       fontFamily: "inherit",
       opacity: loading ? 0.7 : 1
     }
-  }, loading ? "Skickar..." : "Skicka verifieringskod")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 16px",
-      fontSize: 13,
-      color: t.txL,
-      lineHeight: 1.5
-    }
-  }, "Vi har skickat en 6-siffrig kod till ", /*#__PURE__*/React.createElement("strong", null, email)), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: code,
-    onChange: e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6)),
-    placeholder: "123456",
-    inputMode: "numeric",
-    autoFocus: true,
-    onKeyDown: e => e.key === "Enter" && handleVerify(),
-    style: {
-      width: "100%",
-      padding: "14px 16px",
-      borderRadius: 12,
-      border: `1px solid ${t.bdr}`,
-      background: t.bg,
-      fontSize: 24,
-      color: t.tx,
-      outline: "none",
-      boxSizing: "border-box",
-      marginBottom: 12,
-      textAlign: "center",
-      letterSpacing: "0.3em",
-      fontFamily: "monospace"
-    }
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: handleVerify,
-    disabled: loading || code.length < 6,
-    style: {
-      width: "100%",
-      padding: "14px",
-      borderRadius: 12,
-      border: "none",
-      background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-      color: "#fff",
-      fontSize: 14,
-      fontWeight: 600,
-      cursor: loading ? "wait" : "pointer",
-      fontFamily: "inherit",
-      opacity: loading || code.length < 6 ? 0.7 : 1
-    }
-  }, loading ? "Verifierar..." : "Logga in"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setStep(1);
-      setCode("");
-      setError(null);
-    },
-    style: {
-      display: "block",
-      margin: "10px auto 0",
-      fontSize: 12,
-      color: t.txL,
-      background: "none",
-      border: "none",
-      cursor: "pointer"
-    }
-  }, "Byt email"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      if (resendCooldown <= 0) {
-        handleSendCode();
-      }
-    },
-    disabled: resendCooldown > 0 || loading,
-    style: {
-      display: "block",
-      margin: "6px auto 0",
-      fontSize: 12,
-      color: resendCooldown > 0 ? t.txF : t.wine,
-      background: "none",
-      border: "none",
-      cursor: resendCooldown > 0 ? "default" : "pointer",
-      fontFamily: "inherit"
-    }
-  }, resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : "Skicka kod igen")), error && /*#__PURE__*/React.createElement("p", {
+  }, loading ? "Skickar..." : "Skicka inloggningslänk")), error && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.deal,
@@ -2250,7 +2219,13 @@ function LoginModal({
     style: {
       color: t.txL
     }
-  }, "integritetspolicy"), "."), /*#__PURE__*/React.createElement("button", {
+  }, "integritetspolicy"), ".", " ", "Ditt konto delas med ", /*#__PURE__*/React.createElement("a", {
+    href: "https://quiz.smakfynd.se",
+    target: "_blank",
+    style: {
+      color: t.txL
+    }
+  }, "Smakfynd Quiz"), "."), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     style: {
       display: "block",
@@ -2265,176 +2240,84 @@ function LoginModal({
   }, "Avbryt")));
 }
 function useAuth() {
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("sf_user"));
-    } catch (e) {
-      return null;
-    }
-  });
-  const [token, setToken] = useState(() => {
-    try {
-      return localStorage.getItem("sf_token");
-    } catch (e) {
-      return null;
-    }
-  });
-  const login = data => {
-    setUser(data.user);
-    setToken(data.token);
-  };
-  const logout = () => {
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // Check existing session
+    sb.auth.getSession().then(({
+      data: {
+        session: s
+      }
+    }) => {
+      setSession(s);
+      setUser(s?.user || null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes (magic link callback, sign out, etc.)
+    const {
+      data: {
+        subscription
+      }
+    } = sb.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setUser(s?.user || null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+  const login = () => {}; // handled by onAuthStateChange
+  const logout = async () => {
+    await sb.auth.signOut();
     setUser(null);
-    setToken(null);
-    try {
-      localStorage.removeItem("sf_token");
-      localStorage.removeItem("sf_user");
-    } catch (e) {}
+    setSession(null);
   };
+
+  // Saved wines via Supabase
   const syncWines = async localWines => {
-    if (!token) return localWines;
+    if (!session) return localWines;
     try {
-      const res = await fetch(AUTH_URL + "/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          token,
-          wines: localWines
-        })
-      });
-      const data = await res.json();
-      if (data.wines) return data.wines;
+      // Get server wines
+      const {
+        data
+      } = await sb.from("saved_wines").select("wine_nr, notes").eq("user_id", session.user.id);
+      if (data && data.length > 0) {
+        const merged = {
+          ...localWines
+        };
+        for (const row of data) {
+          if (!merged[row.wine_nr]) merged[row.wine_nr] = ["Favoriter"];
+        }
+        return merged;
+      }
     } catch (e) {}
     return localWines;
   };
-  const saveToServer = (nr, list) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        list
-      }),
-      keepalive: true
-    }).catch(() => {});
+  const saveToServer = nr => {
+    if (!session) return;
+    sb.from("saved_wines").upsert({
+      user_id: session.user.id,
+      wine_nr: String(nr)
+    }).then(() => {});
   };
-  const removeFromServer = (nr, list) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/remove", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        list
-      }),
-      keepalive: true
-    }).catch(() => {});
+  const removeFromServer = nr => {
+    if (!session) return;
+    sb.from("saved_wines").delete().eq("user_id", session.user.id).eq("wine_nr", String(nr)).then(() => {});
   };
 
-  // Premium features
-  const rateWine = (nr, rating, notes) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/rate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        rating,
-        notes
-      }),
-      keepalive: true
-    }).catch(() => {});
-  };
-  const setAlert = (nr, alertType, threshold) => {
-    if (!token) return;
-    return fetch(AUTH_URL + "/alert", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        alert_type: alertType,
-        threshold
-      })
-    }).then(r => r.json()).catch(() => ({}));
-  };
-  const removeAlert = (nr, alertType) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/remove-alert", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        alert_type: alertType
-      }),
-      keepalive: true
-    }).catch(() => {});
-  };
-  const addToCellar = (nr, action, data) => {
-    if (!token) return;
-    return fetch(AUTH_URL + "/cellar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        token,
-        nr,
-        action,
-        ...data
-      })
-    }).then(r => r.json()).catch(() => ({}));
-  };
-  const getRatings = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/ratings?token=" + token);
-      const data = await res.json();
-      return data.ratings || [];
-    } catch (e) {
-      return [];
-    }
-  };
-  const getAlerts = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/alerts?token=" + token);
-      const data = await res.json();
-      return data.alerts || [];
-    } catch (e) {
-      return [];
-    }
-  };
-  const getCellar = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/cellar?token=" + token);
-      const data = await res.json();
-      return data.cellar || [];
-    } catch (e) {
-      return [];
-    }
-  };
+  // Stub premium features (keep interface compatible)
+  const rateWine = () => {};
+  const setAlert = () => Promise.resolve({});
+  const removeAlert = () => {};
+  const addToCellar = () => Promise.resolve({});
+  const getRatings = () => Promise.resolve([]);
+  const getAlerts = () => Promise.resolve([]);
+  const getCellar = () => Promise.resolve([]);
+  const token = session?.access_token || null;
   return {
     user,
     token,
+    loading: loading,
     login,
     logout,
     syncWines,
@@ -5177,6 +5060,14 @@ function parseHash() {
 function SmakfyndApp() {
   const sv = useSaved();
   const auth = useAuth();
+
+  // Clean up Supabase auth code from URL after magic link redirect
+  useEffect(() => {
+    if (window.location.search.includes("code=")) {
+      const hash = window.location.hash;
+      window.history.replaceState(null, "", window.location.pathname + hash);
+    }
+  }, []);
   const [showLogin, setShowLogin] = useState(false);
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
@@ -6832,23 +6723,6 @@ function SmakfyndApp() {
       animation: "fadeIn 0.2s ease"
     }
   }, "\u2191")), showLogin && /*#__PURE__*/React.createElement(LoginModal, {
-    onClose: () => setShowLogin(false),
-    onLogin: data => {
-      auth.login(data);
-      setShowLogin(false);
-      // Sync local wines to server
-      const merged = {
-        ...sv.data
-      };
-      if (data.wines && Object.keys(data.wines).length > 0) {
-        for (const [nr, lists] of Object.entries(data.wines)) {
-          merged[nr] = [...new Set([...(merged[nr] || []), ...lists])];
-        }
-        try {
-          localStorage.setItem("smakfynd_saved_v2", JSON.stringify(merged));
-        } catch (e) {}
-      }
-      auth.syncWines(merged);
-    }
+    onClose: () => setShowLogin(false)
   }));
 }

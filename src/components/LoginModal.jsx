@@ -1,62 +1,34 @@
-// src/components/LoginModal.jsx
-const AUTH_URL = "https://smakfynd-auth.smakfynd.workers.dev";
+// src/components/LoginModal.jsx — Supabase magic link auth
 
 function LoginModal({ onClose, onLogin }) {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState(1); // 1=email, 2=code
-  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  const [newsletter, setNewsletter] = useState(false);
 
-  const handleSendCode = async () => {
+  const handleSend = async () => {
     if (!email.includes("@")) { setError("Ange en giltig email"); return; }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(AUTH_URL + "/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newsletter }),
+      const { error: sbError } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
       });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      if (data.status === "code_sent") {
-        setStep(2);
-        setResendCooldown(30);
+      if (sbError) throw sbError;
+      if (newsletter) {
+        fetch("https://smakfynd-auth.smakfynd.workers.dev/subscribe", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }).catch(() => {});
       }
+      setSent(true);
     } catch (e) {
-      setError(e.message || "Kunde inte skicka kod");
+      setError(e.message || "Kunde inte skicka länk");
     }
     setLoading(false);
   };
-
-  const handleVerify = async () => {
-    if (code.length < 6) { setError("Ange 6-siffrig kod"); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(AUTH_URL + "/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code, newsletter }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      try { localStorage.setItem("sf_token", data.token); localStorage.setItem("sf_user", JSON.stringify(data.user)); } catch(e) {}
-      onLogin(data);
-    } catch (e) {
-      setError(e.message || "Felaktig kod");
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
 
   useEffect(() => {
     const handleEsc = e => { if (e.key === "Escape") onClose(); };
@@ -74,17 +46,30 @@ function LoginModal({ onClose, onLogin }) {
         boxShadow: "0 20px 60px rgba(30,23,16,0.2)", animation: "scaleIn 0.2s ease",
       }}>
         <h2 style={{ margin: "0 0 6px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>
-          {step === 1 ? "Logga in" : "Ange kod"}
+          {sent ? "Kolla din inbox" : "Logga in"}
         </h2>
 
-        {step === 1 ? (
+        {sent ? (
           <>
             <p style={{ margin: "0 0 16px", fontSize: 13, color: t.txL, lineHeight: 1.5 }}>
-              Vi skickar en verifieringskod till din email. Inget lösenord behövs.
+              Vi har skickat en inloggningslänk till <strong>{email}</strong>. Klicka på länken för att logga in.
+            </p>
+            <p style={{ margin: "0 0 16px", fontSize: 12, color: t.txF, lineHeight: 1.5 }}>
+              Kolla din skräppost om du inte ser mailet inom en minut.
+            </p>
+            <button onClick={() => { setSent(false); setError(null); }}
+              style={{ display: "block", margin: "0 auto", fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer" }}>
+              Byt email
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: t.txL, lineHeight: 1.5 }}>
+              Vi skickar en inloggningslänk till din email. Inget lösenord behövs.
             </p>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="din@email.se"
-              onKeyDown={e => e.key === "Enter" && handleSendCode()}
+              onKeyDown={e => e.key === "Enter" && handleSend()}
               style={{
                 width: "100%", padding: "14px 16px", borderRadius: 12,
                 border: `1px solid ${t.bdr}`, background: t.bg, fontSize: 14,
@@ -98,48 +83,14 @@ function LoginModal({ onClose, onLogin }) {
                 Ja, jag vill få veckans bästa vinköp via email
               </span>
             </label>
-            <button onClick={handleSendCode} disabled={loading}
+            <button onClick={handleSend} disabled={loading}
               style={{
                 width: "100%", padding: "14px", borderRadius: 12, border: "none",
                 background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
                 color: "#fff", fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
                 fontFamily: "inherit", opacity: loading ? 0.7 : 1,
               }}>
-              {loading ? "Skickar..." : "Skicka verifieringskod"}
-            </button>
-          </>
-        ) : (
-          <>
-            <p style={{ margin: "0 0 16px", fontSize: 13, color: t.txL, lineHeight: 1.5 }}>
-              Vi har skickat en 6-siffrig kod till <strong>{email}</strong>
-            </p>
-            <input type="text" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="123456" inputMode="numeric" autoFocus
-              onKeyDown={e => e.key === "Enter" && handleVerify()}
-              style={{
-                width: "100%", padding: "14px 16px", borderRadius: 12,
-                border: `1px solid ${t.bdr}`, background: t.bg, fontSize: 24,
-                color: t.tx, outline: "none", boxSizing: "border-box", marginBottom: 12,
-                textAlign: "center", letterSpacing: "0.3em", fontFamily: "monospace",
-              }}
-            />
-            <button onClick={handleVerify} disabled={loading || code.length < 6}
-              style={{
-                width: "100%", padding: "14px", borderRadius: 12, border: "none",
-                background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`,
-                color: "#fff", fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
-                fontFamily: "inherit", opacity: (loading || code.length < 6) ? 0.7 : 1,
-              }}>
-              {loading ? "Verifierar..." : "Logga in"}
-            </button>
-            <button onClick={() => { setStep(1); setCode(""); setError(null); }}
-              style={{ display: "block", margin: "10px auto 0", fontSize: 12, color: t.txL, background: "none", border: "none", cursor: "pointer" }}>
-              Byt email
-            </button>
-            <button onClick={() => { if (resendCooldown <= 0) { handleSendCode(); } }}
-              disabled={resendCooldown > 0 || loading}
-              style={{ display: "block", margin: "6px auto 0", fontSize: 12, color: resendCooldown > 0 ? t.txF : t.wine, background: "none", border: "none", cursor: resendCooldown > 0 ? "default" : "pointer", fontFamily: "inherit" }}>
-              {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : "Skicka kod igen"}
+              {loading ? "Skickar..." : "Skicka inloggningslänk"}
             </button>
           </>
         )}
@@ -148,6 +99,7 @@ function LoginModal({ onClose, onLogin }) {
 
         <p style={{ fontSize: 10, color: t.txF, margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>
           Genom att logga in godkänner du vår <a href="/integritet/" target="_blank" style={{ color: t.txL }}>integritetspolicy</a>.
+          {" "}Ditt konto delas med <a href="https://quiz.smakfynd.se" target="_blank" style={{ color: t.txL }}>Smakfynd Quiz</a>.
         </p>
 
         <button onClick={onClose} style={{
@@ -160,124 +112,72 @@ function LoginModal({ onClose, onLogin }) {
 }
 
 function useAuth() {
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("sf_user")); } catch(e) { return null; }
-  });
-  const [token, setToken] = useState(() => {
-    try { return localStorage.getItem("sf_token"); } catch(e) { return null; }
-  });
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (data) => {
-    setUser(data.user);
-    setToken(data.token);
-  };
+  useEffect(() => {
+    // Check existing session
+    sb.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user || null);
+      setLoading(false);
+    });
 
-  const logout = () => {
+    // Listen for auth changes (magic link callback, sign out, etc.)
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setUser(s?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = () => {}; // handled by onAuthStateChange
+  const logout = async () => {
+    await sb.auth.signOut();
     setUser(null);
-    setToken(null);
-    try { localStorage.removeItem("sf_token"); localStorage.removeItem("sf_user"); } catch(e) {}
+    setSession(null);
   };
 
+  // Saved wines via Supabase
   const syncWines = async (localWines) => {
-    if (!token) return localWines;
+    if (!session) return localWines;
     try {
-      const res = await fetch(AUTH_URL + "/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, wines: localWines }),
-      });
-      const data = await res.json();
-      if (data.wines) return data.wines;
+      // Get server wines
+      const { data } = await sb.from("saved_wines").select("wine_nr, notes").eq("user_id", session.user.id);
+      if (data && data.length > 0) {
+        const merged = { ...localWines };
+        for (const row of data) {
+          if (!merged[row.wine_nr]) merged[row.wine_nr] = ["Favoriter"];
+        }
+        return merged;
+      }
     } catch(e) {}
     return localWines;
   };
 
-  const saveToServer = (nr, list) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, list }),
-      keepalive: true,
-    }).catch(() => {});
+  const saveToServer = (nr) => {
+    if (!session) return;
+    sb.from("saved_wines").upsert({ user_id: session.user.id, wine_nr: String(nr) }).then(() => {});
   };
 
-  const removeFromServer = (nr, list) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/remove", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, list }),
-      keepalive: true,
-    }).catch(() => {});
+  const removeFromServer = (nr) => {
+    if (!session) return;
+    sb.from("saved_wines").delete().eq("user_id", session.user.id).eq("wine_nr", String(nr)).then(() => {});
   };
 
-  // Premium features
-  const rateWine = (nr, rating, notes) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/rate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, rating, notes }),
-      keepalive: true,
-    }).catch(() => {});
-  };
+  // Stub premium features (keep interface compatible)
+  const rateWine = () => {};
+  const setAlert = () => Promise.resolve({});
+  const removeAlert = () => {};
+  const addToCellar = () => Promise.resolve({});
+  const getRatings = () => Promise.resolve([]);
+  const getAlerts = () => Promise.resolve([]);
+  const getCellar = () => Promise.resolve([]);
 
-  const setAlert = (nr, alertType, threshold) => {
-    if (!token) return;
-    return fetch(AUTH_URL + "/alert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, alert_type: alertType, threshold }),
-    }).then(r => r.json()).catch(() => ({}));
-  };
+  const token = session?.access_token || null;
 
-  const removeAlert = (nr, alertType) => {
-    if (!token) return;
-    fetch(AUTH_URL + "/remove-alert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, alert_type: alertType }),
-      keepalive: true,
-    }).catch(() => {});
-  };
-
-  const addToCellar = (nr, action, data) => {
-    if (!token) return;
-    return fetch(AUTH_URL + "/cellar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nr, action, ...data }),
-    }).then(r => r.json()).catch(() => ({}));
-  };
-
-  const getRatings = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/ratings?token=" + token);
-      const data = await res.json();
-      return data.ratings || [];
-    } catch(e) { return []; }
-  };
-
-  const getAlerts = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/alerts?token=" + token);
-      const data = await res.json();
-      return data.alerts || [];
-    } catch(e) { return []; }
-  };
-
-  const getCellar = async () => {
-    if (!token) return [];
-    try {
-      const res = await fetch(AUTH_URL + "/cellar?token=" + token);
-      const data = await res.json();
-      return data.cellar || [];
-    } catch(e) { return []; }
-  };
-
-  return { user, token, login, logout, syncWines, saveToServer, removeFromServer,
+  return { user, token, loading: loading, login, logout, syncWines, saveToServer, removeFromServer,
            rateWine, setAlert, removeAlert, addToCellar, getRatings, getAlerts, getCellar };
 }

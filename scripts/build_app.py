@@ -13,6 +13,7 @@ OUTPUT = os.path.join(SCRIPT_DIR, "smakfynd-v7.jsx")
 
 # Concatenation order (dependencies first)
 FILES = [
+    "supabase.jsx",
     "constants.jsx",
     "theme.jsx",
     "utils.jsx",
