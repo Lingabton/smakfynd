@@ -19,8 +19,12 @@ def load_data():
     print(f"SB: {len(sb)} | Vivino: {len(vivino)} | WE expert: {len(expert)} | WS critic: {len(ws_scores)}")
     return sb, vivino, expert, ws_scores, ws_critics
 
+SPAM_MARKERS = ['Gör som miljoner', 'Handla på världens', 'Användarvillkor',
+                'Integritetspolicy', 'App Om Kontakt', 'Cookie-inställningar']
+
 def get_vivino(p, vivino_cache):
     """Look up Vivino data using name|sub|country key format."""
+    import re
     name = p.get('name', '')
     sub = p.get('sub', '')
     country = p.get('country', '')
@@ -28,6 +32,13 @@ def get_vivino(p, vivino_cache):
     v = vivino_cache.get(key, {})
     rating = v.get('vivino_rating', 0)
     reviews = v.get('vivino_reviews', 0)
+    vname = v.get('vivino_name', '')
+    # Reject entries with spam text or too many search results
+    if any(m in vname for m in SPAM_MARKERS):
+        return None, 0
+    m = re.search(r"'\((\d+)\)", vname)
+    if m and int(m.group(1)) >= 50:
+        return None, 0
     if rating and rating > 0:
         return rating, reviews
     return None, 0
