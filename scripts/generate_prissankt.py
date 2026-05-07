@@ -115,8 +115,20 @@ if len(snapshot_files) >= 2:
                         'drop_date': compare_date,
                     })
 
+def dedup_wines(wines):
+    """Remove duplicate wines (same name + sub + price), keep highest scored."""
+    seen = set()
+    result = []
+    for w in wines:
+        key = (w.get('name',''), w.get('sub',''), w.get('price',0))
+        if key not in seen:
+            seen.add(key)
+            result.append(w)
+    return result
+
 # Sort: highest percentage drop first, then by savings amount
 drops.sort(key=lambda x: (-x['drop_pct'], -x['savings']))
+drops = dedup_wines(drops)
 
 print(f"Found {len(drops)} price drops (≥5%)")
 
@@ -342,6 +354,23 @@ html = f'''<!DOCTYPE html>
       <p>Oberoende tjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
     </footer>
   </div>
+  <div id="sf-sub" style="position:fixed;bottom:0;left:0;right:0;background:#1a1510;border-top:2px solid #8b2332;padding:10px 16px;display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;z-index:999;font-family:'Inter',-apple-system,sans-serif">
+    <span style="color:#e6ddd0;font-size:13px;font-weight:500">Få veckans bästa vinfynd på mejlen</span>
+    <input id="sf-sub-email" type="email" placeholder="din@email.se" style="padding:8px 14px;border-radius:8px;border:1px solid #3a3530;background:#2a2520;color:#f5f1ea;font-size:13px;width:200px;outline:none;font-family:inherit">
+    <button onclick="sfSubscribe()" id="sf-sub-btn" style="padding:8px 18px;border-radius:8px;border:none;background:#8b2332;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Prenumerera</button>
+    <button onclick="document.getElementById('sf-sub').remove();try{{localStorage.setItem('sf_sub_hide','1')}}catch(e){{}}" style="background:none;border:none;color:#6b6355;font-size:18px;cursor:pointer;padding:0 4px;line-height:1" aria-label="Stäng">✕</button>
+  </div>
+  <script>
+  (function(){{try{{if(localStorage.getItem('sf_sub_hide')){{var el=document.getElementById('sf-sub');if(el)el.remove()}}}}catch(e){{}}}})();
+  function sfSubscribe(){{
+    var e=document.getElementById('sf-sub-email'),b=document.getElementById('sf-sub-btn'),v=e.value.trim();
+    if(!v||!v.includes('@'))return;
+    b.textContent='...';b.disabled=true;
+    fetch('https://smakfynd-auth.smakfynd.workers.dev/subscribe',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{email:v}})}})
+    .then(function(){{b.textContent='Tack!';b.style.background='#2d6b3f';e.style.display='none';setTimeout(function(){{var el=document.getElementById('sf-sub');if(el)el.remove();try{{localStorage.setItem('sf_sub_hide','1')}}catch(e){{}}}},2000)}})
+    .catch(function(){{b.textContent='Prenumerera';b.disabled=false}});
+  }}
+  </script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>'''

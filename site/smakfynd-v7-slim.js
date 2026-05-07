@@ -6667,11 +6667,39 @@ function SmakfyndApp() {
     auth: auth
   })), filtered.length > 5 && /*#__PURE__*/React.createElement(NewsletterCTA, {
     compact: true
-  }), filtered.slice(5, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
+  }), filtered.slice(5, 10).map((p, i) => /*#__PURE__*/React.createElement(Card, {
     key: p.id || i,
     p: p,
     rank: i + 6,
     delay: Math.min((i + 5) * 0.04, 0.4),
+    allProducts: products,
+    autoOpen: String(p.nr) === String(autoOpenNr),
+    auth: auth
+  })), filtered.length > 10 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 20px",
+      borderRadius: 14,
+      background: t.surface,
+      border: `1px solid ${t.bdr}`,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontFamily: t.serif,
+      color: t.tx,
+      marginBottom: 4
+    }
+  }, "Veckans 5 fynd"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: t.txL
+    }
+  }, "Handplockade viner \u2014 kommer snart.")), filtered.slice(10, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
+    key: p.id || i,
+    p: p,
+    rank: i + 11,
+    delay: 0,
     allProducts: products,
     autoOpen: String(p.nr) === String(autoOpenNr),
     auth: auth

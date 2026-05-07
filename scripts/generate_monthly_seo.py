@@ -56,6 +56,17 @@ for p in all_wines:
         if drop_pct >= 5:
             p['price_vs_launch_pct'] = drop_pct
 
+def dedup_wines(wines):
+    """Remove duplicate wines (same name + sub + price), keep highest scored."""
+    seen = set()
+    result = []
+    for w in wines:
+        key = (w.get('name',''), w.get('sub',''), w.get('price',0))
+        if key not in seen:
+            seen.add(key)
+            result.append(w)
+    return result
+
 def score_label(score):
     if score >= 90: return "Exceptionellt fynd"
     if score >= 80: return "Toppköp"
@@ -219,6 +230,23 @@ def make_page(slug, title, meta, h1, intro, content_html, wines, extra_sections=
       <p>Oberoende tjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
     </footer>
   </div>
+  <div id="sf-sub" style="position:fixed;bottom:0;left:0;right:0;background:#1a1510;border-top:2px solid #8b2332;padding:10px 16px;display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;z-index:999;font-family:'Inter',-apple-system,sans-serif">
+    <span style="color:#e6ddd0;font-size:13px;font-weight:500">Få veckans bästa vinfynd på mejlen</span>
+    <input id="sf-sub-email" type="email" placeholder="din@email.se" style="padding:8px 14px;border-radius:8px;border:1px solid #3a3530;background:#2a2520;color:#f5f1ea;font-size:13px;width:200px;outline:none;font-family:inherit">
+    <button onclick="sfSubscribe()" id="sf-sub-btn" style="padding:8px 18px;border-radius:8px;border:none;background:#8b2332;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Prenumerera</button>
+    <button onclick="document.getElementById('sf-sub').remove();try{{localStorage.setItem('sf_sub_hide','1')}}catch(e){{}}" style="background:none;border:none;color:#6b6355;font-size:18px;cursor:pointer;padding:0 4px;line-height:1" aria-label="Stäng">✕</button>
+  </div>
+  <script>
+  (function(){{try{{if(localStorage.getItem('sf_sub_hide')){{var el=document.getElementById('sf-sub');if(el)el.remove()}}}}catch(e){{}}}})();
+  function sfSubscribe(){{
+    var e=document.getElementById('sf-sub-email'),b=document.getElementById('sf-sub-btn'),v=e.value.trim();
+    if(!v||!v.includes('@'))return;
+    b.textContent='...';b.disabled=true;
+    fetch('https://smakfynd-auth.smakfynd.workers.dev/subscribe',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{email:v}})}})
+    .then(function(){{b.textContent='Tack!';b.style.background='#2d6b3f';e.style.display='none';setTimeout(function(){{var el=document.getElementById('sf-sub');if(el)el.remove();try{{localStorage.setItem('sf_sub_hide','1')}}catch(e){{}}}},2000)}})
+    .catch(function(){{b.textContent='Prenumerera';b.disabled=false}});
+  }}
+  </script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>'''
@@ -234,8 +262,8 @@ def main():
 
     # 1. Bästa vinerna [month] [year]
     month_slug = f"basta-vin-{MONTH_SV}-{YEAR}"
-    top_monthly = sorted([w for w in fast if w.get('pkg') == 'Flaska'],
-                        key=lambda x: -x.get('smakfynd_score', 0))[:20]
+    top_monthly = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'],
+                        key=lambda x: -x.get('smakfynd_score', 0)))[:20]
     make_page(
         month_slug,
         f"Bästa vinerna {MONTH_SV} {YEAR} — Systembolaget",
@@ -247,8 +275,8 @@ def main():
     )
 
     # 2. Billigt och bra vin
-    budget = sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) <= 99],
-                   key=lambda x: -x.get('smakfynd_score', 0))[:20]
+    budget = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) <= 99],
+                   key=lambda x: -x.get('smakfynd_score', 0)))[:20]
     make_page(
         "billigt-och-bra-vin",
         f"Billigt och bra vin på Systembolaget {YEAR}",
@@ -260,8 +288,8 @@ def main():
     )
 
     # 3. Bästa boxvin
-    box_wines = sorted([w for w in bib if w.get('smakfynd_score', 0) > 0],
-                      key=lambda x: -x.get('smakfynd_score', 0))[:20]
+    box_wines = dedup_wines(sorted([w for w in bib if w.get('smakfynd_score', 0) > 0],
+                      key=lambda x: -x.get('smakfynd_score', 0)))[:20]
     if box_wines:
         make_page(
             "basta-boxvin",
@@ -274,10 +302,10 @@ def main():
         )
 
     # 4. Vin till midsommar (seasonal — always useful)
-    midsommar = sorted([w for w in fast if w.get('pkg') == 'Flaska'
+    midsommar = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                        and (w.get('type') in ('Vitt', 'Rosé', 'Mousserande'))
                        and (w.get('price', 999) or 999) <= 200],
-                      key=lambda x: -x.get('smakfynd_score', 0))[:20]
+                      key=lambda x: -x.get('smakfynd_score', 0)))[:20]
     make_page(
         "vin-till-midsommar",
         f"Bästa vinerna till midsommar {YEAR} — Systembolaget",
@@ -289,9 +317,9 @@ def main():
     )
 
     # 5. Vin till kräftskiva
-    kraftskiva = sorted([w for w in fast if w.get('pkg') == 'Flaska'
+    kraftskiva = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                         and (w.get('type') in ('Vitt', 'Mousserande'))],
-                       key=lambda x: -x.get('smakfynd_score', 0))[:20]
+                       key=lambda x: -x.get('smakfynd_score', 0)))[:20]
     make_page(
         "vin-till-kraftskiva",
         f"Bästa vinerna till kräftskiva {YEAR} — Systembolaget",

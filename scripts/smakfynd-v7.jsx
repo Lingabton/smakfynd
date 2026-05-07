@@ -3455,7 +3455,14 @@ function SmakfyndApp() {
             ))}
             {filtered.slice(1, 5).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 5 && <NewsletterCTA compact={true} />}
-            {filtered.slice(5, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 6} delay={Math.min((i + 5) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.slice(5, 10).map((p, i) => <Card key={p.id || i} p={p} rank={i + 6} delay={Math.min((i + 5) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
+            {filtered.length > 10 && (
+              <div style={{ padding: "16px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}`, marginTop: 4 }}>
+                <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Veckans 5 fynd</div>
+                <div style={{ fontSize: 12, color: t.txL }}>Handplockade viner — kommer snart.</div>
+              </div>
+            )}
+            {filtered.slice(10, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 11} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}` }}>
                 <div style={{ fontSize: 14, color: t.txM, marginBottom: 8 }}>Visar topp 50 av {filtered.length} viner</div>
