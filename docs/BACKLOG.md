@@ -1,74 +1,95 @@
 # Smakfynd Feature Backlog
-*Uppdaterad 2026-03-28*
+*Uppdaterad 2026-05-07*
 
-## Att konfigurera (AKUT)
-- [x] ~~Deploya workers med CORS-fix~~ (2026-03-28)
-- [x] ~~Deploya analytics~~ (2026-03-28)
-- [x] ~~Deploya wine-ai~~ (2026-03-28)
-- [x] ~~Sätt ADMIN_KEY~~ (2026-03-28)
+## Kvar att göra
 
-## UX — låg insats
-- [x] ~~Visa kr/liter på alla kort~~ (2026-03-28)
-- [x] ~~Minska hero-höjd på mobil~~ (2026-03-28)
-- [x] ~~"Tryck på ett vin för att se mer"-hint~~ (redan implementerad)
-- [x] ~~CTA på landningssidor → AI-matchern~~ (2026-03-28, 13 sidor)
-- [x] ~~Kort: visa situationspassning~~ (2026-03-28)
+### UX — låg insats
+- [ ] SaveButton: click-outside stänger menyn (har "Stäng"-knapp som fallback)
+- [ ] Ogiltigt vin-deep-link (#vin/XXX) — visa "Vinet hittades inte" istf tyst fail
+- [ ] Kamera-nekad i barcode scanner — visa tydligt felmeddelande istf tyst stängning
+- [ ] Sökfältet: synlig X-knapp för att rensa (type="search" ger inkonsekvent native-knapp)
+- [ ] Fontinkonsistens: landing pages (Instrument Serif + DM Sans) vs SPA (Newsreader + Inter)
 
-## Kritiker-data
-- [x] ~~Scoring-bonus för konsensus~~ (2026-03-28, 54 stark konsensus, 17 konsensus)
-- [x] ~~Spridningsanalys: konsensus vs kontroversiellt vin~~ (2026-03-28, 144 med spread-data)
+### Kritiker-data
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
 
-## UX — medel insats
-- [x] ~~Prisfilter premium: 200-300, 300-500, 500+~~ (2026-03-28)
-- [x] ~~Prissegmentering på landningssidor (budget, mellanklass, premium)~~ (2026-03-28)
-- [x] ~~Komprimera detaljvyn — tydligare hierarki~~ (2026-03-28)
-- [x] ~~Smakprofil: verbal descriptor~~ (2026-03-28)
-
-## Stora features
-- [ ] Inloggningssystem (email/Google) — synka sparade viner, e-postutskick, personalisering
-- [ ] Streckkods-scanner i butikläge (BarcodeDetector API)
+### Stora features
 - [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
-- [ ] "Gabriels val" — månatlig landningssida med handplockade viner + texter
-- [ ] Situationsbaserade ingångar: dejt, grillkväll, svärföräldrar, fredagsmys
-- [ ] Säsongsinnehåll: sommarvin, kräftskiva, glögg, nyårsbubbel
 - [ ] "Vet ingenting om vin"-läge: enkel guide utan pretention
 - [ ] Present-sektion: kurerade listor per prisklass
+- [ ] Situationsbaserade ingångar: dejt, grillkväll, svärföräldrar, fredagsmys
 
-## Data & teknik
+### Data & teknik
 - [ ] Fräschare Wine Enthusiast-data (Kaggle är från 2017)
-- [ ] Scrapa EAN/streckkoder från SB API (krävs för barcode-scanner)
-- [ ] Vinpriser.se deep scrape (594 prissänkta viner)
+- [ ] 70% av viner saknar food_pairings — begränsar mat-filter
+- [ ] 53% saknar expert_score — visa tydligare att data saknas istf tomma staplar
+- [ ] 35% saknar image_url — överväg fallback-bilder per kategori
+- [ ] 37% har tom grape-sträng — påverkar liknande-viner-matchning
 
-## Att konfigurera
-- [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no` (Dashboard → smakfynd.se → Email → Email Routing)
+### Att konfigurera
+- [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no`
 - [ ] Fyll i organisationsnummer i `/integritet/` (`[ORG-NR]`)
-- [ ] Deploya auth worker: `cd workers/auth && npx wrangler d1 create smakfynd-users` → fyll i ID → `npx wrangler d1 execute smakfynd-users --remote --file=schema.sql && npx wrangler deploy`
 
-## Data — rutiner
-- [ ] Kör `python3 scripts/scrape_winesearcher.py --retry-errors` efter varje skrapningssession
-- [ ] Kör `python3 scripts/find_gaps.py` veckovis
-- [ ] Kör `python3 scripts/snapshot_prices.py` veckovis
-- [ ] Kör `./build.sh` efter dataupdatering
-
-## Content & distribution
+### Content & distribution
 - [ ] Fredags-nyhetsbrev "Veckans fynd" via Substack
 - [ ] Substack SEO-artiklar: "bästa röda under 100 kr systembolaget"
-- [ ] "Gabriels val" blogpost: "Viner i mars — test"
 - [ ] Instagram @smakfynd
 - [ ] Reddit/Flashback/Facebook vingrupper
+
+---
+
+## Klart (session 2026-05-06/07 — persona-review)
+- [x] Prissänkta viner: 0→149 synliga (first_seen_prices backfillad, committad till repo)
+- [x] Dagliga prissnapshottar committas till repo (inte bara cache)
+- [x] Drop-datum spåras i first_seen_prices.json
+- [x] Prissänkt-badge (−X%) på vinkort + genomstruket gammalt pris
+- [x] Filterräknare matchar faktiskt synliga resultat (respekterar sortiment/förpackning)
+- [x] "Se alla X prissänkta →" länk till /prissankt/ vid aktivt filter
+- [x] Cache-busting: wines.json?v=TIMESTAMP vid varje deploy
+- [x] Tillgänglighet: ta bort maximum-scale=1.0 (tillåter zoom)
+- [x] ARIA live region på filterräknare
+- [x] Kompakt FoodMatch + Snabbkollen — vinlistan synlig utan scroll
+- [x] Spinner-animation i AI-matchare under laddning
+- [x] "Skicka kod igen" med 30s cooldown i login
+- [x] Canonical tag på integritetssidan
+- [x] Sök ignorerar kategori-filter (söka "riesling" i "Rött" funkar)
+- [x] "Försök igen" laddar om data utan full page reload
+- [x] Login sync skickar mergad data (inte stale pre-merge state)
+- [x] Sparade viner capped till 20 renders (perf)
+- [x] "(kommer snart)" borttagen — login finns redan
+- [x] Profile: .catch() vid token expiry (undviker evigt "Laddar...")
+- [x] CI workflow: ta bort prisdata från fragil cache, committa istället
+
+## Klart (session 5 — 2026-04/05)
+- [x] Inloggningssystem: passwordless email + 6-digit code
+- [x] Synka sparade viner mellan enheter
+- [x] Betygsättning (1-5 stjärnor) per vin
+- [x] Prislarm + tillgänglighetslarm
+- [x] Källarhantering + provningsanteckningar
+- [x] Min sida: dashboard med 5 flikar (Sparade/Betyg/Larm/Källare/Smakprofil)
+- [x] Smakprofil härlett från högt betygsatta viner
+- [x] Streckkods-scanner (html5-qrcode) + etikett-OCR (AI)
+- [x] Crowdsourced EAN-mappning via analytics worker
+- [x] Snabbkollen: rekommendationer (bättre i samma pris, billigare med samma kvalitet)
+- [x] Veckorapport-worker (Resend, cron måndag 07:00 UTC)
+- [x] Daglig uppdatering via GitHub Actions (06:00 UTC)
+- [x] 67+ SEO-landningssidor (druva, land, region, pris, mat, smak, säsong)
+- [x] Prissänkt-sida med interaktiv sortering
+- [x] Sigmoid score rescaling — full 25-95 range
+- [x] Blended price scoring — fair across price classes
+- [x] Profile dashboard: Min sida
 
 ## Klart (session 4 — 2026-03-28)
 - [x] Bugg: prisfilter använder nu PRICES-konstanten istället för hårdkodad array
 - [x] Bugg: Redaktionens val scrollar till #vin/{nr} istället för att söka
-- [x] Bugg: "Gillar du X" har SB ↗-länk till Systembolaget
+- [x] Bugg: "Gillar du X" har SB-länk till Systembolaget
 - [x] Kritiker: individuella scores visas per vin (pipeline end-to-end)
 - [x] Kritiker: "N av N kritiker ger 85+" social proof-chip
 - [x] UX: eko-antal på filterpill ("Ekologiskt (342)")
 - [x] UX: flytande "tillbaka till toppen"-knapp
 - [x] UX: fler länder i filter (Argentina, Nya Zeeland, Österrike)
 - [x] UX: fler food-keywords (Pasta, Lamm)
-- [x] UX: sorteringsval (expert, crowd, pris ↑↓)
+- [x] UX: sorteringsval (expert, crowd, pris)
 - [x] UX: budget-pills i AI-matchern (under 100, 100-200, 200+)
 - [x] UX: smakpreferens-filter (Fylligt, Lätt, Fruktigt, Torrt)
 - [x] UX: region-filter (Bordeaux, Toscana, Rioja, m.fl.)
@@ -87,14 +108,10 @@
 - [x] Om-sektionen: akademiska meriter
 - [x] Dela-knapp per vin (Web Share API)
 - [x] Sparade viner med 6 kategorier (Favoriter, Att testa, etc)
-- [x] Buggfixar: React hooks, store mode, död kod
 - [x] JSX uppdelad i 14 src/-filer
 - [x] JSON Schema-validering av wines.json
 - [x] Test-suite: 28 tester (scoring + data)
 - [x] GitHub Action: CI på varje push
 - [x] Felhantering: retry, offline-meddelande
 - [x] CSS-variabler i :root
-- [x] Analytics: event tracking, AI-loggning, prishistorik (D1)
-- [x] build.sh — en-kommando full pipeline
-- [x] WS-skraper: retry-errors, auto-pause vid CAPTCHA
-- [x] Gap-analys: find_gaps.py
+- [x] Analytics: event tracking, AI-loggning
