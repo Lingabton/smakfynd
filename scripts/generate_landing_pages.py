@@ -1305,7 +1305,7 @@ def render_page(page, all_pages=None):
         points_html = ''.join(f'<li style="margin-bottom:8px">{p}</li>' for p in guide['points'])
         guide_html = f'''
     <div style="margin-top:32px">
-      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;color:#1e1710">{guide['title']}</h2>
+      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Newsreader',Georgia,serif;font-weight:400;color:#1e1710">{guide['title']}</h2>
       <ul style="margin:0;padding:0 0 0 20px;font-size:14px;color:#4a4238;line-height:1.7">
         {points_html}
       </ul>
@@ -1321,7 +1321,7 @@ def render_page(page, all_pages=None):
         )
         faq_visible_html = f'''
     <div style="margin-top:32px">
-      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;color:#1e1710">Vanliga frågor</h2>
+      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Newsreader',Georgia,serif;font-weight:400;color:#1e1710">Vanliga frågor</h2>
       <dl style="margin:0">
         {faq_entries}
       </dl>
@@ -1455,16 +1455,16 @@ def render_page(page, all_pages=None):
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;background:#f7f3ec;font-family:'DM Sans',-apple-system,sans-serif;color:#1e1710">
+<body style="margin:0;background:#f7f3ec;font-family:'Inter',-apple-system,sans-serif;color:#1e1710">
   <div style="max-width:640px;margin:0 auto;padding:24px 20px 60px">
 
     <header style="margin-bottom:24px">
       <a href="https://smakfynd.se" style="text-decoration:none;display:inline-block;margin-bottom:16px">
         <span style="font-family:Georgia,serif;font-size:22px;color:#7a2332">Smakfynd</span>
       </a>
-      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;line-height:1.2;color:#1e1710">
+      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Newsreader',Georgia,serif;font-weight:400;line-height:1.2;color:#1e1710">
         {page['h1']}
       </h1>
       <p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page['intro']}</p>
@@ -1516,7 +1516,7 @@ def render_page(page, all_pages=None):
     {faq_visible_html}
 
     <div style="margin-top:32px;padding:20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
-      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Instrument Serif',serif;font-weight:400">Så fungerar Smakfynd-poängen</h2>
+      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Newsreader',serif;font-weight:400">Så fungerar Smakfynd-poängen</h2>
       <p style="margin:0;font-size:13px;color:#4a4238;line-height:1.6">
         Varje vin bedöms på tre saker: <strong>crowd-betyg</strong> (vad vanliga vindrickare tycker),
         <strong>expertrecensioner</strong> (kritiker som James Suckling, Decanter m.fl.) och

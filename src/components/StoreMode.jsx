@@ -146,7 +146,7 @@ function availLabel(avail) {
   return { text: "Beställningsvara", color: t.txL };
 }
 
-function BarcodeScanner({ onScan, onClose }) {
+function BarcodeScanner({ onScan, onClose, onError }) {
   const scannerRef = useRef(null);
   const doneRef = useRef(false);
 
@@ -156,7 +156,7 @@ function BarcodeScanner({ onScan, onClose }) {
         const script = document.createElement("script");
         script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
         script.onload = () => initScanner();
-        script.onerror = () => onClose();
+        script.onerror = () => { if (onError) onError("Kunde inte ladda streckkodsläsaren."); else onClose(); };
         document.head.appendChild(script);
       } else {
         initScanner();
@@ -190,7 +190,8 @@ function BarcodeScanner({ onScan, onClose }) {
           () => {}
         );
       } catch(e) {
-        onClose();
+        if (onError) onError("Kameran kunde inte öppnas. Kontrollera att du gett tillåtelse.");
+        else onClose();
       }
     };
 
@@ -608,7 +609,7 @@ function StoreMode({ products, onClose }) {
       </div>
 
       {/* Scanner overlays */}
-      {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} />}
+      {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} onError={(msg) => { setShowScanner(false); setScanMsg(msg); }} />}
       {showLabelScanner && <LabelScanner products={products} onMatch={p => { setQ(p.name); handleSelectWithLearn(p); }} onClose={() => setShowLabelScanner(false)} />}
 
       {/* Scan message */}

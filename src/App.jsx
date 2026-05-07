@@ -42,6 +42,7 @@ function SmakfyndApp() {
   const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
+  const [notFound, setNotFound] = useState(false);
 
   // Load data with retry
   const loadData = async (attempt = 1) => {
@@ -97,6 +98,9 @@ function SmakfyndApp() {
           const el = document.querySelector('[aria-expanded]');
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
+      } else {
+        setNotFound(true);
+        setTimeout(() => setNotFound(false), 3000);
       }
       setOpenWineNr(null);
     }
@@ -454,6 +458,9 @@ function SmakfyndApp() {
             onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: t.txL, pointerEvents: "none" }}>⌕</span>
+          {search.length > 0 && (
+            <button onClick={() => setSearch("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", border: "none", background: "none", cursor: "pointer", color: t.txL, fontSize: 16, padding: 0, lineHeight: 1 }} aria-label="Rensa sökning">✕</button>
+          )}
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -585,6 +592,11 @@ function SmakfyndApp() {
 
 
         {/* ═══ RESULTS ═══ */}
+        {notFound && (
+          <div style={{ padding: "10px 16px", marginBottom: 10, borderRadius: 10, background: `${t.deal}12`, border: `1px solid ${t.deal}30`, fontSize: 13, color: t.deal, textAlign: "center", animation: "fadeIn 0.2s ease" }}>
+            Vinet hittades inte
+          </div>
+        )}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div aria-live="polite" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>

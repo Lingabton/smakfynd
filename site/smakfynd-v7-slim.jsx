@@ -889,10 +889,21 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
 // src/components/SaveButton.jsx
 function SaveButton({ nr, sv, auth }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const saved = sv.isSaved(nr);
   const lists = sv.getLists(nr);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
+
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div ref={menuRef} style={{ position: "relative", display: "inline-block" }}>
       <button onClick={e => { e.stopPropagation(); if (saved) { setMenuOpen(!menuOpen); } else { sv.toggle(nr, "favoriter", auth); track("save", { nr, list: "favoriter" }); } }}
         onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(!menuOpen); }}
         style={{
@@ -2112,7 +2123,7 @@ function availLabel(avail) {
   return { text: "Beställningsvara", color: t.txL };
 }
 
-function BarcodeScanner({ onScan, onClose }) {
+function BarcodeScanner({ onScan, onClose, onError }) {
   const scannerRef = useRef(null);
   const doneRef = useRef(false);
 
@@ -2122,7 +2133,7 @@ function BarcodeScanner({ onScan, onClose }) {
         const script = document.createElement("script");
         script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
         script.onload = () => initScanner();
-        script.onerror = () => onClose();
+        script.onerror = () => { if (onError) onError("Kunde inte ladda streckkodsläsaren."); else onClose(); };
         document.head.appendChild(script);
       } else {
         initScanner();
@@ -2156,7 +2167,8 @@ function BarcodeScanner({ onScan, onClose }) {
           () => {}
         );
       } catch(e) {
-        onClose();
+        if (onError) onError("Kameran kunde inte öppnas. Kontrollera att du gett tillåtelse.");
+        else onClose();
       }
     };
 
@@ -2574,7 +2586,7 @@ function StoreMode({ products, onClose }) {
       </div>
 
       {/* Scanner overlays */}
-      {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} />}
+      {showScanner && <BarcodeScanner onScan={handleBarcodeScan} onClose={() => setShowScanner(false)} onError={(msg) => { setShowScanner(false); setScanMsg(msg); }} />}
       {showLabelScanner && <LabelScanner products={products} onMatch={p => { setQ(p.name); handleSelectWithLearn(p); }} onClose={() => setShowLabelScanner(false)} />}
 
       {/* Scan message */}
@@ -2805,6 +2817,7 @@ function SmakfyndApp() {
   const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
+  const [notFound, setNotFound] = useState(false);
 
   // Load data with retry
   const loadData = async (attempt = 1) => {
@@ -2860,6 +2873,9 @@ function SmakfyndApp() {
           const el = document.querySelector('[aria-expanded]');
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
+      } else {
+        setNotFound(true);
+        setTimeout(() => setNotFound(false), 3000);
       }
       setOpenWineNr(null);
     }
@@ -3217,6 +3233,9 @@ function SmakfyndApp() {
             onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: t.txL, pointerEvents: "none" }}>⌕</span>
+          {search.length > 0 && (
+            <button onClick={() => setSearch("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", border: "none", background: "none", cursor: "pointer", color: t.txL, fontSize: 16, padding: 0, lineHeight: 1 }} aria-label="Rensa sökning">✕</button>
+          )}
         </div>
 
         {/* ═══ CATEGORY PILLS ═══ */}
@@ -3348,6 +3367,11 @@ function SmakfyndApp() {
 
 
         {/* ═══ RESULTS ═══ */}
+        {notFound && (
+          <div style={{ padding: "10px 16px", marginBottom: 10, borderRadius: 10, background: `${t.deal}12`, border: `1px solid ${t.deal}30`, fontSize: 13, color: t.deal, textAlign: "center", animation: "fadeIn 0.2s ease" }}>
+            Vinet hittades inte
+          </div>
+        )}
         <div style={{ marginBottom: 14, padding: "0 4px" }}>
           <div aria-live="polite" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 13, color: t.txL }}>{loading ? "Laddar..." : `${filtered.length} produkter`}</span>

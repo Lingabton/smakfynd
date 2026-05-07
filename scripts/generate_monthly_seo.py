@@ -181,15 +181,15 @@ def make_page(slug, title, meta, h1, intro, content_html, wines, extra_sections=
   <script type="application/ld+json">{faq}</script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;background:#f7f3ec;font-family:'DM Sans',-apple-system,sans-serif;color:#1e1710">
+<body style="margin:0;background:#f7f3ec;font-family:'Inter',-apple-system,sans-serif;color:#1e1710">
   <div style="max-width:640px;margin:0 auto;padding:24px 20px 60px">
     <header style="margin-bottom:24px">
       <a href="https://smakfynd.se" style="text-decoration:none;display:inline-block;margin-bottom:16px">
         <span style="font-family:Georgia,serif;font-size:22px;color:#7a2332">Smakfynd</span>
       </a>
-      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;line-height:1.2">{h1}</h1>
+      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Newsreader',Georgia,serif;font-weight:400;line-height:1.2">{h1}</h1>
       <p style="margin:0 0 12px;font-size:15px;color:#4a4238;line-height:1.6">{intro}</p>
       {content_html}
       <p style="margin:12px 0 0;font-size:12px;color:#7a7060">
@@ -199,7 +199,7 @@ def make_page(slug, title, meta, h1, intro, content_html, wines, extra_sections=
     <ol style="list-style:none;padding:0;margin:0">{wines_html}</ol>
     {extra_sections}
     <div style="margin-top:32px;padding:20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
-      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Instrument Serif',serif;font-weight:400">Så fungerar Smakfynd-poängen</h2>
+      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Newsreader',serif;font-weight:400">Så fungerar Smakfynd-poängen</h2>
       <p style="margin:0;font-size:13px;color:#4a4238;line-height:1.6">
         Varje vin bedöms på tre saker: <strong>crowd-betyg</strong>, <strong>expertrecensioner</strong> och
         <strong>prisvärde</strong>. Hög kvalitet till lågt pris = hög poäng.

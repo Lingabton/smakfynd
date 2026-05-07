@@ -1741,9 +1741,19 @@ function SaveButton({
   auth
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const saved = sv.isSaved(nr);
   const lists = sv.getLists(nr);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = e => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
   return /*#__PURE__*/React.createElement("div", {
+    ref: menuRef,
     style: {
       position: "relative",
       display: "inline-block"
@@ -3882,7 +3892,8 @@ function availLabel(avail) {
 }
 function BarcodeScanner({
   onScan,
-  onClose
+  onClose,
+  onError
 }) {
   const scannerRef = useRef(null);
   const doneRef = useRef(false);
@@ -3892,7 +3903,9 @@ function BarcodeScanner({
         const script = document.createElement("script");
         script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
         script.onload = () => initScanner();
-        script.onerror = () => onClose();
+        script.onerror = () => {
+          if (onError) onError("Kunde inte ladda streckkodsläsaren.");else onClose();
+        };
         document.head.appendChild(script);
       } else {
         initScanner();
@@ -3919,7 +3932,7 @@ function BarcodeScanner({
           onScan(decodedText, "barcode");
         }, () => {});
       } catch (e) {
-        onClose();
+        if (onError) onError("Kameran kunde inte öppnas. Kontrollera att du gett tillåtelse.");else onClose();
       }
     };
     loadAndStart();
@@ -4748,7 +4761,11 @@ function StoreMode({
     }
   }, "BETA"))), showScanner && /*#__PURE__*/React.createElement(BarcodeScanner, {
     onScan: handleBarcodeScan,
-    onClose: () => setShowScanner(false)
+    onClose: () => setShowScanner(false),
+    onError: msg => {
+      setShowScanner(false);
+      setScanMsg(msg);
+    }
   }), showLabelScanner && /*#__PURE__*/React.createElement(LabelScanner, {
     products: products,
     onMatch: p => {
@@ -5177,6 +5194,7 @@ function SmakfyndApp() {
   const [loadError, setLoadError] = useState(null);
   const [openWineNr, setOpenWineNr] = useState(initHash.openWine || null);
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
+  const [notFound, setNotFound] = useState(false);
 
   // Load data with retry
   const loadData = async (attempt = 1) => {
@@ -5235,6 +5253,9 @@ function SmakfyndApp() {
             block: "start"
           });
         }, 500);
+      } else {
+        setNotFound(true);
+        setTimeout(() => setNotFound(false), 3000);
       }
       setOpenWineNr(null);
     }
@@ -5987,7 +6008,23 @@ function SmakfyndApp() {
       color: t.txL,
       pointerEvents: "none"
     }
-  }, "\u2315")), /*#__PURE__*/React.createElement("div", {
+  }, "\u2315"), search.length > 0 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSearch(""),
+    style: {
+      position: "absolute",
+      right: 12,
+      top: "50%",
+      transform: "translateY(-50%)",
+      border: "none",
+      background: "none",
+      cursor: "pointer",
+      color: t.txL,
+      fontSize: 16,
+      padding: 0,
+      lineHeight: 1
+    },
+    "aria-label": "Rensa s\xF6kning"
+  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -6359,7 +6396,19 @@ function SmakfyndApp() {
       fontFamily: "inherit",
       fontWeight: sortBy === k ? 600 : 400
     }
-  }, l))))), /*#__PURE__*/React.createElement("div", {
+  }, l))))), notFound && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px",
+      marginBottom: 10,
+      borderRadius: 10,
+      background: `${t.deal}12`,
+      border: `1px solid ${t.deal}30`,
+      fontSize: 13,
+      color: t.deal,
+      textAlign: "center",
+      animation: "fadeIn 0.2s ease"
+    }
+  }, "Vinet hittades inte"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "0 4px"

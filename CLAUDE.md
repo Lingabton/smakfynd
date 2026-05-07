@@ -10,7 +10,7 @@ Frontend:  React SPA (vanilla JSX, ingen bundler) → GitHub Pages (docs/)
 Backend:   4 Cloudflare Workers (auth, analytics, wine-ai, report)
 Databas:   Cloudflare D1 (smakfynd-users, smakfynd-analytics)
 Data:      Python-pipeline → JSON → statisk deploy
-Fonts:     Instrument Serif + DM Sans (Google Fonts)
+Fonts:     Newsreader + Inter (Google Fonts)
 Analytics: GoatCounter (cookieless) + egen analytics-worker
 ```
 

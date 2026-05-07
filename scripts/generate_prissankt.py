@@ -150,12 +150,12 @@ def render_drop_row(d, rank):
         <span style="font-size:13px;color:#c44020;font-weight:600">Spara {savings:.0f} kr</span>
       </div>
       <a href="https://smakfynd.se/#vin/{nr}" style="text-decoration:none">
-        <strong style="font-size:18px;font-family:'Instrument Serif',Georgia,serif;color:#1e1710">{name}</strong>
+        <strong style="font-size:18px;font-family:'Newsreader',Georgia,serif;color:#1e1710">{name}</strong>
         <span style="color:#7a7060;font-size:14px"> — {sub}</span>
       </a>
       <div style="font-size:13px;color:#4a4238;margin-top:3px">{country} · {grape}</div>
       <div style="margin-top:6px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
-        <span style="font-size:22px;font-weight:700;font-family:'Instrument Serif',Georgia,serif;color:#1e1710">{price:.0f} kr</span>
+        <span style="font-size:22px;font-weight:700;font-family:'Newsreader',Georgia,serif;color:#1e1710">{price:.0f} kr</span>
         <span style="font-size:15px;color:#7a7060;text-decoration:line-through">{old_price:.0f} kr</span>
         <span style="font-size:11px;color:#7a7060">{date_str}</span>
       </div>
@@ -166,7 +166,7 @@ def render_drop_row(d, rank):
     </div>
     <div style="text-align:center;flex-shrink:0">
       <div style="width:54px;height:54px;border-radius:50%;background:#e8f0e4;border:2px solid #2d6b3f;display:flex;align-items:center;justify-content:center">
-        <span style="font-size:20px;font-weight:900;color:#2d6b3f;font-family:'Instrument Serif',Georgia,serif">{score}</span>
+        <span style="font-size:20px;font-weight:900;color:#2d6b3f;font-family:'Newsreader',Georgia,serif">{score}</span>
       </div>
       <div style="font-size:10px;color:#2d6b3f;margin-top:2px">{label}</div>
     </div>
@@ -244,16 +244,16 @@ html = f'''<!DOCTYPE html>
   <script type="application/ld+json">{faq_ld}</script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='19' fill='%237a2332'/><text x='20' y='27' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='%23f5ede3'>S</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;background:#f7f3ec;font-family:'DM Sans',-apple-system,sans-serif;color:#1e1710">
+<body style="margin:0;background:#f7f3ec;font-family:'Inter',-apple-system,sans-serif;color:#1e1710">
   <div style="max-width:640px;margin:0 auto;padding:24px 20px 60px">
 
     <header style="margin-bottom:28px">
       <a href="https://smakfynd.se" style="text-decoration:none;display:inline-block;margin-bottom:16px">
         <span style="font-family:Georgia,serif;font-size:22px;color:#7a2332">Smakfynd</span>
       </a>
-      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;line-height:1.2">
+      <h1 style="margin:0 0 8px;font-size:28px;font-family:'Newsreader',Georgia,serif;font-weight:400;line-height:1.2">
         Prissänkta viner på Systembolaget
       </h1>
       <p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">
@@ -264,15 +264,15 @@ html = f'''<!DOCTYPE html>
       {f"""
       <div style="display:flex;gap:12px;margin-bottom:16px">
         <div style="flex:1;padding:14px 16px;border-radius:12px;background:#c4402010;text-align:center">
-          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Instrument Serif',serif">{len(drops)}</div>
+          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Newsreader',serif">{len(drops)}</div>
           <div style="font-size:11px;color:#c44020;font-weight:500">prissänkta viner</div>
         </div>
         <div style="flex:1;padding:14px 16px;border-radius:12px;background:#c4402010;text-align:center">
-          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Instrument Serif',serif">−{avg_pct}%</div>
+          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Newsreader',serif">−{avg_pct}%</div>
           <div style="font-size:11px;color:#c44020;font-weight:500">snittrabatt</div>
         </div>
         <div style="flex:1;padding:14px 16px;border-radius:12px;background:#c4402010;text-align:center">
-          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Instrument Serif',serif">−{drops[0]['drop_pct']}%</div>
+          <div style="font-size:24px;font-weight:700;color:#c44020;font-family:'Newsreader',serif">−{drops[0]['drop_pct']}%</div>
           <div style="font-size:11px;color:#c44020;font-weight:500">bästa rabatten</div>
         </div>
       </div>
@@ -311,7 +311,7 @@ html = f'''<!DOCTYPE html>
     {"<ol style='list-style:none;padding:0;margin:0'>" + wines_html + "</ol>" if drops else "<p style='font-size:15px;color:#7a7060;text-align:center;padding:40px 0'>Inga prissänkningar hittade just nu. Kom tillbaka snart!</p>"}
 
     <div style="margin-top:32px;padding:20px;border-radius:14px;background:#fefcf8;border:1px solid #e6ddd0">
-      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Instrument Serif',serif;font-weight:400">Hur hittar vi prissänkningar?</h2>
+      <h2 style="margin:0 0 8px;font-size:18px;font-family:'Newsreader',serif;font-weight:400">Hur hittar vi prissänkningar?</h2>
       <p style="margin:0;font-size:13px;color:#4a4238;line-height:1.6">
         Vi sparar priset på varje vin varje dag. När ett pris sjunker med minst 5% flaggar vi det här.
         Systembolaget har ingen offentlig lista över prissänkningar — men vi håller koll automatiskt.
