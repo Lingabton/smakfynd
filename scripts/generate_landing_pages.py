@@ -235,6 +235,7 @@ def make_pages():
             "h1": f"Bästa Malbec på Systembolaget — {DATE_STR}",
             "intro": "Malbec från Argentina är en favorit bland svenska vindrickare. Här är de som ger mest smak för pengarna.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'malbec' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -246,6 +247,7 @@ def make_pages():
             "intro": "Cabernet Sauvignon — världens mest kända rödvinsdruva. Här är de bästa köpen på Systembolaget.",
             "intro2": "Cabernet Sauvignon från Systembolaget finns i alla prisklasser — från chilenska budgetviner till prestigefyllda Bordeaux-blandningar. Druvan ger strukturerade viner med svarta vinbär, ceder och ofta fatlagring. Perfekt till kötträtter och grillat.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'cabernet sauvignon' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -278,6 +280,7 @@ def make_pages():
             "intro": "Pinot Noir är elegant, fruktig och mångsidig. Här är de bästa köpen — från Bourgogne till Nya Zeeland.",
             "intro2": "Pinot Noir på Systembolaget sträcker sig från eleganta Bourgogne till fruktdrivna Nya Zeeland-varianter. Druvan är känslig och svårodlad, vilket gör prisvärdhet extra viktig. Vi jämför alla Pinot Noir-viner i fast sortiment baserat på smak och pris.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'pinot noir' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -288,6 +291,7 @@ def make_pages():
             "h1": f"Bästa Syrah & Shiraz på Systembolaget — {DATE_STR}",
             "intro": "Syrah (eller Shiraz) ger kraftfulla viner med peppar och mörka bär. Här är de bästa fynden.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and ('syrah' in (w.get('grape', '') or '').lower() or 'shiraz' in (w.get('grape', '') or '').lower())],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -298,6 +302,7 @@ def make_pages():
             "h1": f"Bästa Riesling på Systembolaget — {DATE_STR}",
             "intro": "Riesling är en av världens mest mångsidiga vita druvor — från stentorrt till sött. Här är de bästa.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Vitt'
                            and 'riesling' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -308,6 +313,7 @@ def make_pages():
             "h1": f"Bästa Tempranillo på Systembolaget — {DATE_STR}",
             "intro": "Tempranillo är Spaniens stolthet — fylliga viner med vanilj och körsbär. Här är de bästa köpen.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'tempranillo' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -318,6 +324,7 @@ def make_pages():
             "h1": f"Bästa Sangiovese på Systembolaget — {DATE_STR}",
             "intro": "Sangiovese är druvan bakom Chianti och Brunello di Montalcino. Här är de bästa italienska fynden.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'sangiovese' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -328,6 +335,7 @@ def make_pages():
             "h1": f"Bästa Chardonnay på Systembolaget — {DATE_STR}",
             "intro": "Chardonnay — från fräsch och mineralisk till fyllig och fatlagrad. Här är de bästa köpen.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Vitt'
                            and 'chardonnay' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -338,6 +346,7 @@ def make_pages():
             "h1": f"Bästa Sauvignon Blanc på Systembolaget — {DATE_STR}",
             "intro": "Sauvignon Blanc är fräsch, syrig och perfekt till sommar och fisk. Här är de bästa fynden.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Vitt'
                            and 'sauvignon blanc' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -348,6 +357,7 @@ def make_pages():
             "h1": f"Bästa Zinfandel på Systembolaget — {DATE_STR}",
             "intro": "Zinfandel ger generösa, fruktdrivna viner med kryddighet. Här är de bästa köpen.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'zinfandel' in (w.get('grape', '') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -880,6 +890,7 @@ def make_pages():
             "h1": f"Bästa Merlot-vinerna — {DATE_STR}",
             "intro": "Merlot är den mjuka, tillgängliga favoriten. Fruktigt, rundt och vänligt — perfekt för den som vill ha ett rött vin utan för mycket tanniner.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'merlot' in (w.get('grape') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -890,6 +901,7 @@ def make_pages():
             "h1": f"Bästa Grenache-vinerna — {DATE_STR}",
             "intro": "Grenache (eller Garnacha) ger generösa, kryddiga röda viner med bärtoner och värme. Populär i Rhônedalen, Spanien och Australien.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and any(g in (w.get('grape') or '').lower() for g in ['grenache', 'garnacha'])],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
@@ -950,6 +962,7 @@ def make_pages():
             "h1": f"Bästa Carménère-vinerna — {DATE_STR}",
             "intro": "Carménère — Chiles signaturdruva med kryddiga, gröna och mörka bärtoner. Unik och ofta undervärderad. Här är de bästa köpen.",
             "wines": sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Rött'
                            and 'carm' in (w.get('grape') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0))[:20],
         },
