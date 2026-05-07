@@ -255,8 +255,9 @@ function SmakfyndApp() {
             <svg width="22" height="22" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill={t.wine}/><text x="20" y="27" textAnchor="middle" fontFamily="Georgia,serif" fontSize="18" fill="#f5ede3" fontWeight="400">S</text></svg>
             <span style={{ fontFamily: t.serif, fontSize: 20, color: t.wine }}>Smakfynd</span>
           </div>
-          <div style={{ display: "flex", gap: 12, fontSize: 12, color: t.txL }}>
-            {[["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`], ["about", "Om"],
+          <div style={{ display: "flex", gap: 12, fontSize: 12, color: t.txL, alignItems: "center" }}>
+            <span onClick={() => setStoreMode(true)} style={{ cursor: "pointer", color: t.wine, fontWeight: 500, padding: "8px 0", minHeight: 44, display: "inline-flex", alignItems: "center" }}>Skanna</span>
+            {[["saved", `Sparade${sv.count ? ` (${sv.count})` : ""}`],
               [auth.user ? "profile" : "login", auth.user ? "Min sida" : "Logga in"]].map(([k, l]) => (
               <span key={k} onClick={() => {
                   if (k === "login") { setShowLogin(true); return; }

@@ -16,9 +16,10 @@
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
 
 ### Plattform (pågående)
-- [ ] Supabase-integration på huvudsajten (shared auth med quiz)
-- [ ] Login/Min profil i headern (magic link)
-- [ ] "Spara vin"-funktion (Supabase saved_wines-tabell)
+- [x] Supabase-integration på huvudsajten (shared auth med quiz) (2026-05-07)
+- [x] KRÄVER: Lägg till https://smakfynd.se i Supabase redirect URLs (Gabriel manuellt)
+- [ ] Login/Min profil i headern (magic link) — redan implementerat, behöver testas
+- [ ] "Spara vin"-funktion (Supabase saved_wines-tabell) — backend klar, behöver UI-uppdatering
 - [ ] Profilsida /profil (email, sparade viner, quiz-länk, premium-placeholder)
 - [ ] Sparade-viner-sida /sparade (listvy med sortering)
 - [ ] Snabbkollen synligare (CTA i header/hero)
