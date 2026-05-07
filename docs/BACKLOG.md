@@ -4,11 +4,11 @@
 ## Kvar att göra
 
 ### UX — låg insats
-- [ ] SaveButton: click-outside stänger menyn (har "Stäng"-knapp som fallback)
-- [ ] Ogiltigt vin-deep-link (#vin/XXX) — visa "Vinet hittades inte" istf tyst fail
-- [ ] Kamera-nekad i barcode scanner — visa tydligt felmeddelande istf tyst stängning
-- [ ] Sökfältet: synlig X-knapp för att rensa (type="search" ger inkonsekvent native-knapp)
-- [ ] Fontinkonsistens: landing pages (Instrument Serif + DM Sans) vs SPA (Newsreader + Inter)
+- [x] SaveButton: click-outside stänger menyn (2026-05-07)
+- [x] Ogiltigt vin-deep-link — visar "Vinet hittades inte" toast (2026-05-07)
+- [x] Kamera-nekad i barcode scanner — visar felmeddelande (2026-05-07)
+- [x] Sökfältet: synlig X-knapp för att rensa (2026-05-07)
+- [x] Fontinkonsistens: alla 75 landing pages nu Newsreader + Inter (2026-05-07)
 
 ### Kritiker-data
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
