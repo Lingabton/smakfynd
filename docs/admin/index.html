@@ -295,23 +295,66 @@ function downloadJSON(name, obj) {
 }
 
 function renderAnalytics() {
+  const a = D.analytics || {};
+  const evtTypes = a.events_by_type || [];
+  const recent = a.recent_events || [];
+  const searches = a.top_searches || [];
+  const daily = a.daily_events || [];
+  const ai = a.ai_stats || {};
+
+  // Daily chart (simple bars)
+  const maxDaily = Math.max(...daily.map(d => d.n), 1);
+  let dailyBars = daily.map(d => `<div class="bar-row">
+    <span class="bar-label">${d.day.slice(5)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${d.n/maxDaily*100}%;background:#8b2332"></div></div>
+    <span class="bar-value">${d.n}</span>
+  </div>`).join('');
+
+  // Event type breakdown
+  let evtRows = evtTypes.map(e => `<tr><td><strong>${e.event}</strong></td><td>${e.n}</td></tr>`).join('');
+
+  // Recent events
+  let recentRows = recent.map(e => {
+    let detail = '';
+    try { const d = JSON.parse(e.data || '{}'); detail = d.name || d.query || ''; } catch(x) {}
+    return `<tr>
+      <td style="font-size:11px;color:#9e9588">${e.ts.slice(5, 16)}</td>
+      <td>${e.event}</td>
+      <td>${detail}</td>
+      <td style="font-size:11px;color:#9e9588">${e.device || ''}</td>
+    </tr>`;
+  }).join('');
+
+  // Searches
+  let searchRows = searches.map(s => `<tr><td>${s.query}</td><td>${s.result_count || '–'}</td><td>${s.n}</td></tr>`).join('');
+
   document.getElementById('tab-analytics').innerHTML = `
-    <h2>Trafik</h2>
-    <div class="links">
-      <a href="https://smakfynd.goatcounter.com" target="_blank">GoatCounter Dashboard →</a>
-      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Google Search Console →</a>
-      <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions →</a>
+    <div class="grid">
+      <div class="stat"><div class="stat-value">${(a.total_events || 0).toLocaleString()}</div><div class="stat-label">Events totalt</div></div>
+      <div class="stat"><div class="stat-value">${searches.length}</div><div class="stat-label">Unika sökningar</div></div>
+      <div class="stat"><div class="stat-value">${ai.n || 0}</div><div class="stat-label">AI-frågor</div></div>
+      <div class="stat"><div class="stat-value">${ai.avg_ms ? Math.round(ai.avg_ms) + 'ms' : '–'}</div><div class="stat-label">AI snitt-svar</div></div>
     </div>
 
-    <h2>GoatCounter (senaste 7 dagarna)</h2>
-    <iframe src="https://smakfynd.goatcounter.com" class="gc-embed" style="height:600px;border:none" loading="lazy"></iframe>
+    <h2>Events per dag (14 dagar)</h2>
+    ${dailyBars || '<p style="font-size:13px;color:#9e9588">Ingen data</p>'}
 
-    <h2>Snabblänkar</h2>
+    <h2>Event-typer</h2>
+    <table><thead><tr><th>Event</th><th>Antal</th></tr></thead><tbody>${evtRows || '<tr><td colspan="2" style="color:#9e9588">Ingen data</td></tr>'}</tbody></table>
+
+    <h2>Topp sökningar</h2>
+    <table><thead><tr><th>Sökfras</th><th>Resultat</th><th>Gånger</th></tr></thead><tbody>${searchRows || '<tr><td colspan="3" style="color:#9e9588">Inga sökningar</td></tr>'}</tbody></table>
+
+    <h2>Senaste händelser</h2>
+    <table><thead><tr><th>Tid</th><th>Event</th><th>Detalj</th><th>Enhet</th></tr></thead><tbody>${recentRows || '<tr><td colspan="4" style="color:#9e9588">Inga händelser</td></tr>'}</tbody></table>
+
+    <h2>Externa dashboards</h2>
     <div class="links">
-      <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase Dashboard</a>
-      <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a>
-      <a href="/prissankt/">Prissänkt-sidan</a>
-      <a href="https://smakfynd.goatcounter.com/api/v0/stats/total" target="_blank">GoatCounter API</a>
+      <a href="https://smakfynd.goatcounter.com" target="_blank">GoatCounter →</a>
+      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Google Search Console →</a>
+      <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase →</a>
+      <a href="https://dash.cloudflare.com" target="_blank">Cloudflare →</a>
+      <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions →</a>
     </div>
   `;
 }

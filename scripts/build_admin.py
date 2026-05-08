@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Build admin dashboard data: stats, data quality, flagged Vivino matches."""
-import json, os
+"""Build admin dashboard data: stats, data quality, flagged Vivino matches, analytics."""
+import json, os, subprocess
 from datetime import datetime
 from collections import Counter
 
@@ -101,6 +101,48 @@ admin_data = {
         for k, v in sorted(flagged.items(), key=lambda x: x[1].get("match_quality", 0))
     ],
 }
+
+# --- Fetch analytics from CF D1 ---
+analytics = {}
+try:
+    def d1_query(sql):
+        r = subprocess.run(
+            ["npx", "wrangler", "d1", "execute", "smakfynd-analytics", "--remote", "--json", "--command", sql],
+            capture_output=True, text=True, cwd=os.path.join(BASE, "workers", "analytics"), timeout=30
+        )
+        if r.returncode == 0:
+            data = json.loads(r.stdout)
+            return data[0].get("results", []) if data else []
+        return []
+
+    # Event counts by type
+    events_by_type = d1_query("SELECT event, COUNT(*) as n FROM events GROUP BY event ORDER BY n DESC")
+
+    # Recent events
+    recent_events = d1_query("SELECT event, wine_nr, data, device, ts FROM events ORDER BY id DESC LIMIT 15")
+
+    # Top searches
+    top_searches = d1_query("SELECT query, result_count, COUNT(*) as n FROM searches GROUP BY query ORDER BY n DESC LIMIT 15")
+
+    # AI usage
+    ai_stats = d1_query("SELECT COUNT(*) as n, AVG(response_time_ms) as avg_ms FROM ai_logs")
+
+    # Daily event counts (last 14 days)
+    daily_events = d1_query("SELECT DATE(ts) as day, COUNT(*) as n FROM events WHERE ts > datetime('now', '-14 days') GROUP BY DATE(ts) ORDER BY day")
+
+    analytics = {
+        "events_by_type": events_by_type,
+        "recent_events": recent_events,
+        "top_searches": top_searches,
+        "ai_stats": ai_stats[0] if ai_stats else {},
+        "daily_events": daily_events,
+        "total_events": sum(e.get("n", 0) for e in events_by_type),
+    }
+    print(f"  Analytics: {analytics['total_events']} events fetched")
+except Exception as e:
+    print(f"  Analytics: skipped ({e})")
+
+admin_data["analytics"] = analytics
 
 out_path = os.path.join(ADMIN_DIR, "data.json")
 json.dump(admin_data, open(out_path, "w"), ensure_ascii=False)
