@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — Smakfynd</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f1ea; color: #1a1510; }
+    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 24px; font-family: Georgia, serif; margin-bottom: 4px; }
+    h2 { font-size: 16px; font-family: Georgia, serif; font-weight: 400; margin: 24px 0 12px; color: #3d3830; border-bottom: 1px solid #e2d8c8; padding-bottom: 6px; }
+    .subtitle { font-size: 12px; color: #9e9588; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat { background: #fff; border-radius: 12px; border: 1px solid #e2d8c8; padding: 14px 16px; }
+    .stat-value { font-size: 28px; font-weight: 700; font-family: Georgia, serif; color: #1a1510; }
+    .stat-label { font-size: 11px; color: #9e9588; margin-top: 2px; }
+    .stat-warn .stat-value { color: #c44020; }
+    .stat-good .stat-value { color: #2d6b3f; }
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .bar-label { font-size: 11px; color: #6b6355; width: 100px; text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 8px; background: #e8e2d8; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .bar-value { font-size: 11px; color: #9e9588; width: 40px; flex-shrink: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-size: 10px; color: #9e9588; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 8px; border-bottom: 2px solid #e2d8c8; }
+    td { padding: 8px; border-bottom: 1px solid #ede6da; }
+    .score { font-weight: 700; font-family: Georgia, serif; }
+    .match-pct { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .match-low { background: #c4402018; color: #c44020; }
+    .match-mid { background: #b08d4018; color: #b08d40; }
+    .match-ok { background: #2d6b3f18; color: #2d6b3f; }
+    .quality-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+    .quality-item { flex: 1; padding: 8px 10px; background: #fff; border-radius: 8px; border: 1px solid #e2d8c8; }
+    .quality-item .pct { font-size: 20px; font-weight: 700; font-family: Georgia, serif; }
+    .quality-item .label { font-size: 10px; color: #9e9588; }
+    .quality-item.bad .pct { color: #c44020; }
+    .quality-item.ok .pct { color: #b08d40; }
+    .quality-item.good .pct { color: #2d6b3f; }
+    .links { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+    .links a { padding: 8px 16px; border-radius: 8px; font-size: 12px; text-decoration: none; font-weight: 500; border: 1px solid #e2d8c8; color: #3d3830; background: #fff; }
+    .links a:hover { border-color: #8b2332; color: #8b2332; }
+    .flag-card { background: #fff; border-radius: 10px; border: 1px solid #e2d8c8; padding: 12px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .flag-info { flex: 1; min-width: 0; }
+    .flag-name { font-size: 14px; font-weight: 600; }
+    .flag-match { font-size: 12px; color: #6b6355; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .flag-meta { font-size: 11px; color: #9e9588; margin-top: 2px; }
+    .flag-actions button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: 4px; }
+    .btn-ok { background: #2d6b3f; color: #fff; }
+    .btn-no { background: #c44020; color: #fff; }
+    .btn-undo { background: #e8e2d8; color: #3d3830; }
+    .tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab-bar button { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2d8c8; background: #fff; cursor: pointer; font-size: 12px; font-family: inherit; }
+    .tab-bar button.active { background: #8b2332; color: #fff; border-color: #8b2332; }
+    .section { display: none; }
+    .section.active { display: block; }
+    #loading { text-align: center; padding: 60px; color: #9e9588; }
+    .gc-embed { width: 100%; border: 1px solid #e2d8c8; border-radius: 12px; overflow: hidden; background: #fff; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <h1>Smakfynd Admin</h1>
+  <div class="subtitle" id="generated">Laddar...</div>
+
+  <div class="tab-bar" id="tabs">
+    <button class="active" onclick="showTab('overview')">Översikt</button>
+    <button onclick="showTab('quality')">Datakvalitet</button>
+    <button onclick="showTab('vivino')">Vivino Review</button>
+    <button onclick="showTab('analytics')">Trafik</button>
+  </div>
+
+  <div id="loading">Laddar data...</div>
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="tab-overview"></div>
+
+  <!-- DATA QUALITY -->
+  <div class="section" id="tab-quality"></div>
+
+  <!-- VIVINO REVIEW -->
+  <div class="section" id="tab-vivino"></div>
+
+  <!-- ANALYTICS -->
+  <div class="section" id="tab-analytics"></div>
+</div>
+
+<script>
+let D = null;
+let flagDecisions = {};
+
+function showTab(id) {
+  document.querySelectorAll('.tab-bar button').forEach((b, i) => {
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(id.slice(0,4)));
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+async function init() {
+  try {
+    const res = await fetch('data.json?v=' + Date.now());
+    D = await res.json();
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Kunde inte ladda data.json — kör: python3 scripts/build_admin.py';
+    return;
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('generated').textContent = 'Senast: ' + new Date(D.generated).toLocaleString('sv-SE');
+
+  renderOverview();
+  renderQuality();
+  renderVivino();
+  renderAnalytics();
+}
+
+function renderOverview() {
+  const o = D.overview;
+  const s = D.scores;
+  const p = D.prices;
+  const top = D.top_wines;
+
+  let typeBars = '';
+  const maxType = Math.max(...Object.values(D.types));
+  for (const [type, count] of Object.entries(D.types)) {
+    typeBars += `<div class="bar-row">
+      <span class="bar-label">${type}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${count/maxType*100}%;background:#8b2332"></div></div>
+      <span class="bar-value">${count}</span>
+    </div>`;
+  }
+
+  let scoreBars = '';
+  const maxBin = Math.max(...Object.values(D.scores.distribution));
+  for (const [bin, count] of Object.entries(D.scores.distribution)) {
+    const col = bin >= 80 ? '#2d6b3f' : bin >= 60 ? '#b08d40' : '#c44020';
+    scoreBars += `<div class="bar-row">
+      <span class="bar-label">${bin}–${parseInt(bin)+9}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${count/maxBin*100}%;background:${col}"></div></div>
+      <span class="bar-value">${count}</span>
+    </div>`;
+  }
+
+  let topRows = top.map((w, i) => `<tr>
+    <td class="score">${w.score}</td>
+    <td><strong>${w.name}</strong> <span style="color:#9e9588">${w.sub}</span></td>
+    <td>${w.price} kr</td>
+    <td>${w.country}</td>
+  </tr>`).join('');
+
+  document.getElementById('tab-overview').innerHTML = `
+    <div class="grid">
+      <div class="stat"><div class="stat-value">${o.total_wines.toLocaleString()}</div><div class="stat-label">Viner live</div></div>
+      <div class="stat"><div class="stat-value">${o.fast_sortiment}</div><div class="stat-label">Fast sortiment</div></div>
+      <div class="stat"><div class="stat-value">${o.price_drops}</div><div class="stat-label">Prissänkta</div></div>
+      <div class="stat"><div class="stat-value">${o.snapshots}</div><div class="stat-label">Prissnapshottar</div></div>
+      <div class="stat"><div class="stat-value">${s.avg}</div><div class="stat-label">Snittpoäng</div></div>
+      <div class="stat"><div class="stat-value">${p.median} kr</div><div class="stat-label">Medianpris</div></div>
+    </div>
+
+    <h2>Poängfördelning</h2>
+    ${scoreBars}
+
+    <h2>Vintyper</h2>
+    ${typeBars}
+
+    <h2>Topp 20</h2>
+    <table><thead><tr><th>Poäng</th><th>Vin</th><th>Pris</th><th>Land</th></tr></thead><tbody>${topRows}</tbody></table>
+  `;
+}
+
+function renderQuality() {
+  const q = D.data_quality;
+  const v = D.vivino;
+
+  let items = '';
+  for (const [field, d] of Object.entries(q)) {
+    const cls = d.pct > 50 ? 'bad' : d.pct > 20 ? 'ok' : 'good';
+    items += `<div class="quality-item ${cls}"><div class="pct">${d.pct}%</div><div class="label">${field} saknas</div></div>`;
+  }
+
+  let countryBars = '';
+  const maxC = Math.max(...Object.values(D.countries));
+  for (const [c, count] of Object.entries(D.countries)) {
+    countryBars += `<div class="bar-row">
+      <span class="bar-label">${c}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${count/maxC*100}%;background:#6b8cce"></div></div>
+      <span class="bar-value">${count}</span>
+    </div>`;
+  }
+
+  document.getElementById('tab-quality').innerHTML = `
+    <h2>Saknad data</h2>
+    <div class="quality-bar">${items}</div>
+    <p style="font-size:12px;color:#9e9588;margin:8px 0">Av ${D.overview.total_wines} viner i wines.json</p>
+
+    <h2>Datakällor</h2>
+    <div class="grid">
+      <div class="stat ${v.with_rating > 1000 ? 'stat-good' : 'stat-warn'}"><div class="stat-value">${v.with_rating.toLocaleString()}</div><div class="stat-label">Vivino med betyg</div></div>
+      <div class="stat"><div class="stat-value">${v.zero_rating.toLocaleString()}</div><div class="stat-label">Vivino utan betyg</div></div>
+      <div class="stat"><div class="stat-value">${v.expert_cache.toLocaleString()}</div><div class="stat-label">Expert-cache</div></div>
+      <div class="stat ${v.flagged > 0 ? 'stat-warn' : 'stat-good'}"><div class="stat-value">${v.flagged}</div><div class="stat-label">Flaggade matchningar</div></div>
+    </div>
+
+    <h2>Länder (topp 15)</h2>
+    ${countryBars}
+  `;
+}
+
+function renderVivino() {
+  const flagged = D.flagged_vivino || [];
+
+  if (flagged.length === 0) {
+    document.getElementById('tab-vivino').innerHTML = '<div style="text-align:center;padding:40px;color:#2d6b3f;font-size:14px">Inga flaggade matchningar — allt ser bra ut.</div>';
+    return;
+  }
+
+  let cards = flagged.map((f, i) => {
+    const sbName = f.key.split('|')[0];
+    const sbSub = f.key.split('|')[1] || '';
+    const country = f.key.split('|')[2] || '';
+    const pctClass = f.match_quality < 60 ? 'match-low' : f.match_quality < 80 ? 'match-mid' : 'match-ok';
+    const status = flagDecisions[f.key] || 'pending';
+    const opacity = status !== 'pending' ? 'opacity:0.5' : '';
+
+    return `<div class="flag-card" style="${opacity}" data-key="${f.key}" data-status="${status}">
+      <div class="flag-info">
+        <div class="flag-name">${sbName} <span style="font-weight:400;color:#6b6355">${sbSub}</span></div>
+        <div class="flag-match">→ ${f.vivino_name}</div>
+        <div class="flag-meta">
+          <span class="match-pct ${pctClass}">${f.match_quality}%</span>
+          Rating: ${f.vivino_rating} · Reviews: ${f.vivino_reviews} · ${country}
+        </div>
+      </div>
+      <div class="flag-actions">
+        ${status === 'pending' ? `
+          <button class="btn-ok" onclick="flagDecide('${f.key}','approved')">Godkänn</button>
+          <button class="btn-no" onclick="flagDecide('${f.key}','rejected')">Avvisa</button>
+        ` : `
+          <button class="btn-undo" onclick="flagDecide('${f.key}','pending')">${status === 'approved' ? '✓' : '✗'} Ångra</button>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+
+  const pending = flagged.length - Object.keys(flagDecisions).length;
+  const approved = Object.values(flagDecisions).filter(d => d === 'approved').length;
+  const rejected = Object.values(flagDecisions).filter(d => d === 'rejected').length;
+
+  document.getElementById('tab-vivino').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;color:#6b6355">${flagged.length} flaggade · ${pending} kvar · ${approved} godkända · ${rejected} avvisade</div>
+      <div>
+        <button onclick="flagAll('approved')" style="padding:6px 14px;border-radius:6px;border:1px solid #2d6b3f;background:#2d6b3f;color:#fff;cursor:pointer;font-size:11px;font-weight:600;margin-right:4px">Godkänn alla</button>
+        <button onclick="flagAll('rejected')" style="padding:6px 14px;border-radius:6px;border:1px solid #c44020;background:#c44020;color:#fff;cursor:pointer;font-size:11px;font-weight:600;margin-right:8px">Avvisa alla</button>
+        <button onclick="exportDecisions()" style="padding:6px 14px;border-radius:6px;border:1px solid #e2d8c8;background:#fff;cursor:pointer;font-size:11px">Exportera beslut</button>
+      </div>
+    </div>
+    <div id="flag-cards">${cards}</div>
+  `;
+}
+
+function flagDecide(key, status) {
+  if (status === 'pending') delete flagDecisions[key];
+  else flagDecisions[key] = status;
+  renderVivino();
+}
+
+function flagAll(status) {
+  (D.flagged_vivino || []).forEach(f => { if (!flagDecisions[f.key]) flagDecisions[f.key] = status; });
+  renderVivino();
+}
+
+function exportDecisions() {
+  const approved = {}, rejected = {};
+  for (const [key, status] of Object.entries(flagDecisions)) {
+    const entry = (D.flagged_vivino || []).find(f => f.key === key);
+    if (!entry) continue;
+    if (status === 'approved') approved[key] = { vivino_rating: entry.vivino_rating, vivino_reviews: entry.vivino_reviews, vivino_name: entry.vivino_name };
+    if (status === 'rejected') rejected[key] = true;
+  }
+  downloadJSON('vivino_approved.json', approved);
+  downloadJSON('vivino_rejected.json', rejected);
+}
+
+function downloadJSON(name, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+}
+
+function renderAnalytics() {
+  document.getElementById('tab-analytics').innerHTML = `
+    <h2>Trafik</h2>
+    <div class="links">
+      <a href="https://smakfynd.goatcounter.com" target="_blank">GoatCounter Dashboard →</a>
+      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Google Search Console →</a>
+      <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions →</a>
+    </div>
+
+    <h2>GoatCounter (senaste 7 dagarna)</h2>
+    <iframe src="https://smakfynd.goatcounter.com" class="gc-embed" style="height:600px;border:none" loading="lazy"></iframe>
+
+    <h2>Snabblänkar</h2>
+    <div class="links">
+      <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase Dashboard</a>
+      <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a>
+      <a href="/prissankt/">Prissänkt-sidan</a>
+      <a href="https://smakfynd.goatcounter.com/api/v0/stats/total" target="_blank">GoatCounter API</a>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
