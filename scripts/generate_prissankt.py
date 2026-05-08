@@ -115,15 +115,28 @@ if len(snapshot_files) >= 2:
                         'drop_date': compare_date,
                     })
 
-def dedup_wines(wines):
-    """Remove duplicate wines (same name + sub + price), keep highest scored."""
+def dedup_wines(wines, max_per_producer=3):
+    """Remove duplicates, limit per producer, hide large formats."""
+    standard = set()
+    for w in wines:
+        if (w.get('vol') or 750) <= 750:
+            standard.add((w.get('name','').lower(), (w.get('sub','') or '').lower()))
     seen = set()
+    producer_count = {}
     result = []
     for w in wines:
-        key = (w.get('name',''), w.get('sub',''), w.get('price',0))
-        if key not in seen:
-            seen.add(key)
-            result.append(w)
+        if (w.get('vol') or 750) > 750:
+            if (w.get('name','').lower(), (w.get('sub','') or '').lower()) in standard:
+                continue
+        dup_key = (w.get('name',''), w.get('sub',''), w.get('price',0))
+        if dup_key in seen:
+            continue
+        seen.add(dup_key)
+        producer = w.get('name','').strip()
+        producer_count[producer] = producer_count.get(producer, 0) + 1
+        if producer_count[producer] > max_per_producer:
+            continue
+        result.append(w)
     return result
 
 # Sort: highest percentage drop first, then by savings amount

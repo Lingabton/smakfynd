@@ -82,6 +82,21 @@ print(f"Price drops (5%+): {drops}")
 data = [p for p in data if p.get('smakfynd_score') and p.get('smakfynd_score') > 0]
 print(f"After score filter: {len(data)} products")
 
+# Hide large-format bottles when standard (750ml) version exists
+# e.g. Pol Roger 3L/6L/9L when 750ml is already in the list
+standard_wines = set()
+for p in data:
+    if (p.get('vol') or 750) <= 750:
+        key = (p.get('name', '').strip().lower(), (p.get('sub', '') or '').strip().lower())
+        standard_wines.add(key)
+
+before_format = len(data)
+data = [p for p in data if (p.get('vol') or 750) <= 750
+        or (p.get('name', '').strip().lower(), (p.get('sub', '') or '').strip().lower()) not in standard_wines]
+format_removed = before_format - len(data)
+if format_removed:
+    print(f"Large-format filter: removed {format_removed} (standard bottle exists)")
+
 # Deduplicate: keep highest-scored wine when name+sub is identical
 seen_keys = {}
 deduped = []
@@ -92,7 +107,7 @@ for p in sorted(data, key=lambda x: -(x.get('smakfynd_score', 0))):
         deduped.append(p)
 removed = len(data) - len(deduped)
 if removed:
-    print(f"Deduplication: removed {removed} duplicates")
+    print(f"Deduplication: removed {removed} exact duplicates")
 data = deduped
 fast = [p for p in data if p.get('assortment') == 'Fast sortiment']
 tillfälligt = [p for p in data if p.get('assortment') != 'Fast sortiment']

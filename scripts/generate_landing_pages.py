@@ -52,15 +52,38 @@ for p in all_wines:
 
 fast = [w for w in all_wines if w.get('assortment') == 'Fast sortiment']
 
-def dedup_wines(wines):
-    """Remove duplicate wines (same name + sub + price), keep highest scored."""
+def dedup_wines(wines, max_per_producer=2):
+    """Remove duplicates and limit per producer. Hide large formats when standard exists."""
+    # Step 1: find which wines have standard (750ml) bottles
+    standard = set()
+    for w in wines:
+        if (w.get('vol') or 750) <= 750:
+            standard.add((w.get('name','').lower(), (w.get('sub','') or '').lower()))
+
+    # Step 2: dedup + producer limit + format filter
     seen = set()
+    producer_count = {}
     result = []
     for w in wines:
-        key = (w.get('name',''), w.get('sub',''), w.get('price',0))
-        if key not in seen:
-            seen.add(key)
-            result.append(w)
+        # Skip large format if standard exists
+        if (w.get('vol') or 750) > 750:
+            key = (w.get('name','').lower(), (w.get('sub','') or '').lower())
+            if key in standard:
+                continue
+
+        # Skip exact duplicates (same name + sub + price)
+        dup_key = (w.get('name',''), w.get('sub',''), w.get('price',0))
+        if dup_key in seen:
+            continue
+        seen.add(dup_key)
+
+        # Limit per producer (name = producer proxy)
+        producer = w.get('name','').strip()
+        producer_count[producer] = producer_count.get(producer, 0) + 1
+        if producer_count[producer] > max_per_producer:
+            continue
+
+        result.append(w)
     return result
 
 NOW = datetime.now()
