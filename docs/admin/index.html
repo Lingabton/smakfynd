@@ -301,6 +301,7 @@ function renderAnalytics() {
   const searches = a.top_searches || [];
   const daily = a.daily_events || [];
   const ai = a.ai_stats || {};
+  const history = D.history || [];
 
   // Daily chart (simple bars)
   const maxDaily = Math.max(...daily.map(d => d.n), 1);
@@ -347,6 +348,21 @@ function renderAnalytics() {
 
     <h2>Senaste händelser</h2>
     <table><thead><tr><th>Tid</th><th>Event</th><th>Detalj</th><th>Enhet</th></tr></thead><tbody>${recentRows || '<tr><td colspan="4" style="color:#9e9588">Inga händelser</td></tr>'}</tbody></table>
+
+    ${history.length > 1 ? `
+    <h2>Historik (${history.length} dagar)</h2>
+    <table>
+      <thead><tr><th>Datum</th><th>Events totalt</th><th>Dagens events</th><th>Viner</th><th>Vivino</th><th>Prissänkta</th></tr></thead>
+      <tbody>${history.slice().reverse().map(h => `<tr>
+        <td>${h.date}</td>
+        <td>${(h.events || 0).toLocaleString()}</td>
+        <td>${h.today_events || '–'}</td>
+        <td>${(h.wines || 0).toLocaleString()}</td>
+        <td>${h.vivino_matches || '–'}</td>
+        <td>${h.price_drops || '–'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    ` : ''}
 
     <h2>Externa dashboards</h2>
     <div class="links">

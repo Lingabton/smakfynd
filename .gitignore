@@ -2,6 +2,7 @@ data/*
 !data/vivino_cache.json
 !data/expert_cache.json
 !data/prissankt_bootstrap.json
+!data/analytics_history.json
 !data/history
 vivino_log.txt
 node_modules/

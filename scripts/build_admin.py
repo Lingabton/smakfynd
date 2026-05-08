@@ -144,6 +144,40 @@ except Exception as e:
 
 admin_data["analytics"] = analytics
 
+# --- Persist daily analytics history ---
+HISTORY_FILE = os.path.join(DATA_DIR, "analytics_history.json")
+history = json.load(open(HISTORY_FILE)) if os.path.exists(HISTORY_FILE) else []
+
+today = datetime.now().strftime("%Y-%m-%d")
+# Only add one entry per day (skip if today already recorded)
+if not history or history[-1].get("date") != today:
+    today_events = 0
+    today_searches = 0
+    today_ai = 0
+    for e in analytics.get("daily_events", []):
+        if e.get("day") == today:
+            today_events = e.get("n", 0)
+    for s in analytics.get("top_searches", []):
+        today_searches += s.get("n", 0)
+    today_ai = analytics.get("ai_stats", {}).get("n", 0)
+
+    history.append({
+        "date": today,
+        "events": analytics.get("total_events", 0),
+        "today_events": today_events,
+        "searches": today_searches,
+        "ai_queries": today_ai,
+        "wines": total,
+        "vivino_matches": vivino_with_rating,
+        "price_drops": len(drops),
+    })
+    json.dump(history, open(HISTORY_FILE, "w"), ensure_ascii=False, indent=2)
+    print(f"  History: {len(history)} days saved")
+else:
+    print(f"  History: already recorded today ({len(history)} days)")
+
+admin_data["history"] = history
+
 out_path = os.path.join(ADMIN_DIR, "data.json")
 json.dump(admin_data, open(out_path, "w"), ensure_ascii=False)
 print(f"Admin data: {os.path.getsize(out_path) / 1024:.0f} KB → {out_path}")
