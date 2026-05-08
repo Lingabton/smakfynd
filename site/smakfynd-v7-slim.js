@@ -441,7 +441,7 @@ function ScoreBars({
     label: "Vindrickare",
     value: p.crowd_score,
     color: "#6b8cce"
-  }), p.expert_score && /*#__PURE__*/React.createElement(MiniBar, {
+  }), /*#__PURE__*/React.createElement(MiniBar, {
     label: "Expert",
     value: p.expert_score,
     color: "#b07d3b"
@@ -1586,7 +1586,7 @@ function Card({
       color: t.txL,
       marginTop: 2
     }
-  }, p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews, " omd\xF6men")), p.expert_score && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews, " omd\xF6men")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -1595,15 +1595,15 @@ function Card({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "#b07d3b",
+      color: p.expert_score ? "#b07d3b" : t.txF,
       fontWeight: 600
     }
   }, "Expert"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontWeight: 700,
-      color: "#b07d3b"
+      color: p.expert_score ? "#b07d3b" : t.txF
     }
-  }, p.expert_score.toFixed(1), "/10")), /*#__PURE__*/React.createElement("div", {
+  }, p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "Inga expertbetyg")), p.expert_score && /*#__PURE__*/React.createElement("div", {
     style: {
       height: 3,
       borderRadius: 2,
@@ -2805,48 +2805,54 @@ function FoodMatch({
       fontSize: 12,
       color: t.txL
     }
-  }, "Hittade inga matchningar. Prova en annan beskrivning."), courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const lines = courseResults.flatMap(c => {
-        const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
-        return [...header, ...c.wines.filter(m => m.nr).map(m => {
-          const p = products.find(pr => String(pr.nr) === String(m.nr));
-          return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100)` : null;
-        }).filter(Boolean)];
-      });
-      const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;
-      if (navigator.share) {
-        navigator.share({
-          title: `Vinlista till ${meal}`,
-          text
-        }).catch(() => {});
-      } else {
-        navigator.clipboard?.writeText(text);
+  }, "Hittade inga matchningar. Prova en annan beskrivning."), courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
+    const [shared, setShared] = useState(false);
+    return /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        const lines = courseResults.flatMap(c => {
+          const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+          return [...header, ...c.wines.filter(m => m.nr).map(m => {
+            const p = products.find(pr => String(pr.nr) === String(m.nr));
+            return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100) \u2014 smakfynd.se/#vin/${p.nr}` : null;
+          }).filter(Boolean)];
+        });
+        const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se \u2014 hitta bästa vinet`;
+        if (navigator.share) {
+          navigator.share({
+            title: `Vinlista till ${meal}`,
+            text
+          }).catch(() => {});
+        } else {
+          navigator.clipboard?.writeText(text);
+          setShared(true);
+          setTimeout(() => setShared(false), 2000);
+        }
+        track("share", {
+          type: "ai_list",
+          meal
+        });
+      },
+      style: {
+        marginTop: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        padding: "8px 14px",
+        borderRadius: 10,
+        border: `1px solid ${t.bdr}`,
+        background: shared ? "#2d6b3f10" : t.card,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        fontSize: 12,
+        color: shared ? "#2d6b3f" : t.txM,
+        transition: "all 0.2s"
       }
-      track("share", {
-        type: "ai_list",
-        meal
-      });
-    },
-    style: {
-      marginTop: 10,
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      padding: "8px 14px",
-      borderRadius: 10,
-      border: `1px solid ${t.bdr}`,
-      background: t.card,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      fontSize: 12,
-      color: t.txM
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14
-    }
-  }, "\u2197"), " Dela vinlista"))));
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 14
+      }
+    }, shared ? "✓" : "↗"), " ", shared ? "Kopierad!" : "Dela vinlista");
+  })())));
 }
 
 // ════════════════════════════════════════════════════════════

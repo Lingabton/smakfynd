@@ -8,5 +8,15 @@
     "wines": 4390,
     "vivino_matches": 1527,
     "price_drops": 64
+  },
+  {
+    "date": "2026-05-09",
+    "events": 479,
+    "today_events": 0,
+    "searches": 0,
+    "ai_queries": 0,
+    "wines": 4579,
+    "vivino_matches": 1527,
+    "price_drops": 58
   }
 ]

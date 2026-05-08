@@ -262,27 +262,32 @@ function FoodMatch({ products }) {
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
 
               {/* Share wine list */}
-              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
-                <button onClick={() => {
-                  const lines = courseResults.flatMap(c => {
-                    const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
-                    return [...header, ...c.wines.filter(m => m.nr).map(m => {
-                      const p = products.find(pr => String(pr.nr) === String(m.nr));
-                      return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100)` : null;
-                    }).filter(Boolean)];
-                  });
-                  const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;
-                  if (navigator.share) {
-                    navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
-                  } else {
-                    navigator.clipboard?.writeText(text);
-                  }
-                  track("share", { type: "ai_list", meal });
-                }}
-                  style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: t.txM }}>
-                  <span style={{ fontSize: 14 }}>↗</span> Dela vinlista
-                </button>
-              )}
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
+                const [shared, setShared] = useState(false);
+                return (
+                  <button onClick={() => {
+                    const lines = courseResults.flatMap(c => {
+                      const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+                      return [...header, ...c.wines.filter(m => m.nr).map(m => {
+                        const p = products.find(pr => String(pr.nr) === String(m.nr));
+                        return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100) \u2014 smakfynd.se/#vin/${p.nr}` : null;
+                      }).filter(Boolean)];
+                    });
+                    const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se \u2014 hitta bästa vinet`;
+                    if (navigator.share) {
+                      navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
+                    } else {
+                      navigator.clipboard?.writeText(text);
+                      setShared(true);
+                      setTimeout(() => setShared(false), 2000);
+                    }
+                    track("share", { type: "ai_list", meal });
+                  }}
+                    style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: shared ? "#2d6b3f10" : t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: shared ? "#2d6b3f" : t.txM, transition: "all 0.2s" }}>
+                    <span style={{ fontSize: 14 }}>{shared ? "✓" : "↗"}</span> {shared ? "Kopierad!" : "Dela vinlista"}
+                  </button>
+                );
+              })()}
             </div>
           )}
         </div>

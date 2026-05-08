@@ -16,7 +16,7 @@ function ScoreBars({ p }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <MiniBar label="Vindrickare" value={p.crowd_score} color="#6b8cce" />
-      {p.expert_score && <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />}
+      <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
     </div>
   );
 }

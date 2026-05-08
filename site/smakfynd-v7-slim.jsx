@@ -266,7 +266,7 @@ function ScoreBars({ p }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <MiniBar label="Vindrickare" value={p.crowd_score} color="#6b8cce" />
-      {p.expert_score && <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />}
+      <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
     </div>
   );
 }
@@ -836,22 +836,20 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                     {p.crowd_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} /></div>}
                     {p.crowd_reviews && <div style={{ fontSize: 10, color: t.txL, marginTop: 2 }}>{p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen</div>}
                   </div>
-                  {p.expert_score && (
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                        <span style={{ color: "#b07d3b", fontWeight: 600 }}>Expert</span>
-                        <span style={{ fontWeight: 700, color: "#b07d3b" }}>{p.expert_score.toFixed(1)}/10</span>
-                      </div>
-                      <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} /></div>
-                      {p.critics && p.critics.length > 0 && (
-                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
-                          {p.critics.map((cr, ci) => (
-                            <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>{cr.c}: {cr.s}</span>
-                          ))}
-                        </div>
-                      )}
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+                      <span style={{ color: p.expert_score ? "#b07d3b" : t.txF, fontWeight: 600 }}>Expert</span>
+                      <span style={{ fontWeight: 700, color: p.expert_score ? "#b07d3b" : t.txF }}>{p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "Inga expertbetyg"}</span>
                     </div>
-                  )}
+                    {p.expert_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} /></div>}
+                    {p.critics && p.critics.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                        {p.critics.map((cr, ci) => (
+                          <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>{cr.c}: {cr.s}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
                       <span style={{ color: t.txM, fontWeight: 600 }}>Prisvärde</span>
@@ -1487,27 +1485,32 @@ function FoodMatch({ products }) {
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
 
               {/* Share wine list */}
-              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
-                <button onClick={() => {
-                  const lines = courseResults.flatMap(c => {
-                    const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
-                    return [...header, ...c.wines.filter(m => m.nr).map(m => {
-                      const p = products.find(pr => String(pr.nr) === String(m.nr));
-                      return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100)` : null;
-                    }).filter(Boolean)];
-                  });
-                  const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se`;
-                  if (navigator.share) {
-                    navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
-                  } else {
-                    navigator.clipboard?.writeText(text);
-                  }
-                  track("share", { type: "ai_list", meal });
-                }}
-                  style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: t.txM }}>
-                  <span style={{ fontSize: 14 }}>↗</span> Dela vinlista
-                </button>
-              )}
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
+                const [shared, setShared] = useState(false);
+                return (
+                  <button onClick={() => {
+                    const lines = courseResults.flatMap(c => {
+                      const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+                      return [...header, ...c.wines.filter(m => m.nr).map(m => {
+                        const p = products.find(pr => String(pr.nr) === String(m.nr));
+                        return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100) \u2014 smakfynd.se/#vin/${p.nr}` : null;
+                      }).filter(Boolean)];
+                    });
+                    const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se \u2014 hitta bästa vinet`;
+                    if (navigator.share) {
+                      navigator.share({ title: `Vinlista till ${meal}`, text }).catch(() => {});
+                    } else {
+                      navigator.clipboard?.writeText(text);
+                      setShared(true);
+                      setTimeout(() => setShared(false), 2000);
+                    }
+                    track("share", { type: "ai_list", meal });
+                  }}
+                    style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: shared ? "#2d6b3f10" : t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: shared ? "#2d6b3f" : t.txM, transition: "all 0.2s" }}>
+                    <span style={{ fontSize: 14 }}>{shared ? "✓" : "↗"}</span> {shared ? "Kopierad!" : "Dela vinlista"}
+                  </button>
+                );
+              })()}
             </div>
           )}
         </div>

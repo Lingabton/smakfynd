@@ -1139,6 +1139,58 @@ def make_pages():
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
 
+        # ─── Presenter ───
+        {
+            "slug": "vin-present",
+            "title": f"Ge vin i present {YEAR} — Bästa vinpresenterna på Systembolaget",
+            "meta": f"Ska du ge vin i present? Här är de bästa vinpresenterna per prisklass — från under 150 kr till lyxiga 500+ kr. {DATE_STR}.",
+            "h1": f"Vin i present — bästa valen per prisklass {YEAR}",
+            "intro": "Vin är en av de mest uppskattade presenterna. Men vilket vin väljer man? Vi har plockat ut de bästa vinpresenterna i tre prisklasser.",
+            "intro2": "En bra vinpresent ska vara något mottagaren inte köper själv — lite finare, lite mer spännande. Undvik de allra billigaste vinerna och sikta på 150+ kr för att imponera. Ekologiskt vin är ett plus. Vi har valt viner med höga betyg från både experter och vindrickare.",
+            "guide": {
+                "title": "Så väljer du vin som present",
+                "points": [
+                    "Under 200 kr: Imponerande vardagsvin — Barolo, Brunello eller fin Champagne-crémant.",
+                    "200–400 kr: Riktiga kvalitetsviner — Châteauneuf-du-Pape, Amarone, grower-champagne.",
+                    "400+ kr: Lyxpresent — Barolo, Brunello di Montalcino, fin Burgundy eller champagne.",
+                    "Tips: Välj vin med snygg etikett — presentationen är halva upplevelsen.",
+                ]
+            },
+            "faq_visible": [
+                ("Hur mycket ska man spendera på vin i present?", "150–300 kr ger en uppskattad present. Under 100 kr kan kännas billigt, och över 500 kr behöver du bara om du vet att mottagaren är vinintresserad."),
+                ("Rött eller vitt i present?", "Rött är säkrast om du inte vet mottagarens preferenser. En fyllig Rioja, Barolo eller Bordeaux är alltid uppskattat. Bubbel fungerar också universellt."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 500
+                           and w.get('smakfynd_score', 0) >= 80],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # ─── Situationsbaserade (kompletterande) ───
+        {
+            "slug": "vin-till-fredagsmys",
+            "title": f"Bästa vinet till fredagsmys {YEAR} — Systembolaget",
+            "meta": f"Fredagsmys med vin? Här är de bästa vinerna för en avslappnad fredagskväll — prisvärda och lättdruckna. {DATE_STR}.",
+            "h1": f"Bästa vinet till fredagsmys — {DATE_STR}",
+            "intro": "Fredagsmysets vin ska vara lättdrucket, okomplicerat och prisvärt. Här är våra favoriter för soffhänget.",
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('price', 0) or 0) <= 150
+                           and w.get('smakfynd_score', 0) >= 75
+                           and (w.get('taste_body') or 6) <= 8],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+        {
+            "slug": "vin-till-svarforaldrar",
+            "title": f"Bästa vinet när svärföräldrarna kommer {YEAR}",
+            "meta": f"Ska svärföräldrarna på middag? Välj vin som imponerar utan att vara pretentiöst. Här är de säkra valen. {DATE_STR}.",
+            "h1": f"Bästa vinet till middagen med svärföräldrarna",
+            "intro": "Ett vin som visar att du har bra smak — utan att det ser ut som du anstränger dig för mycket. Klassiker som aldrig svikar.",
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 350
+                           and w.get('smakfynd_score', 0) >= 80],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
         # ─── Norska besökare ───
         {
             "slug": "basta-vin-for-norrman",

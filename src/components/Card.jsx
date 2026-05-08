@@ -273,22 +273,20 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                     {p.crowd_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} /></div>}
                     {p.crowd_reviews && <div style={{ fontSize: 10, color: t.txL, marginTop: 2 }}>{p.crowd_reviews > 999 ? `${(p.crowd_reviews / 1000).toFixed(0)}k` : p.crowd_reviews} omdömen</div>}
                   </div>
-                  {p.expert_score && (
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                        <span style={{ color: "#b07d3b", fontWeight: 600 }}>Expert</span>
-                        <span style={{ fontWeight: 700, color: "#b07d3b" }}>{p.expert_score.toFixed(1)}/10</span>
-                      </div>
-                      <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} /></div>
-                      {p.critics && p.critics.length > 0 && (
-                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
-                          {p.critics.map((cr, ci) => (
-                            <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>{cr.c}: {cr.s}</span>
-                          ))}
-                        </div>
-                      )}
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+                      <span style={{ color: p.expert_score ? "#b07d3b" : t.txF, fontWeight: 600 }}>Expert</span>
+                      <span style={{ fontWeight: 700, color: p.expert_score ? "#b07d3b" : t.txF }}>{p.expert_score ? `${p.expert_score.toFixed(1)}/10` : "Inga expertbetyg"}</span>
                     </div>
-                  )}
+                    {p.expert_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.expert_score * 10}%`, height: "100%", borderRadius: 2, background: "#b07d3b" }} /></div>}
+                    {p.critics && p.critics.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                        {p.critics.map((cr, ci) => (
+                          <span key={ci} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#b07d3b10", color: "#b07d3b" }}>{cr.c}: {cr.s}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
                       <span style={{ color: t.txM, fontWeight: 600 }}>Prisvärde</span>
