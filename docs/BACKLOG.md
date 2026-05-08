@@ -1,32 +1,19 @@
 # Smakfynd Feature Backlog
-*Uppdaterad 2026-05-07*
+*Uppdaterad 2026-05-08*
 
 ## Kvar att göra
 
-### UX — låg insats
-- [x] SaveButton: click-outside stänger menyn (2026-05-07)
-- [x] Ogiltigt vin-deep-link — visar "Vinet hittades inte" toast (2026-05-07)
-- [x] Kamera-nekad i barcode scanner — visar felmeddelande (2026-05-07)
-- [x] Sökfältet: synlig X-knapp för att rensa (2026-05-07)
-- [x] Fontinkonsistens: alla 75 landing pages nu Newsreader + Inter (2026-05-07)
-
 ### Vivino-data
-- [ ] Kör vivino_playwright.py --refresh-top 500 (kräver manuell CAPTCHA-lösning)
+- [ ] Kör vivino_playwright.py --refresh-top 500 (kräver manuell CAPTCHA, Vivino blockerar headless)
 - [ ] Kör score_wines_v2.py + full rebuild efter lyckad scrape
 - [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
 
-### Plattform (pågående)
-- [x] Supabase-integration på huvudsajten (shared auth med quiz) (2026-05-07)
-- [x] KRÄVER: Lägg till https://smakfynd.se i Supabase redirect URLs (Gabriel manuellt)
-- [x] Login/Min profil i headern (magic link) (2026-05-07)
-- [x] "Spara vin"-funktion (Supabase saved_wines) (2026-05-07)
-- [x] Profilsida: email, sparade viner med sortering, quiz-länk, premium-placeholder (2026-05-07)
-- [x] Snabbkollen synligare: "Skanna" CTA i headern (2026-05-07)
-- [x] AI-vinmatchare som interaktiv input på framsidan (redan klar från Round 1)
+### Datakvalitet
+- [ ] 50+ viner i topp 200 saknar grape-fält — fyll i manuellt eller scrapa från SB produktsidor
+- [ ] GSC API-integration (service account) — automatisk daglig hämtning istf manuell CSV
 
 ### Stora features
 - [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
-- [ ] "Vet ingenting om vin"-läge: enkel guide utan pretention
 - [ ] Present-sektion: kurerade listor per prisklass
 - [ ] Situationsbaserade ingångar: dejt, grillkväll, svärföräldrar, fredagsmys
 
