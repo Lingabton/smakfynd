@@ -176,6 +176,45 @@ if not history or history[-1].get("date") != today:
 else:
     print(f"  History: already recorded today ({len(history)} days)")
 
+# --- Actionable insights ---
+insights = []
+
+# Wines without images (top 20 by score)
+no_image = sorted([w for w in wines if not w.get("image_url") and w.get("smakfynd_score", 0) >= 70],
+                  key=lambda w: -(w.get("smakfynd_score") or 0))[:20]
+insights.append({"type": "no_image", "title": f"{sum(1 for w in wines if not w.get('image_url'))} viner utan bild",
+                 "items": [{"nr": w["nr"], "name": w.get("name",""), "sub": w.get("sub",""), "score": w.get("smakfynd_score",0)} for w in no_image]})
+
+# Wines with only 1 data source (high risk)
+single_source = sorted([w for w in wines if w.get("smakfynd_score", 0) >= 80
+                        and (bool(w.get("crowd_score")) + bool(w.get("expert_score"))) == 1],
+                       key=lambda w: -(w.get("smakfynd_score") or 0))[:20]
+insights.append({"type": "single_source", "title": f"{len([w for w in wines if (bool(w.get('crowd_score')) + bool(w.get('expert_score'))) == 1])} viner med bara 1 datakälla",
+                 "items": [{"nr": w["nr"], "name": w.get("name",""), "score": w.get("smakfynd_score",0),
+                           "source": "crowd" if w.get("crowd_score") else "expert"} for w in single_source]})
+
+# Score anomalies — wines ≥90 with low confidence
+high_score_low_conf = [w for w in wines if w.get("smakfynd_score", 0) >= 90
+                       and w.get("confidence") == "låg"][:10]
+insights.append({"type": "score_anomaly", "title": f"{len(high_score_low_conf)} viner med score ≥90 men låg konfidensgrad",
+                 "items": [{"nr": w["nr"], "name": w.get("name",""), "score": w.get("smakfynd_score",0)} for w in high_score_low_conf]})
+
+admin_data["insights"] = insights
+
+# --- Git log (recent deployments) ---
+git_log = []
+try:
+    r = subprocess.run(["git", "log", "--oneline", "--format=%H|%s|%ai", "-20"],
+                       capture_output=True, text=True, cwd=BASE, timeout=10)
+    if r.returncode == 0:
+        for line in r.stdout.strip().split("\n"):
+            parts = line.split("|", 2)
+            if len(parts) == 3:
+                git_log.append({"hash": parts[0][:7], "message": parts[1], "date": parts[2][:16]})
+except Exception:
+    pass
+admin_data["git_log"] = git_log
+
 # --- Load GSC data ---
 gsc_file = os.path.join(DATA_DIR, "gsc_history.json")
 gsc = json.load(open(gsc_file)) if os.path.exists(gsc_file) else {}

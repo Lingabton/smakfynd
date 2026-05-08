@@ -7,56 +7,51 @@
   <title>Admin — Smakfynd</title>
   <style>
     * { box-sizing: border-box; margin: 0; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f1ea; color: #1a1510; }
-    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-    h1 { font-size: 24px; font-family: Georgia, serif; margin-bottom: 4px; }
-    h2 { font-size: 16px; font-family: Georgia, serif; font-weight: 400; margin: 24px 0 12px; color: #3d3830; border-bottom: 1px solid #e2d8c8; padding-bottom: 6px; }
-    .subtitle { font-size: 12px; color: #9e9588; margin-bottom: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
-    .stat { background: #fff; border-radius: 12px; border: 1px solid #e2d8c8; padding: 14px 16px; }
-    .stat-value { font-size: 28px; font-weight: 700; font-family: Georgia, serif; color: #1a1510; }
-    .stat-label { font-size: 11px; color: #9e9588; margin-top: 2px; }
-    .stat-warn .stat-value { color: #c44020; }
-    .stat-good .stat-value { color: #2d6b3f; }
-    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .bar-label { font-size: 11px; color: #6b6355; width: 100px; text-align: right; flex-shrink: 0; }
-    .bar-track { flex: 1; height: 8px; background: #e8e2d8; border-radius: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-    .bar-value { font-size: 11px; color: #9e9588; width: 40px; flex-shrink: 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { text-align: left; font-size: 10px; color: #9e9588; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 8px; border-bottom: 2px solid #e2d8c8; }
-    td { padding: 8px; border-bottom: 1px solid #ede6da; }
-    .score { font-weight: 700; font-family: Georgia, serif; }
-    .match-pct { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .match-low { background: #c4402018; color: #c44020; }
-    .match-mid { background: #b08d4018; color: #b08d40; }
-    .match-ok { background: #2d6b3f18; color: #2d6b3f; }
-    .quality-bar { display: flex; gap: 4px; margin-bottom: 4px; }
-    .quality-item { flex: 1; padding: 8px 10px; background: #fff; border-radius: 8px; border: 1px solid #e2d8c8; }
-    .quality-item .pct { font-size: 20px; font-weight: 700; font-family: Georgia, serif; }
-    .quality-item .label { font-size: 10px; color: #9e9588; }
-    .quality-item.bad .pct { color: #c44020; }
-    .quality-item.ok .pct { color: #b08d40; }
-    .quality-item.good .pct { color: #2d6b3f; }
-    .links { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
-    .links a { padding: 8px 16px; border-radius: 8px; font-size: 12px; text-decoration: none; font-weight: 500; border: 1px solid #e2d8c8; color: #3d3830; background: #fff; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f1ea; color: #1a1510; font-size: 13px; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+    h1 { font-size: 22px; font-family: Georgia, serif; margin-bottom: 2px; }
+    h2 { font-size: 15px; font-family: Georgia, serif; font-weight: 400; margin: 20px 0 10px; color: #3d3830; border-bottom: 1px solid #e2d8c8; padding-bottom: 4px; }
+    .sub { font-size: 11px; color: #9e9588; margin-bottom: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .stat { background: #fff; border-radius: 10px; border: 1px solid #e2d8c8; padding: 12px; }
+    .stat-v { font-size: 24px; font-weight: 700; font-family: Georgia, serif; }
+    .stat-l { font-size: 10px; color: #9e9588; margin-top: 1px; }
+    .stat-w .stat-v { color: #c44020; }
+    .stat-g .stat-v { color: #2d6b3f; }
+    .bar-r { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .bar-l { font-size: 10px; color: #6b6355; width: 80px; text-align: right; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-t { flex: 1; height: 6px; background: #e8e2d8; border-radius: 3px; overflow: hidden; }
+    .bar-f { height: 100%; border-radius: 3px; }
+    .bar-v { font-size: 10px; color: #9e9588; width: 35px; flex-shrink: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; font-size: 10px; color: #9e9588; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 6px; border-bottom: 2px solid #e2d8c8; }
+    td { padding: 6px; border-bottom: 1px solid #ede6da; }
+    .pill { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .p-red { background: #c4402015; color: #c44020; }
+    .p-green { background: #2d6b3f15; color: #2d6b3f; }
+    .p-yellow { background: #b08d4015; color: #b08d40; }
+    .p-blue { background: #6b8cce15; color: #6b8cce; }
+    .card { background: #fff; border-radius: 10px; border: 1px solid #e2d8c8; padding: 12px; margin-bottom: 6px; }
+    .tabs { display: flex; gap: 3px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tabs button { padding: 6px 14px; border-radius: 6px; border: 1px solid #e2d8c8; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit; }
+    .tabs button.on { background: #8b2332; color: #fff; border-color: #8b2332; }
+    .sec { display: none; }
+    .sec.on { display: block; }
+    .links { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+    .links a { padding: 6px 12px; border-radius: 6px; font-size: 11px; text-decoration: none; border: 1px solid #e2d8c8; color: #3d3830; background: #fff; }
     .links a:hover { border-color: #8b2332; color: #8b2332; }
-    .flag-card { background: #fff; border-radius: 10px; border: 1px solid #e2d8c8; padding: 12px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .flag-info { flex: 1; min-width: 0; }
-    .flag-name { font-size: 14px; font-weight: 600; }
-    .flag-match { font-size: 12px; color: #6b6355; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .flag-meta { font-size: 11px; color: #9e9588; margin-top: 2px; }
-    .flag-actions button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: 4px; }
-    .btn-ok { background: #2d6b3f; color: #fff; }
-    .btn-no { background: #c44020; color: #fff; }
-    .btn-undo { background: #e8e2d8; color: #3d3830; }
-    .tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
-    .tab-bar button { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2d8c8; background: #fff; cursor: pointer; font-size: 12px; font-family: inherit; }
-    .tab-bar button.active { background: #8b2332; color: #fff; border-color: #8b2332; }
-    .section { display: none; }
-    .section.active { display: block; }
-    #loading { text-align: center; padding: 60px; color: #9e9588; }
-    .gc-embed { width: 100%; border: 1px solid #e2d8c8; border-radius: 12px; overflow: hidden; background: #fff; }
+    .live { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2d6b3f; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .commit { font-family: monospace; font-size: 11px; color: #8b2332; }
+    .insight-item { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f0ebe3; align-items: center; }
+    .insight-item:last-child { border: none; }
+    #loading { text-align: center; padding: 40px; color: #9e9588; }
+    .flag-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .flag-card .info { flex: 1; min-width: 0; }
+    .btn { padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer; font-size: 10px; font-weight: 600; }
+    .btn-g { background: #2d6b3f; color: #fff; }
+    .btn-r { background: #c44020; color: #fff; }
+    .btn-u { background: #e8e2d8; color: #3d3830; }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,405 +59,275 @@
 <body>
 <div class="container">
   <h1>Smakfynd Admin</h1>
-  <div class="subtitle" id="generated">Laddar...</div>
+  <div class="sub" id="gen">Laddar...</div>
 
-  <div class="tab-bar" id="tabs">
-    <button class="active" onclick="showTab('overview')">Översikt</button>
-    <button onclick="showTab('quality')">Datakvalitet</button>
-    <button onclick="showTab('vivino')">Vivino Review</button>
-    <button onclick="showTab('analytics')">Trafik</button>
-    <button onclick="showTab('seo')">SEO</button>
+  <div class="tabs" id="tabs">
+    <button class="on" onclick="tab('ov')">Översikt</button>
+    <button onclick="tab('ins')">Insikter</button>
+    <button onclick="tab('dq')">Datakvalitet</button>
+    <button onclick="tab('viv')">Vivino</button>
+    <button onclick="tab('tr')">Trafik <span class="live"></span></button>
+    <button onclick="tab('seo')">SEO</button>
+    <button onclick="tab('dep')">Deploy</button>
   </div>
 
-  <div id="loading">Laddar data...</div>
-
-  <!-- OVERVIEW -->
-  <div class="section active" id="tab-overview"></div>
-
-  <!-- DATA QUALITY -->
-  <div class="section" id="tab-quality"></div>
-
-  <!-- VIVINO REVIEW -->
-  <div class="section" id="tab-vivino"></div>
-
-  <!-- ANALYTICS -->
-  <div class="section" id="tab-analytics"></div>
-
-  <!-- SEO -->
-  <div class="section" id="tab-seo"></div>
+  <div id="loading">Laddar...</div>
+  <div class="sec on" id="s-ov"></div>
+  <div class="sec" id="s-ins"></div>
+  <div class="sec" id="s-dq"></div>
+  <div class="sec" id="s-viv"></div>
+  <div class="sec" id="s-tr"></div>
+  <div class="sec" id="s-seo"></div>
+  <div class="sec" id="s-dep"></div>
 </div>
 
 <script>
-let D = null;
-let flagDecisions = {};
+const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+const SUPABASE_URL = "https://bfzzsniebwxwrnkmeymg.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenpzbmllYnd4d3Jua21leW1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjMzMzgsImV4cCI6MjA5Mjc5OTMzOH0.DxlxqgJ8ANtAaOS95wX1hr6Cd7oEP7l3pJQAy52L778";
+let D = null, live = {}, flagD = {};
 
-function showTab(id) {
-  document.querySelectorAll('.tab-bar button').forEach((b, i) => {
-    b.classList.toggle('active', b.textContent.toLowerCase().includes(id.slice(0,4)));
-  });
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
+function tab(id) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+  event.target.classList.add('on');
+  document.getElementById('s-' + id).classList.add('on');
+  if (id === 'tr' && !live.loaded) fetchLive();
+}
+
+function bars(data, color, maxVal) {
+  if (!maxVal) maxVal = Math.max(...data.map(d => d[1]), 1);
+  return data.map(d => `<div class="bar-r"><span class="bar-l">${d[0]}</span><div class="bar-t"><div class="bar-f" style="width:${d[1]/maxVal*100}%;background:${color}"></div></div><span class="bar-v">${d[1]}</span></div>`).join('');
 }
 
 async function init() {
   try {
-    const res = await fetch('data.json?v=' + Date.now());
-    D = await res.json();
+    D = await (await fetch('data.json?v=' + Date.now())).json();
   } catch(e) {
-    document.getElementById('loading').textContent = 'Kunde inte ladda data.json — kör: python3 scripts/build_admin.py';
+    document.getElementById('loading').textContent = 'Kör: python3 scripts/build_admin.py';
     return;
   }
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('generated').textContent = 'Senast: ' + new Date(D.generated).toLocaleString('sv-SE');
-
-  renderOverview();
-  renderQuality();
-  renderVivino();
-  renderAnalytics();
-  renderSEO();
+  document.getElementById('gen').textContent = 'Build: ' + new Date(D.generated).toLocaleString('sv-SE');
+  renderOv(); renderIns(); renderDq(); renderViv(); renderSeo(); renderDep();
 }
 
-function renderOverview() {
-  const o = D.overview;
-  const s = D.scores;
-  const p = D.prices;
-  const top = D.top_wines;
-
-  let typeBars = '';
-  const maxType = Math.max(...Object.values(D.types));
-  for (const [type, count] of Object.entries(D.types)) {
-    typeBars += `<div class="bar-row">
-      <span class="bar-label">${type}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${count/maxType*100}%;background:#8b2332"></div></div>
-      <span class="bar-value">${count}</span>
-    </div>`;
-  }
-
-  let scoreBars = '';
-  const maxBin = Math.max(...Object.values(D.scores.distribution));
-  for (const [bin, count] of Object.entries(D.scores.distribution)) {
-    const col = bin >= 80 ? '#2d6b3f' : bin >= 60 ? '#b08d40' : '#c44020';
-    scoreBars += `<div class="bar-row">
-      <span class="bar-label">${bin}–${parseInt(bin)+9}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${count/maxBin*100}%;background:${col}"></div></div>
-      <span class="bar-value">${count}</span>
-    </div>`;
-  }
-
-  let topRows = top.map((w, i) => `<tr>
-    <td class="score">${w.score}</td>
-    <td><strong>${w.name}</strong> <span style="color:#9e9588">${w.sub}</span></td>
-    <td>${w.price} kr</td>
-    <td>${w.country}</td>
-  </tr>`).join('');
-
-  document.getElementById('tab-overview').innerHTML = `
+function renderOv() {
+  const o = D.overview, s = D.scores, p = D.prices, top = D.top_wines;
+  const scoreBars = Object.entries(s.distribution).map(([k,v]) => [k+'-'+(+k+9), v]);
+  const typeBars = Object.entries(D.types).map(([k,v]) => [k, v]);
+  document.getElementById('s-ov').innerHTML = `
     <div class="grid">
-      <div class="stat"><div class="stat-value">${o.total_wines.toLocaleString()}</div><div class="stat-label">Viner live</div></div>
-      <div class="stat"><div class="stat-value">${o.fast_sortiment}</div><div class="stat-label">Fast sortiment</div></div>
-      <div class="stat"><div class="stat-value">${o.price_drops}</div><div class="stat-label">Prissänkta</div></div>
-      <div class="stat"><div class="stat-value">${o.snapshots}</div><div class="stat-label">Prissnapshottar</div></div>
-      <div class="stat"><div class="stat-value">${s.avg}</div><div class="stat-label">Snittpoäng</div></div>
-      <div class="stat"><div class="stat-value">${p.median} kr</div><div class="stat-label">Medianpris</div></div>
+      <div class="stat"><div class="stat-v">${o.total_wines.toLocaleString()}</div><div class="stat-l">Viner live</div></div>
+      <div class="stat"><div class="stat-v">${o.fast_sortiment}</div><div class="stat-l">Fast sortiment</div></div>
+      <div class="stat"><div class="stat-v">${o.price_drops}</div><div class="stat-l">Prissänkta</div></div>
+      <div class="stat"><div class="stat-v">${s.avg}</div><div class="stat-l">Snittpoäng</div></div>
+      <div class="stat"><div class="stat-v">${p.median} kr</div><div class="stat-l">Medianpris</div></div>
+      <div class="stat"><div class="stat-v">${o.snapshots}</div><div class="stat-l">Snapshots</div></div>
     </div>
-
-    <h2>Poängfördelning</h2>
-    ${scoreBars}
-
-    <h2>Vintyper</h2>
-    ${typeBars}
-
+    <h2>Poängfördelning</h2>${bars(scoreBars, '#8b2332')}
+    <h2>Vintyper</h2>${bars(typeBars, '#6b8cce')}
     <h2>Topp 20</h2>
-    <table><thead><tr><th>Poäng</th><th>Vin</th><th>Pris</th><th>Land</th></tr></thead><tbody>${topRows}</tbody></table>
-  `;
+    <table><thead><tr><th>Poäng</th><th>Vin</th><th>Pris</th><th>Land</th></tr></thead><tbody>
+    ${top.map(w => `<tr><td style="font-weight:700;font-family:Georgia">${w.score}</td><td><a href="https://smakfynd.se/#vin/${w.nr}" target="_blank" style="color:#8b2332;text-decoration:none"><strong>${w.name}</strong> ${w.sub}</a></td><td>${w.price} kr</td><td>${w.country}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 
-function renderQuality() {
-  const q = D.data_quality;
-  const v = D.vivino;
-
-  let items = '';
-  for (const [field, d] of Object.entries(q)) {
-    const cls = d.pct > 50 ? 'bad' : d.pct > 20 ? 'ok' : 'good';
-    items += `<div class="quality-item ${cls}"><div class="pct">${d.pct}%</div><div class="label">${field} saknas</div></div>`;
+function renderIns() {
+  const ins = D.insights || [];
+  let html = '';
+  for (const i of ins) {
+    const icon = i.type === 'no_image' ? '🖼' : i.type === 'single_source' ? '⚠️' : '🎯';
+    html += `<div class="card"><strong>${icon} ${i.title}</strong>`;
+    if (i.items.length) {
+      html += '<div style="margin-top:8px">';
+      for (const item of i.items.slice(0, 10)) {
+        const extra = item.source ? `<span class="pill ${item.source === 'crowd' ? 'p-blue' : 'p-yellow'}">${item.source}</span>` : '';
+        html += `<div class="insight-item">
+          <a href="https://www.systembolaget.se/produkt/vin/${item.nr}" target="_blank" style="color:#8b2332;text-decoration:none;font-weight:600">${item.name}</a>
+          ${item.sub ? '<span style="color:#9e9588">'+item.sub+'</span>' : ''}
+          <span style="font-weight:700;font-family:Georgia;margin-left:auto">${item.score}</span> ${extra}
+        </div>`;
+      }
+      if (i.items.length > 10) html += `<div style="font-size:11px;color:#9e9588;padding:4px 0">+${i.items.length - 10} fler</div>`;
+      html += '</div>';
+    }
+    html += '</div>';
   }
+  document.getElementById('s-ins').innerHTML = html || '<p style="color:#9e9588">Inga insikter</p>';
+}
 
-  let countryBars = '';
-  const maxC = Math.max(...Object.values(D.countries));
-  for (const [c, count] of Object.entries(D.countries)) {
-    countryBars += `<div class="bar-row">
-      <span class="bar-label">${c}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${count/maxC*100}%;background:#6b8cce"></div></div>
-      <span class="bar-value">${count}</span>
-    </div>`;
-  }
-
-  document.getElementById('tab-quality').innerHTML = `
-    <h2>Saknad data</h2>
-    <div class="quality-bar">${items}</div>
-    <p style="font-size:12px;color:#9e9588;margin:8px 0">Av ${D.overview.total_wines} viner i wines.json</p>
-
+function renderDq() {
+  const q = D.data_quality, v = D.vivino;
+  let items = Object.entries(q).map(([f, d]) => {
+    const cls = d.pct > 50 ? 'p-red' : d.pct > 20 ? 'p-yellow' : 'p-green';
+    return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0ebe3"><span>${f}</span><span class="pill ${cls}">${d.pct}% saknas (${d.missing})</span></div>`;
+  }).join('');
+  const countryBars = Object.entries(D.countries).map(([k,v]) => [k, v]);
+  document.getElementById('s-dq').innerHTML = `
+    <h2>Saknade fält</h2><div class="card">${items}</div>
     <h2>Datakällor</h2>
     <div class="grid">
-      <div class="stat ${v.with_rating > 1000 ? 'stat-good' : 'stat-warn'}"><div class="stat-value">${v.with_rating.toLocaleString()}</div><div class="stat-label">Vivino med betyg</div></div>
-      <div class="stat"><div class="stat-value">${v.zero_rating.toLocaleString()}</div><div class="stat-label">Vivino utan betyg</div></div>
-      <div class="stat"><div class="stat-value">${v.expert_cache.toLocaleString()}</div><div class="stat-label">Expert-cache</div></div>
-      <div class="stat ${v.flagged > 0 ? 'stat-warn' : 'stat-good'}"><div class="stat-value">${v.flagged}</div><div class="stat-label">Flaggade matchningar</div></div>
+      <div class="stat ${v.with_rating > 1000 ? 'stat-g' : 'stat-w'}"><div class="stat-v">${v.with_rating.toLocaleString()}</div><div class="stat-l">Vivino med betyg</div></div>
+      <div class="stat"><div class="stat-v">${v.zero_rating.toLocaleString()}</div><div class="stat-l">Vivino utan betyg</div></div>
+      <div class="stat"><div class="stat-v">${v.expert_cache.toLocaleString()}</div><div class="stat-l">Expert-cache</div></div>
+      <div class="stat ${v.flagged > 0 ? 'stat-w' : 'stat-g'}"><div class="stat-v">${v.flagged}</div><div class="stat-l">Flaggade</div></div>
     </div>
-
-    <h2>Länder (topp 15)</h2>
-    ${countryBars}
-  `;
+    <h2>Länder (topp 15)</h2>${bars(countryBars, '#6b8cce')}`;
 }
 
-function renderVivino() {
-  const flagged = D.flagged_vivino || [];
-
-  if (flagged.length === 0) {
-    document.getElementById('tab-vivino').innerHTML = '<div style="text-align:center;padding:40px;color:#2d6b3f;font-size:14px">Inga flaggade matchningar — allt ser bra ut.</div>';
-    return;
+function renderViv() {
+  const fl = D.flagged_vivino || [];
+  if (!fl.length) { document.getElementById('s-viv').innerHTML = '<div class="card" style="text-align:center;color:#2d6b3f">Inga flaggade matchningar</div>'; return; }
+  const pending = () => fl.length - Object.keys(flagD).length;
+  const render = () => {
+    document.getElementById('viv-list').innerHTML = fl.map(f => {
+      const st = flagD[f.key] || 'pending';
+      const cls = f.match_quality < 60 ? 'p-red' : 'p-yellow';
+      return `<div class="card" style="${st!=='pending'?'opacity:0.4':''}"><div class="flag-card"><div class="info">
+        <strong>${f.key.split('|')[0]}</strong> <span style="color:#9e9588">${f.key.split('|')[1]||''}</span>
+        <div style="color:#6b6355;margin:2px 0">→ ${f.vivino_name}</div>
+        <span class="pill ${cls}">${f.match_quality}%</span> Rating: ${f.vivino_rating} · Reviews: ${f.vivino_reviews}
+      </div><div>
+        ${st==='pending' ? `<button class="btn btn-g" onclick="vDec('${f.key}','ok')">Godkänn</button> <button class="btn btn-r" onclick="vDec('${f.key}','no')">Avvisa</button>` :
+        `<button class="btn btn-u" onclick="vDec('${f.key}','undo')">${st==='ok'?'✓':'✗'} Ångra</button>`}
+      </div></div></div>`;
+    }).join('');
+    document.getElementById('viv-status').textContent = `${fl.length} flaggade · ${pending()} kvar`;
+  };
+  document.getElementById('s-viv').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span id="viv-status"></span>
+    <div><button class="btn btn-g" onclick="vAll('ok')">Godkänn alla</button> <button class="btn btn-r" onclick="vAll('no')">Avvisa alla</button> <button class="btn btn-u" onclick="vExport()">Exportera</button></div>
+  </div><div id="viv-list"></div>`;
+  render();
+  window._vRender = render;
+}
+function vDec(k, s) { if(s==='undo') delete flagD[k]; else flagD[k]=s; window._vRender(); }
+function vAll(s) { (D.flagged_vivino||[]).forEach(f => { if(!flagD[f.key]) flagD[f.key]=s; }); window._vRender(); }
+function vExport() {
+  const a={}, r={};
+  for(const[k,s] of Object.entries(flagD)) {
+    const e = (D.flagged_vivino||[]).find(f=>f.key===k);
+    if(s==='ok'&&e) a[k]={vivino_rating:e.vivino_rating,vivino_reviews:e.vivino_reviews,vivino_name:e.vivino_name};
+    if(s==='no') r[k]=true;
   }
-
-  let cards = flagged.map((f, i) => {
-    const sbName = f.key.split('|')[0];
-    const sbSub = f.key.split('|')[1] || '';
-    const country = f.key.split('|')[2] || '';
-    const pctClass = f.match_quality < 60 ? 'match-low' : f.match_quality < 80 ? 'match-mid' : 'match-ok';
-    const status = flagDecisions[f.key] || 'pending';
-    const opacity = status !== 'pending' ? 'opacity:0.5' : '';
-
-    return `<div class="flag-card" style="${opacity}" data-key="${f.key}" data-status="${status}">
-      <div class="flag-info">
-        <div class="flag-name">${sbName} <span style="font-weight:400;color:#6b6355">${sbSub}</span></div>
-        <div class="flag-match">→ ${f.vivino_name}</div>
-        <div class="flag-meta">
-          <span class="match-pct ${pctClass}">${f.match_quality}%</span>
-          Rating: ${f.vivino_rating} · Reviews: ${f.vivino_reviews} · ${country}
-        </div>
-      </div>
-      <div class="flag-actions">
-        ${status === 'pending' ? `
-          <button class="btn-ok" onclick="flagDecide('${f.key}','approved')">Godkänn</button>
-          <button class="btn-no" onclick="flagDecide('${f.key}','rejected')">Avvisa</button>
-        ` : `
-          <button class="btn-undo" onclick="flagDecide('${f.key}','pending')">${status === 'approved' ? '✓' : '✗'} Ångra</button>
-        `}
-      </div>
-    </div>`;
-  }).join('');
-
-  const pending = flagged.length - Object.keys(flagDecisions).length;
-  const approved = Object.values(flagDecisions).filter(d => d === 'approved').length;
-  const rejected = Object.values(flagDecisions).filter(d => d === 'rejected').length;
-
-  document.getElementById('tab-vivino').innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:13px;color:#6b6355">${flagged.length} flaggade · ${pending} kvar · ${approved} godkända · ${rejected} avvisade</div>
-      <div>
-        <button onclick="flagAll('approved')" style="padding:6px 14px;border-radius:6px;border:1px solid #2d6b3f;background:#2d6b3f;color:#fff;cursor:pointer;font-size:11px;font-weight:600;margin-right:4px">Godkänn alla</button>
-        <button onclick="flagAll('rejected')" style="padding:6px 14px;border-radius:6px;border:1px solid #c44020;background:#c44020;color:#fff;cursor:pointer;font-size:11px;font-weight:600;margin-right:8px">Avvisa alla</button>
-        <button onclick="exportDecisions()" style="padding:6px 14px;border-radius:6px;border:1px solid #e2d8c8;background:#fff;cursor:pointer;font-size:11px">Exportera beslut</button>
-      </div>
-    </div>
-    <div id="flag-cards">${cards}</div>
-  `;
+  dl('vivino_approved.json',a); dl('vivino_rejected.json',r);
 }
+function dl(n,o) { const b=new Blob([JSON.stringify(o,null,2)],{type:'application/json'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
 
-function flagDecide(key, status) {
-  if (status === 'pending') delete flagDecisions[key];
-  else flagDecisions[key] = status;
-  renderVivino();
-}
+async function fetchLive() {
+  live.loaded = true;
+  const el = document.getElementById('s-tr');
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:#9e9588"><span class="live"></span> Hämtar realtidsdata...</div>';
+  try {
+    const [stats, searches, aiQ] = await Promise.all([
+      fetch(ANALYTICS_URL+'/stats').then(r=>r.json()),
+      fetch(ANALYTICS_URL+'/top-searches').then(r=>r.json()),
+      fetch(ANALYTICS_URL+'/ai-queries').then(r=>r.json()),
+    ]);
+    // Try Supabase user count
+    let userCount = '–', subCount = '–';
+    try {
+      const uRes = await fetch(SUPABASE_URL+'/rest/v1/users?select=id', {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'count=exact','Range':'0-0'}});
+      userCount = uRes.headers.get('content-range')?.split('/')[1] || '–';
+      const sRes = await fetch(SUPABASE_URL+'/rest/v1/email_subscribers?select=id', {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'count=exact','Range':'0-0'}});
+      subCount = sRes.headers.get('content-range')?.split('/')[1] || '–';
+    } catch(e) {}
 
-function flagAll(status) {
-  (D.flagged_vivino || []).forEach(f => { if (!flagDecisions[f.key]) flagDecisions[f.key] = status; });
-  renderVivino();
-}
+    const topW = (stats.top_wines_7d||[]).slice(0,10);
+    const daily = D.analytics?.daily_events || [];
+    const history = D.history || [];
 
-function exportDecisions() {
-  const approved = {}, rejected = {};
-  for (const [key, status] of Object.entries(flagDecisions)) {
-    const entry = (D.flagged_vivino || []).find(f => f.key === key);
-    if (!entry) continue;
-    if (status === 'approved') approved[key] = { vivino_rating: entry.vivino_rating, vivino_reviews: entry.vivino_reviews, vivino_name: entry.vivino_name };
-    if (status === 'rejected') rejected[key] = true;
+    el.innerHTML = `
+      <div style="font-size:11px;color:#2d6b3f;margin-bottom:8px"><span class="live"></span> Realtidsdata från CF Workers + Supabase</div>
+      <div class="grid">
+        <div class="stat"><div class="stat-v">${stats.total_events||0}</div><div class="stat-l">Events totalt</div></div>
+        <div class="stat"><div class="stat-v">${stats.total_searches||0}</div><div class="stat-l">Sökningar</div></div>
+        <div class="stat"><div class="stat-v">${stats.total_ai_queries||0}</div><div class="stat-l">AI-frågor</div></div>
+        <div class="stat stat-g"><div class="stat-v">${userCount}</div><div class="stat-l">Supabase users</div></div>
+        <div class="stat"><div class="stat-v">${subCount}</div><div class="stat-l">Prenumeranter</div></div>
+      </div>
+
+      <h2>Events per dag</h2>
+      ${bars(daily.map(d => [d.day.slice(5), d.n]), '#8b2332')}
+
+      <h2>Topp sökningar (live)</h2>
+      <table><thead><tr><th>Sökfras</th><th>Gånger</th></tr></thead><tbody>
+      ${searches.slice(0,15).map(s => `<tr><td>${s.query}</td><td>${s.count}</td></tr>`).join('')}
+      </tbody></table>
+
+      <h2>AI-frågor (senaste)</h2>
+      <table><thead><tr><th>Måltid</th><th>Svar</th><th>Tid</th></tr></thead><tbody>
+      ${aiQ.slice(0,10).map(a => `<tr><td>${a.meal}</td><td><span class="pill p-green">${a.mode}</span></td><td>${a.latency_ms?Math.round(a.latency_ms)+'ms':'–'}</td></tr>`).join('')}
+      </tbody></table>
+
+      <h2>Populäraste viner (7 dagar)</h2>
+      <table><thead><tr><th>Art.nr</th><th>Klick</th><th>SB-klick</th></tr></thead><tbody>
+      ${topW.map(w => `<tr><td><a href="https://smakfynd.se/#vin/${w.wine_nr}" target="_blank" style="color:#8b2332">${w.wine_nr}</a></td><td>${w.clicks}</td><td>${w.sb}</td></tr>`).join('')}
+      </tbody></table>
+
+      ${history.length > 1 ? `<h2>Historik (${history.length} dagar)</h2>
+      <table><thead><tr><th>Datum</th><th>Events</th><th>Idag</th><th>Viner</th><th>Vivino</th><th>Drops</th></tr></thead><tbody>
+      ${history.slice().reverse().map(h => `<tr><td>${h.date}</td><td>${h.events}</td><td>${h.today_events||'–'}</td><td>${h.wines}</td><td>${h.vivino_matches||'–'}</td><td>${h.price_drops||'–'}</td></tr>`).join('')}
+      </tbody></table>` : ''}
+
+      <h2>Externa dashboards</h2>
+      <div class="links">
+        <a href="https://smakfynd.goatcounter.com" target="_blank">GoatCounter</a>
+        <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Search Console</a>
+        <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase</a>
+        <a href="https://dash.cloudflare.com" target="_blank">Cloudflare</a>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="card" style="color:#c44020">Kunde inte hämta live-data: ${e.message}</div>
+    <p style="margin:8px 0;font-size:12px;color:#9e9588">Fallback: build-time data</p>` + renderTrafficFallback();
   }
-  downloadJSON('vivino_approved.json', approved);
-  downloadJSON('vivino_rejected.json', rejected);
 }
 
-function downloadJSON(name, obj) {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-}
-
-function renderAnalytics() {
+function renderTrafficFallback() {
   const a = D.analytics || {};
-  const evtTypes = a.events_by_type || [];
-  const recent = a.recent_events || [];
-  const searches = a.top_searches || [];
   const daily = a.daily_events || [];
-  const ai = a.ai_stats || {};
-  const history = D.history || [];
-
-  // Daily chart (simple bars)
-  const maxDaily = Math.max(...daily.map(d => d.n), 1);
-  let dailyBars = daily.map(d => `<div class="bar-row">
-    <span class="bar-label">${d.day.slice(5)}</span>
-    <div class="bar-track"><div class="bar-fill" style="width:${d.n/maxDaily*100}%;background:#8b2332"></div></div>
-    <span class="bar-value">${d.n}</span>
-  </div>`).join('');
-
-  // Event type breakdown
-  let evtRows = evtTypes.map(e => `<tr><td><strong>${e.event}</strong></td><td>${e.n}</td></tr>`).join('');
-
-  // Recent events
-  let recentRows = recent.map(e => {
-    let detail = '';
-    try { const d = JSON.parse(e.data || '{}'); detail = d.name || d.query || ''; } catch(x) {}
-    return `<tr>
-      <td style="font-size:11px;color:#9e9588">${e.ts.slice(5, 16)}</td>
-      <td>${e.event}</td>
-      <td>${detail}</td>
-      <td style="font-size:11px;color:#9e9588">${e.device || ''}</td>
-    </tr>`;
-  }).join('');
-
-  // Searches
-  let searchRows = searches.map(s => `<tr><td>${s.query}</td><td>${s.result_count || '–'}</td><td>${s.n}</td></tr>`).join('');
-
-  document.getElementById('tab-analytics').innerHTML = `
-    <div class="grid">
-      <div class="stat"><div class="stat-value">${(a.total_events || 0).toLocaleString()}</div><div class="stat-label">Events totalt</div></div>
-      <div class="stat"><div class="stat-value">${searches.length}</div><div class="stat-label">Unika sökningar</div></div>
-      <div class="stat"><div class="stat-value">${ai.n || 0}</div><div class="stat-label">AI-frågor</div></div>
-      <div class="stat"><div class="stat-value">${ai.avg_ms ? Math.round(ai.avg_ms) + 'ms' : '–'}</div><div class="stat-label">AI snitt-svar</div></div>
-    </div>
-
-    <h2>Events per dag (14 dagar)</h2>
-    ${dailyBars || '<p style="font-size:13px;color:#9e9588">Ingen data</p>'}
-
-    <h2>Event-typer</h2>
-    <table><thead><tr><th>Event</th><th>Antal</th></tr></thead><tbody>${evtRows || '<tr><td colspan="2" style="color:#9e9588">Ingen data</td></tr>'}</tbody></table>
-
-    <h2>Topp sökningar</h2>
-    <table><thead><tr><th>Sökfras</th><th>Resultat</th><th>Gånger</th></tr></thead><tbody>${searchRows || '<tr><td colspan="3" style="color:#9e9588">Inga sökningar</td></tr>'}</tbody></table>
-
-    <h2>Senaste händelser</h2>
-    <table><thead><tr><th>Tid</th><th>Event</th><th>Detalj</th><th>Enhet</th></tr></thead><tbody>${recentRows || '<tr><td colspan="4" style="color:#9e9588">Inga händelser</td></tr>'}</tbody></table>
-
-    ${history.length > 1 ? `
-    <h2>Historik (${history.length} dagar)</h2>
-    <table>
-      <thead><tr><th>Datum</th><th>Events totalt</th><th>Dagens events</th><th>Viner</th><th>Vivino</th><th>Prissänkta</th></tr></thead>
-      <tbody>${history.slice().reverse().map(h => `<tr>
-        <td>${h.date}</td>
-        <td>${(h.events || 0).toLocaleString()}</td>
-        <td>${h.today_events || '–'}</td>
-        <td>${(h.wines || 0).toLocaleString()}</td>
-        <td>${h.vivino_matches || '–'}</td>
-        <td>${h.price_drops || '–'}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-    ` : ''}
-
-    <h2>Externa dashboards</h2>
-    <div class="links">
-      <a href="https://smakfynd.goatcounter.com" target="_blank">GoatCounter →</a>
-      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Google Search Console →</a>
-      <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase →</a>
-      <a href="https://dash.cloudflare.com" target="_blank">Cloudflare →</a>
-      <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions →</a>
-    </div>
-  `;
+  return `<h2>Events per dag (build-time)</h2>${bars(daily.map(d => [d.day.slice(5), d.n]), '#8b2332')}`;
 }
 
-function renderSEO() {
+function renderSeo() {
   const g = D.gsc || {};
-  if (!g.daily || !g.daily.length) {
-    document.getElementById('tab-seo').innerHTML = '<p style="padding:40px;text-align:center;color:#9e9588">Ingen GSC-data. Ladda upp CSV-export från Google Search Console.</p>';
-    return;
-  }
-
+  if (!g.daily?.length) { document.getElementById('s-seo').innerHTML = '<div class="card" style="color:#9e9588">Ingen GSC-data. Exportera från Google Search Console.</div>'; return; }
   const t = g.totals || {};
-  const daily = g.daily || [];
-  const queries = g.queries || [];
-  const pages = g.pages || [];
-  const devices = g.devices || {};
-
-  // Daily clicks chart
-  const maxClicks = Math.max(...daily.map(d => d.clicks), 1);
-  let clickBars = daily.map(d => `<div class="bar-row">
-    <span class="bar-label">${d.date.slice(5)}</span>
-    <div class="bar-track"><div class="bar-fill" style="width:${d.clicks/maxClicks*100}%;background:#8b2332"></div></div>
-    <span class="bar-value">${d.clicks}</span>
-  </div>`).join('');
-
-  // Daily impressions chart
-  const maxImp = Math.max(...daily.map(d => d.impressions), 1);
-  let impBars = daily.map(d => `<div class="bar-row">
-    <span class="bar-label">${d.date.slice(5)}</span>
-    <div class="bar-track"><div class="bar-fill" style="width:${d.impressions/maxImp*100}%;background:#6b8cce"></div></div>
-    <span class="bar-value">${d.impressions}</span>
-  </div>`).join('');
-
-  // Queries table
-  let queryRows = queries.slice(0, 25).map(q => `<tr>
-    <td>${q.query}</td>
-    <td><strong>${q.clicks}</strong></td>
-    <td>${q.impressions}</td>
-    <td>${q.ctr}</td>
-    <td>${q.position}</td>
-  </tr>`).join('');
-
-  // Pages table
-  let pageRows = pages.map(p => `<tr>
-    <td><a href="https://smakfynd.se${p.page}" target="_blank" style="color:#8b2332;text-decoration:none">${p.page || '/'}</a></td>
-    <td><strong>${p.clicks}</strong></td>
-    <td>${p.impressions}</td>
-    <td>${p.ctr}</td>
-    <td>${p.position}</td>
-  </tr>`).join('');
-
-  // Device split
-  const totalDevClicks = Object.values(devices).reduce((s, d) => s + d.clicks, 0) || 1;
-  let deviceBars = Object.entries(devices).map(([dev, d]) => `<div class="bar-row">
-    <span class="bar-label">${dev}</span>
-    <div class="bar-track"><div class="bar-fill" style="width:${d.clicks/totalDevClicks*100}%;background:#2d6b3f"></div></div>
-    <span class="bar-value">${d.clicks} klick</span>
-  </div>`).join('');
-
-  document.getElementById('tab-seo').innerHTML = `
-    <div style="font-size:12px;color:#9e9588;margin-bottom:12px">Period: ${g.period} · Exporterad ${g.exported}</div>
+  document.getElementById('s-seo').innerHTML = `
+    <div style="font-size:11px;color:#9e9588;margin-bottom:8px">Period: ${g.period} · Export ${g.exported}</div>
     <div class="grid">
-      <div class="stat stat-good"><div class="stat-value">${t.clicks}</div><div class="stat-label">Klick från Google</div></div>
-      <div class="stat"><div class="stat-value">${(t.impressions || 0).toLocaleString()}</div><div class="stat-label">Impressions</div></div>
-      <div class="stat"><div class="stat-value">${t.clicks && t.impressions ? (t.clicks / t.impressions * 100).toFixed(1) + '%' : '–'}</div><div class="stat-label">CTR</div></div>
-      <div class="stat"><div class="stat-value">${t.avg_position}</div><div class="stat-label">Snittposition</div></div>
+      <div class="stat stat-g"><div class="stat-v">${t.clicks}</div><div class="stat-l">Klick</div></div>
+      <div class="stat"><div class="stat-v">${(t.impressions||0).toLocaleString()}</div><div class="stat-l">Impressions</div></div>
+      <div class="stat"><div class="stat-v">${t.clicks&&t.impressions?(t.clicks/t.impressions*100).toFixed(1)+'%':'–'}</div><div class="stat-l">CTR</div></div>
+      <div class="stat"><div class="stat-v">${t.avg_position}</div><div class="stat-l">Snittposition</div></div>
     </div>
-
-    <h2>Klick per dag</h2>
-    ${clickBars}
-
-    <h2>Impressions per dag</h2>
-    ${impBars}
-
-    <h2>Enheter</h2>
-    ${deviceBars}
-
-    <h2>Topp sökord (${queries.length} st)</h2>
-    <table><thead><tr><th>Sökfras</th><th>Klick</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead><tbody>${queryRows}</tbody></table>
-
+    <h2>Klick per dag</h2>${bars(g.daily.map(d => [d.date.slice(5), d.clicks]), '#8b2332')}
+    <h2>Impressions per dag</h2>${bars(g.daily.map(d => [d.date.slice(5), d.impressions]), '#6b8cce')}
+    <h2>Enheter</h2>${bars(Object.entries(g.devices||{}).map(([k,v]) => [k, v.clicks]), '#2d6b3f')}
+    <h2>Topp sökord</h2>
+    <table><thead><tr><th>Sökfras</th><th>Klick</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead><tbody>
+    ${(g.queries||[]).slice(0,20).map(q => `<tr><td>${q.query}</td><td><strong>${q.clicks}</strong></td><td>${q.impressions}</td><td>${q.ctr}</td><td>${q.position}</td></tr>`).join('')}
+    </tbody></table>
     <h2>Topp sidor</h2>
-    <table><thead><tr><th>Sida</th><th>Klick</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead><tbody>${pageRows}</tbody></table>
+    <table><thead><tr><th>Sida</th><th>Klick</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead><tbody>
+    ${(g.pages||[]).map(p => `<tr><td><a href="https://smakfynd.se${p.page}" target="_blank" style="color:#8b2332">${p.page||'/'}</a></td><td><strong>${p.clicks}</strong></td><td>${p.impressions}</td><td>${p.ctr}</td><td>${p.position}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="links"><a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Öppna Search Console →</a></div>`;
+}
 
-    <div class="links" style="margin-top:20px">
-      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Öppna Google Search Console →</a>
-    </div>
-  `;
+function renderDep() {
+  const log = D.git_log || [];
+  document.getElementById('s-dep').innerHTML = `
+    <h2>Senaste commits</h2>
+    <table><thead><tr><th>Hash</th><th>Meddelande</th><th>Datum</th></tr></thead><tbody>
+    ${log.map(c => `<tr><td><span class="commit">${c.hash}</span></td><td>${c.message}</td><td style="white-space:nowrap;color:#9e9588">${c.date}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="links" style="margin-top:12px">
+      <a href="https://github.com/Lingabton/smakfynd" target="_blank">GitHub repo</a>
+      <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions</a>
+      <a href="https://github.com/Lingabton/smakfynd/commits/main" target="_blank">Commit history</a>
+    </div>`;
 }
 
 init();
