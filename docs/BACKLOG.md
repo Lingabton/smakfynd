@@ -1,34 +1,25 @@
 # Smakfynd Feature Backlog
-*Uppdaterad 2026-05-08*
+*Uppdaterad 2026-05-09*
 
 ## Kvar att göra
 
 ### Vivino-data
 - [ ] Kör vivino_playwright.py --refresh-top 500 (kräver manuell CAPTCHA, Vivino blockerar headless)
 - [ ] Kör score_wines_v2.py + full rebuild efter lyckad scrape
-- [ ] Vikta kritiker olika baserat på tillförlitlighet/korrelation med crowd
+- [x] Vikta kritiker — analyserad men otillräcklig data (bara Wine Enthusiast n=824, resten n<10)
 
 ### Datakvalitet
-- [ ] 50+ viner i topp 200 saknar grape-fält — fyll i manuellt eller scrapa från SB produktsidor
+- [x] Grape-fält patchad för 18 av 57 viner i topp 200 (namn-extraktion)
+- [ ] 39 viner i topp 200 saknar fortfarande grape — kräver manuell lookup
 - [ ] GSC API-integration (service account) — automatisk daglig hämtning istf manuell CSV
-
-### Stora features
-- [ ] Delbar AI-vinlista ("Dela vinlista" för middagsbjudning)
-- [ ] Present-sektion: kurerade listor per prisklass
-- [ ] Situationsbaserade ingångar: dejt, grillkväll, svärföräldrar, fredagsmys
-
-### Data & teknik
-- [ ] Fräschare Wine Enthusiast-data (Kaggle är från 2017)
 - [ ] 70% av viner saknar food_pairings — begränsar mat-filter
-- [ ] 53% saknar expert_score — visa tydligare att data saknas istf tomma staplar
-- [ ] 35% saknar image_url — överväg fallback-bilder per kategori
-- [ ] 37% har tom grape-sträng — påverkar liknande-viner-matchning
+- [ ] 35% saknar image_url
 
-### Att konfigurera
+### Att konfigurera (kräver Gabriel)
 - [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no`
 - [ ] Fyll i organisationsnummer i `/integritet/` (`[ORG-NR]`)
 
-### Content & distribution
+### Content & distribution (kräver Gabriel)
 - [ ] Fredags-nyhetsbrev "Veckans fynd" via Substack
 - [ ] Substack SEO-artiklar: "bästa röda under 100 kr systembolaget"
 - [ ] Instagram @smakfynd
