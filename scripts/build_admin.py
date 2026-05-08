@@ -176,7 +176,12 @@ if not history or history[-1].get("date") != today:
 else:
     print(f"  History: already recorded today ({len(history)} days)")
 
+# --- Load GSC data ---
+gsc_file = os.path.join(DATA_DIR, "gsc_history.json")
+gsc = json.load(open(gsc_file)) if os.path.exists(gsc_file) else {}
+
 admin_data["history"] = history
+admin_data["gsc"] = gsc
 
 out_path = os.path.join(ADMIN_DIR, "data.json")
 json.dump(admin_data, open(out_path, "w"), ensure_ascii=False)

@@ -71,6 +71,7 @@
     <button onclick="showTab('quality')">Datakvalitet</button>
     <button onclick="showTab('vivino')">Vivino Review</button>
     <button onclick="showTab('analytics')">Trafik</button>
+    <button onclick="showTab('seo')">SEO</button>
   </div>
 
   <div id="loading">Laddar data...</div>
@@ -86,6 +87,9 @@
 
   <!-- ANALYTICS -->
   <div class="section" id="tab-analytics"></div>
+
+  <!-- SEO -->
+  <div class="section" id="tab-seo"></div>
 </div>
 
 <script>
@@ -115,6 +119,7 @@ async function init() {
   renderQuality();
   renderVivino();
   renderAnalytics();
+  renderSEO();
 }
 
 function renderOverview() {
@@ -371,6 +376,91 @@ function renderAnalytics() {
       <a href="https://supabase.com/dashboard/project/bfzzsniebwxwrnkmeymg" target="_blank">Supabase →</a>
       <a href="https://dash.cloudflare.com" target="_blank">Cloudflare →</a>
       <a href="https://github.com/Lingabton/smakfynd/actions" target="_blank">GitHub Actions →</a>
+    </div>
+  `;
+}
+
+function renderSEO() {
+  const g = D.gsc || {};
+  if (!g.daily || !g.daily.length) {
+    document.getElementById('tab-seo').innerHTML = '<p style="padding:40px;text-align:center;color:#9e9588">Ingen GSC-data. Ladda upp CSV-export från Google Search Console.</p>';
+    return;
+  }
+
+  const t = g.totals || {};
+  const daily = g.daily || [];
+  const queries = g.queries || [];
+  const pages = g.pages || [];
+  const devices = g.devices || {};
+
+  // Daily clicks chart
+  const maxClicks = Math.max(...daily.map(d => d.clicks), 1);
+  let clickBars = daily.map(d => `<div class="bar-row">
+    <span class="bar-label">${d.date.slice(5)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${d.clicks/maxClicks*100}%;background:#8b2332"></div></div>
+    <span class="bar-value">${d.clicks}</span>
+  </div>`).join('');
+
+  // Daily impressions chart
+  const maxImp = Math.max(...daily.map(d => d.impressions), 1);
+  let impBars = daily.map(d => `<div class="bar-row">
+    <span class="bar-label">${d.date.slice(5)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${d.impressions/maxImp*100}%;background:#6b8cce"></div></div>
+    <span class="bar-value">${d.impressions}</span>
+  </div>`).join('');
+
+  // Queries table
+  let queryRows = queries.slice(0, 25).map(q => `<tr>
+    <td>${q.query}</td>
+    <td><strong>${q.clicks}</strong></td>
+    <td>${q.impressions}</td>
+    <td>${q.ctr}</td>
+    <td>${q.position}</td>
+  </tr>`).join('');
+
+  // Pages table
+  let pageRows = pages.map(p => `<tr>
+    <td><a href="https://smakfynd.se${p.page}" target="_blank" style="color:#8b2332;text-decoration:none">${p.page || '/'}</a></td>
+    <td><strong>${p.clicks}</strong></td>
+    <td>${p.impressions}</td>
+    <td>${p.ctr}</td>
+    <td>${p.position}</td>
+  </tr>`).join('');
+
+  // Device split
+  const totalDevClicks = Object.values(devices).reduce((s, d) => s + d.clicks, 0) || 1;
+  let deviceBars = Object.entries(devices).map(([dev, d]) => `<div class="bar-row">
+    <span class="bar-label">${dev}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${d.clicks/totalDevClicks*100}%;background:#2d6b3f"></div></div>
+    <span class="bar-value">${d.clicks} klick</span>
+  </div>`).join('');
+
+  document.getElementById('tab-seo').innerHTML = `
+    <div style="font-size:12px;color:#9e9588;margin-bottom:12px">Period: ${g.period} · Exporterad ${g.exported}</div>
+    <div class="grid">
+      <div class="stat stat-good"><div class="stat-value">${t.clicks}</div><div class="stat-label">Klick från Google</div></div>
+      <div class="stat"><div class="stat-value">${(t.impressions || 0).toLocaleString()}</div><div class="stat-label">Impressions</div></div>
+      <div class="stat"><div class="stat-value">${t.clicks && t.impressions ? (t.clicks / t.impressions * 100).toFixed(1) + '%' : '–'}</div><div class="stat-label">CTR</div></div>
+      <div class="stat"><div class="stat-value">${t.avg_position}</div><div class="stat-label">Snittposition</div></div>
+    </div>
+
+    <h2>Klick per dag</h2>
+    ${clickBars}
+
+    <h2>Impressions per dag</h2>
+    ${impBars}
+
+    <h2>Enheter</h2>
+    ${deviceBars}
+
+    <h2>Topp sökord (${queries.length} st)</h2>
+    <table><thead><tr><th>Sökfras</th><th>Klick</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead><tbody>${queryRows}</tbody></table>
+
+    <h2>Topp sidor</h2>
+    <table><thead><tr><th>Sida</th><th>Klick</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead><tbody>${pageRows}</tbody></table>
+
+    <div class="links" style="margin-top:20px">
+      <a href="https://search.google.com/search-console?resource_id=sc-domain:smakfynd.se" target="_blank">Öppna Google Search Console →</a>
     </div>
   `;
 }
