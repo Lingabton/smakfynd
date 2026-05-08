@@ -293,11 +293,11 @@ def main():
     if box_wines:
         make_page(
             "basta-boxvin",
-            f"Bästa boxvin (bag-in-box) på Systembolaget {YEAR}",
-            f"Topp 20 bästa bag-in-box-viner. Rankade efter kvalitet per krona. Uppdaterad {DATE_STR}.",
-            f"Bästa boxvin på Systembolaget — {DATE_STR}",
-            "Bag-in-box har blivit mycket bättre. Här är de boxviner som faktiskt smakar bra — rankade efter kvalitet per krona.",
-            '<p style="margin:8px 0 0;font-size:14px;color:#4a4238;line-height:1.6">Sverige är världens största marknad för boxvin. Med rätt val kan du få utmärkt vin för en bråkdel av flaskpriset. Vi har testat och rankat alla BiB-viner på Systembolaget.</p>',
+            f"Bästa boxvin {YEAR} — Topp 20 bag-in-box på Systembolaget",
+            f"Bästa boxvinet {YEAR}? Vi har rankat alla {len(box_wines)}+ BiB-viner efter smak och pris. Röda, vita och rosé — här är boxvinerna som faktiskt är värda pengarna. {DATE_STR}.",
+            f"Bästa boxvin {YEAR} — topp bag-in-box på Systembolaget",
+            f"Vilket boxvin är bäst just nu? Sverige är världens största boxvinmarknad — men kvaliteten varierar enormt. Vi har rankat alla bag-in-box-viner på Systembolaget efter kvalitet per krona.",
+            f'<p style="margin:8px 0 0;font-size:14px;color:#4a4238;line-height:1.6">Bästa boxvinet {YEAR} behöver inte vara dyrt. Med rätt val får du utmärkt vin — ofta bättre än flaskor i samma prisklass. Listan uppdateras varje vecka med nya betyg och priser.</p>',
             box_wines,
         )
 
