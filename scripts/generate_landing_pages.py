@@ -981,6 +981,141 @@ def make_pages():
                            and 'carm' in (w.get('grape') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
+        # ─── Nya SEO-sidor (maj 2026) ───
+
+        # Champagne (bredare än bara under 300 kr)
+        {
+            "slug": "basta-champagne",
+            "title": f"Bästa champagnen {YEAR} — Topp 20 på Systembolaget",
+            "meta": f"Bästa champagnen {YEAR}? Från Brut under 300 kr till prestige-cuvéer. Topp 20 champagne rankade efter smak och pris. {DATE_STR}.",
+            "h1": f"Bästa champagnen {YEAR} — rankad topplista",
+            "intro": f"Bästa champagnen på Systembolaget just nu? Vi har rankat alla champagner — från prisvärda under 300 kr till prestigefyllda hus som Krug och Pol Roger.",
+            "intro2": f"Champagne är den ultimata festdrycken, men kvaliteten varierar enormt. Grower-champagne (små producenter) ger ofta bättre prisvärdhet än de stora husen. Blanc de Blancs (100% Chardonnay) är elegant, Blanc de Noirs (Pinot Noir) mer kraftfull. Vi jämför alla champagner på Systembolaget baserat på expert- och crowd-betyg.",
+            "guide": {
+                "title": "Så väljer du rätt champagne",
+                "points": [
+                    "Under 300 kr: Beaumont des Crayères och liknande kooperativ ger mest kvalitet.",
+                    "300–500 kr: Grower-champagne slår ofta de stora husen. Kolla Palmer & Co och liknande.",
+                    "Blanc de Blancs = elegant. Blanc de Noirs = fylligare. Rosé = festligast.",
+                    "Servera vid 8°C. Använd inte flöjtglas — ett vanligt vinglas ger bättre arom.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilken champagne är bäst för pengarna?", "Grower-champagne och kooperativ som Beaumont des Crayères ger ofta bäst prisvärdhet. De stora husen (Moët, Veuve Clicquot) betalar du delvis för varumärket."),
+                ("Vad är skillnaden på Brut och Extra Brut?", "Brut har upp till 12 g/l restsocker, Extra Brut under 6 g/l. Extra Brut är torrare och visar mer av vinets karaktär. De flesta föredrar Brut till festliga tillfällen."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande' and w.get('region') == 'Champagne'],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # Röda boxviner
+        {
+            "slug": "basta-roda-boxvin",
+            "title": f"Bästa röda boxvin {YEAR} — Topp bag-in-box på Systembolaget",
+            "meta": f"Bästa röda boxvinet {YEAR}? Topp röda BiB-viner rankade efter kvalitet. Från Tempranillo till Malbec. {DATE_STR}.",
+            "h1": f"Bästa röda boxvin {YEAR}",
+            "intro": f"Bästa röda boxvinet just nu? Röda bag-in-box har blivit mycket bättre — här är de som faktiskt levererar kvalitet per krona.",
+            "intro2": "Sverige är världens största marknad för boxvin, och kvaliteten har exploderat. Röda boxviner från Spanien (Tempranillo, Garnacha) och Sydamerika (Malbec) dominerar topplistorna. Vi rankar alla röda BiB-viner efter smak och pris.",
+            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+                           and w.get('type') == 'Rött' and w.get('smakfynd_score', 0) > 0
+                           and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # Vita boxviner
+        {
+            "slug": "basta-vita-boxvin",
+            "title": f"Bästa vita boxvin {YEAR} — Topp bag-in-box på Systembolaget",
+            "meta": f"Bästa vita boxvinet {YEAR}? Topp vita BiB-viner rankade efter kvalitet. Chardonnay, Sauvignon Blanc och mer. {DATE_STR}.",
+            "h1": f"Bästa vita boxvin {YEAR}",
+            "intro": f"Bästa vita boxvinet just nu? Fräscha, fruktiga och prisvärda — här är de vita bag-in-box som faktiskt imponerar.",
+            "intro2": "Vita boxviner har gjort enorma kvalitetssprång. Från fräscha Sauvignon Blanc till runda Chardonnay — rätt val ger dig utmärkt vin till vardags. Vi rankar alla vita BiB-viner på Systembolaget efter kvalitet per krona.",
+            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+                           and w.get('type') == 'Vitt' and w.get('smakfynd_score', 0) > 0
+                           and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # Alkoholfritt vin (informationssida — data saknas i scoring)
+        {
+            "slug": "alkoholfritt-vin",
+            "title": f"Bästa alkoholfria vin {YEAR} — Guide till Systembolaget",
+            "meta": f"Bästa alkoholfritt vin {YEAR}? Guide till de godaste alkoholfria vinerna på Systembolaget. Rött, vitt, rosé och bubbel. {DATE_STR}.",
+            "h1": f"Bästa alkoholfria vin {YEAR}",
+            "intro": "Alkoholfritt vin har blivit riktigt bra. Här är vår guide till de bästa alkoholfria vinerna på Systembolaget — rött, vitt, rosé och bubbel.",
+            "intro2": f"Marknaden för alkoholfritt vin växer explosionsartat. Kvaliteten har förbättrats enormt de senaste åren tack vare bättre avalkoholiseringstekniker. Leitz (Tyskland) och Torres (Spanien) är pionjärer. Vi har ännu inte integrerat alkoholfria viner i vår poängsättning, men guidar dig till de bästa valen baserat på expertrecensioner.",
+            "guide": {
+                "title": "Så väljer du alkoholfritt vin",
+                "points": [
+                    "Leitz Eins Zwei Zero Riesling är benchmark — fräsch, fruktig och närmast riktigt vin i smak.",
+                    "Torres Natureo (Muscat) och Oddbird (Frankrike) är andra toppval.",
+                    "Alkoholfritt bubbel funkar ofta bättre än alkoholfritt rött — kolsyran ger kropp.",
+                    "Servera kallt — alkoholfritt vin tappar smak snabbare vid rumstemperatur.",
+                ]
+            },
+            "faq_visible": [
+                ("Smakar alkoholfritt vin bra?", "De bästa alkoholfria vinerna (som Leitz Riesling) är genuint goda. Men förväntningarna bör vara realistiska — det smakar annorlunda. Bubbel och vita viner lyckas generellt bättre alkoholfritt än röda."),
+                ("Är alkoholfritt vin nyttigt?", "Alkoholfritt vin har ungefär hälften av kalorierna jämfört med vanligt vin och innehåller fortfarande antioxidanter. Det är ett bra alternativ om du vill njuta av vinupplevelsen utan alkohol."),
+            ],
+            "wines": [],
+        },
+
+        # Naturvin
+        {
+            "slug": "naturvin",
+            "title": f"Bästa naturvin {YEAR} — Guide till Systembolaget",
+            "meta": f"Bästa naturvinet {YEAR}? Guide till naturviner på Systembolaget — vad det är, hur det smakar och vilka du bör prova. {DATE_STR}.",
+            "h1": f"Bästa naturvin {YEAR} — guide & rekommendationer",
+            "intro": "Naturvin är vin med minimal påverkan — inga tillsatser, ekologiska druvor, vilda jäster. Här är allt du behöver veta om naturvin på Systembolaget.",
+            "intro2": "Naturvin har gått från nisch till mainstream. Systembolaget har en egen naturvinskategori med allt från orangea viner till pétillant naturel (pet-nat). Stilen varierar enormt — från fräscha och fruktiga till funky och jordiga. Vi guidar dig genom utbudet.",
+            "guide": {
+                "title": "Naturvin — vad är det?",
+                "points": [
+                    "Ekologiska eller biodynamiska druvor, ofta handplockade.",
+                    "Vild jäst (inga tillsatta jästkulturer), minimal svavel.",
+                    "Ofta ofiltrerat — kan vara grumligt, det är normalt.",
+                    "Orangea viner = vita druvor som macererats med skal, ger färg och tanniner.",
+                ]
+            },
+            "faq_visible": [
+                ("Smakar naturvin annorlunda?", "Ja, ofta. Naturvin kan vara mer oförutsägbart — fruktdrivet, jordigt eller funkigt. Börja med ett pet-nat (naturligt mousserande) eller en lättare röd som Gamay om du är nybörjare."),
+                ("Är allt ekologiskt vin naturvin?", "Nej. Ekologiskt vin reglerar odlingen men tillåter tillsatser i vinmakningen. Naturvin minimerar ingrepp i hela processen — från druva till flaska."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('organic')
+                           and any(g in (w.get('grape') or '').lower() for g in ['gamay', 'cabernet franc', 'chenin', 'grenache', 'cinsault', 'carignan'])],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # Vin för nybörjare
+        {
+            "slug": "vin-for-nyborjare",
+            "title": f"Vin för nybörjare {YEAR} — Var börjar man? Systembolaget-guide",
+            "meta": f"Ny på vin? Enkel guide utan pretention. Vilka viner du bör börja med, hur du väljer och vad begreppen betyder. {DATE_STR}.",
+            "h1": f"Vin för nybörjare — var börjar man?",
+            "intro": "Vet du inte så mycket om vin? Perfekt. Den här guiden hjälper dig välja rätt utan att du behöver kunna ett enda vinord.",
+            "intro2": f"Vinvärlden kan kännas överväldigande med hundratals druvor, regioner och uttryck. Men i verkligheten behöver du bara veta tre saker: vad du gillar att äta, hur mycket du vill spendera, och om du föredrar lätt eller fylligt. Vi matchar dig med rätt vin — enkelt och utan pretention.",
+            "guide": {
+                "title": "Tre steg till rätt vin",
+                "points": [
+                    "Steg 1: Börja med lättare viner. Rött = Pinot Noir. Vitt = Sauvignon Blanc. Bubbel = Cava.",
+                    "Steg 2: Prova dig fram i prisklassen 100–150 kr — det är sweet spot för kvalitet.",
+                    "Steg 3: Använd Smakfynds AI-matchare — beskriv vad du ska äta och få personligt vinförslag.",
+                    "Bonus: Ekologiskt vin är inte dyrare men ofta mer genomtänkt — bra val för nybörjare.",
+                ]
+            },
+            "faq_visible": [
+                ("Jag gillar inte vin — vad ska jag prova?", "Börja med ett sött eller halvtorrt vin — Moscato d'Asti (bubbligt, lätt, fruktigt) eller en Riesling med viss sötma. Många som 'inte gillar vin' har bara provat torra, sträviga röda."),
+                ("Vad betyder torrt vin?", "Torrt = inte sött. De flesta röda viner och många vita är torra. Det har inget med hur de känns i munnen att göra — ett torrt vin kan vara fruktigt och lättdrucket."),
+                ("Måste jag kunna mycket om vin för att välja rätt?", "Nej. Smakfynd-poängen sammanfattar expertbetyg och prisvärde i en enda siffra. Välj det med högst poäng i din prisklass — klart."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('price', 999) or 999) <= 150
+                           and w.get('smakfynd_score', 0) >= 80],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
         # ─── Norska besökare ───
         {
             "slug": "basta-vin-for-norrman",
@@ -1632,7 +1767,7 @@ def main():
     generated = 0
 
     for page in pages:
-        if not page['wines']:
+        if not page['wines'] and page['slug'] not in ('alkoholfritt-vin',):
             print(f"  Skip {page['slug']} (no wines)")
             continue
 
