@@ -122,8 +122,8 @@ def make_pages():
         },
         {
             "slug": "basta-vita-vin",
-            "title": f"Bästa vita vinerna på Systembolaget {YEAR}",
-            "meta": f"Topp 20 bästa vita viner på Systembolaget. Rankade efter smak och prisvärde. Uppdaterad {DATE_STR}.",
+            "title": f"Bästa vita vinet {YEAR} — Topp 20 vita viner på Systembolaget",
+            "meta": f"Bästa vita vinet {YEAR}? Topp 20 vita viner på Systembolaget — Chardonnay, Sauvignon Blanc, Riesling och fler. Rankade efter smak och prisvärde. {DATE_STR}.",
             "h1": f"Bästa vita vinerna på Systembolaget — {DATE_STR}",
             "intro": "Fräscha, fruktiga eller fyllda — här är de vita vinerna som ger mest smak för pengarna.",
             "intro2": "Vita viner på Systembolaget spänner från mineraldrivna Chablis till fylliga, fatlagrade Chardonnay. Vi rankar utifrån Vivino-betyg, expertrecensioner och pris per kvalitet så att du enkelt hittar det bästa vita vinet oavsett budget.",
@@ -168,8 +168,8 @@ def make_pages():
         },
         {
             "slug": "basta-rose",
-            "title": f"Bästa rosévin {YEAR} — Årets bästa rosé på Systembolaget",
-            "meta": f"Bästa rosévinet {YEAR}? Årets rosé rankat efter smak och pris. Topp 20 rosévin på Systembolaget — från Provence till Spanien. Uppdaterad {DATE_STR}.",
+            "title": f"Bästa rosévinet {YEAR} — Topp 20 rosévin rankat & testat",
+            "meta": f"Bästa rosévinet {YEAR}? Vi har rankat alla {YEAR} roséer på Systembolaget. Nr 1 just nu kostar under 150 kr. Se hela topp 20 — uppdaterad {DATE_STR}.",
             "h1": f"Bästa rosévin {YEAR} — årets topp 20 på Systembolaget",
             "intro": f"Bästa rosévinet just nu? Årets rosevin {YEAR} rankat efter kvalitet per krona — vi jämför alla roséer på Systembolaget så du slipper gissa.",
             "intro2": f"Rosé är Sveriges snabbast växande vinkategori. Provence dominerar topplistorna, men spanska Garnacha-roséer och italienska alternativ ger ofta bättre prisvärdhet. Oavsett om du söker bästa rosévinet {YEAR}, årets rosevin eller bara ett bra tips — här hittar du det. Listan uppdateras varje vecka.",
@@ -219,6 +219,19 @@ def make_pages():
             "h1": f"Bästa vinerna under 150 kr {YEAR}",
             "intro": f"Under 150 kr hittar du Systembolagets bästa fynd. Rioja, Chianti, Rhône — kvalitetsvin utan premiumprislapp. Här är topp 20 just nu.",
             "intro2": "Prisklassen 100–150 kr är sweet spot för vin på Systembolaget. Du får tillgång till komplexa viner från etablerade regioner utan att betala premiumpriser. Vi jämför alla viner i denna prisklass baserat på expertbetyg, crowd-recensioner och prisvärdhet.",
+            "guide": {
+                "title": "Varför 150 kr är sweet spot",
+                "points": [
+                    "Under 100 kr dominerar Nya världen. Mellan 100–150 kr öppnas europeiska kvalitetsregioner som Rioja, Toscana och Rhône.",
+                    "Spansk Rioja Crianza i detta prissegment ger ofta samma kvalitet som dubbelt så dyr Bordeaux.",
+                    "Italienska Montepulciano d'Abruzzo och Nero d'Avola är konsekvent underskattade i denna klass.",
+                    "Ekologiska viner under 150 kr har blivit riktigt konkurrenskraftiga — missa inte dem.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilken typ av vin ska man välja under 150 kr?", "I denna prisklass fungerar alla typer bra. Röda viner från Spanien och Italien ger ofta mest komplexitet per krona. Vita viner som Sauvignon Blanc och Riesling är säkra kort. Mousserande (Cava, Crémant) ger champagnekänsla till en bråkdel av priset."),
+                ("Är dyrare vin alltid bättre?", "Nej. Vår data visar att sambandet mellan pris och kvalitet är starkast under 200 kr. Över det betalar du ofta för varumärke, region eller sällsynthet — inte nödvändigtvis bättre smak."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
@@ -335,10 +348,24 @@ def make_pages():
         },
         {
             "slug": "basta-riesling",
-            "title": f"Bästa Riesling på Systembolaget {YEAR}",
-            "meta": f"Topp Riesling-viner på Systembolaget. Tyskland, Alsace och mer — rankade efter kvalitet per krona. {DATE_STR}.",
+            "title": f"Bästa Riesling {YEAR} — Topp Riesling på Systembolaget",
+            "meta": f"Bästa Riesling {YEAR}? Topp Riesling-viner från Tyskland, Alsace och Australien. Från stentorrt till halvsött — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Riesling på Systembolaget — {DATE_STR}",
             "intro": "Riesling är en av världens mest mångsidiga vita druvor — från stentorrt till sött. Här är de bästa.",
+            "intro2": "Riesling på Systembolaget kommer framförallt från Tyskland (Mosel, Pfalz, Rheingau) och Alsace i Frankrike. Druvan uttrycker terroir som få andra — mineralisk, syradriven och med fantastisk lagringspotential. Torr Riesling (Trocken) från Pfalz och Alsace passar utmärkt till asiatisk mat och fisk, medan halvsöt Kabinett från Mosel är perfekt som aperitif.",
+            "guide": {
+                "title": "Så väljer du rätt Riesling",
+                "points": [
+                    "Trocken = torrt, Kabinett = halvtorrt/lätt sött, Spätlese = sötare. Kolla etiketten.",
+                    "Alsace-Riesling är nästan alltid torr och kraftfull — passar bäst till mat.",
+                    "Tysk Riesling under 120 kr ger ofta exceptionell prisvärdhet — en av vinvärldens bästa deals.",
+                    "Perfekt till asiatisk mat, fisk, skaldjur och kryddiga rätter. Rieslings syra balanserar allt.",
+                ]
+            },
+            "faq_visible": [
+                ("Är Riesling alltid sött?", "Nej! De flesta Riesling-viner på Systembolaget är torra eller halvtorra. Kolla smakprofilen — sötma 1–3 av 12 betyder torrt. Trocken på etiketten garanterar torr stil."),
+                ("Vilken Riesling är bäst för nybörjare?", "Börja med en tysk Kabinett — den har lägre alkohol, mild sötma och tydlig fruktighet. Det är ett av vinvärldens mest tillgängliga viner. Vill du ha torrt, prova en Pfalz Trocken."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'riesling' in (w.get('grape', '') or '').lower()],
@@ -740,11 +767,24 @@ def make_pages():
         },
         {
             "slug": "basta-kaliforniska-vin",
-            "title": f"Bästa kaliforniska vinerna på Systembolaget {YEAR}",
-            "meta": f"Topp 20 kaliforniska viner på Systembolaget. Napa Valley, Sonoma och mer. {DATE_STR}.",
-            "h1": f"Bästa kaliforniska vinerna på Systembolaget — {DATE_STR}",
+            "title": f"Bästa amerikanska & kaliforniska vinerna {YEAR} — Systembolaget",
+            "meta": f"Bästa kaliforniska viner {YEAR}? Napa Valley Cabernet, Sonoma Pinot Noir och Oregon. Topp 20 amerikanska viner rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa kaliforniska & amerikanska vinerna — {DATE_STR}",
             "intro": "Kalifornien producerar USA:s mest ikoniska viner — från kraftfulla Napa Cabernets till eleganta Sonoma Pinot Noirs.",
             "intro2": "Kaliforniska viner på Systembolaget representerar det bästa från USA:s största vinstat. Napa Valley är känt för sina kraftfulla, koncentrerade Cabernet Sauvignon-viner, medan Sonoma erbjuder mer eleganta Pinot Noir och Chardonnay. Central Coast har vuxit fram som en spännande region med Rhône-druvor och unika terroir. Kalifornien levererar mogna, fruktdrivna viner med generös smak — perfekt för dig som gillar det nya världen-stilen med rik frukt och ofta fatlagring.",
+            "guide": {
+                "title": "Hur väljer man kaliforniskt vin?",
+                "points": [
+                    "Napa Valley Cabernet Sauvignon är Kaliforniens flaggskepp — kraftfullt, koncentrerat och perfekt till grillat kött.",
+                    "Sonoma ger elegantare Pinot Noir och Chardonnay till något lägre priser än Napa.",
+                    "Zinfandel är Kaliforniens signaturdruva — generös, kryddig och unik för regionen.",
+                    "Under 200 kr hittar du bäst kvalitet bland Central Coast-viner och mindre kända producenter.",
+                ]
+            },
+            "faq_visible": [
+                ("Är kaliforniskt vin dyrt?", "Det varierar enormt. Napa Valley-viner kostar ofta 200–500 kr på Systembolaget, men kaliforniska viner från Lodi, Central Coast och Sonoma finns redan från 100 kr med bra kvalitet."),
+                ("Vad skiljer kaliforniskt vin från europeiskt?", "Kalifornien ger generellt mognare, fruktigare viner med mer generös stil. Europeiska viner tenderar att vara stramare och mer jordiga. Ingen stil är bättre — det handlar om smak."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
@@ -958,6 +998,20 @@ def make_pages():
             "meta": f"Bästa cavan {YEAR}? Topp cava-viner på Systembolaget — champagnekvalitet till halva priset. Rankade efter smak och pris. {DATE_STR}.",
             "h1": f"Bästa Cava {YEAR} — topp cava på Systembolaget",
             "intro": f"Bästa cavan {YEAR}? Cava är Spaniens svar på champagne — fräscht, torrt och festligt till en bråkdel av priset. Här är de cava-viner som ger mest bubbel för pengarna.",
+            "intro2": "Cava görs med méthode traditionnelle (samma flaskjäsning som champagne) i Penedès-regionen i Katalonien. Druvorna Macabeo, Xarel·lo och Parellada ger fräscha, citrusdrivna bubblor. De bästa cavorna konkurrerar med champagne till en tredjedel av priset. Reserva och Gran Reserva har lagrats längre och ger mer komplexitet.",
+            "guide": {
+                "title": "Så väljer du rätt Cava",
+                "points": [
+                    "Cava Brut eller Brut Nature ger torrast och mest matanpassad smak.",
+                    "Reserva (minst 15 månader lagring) ger mer komplexitet — ofta värd de extra kronorna.",
+                    "Cava under 100 kr kan vara riktigt bra — det är här prisvärdheten lyser starkast.",
+                    "Perfekt aperitif, men funkar också utmärkt till tapas, skaldjur och friterad mat.",
+                ]
+            },
+            "faq_visible": [
+                ("Vad är skillnaden mellan Cava och Prosecco?", "Cava jäser i flaskan (som champagne) medan Prosecco jäser i tank. Cava ger finare bubblor, mer komplexitet och torrare stil. Prosecco är lättare och fruktigare. Cava ger generellt mer champagnekänsla per krona."),
+                ("Kan man dricka Cava till mat?", "Absolut — Cava med hög syra fungerar utmärkt till skaldjur, sushi, tapas och till och med friterad mat. Den höga syran och de fina bubblorna rengör gommen mellan tuggorna."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('country') == 'Spanien'],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
@@ -1049,11 +1103,24 @@ def make_pages():
         # Vita boxviner
         {
             "slug": "basta-vita-boxvin",
-            "title": f"Bästa vita boxvin {YEAR} — Topp bag-in-box på Systembolaget",
-            "meta": f"Bästa vita boxvinet {YEAR}? Topp vita BiB-viner rankade efter kvalitet. Chardonnay, Sauvignon Blanc och mer. {DATE_STR}.",
-            "h1": f"Bästa vita boxvin {YEAR}",
+            "title": f"Bästa vita boxen {YEAR} — Topp vita boxviner på Systembolaget",
+            "meta": f"Bästa vita boxen {YEAR}? Vi har rankat alla vita bag-in-box på Systembolaget. Chardonnay, Sauvignon Blanc och fler — topp vita boxviner just nu. {DATE_STR}.",
+            "h1": f"Bästa vita boxen {YEAR} — topp vita boxviner",
             "intro": f"Bästa vita boxvinet just nu? Fräscha, fruktiga och prisvärda — här är de vita bag-in-box som faktiskt imponerar.",
             "intro2": "Vita boxviner har gjort enorma kvalitetssprång. Från fräscha Sauvignon Blanc till runda Chardonnay — rätt val ger dig utmärkt vin till vardags. Vi rankar alla vita BiB-viner på Systembolaget efter kvalitet per krona.",
+            "guide": {
+                "title": "Så väljer du rätt vit box",
+                "points": [
+                    "Sauvignon Blanc-boxar ger fräsch, citrusdriven smak — perfekt till fisk och sallad.",
+                    "Chardonnay-boxar varierar enormt: kolla om den är fatlagrad (fylligare) eller stålad (fräschare).",
+                    "Sydafrikanska och chilenska vita boxar ger ofta bäst prisvärdhet per liter.",
+                    "Öppnad box håller 4–6 veckor tack vare vakuumförpackningen — betydligt längre än flaska.",
+                ]
+            },
+            "faq_visible": [
+                ("Hur länge håller öppnad vit boxvin?", "En öppnad vit box håller 4–6 veckor i kylskåp. Vakuumförpackningen skyddar vinet från oxidering, till skillnad från en öppnad flaska som håller max en vecka."),
+                ("Är vit boxvin sämre än flaskor?", "Inte nödvändigtvis. Samma vin kan finnas i både box och flaska. Boxen ger ofta bättre literpris och håller längre öppnad. Kvaliteten har förbättrats enormt de senaste åren."),
+            ],
             "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
                            and w.get('type') == 'Vitt' and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
@@ -1389,6 +1456,88 @@ def make_pages():
                            and 'champagne' not in (w.get('region') or '').lower()],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
+
+        # ─── Boxvin (moved from monthly_seo for full template) ───
+        {
+            "slug": "basta-boxvin",
+            "title": f"Bästa boxvinet {YEAR} — Topp 20 box röda, vita & rosé",
+            "meta": f"Bästa boxvinet {YEAR}? Vi har rankat alla bag-in-box på Systembolaget — röda, vita och rosé. Se vilken box som ger mest smak per krona. Uppdaterad {DATE_STR}.",
+            "h1": f"Bästa boxvinet {YEAR} — topp bag-in-box på Systembolaget",
+            "intro": f"Vilket boxvin är bäst just nu? Sverige är världens största boxvinmarknad — men kvaliteten varierar enormt. Vi har rankat alla bag-in-box-viner på Systembolaget efter kvalitet per krona.",
+            "intro2": f"Bästa boxvinet {YEAR} behöver inte vara dyrt. Box ger ofta bättre literpris än flaska, och de bästa boxvinerna håller riktigt hög kvalitet. En öppnad box håller dessutom 4–6 veckor tack vare vakuumförpackningen. Vi rankar alla BiB-viner — röda, vita och rosé — baserat på crowd-betyg, expertrecensioner och prisvärde.",
+            "guide": {
+                "title": "Så väljer du rätt boxvin",
+                "points": [
+                    "Röda boxar: Spansk Tempranillo och argentinsk Malbec dominerar topplistorna. Kolla smakfynd-poängen.",
+                    "Vita boxar: Sauvignon Blanc för fräscht, Chardonnay för fylligare. Sydafrikanska boxar ger bra prisvärdhet.",
+                    "Rosé-boxar: Perfekt till sommar och grillfester. Välj en med hög syra och låg sötma.",
+                    "Öppnad box håller 4–6 veckor i kylskåp — mycket längre än flaska. Perfekt till vardags.",
+                ]
+            },
+            "faq_visible": [
+                ("Är boxvin sämre än flaskor?", "Nej. Samma vin kan finnas i både box och flaska. Boxformatet ger ofta bättre literpris och vinet håller längre öppnat. De bästa boxvinerna på Systembolaget har höga betyg från både crowd och experter."),
+                ("Hur länge håller öppnat boxvin?", "En öppnad bag-in-box håller 4–6 veckor tack vare vakuumförpackningen som skyddar vinet från luft. En öppnad flaska håller max 3–5 dagar."),
+                ("Vilket boxvin passar till grillat?", "Välj en fyllig röd box — spansk Tempranillo eller argentinsk Malbec fungerar utmärkt. Till grillad kyckling och fisk funkar en fräsch vit box eller rosé."),
+            ],
+            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+                           and w.get('smakfynd_score', 0) > 0
+                           and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # ─── Midsommar (moved from monthly_seo for full template) ───
+        {
+            "slug": "vin-till-midsommar",
+            "title": f"Bästa vinerna till midsommar {YEAR} — Topp rosé, bubbel & vitt",
+            "meta": f"Vin till midsommar {YEAR}? Bästa rosé, bubbel och vita viner till sill, jordgubbar och midsommarfirande. Topp 20 på Systembolaget. {DATE_STR}.",
+            "h1": f"Bästa vinerna till midsommar {YEAR}",
+            "intro": f"Midsommar {YEAR} — Sveriges mest älskade sommarfest. Fräscht, festligt och lättdrucket är nyckelorden. Här är de bästa vinerna till midsommarfirandet.",
+            "intro2": f"Till den klassiska midsommarmaten — matjessill, gräddfil, jordgubbar, nypotatis och knäckebröd — vill du ha viner med friskhet och hög syra. Undvik tunga röda viner. Satsa på krispigt vitt, elegant rosé eller ett festligt bubbel. De bästa midsommarvinerna är mångsidiga nog att passa till hela buffén, från sillen till desserten.",
+            "guide": {
+                "title": "Vinerna till midsommarmenyn",
+                "points": [
+                    "Till matjessill och gravad lax: Torr Riesling, Chablis eller Sauvignon Blanc. Syran balanserar fettigheten.",
+                    "Till nypotatis och gräddfil: Fräsch rosé från Provence eller en torr Crémant.",
+                    "Till jordgubbar: Mousserande rosé eller en halvtorr Riesling — sötman matchar bäret.",
+                    "Helgaranti: En torr, fräsch rosé fungerar till hela midsommarbuffén. Köp en box för enkel servering.",
+                ]
+            },
+            "faq_visible": [
+                (f"Vilken rosé passar bäst till midsommar?", "En torr Provence-rosé är det klassiska valet — elegant, fräsch och funkar till allt från sill till jordgubbar. Men spanska och italienska roséer ger ofta lika bra kvalitet till lägre pris."),
+                ("Hur mycket vin behöver man till midsommar?", "Räkna med 1 flaska per person för ett längre midsommarfirande. Blanda gärna vita, rosé och bubbel. Ha alltid extra kylda flaskor redo — det går åt mer än man tror i värmen."),
+                ("Kan man dricka rött vin till midsommar?", "Det går, men det är inte optimalt. Midsommarmaten (sill, lax, potatis) passar bättre med vita, rosé och bubbel. Om du ändå vill ha rött, välj en lätt, kyld Pinot Noir."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('type') in ('Vitt', 'Rosé', 'Mousserande'))
+                           and (w.get('price', 999) or 999) <= 200],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+
+        # ─── Kräftskiva (moved from monthly_seo for full template) ───
+        {
+            "slug": "vin-till-kraftskiva",
+            "title": f"Bästa vinerna till kräftskiva {YEAR} — Systembolaget",
+            "meta": f"Vin till kräftskiva {YEAR}? Bästa vita viner och bubbel till kräftorna. Riesling, Chablis och Sauvignon Blanc. Topp 20 på Systembolaget. {DATE_STR}.",
+            "h1": f"Bästa vinerna till kräftskiva {YEAR}",
+            "intro": "Kräftskivan kräver vita viner med syra och mineralitet — plus ett festligt bubbel att skåla med. Här är de bästa alternativen på Systembolaget.",
+            "intro2": "Till kräftor vill du ha ett torrt, syradrivet vitt vin som lyfter skaldjurssmaken utan att ta över. Riesling, Chablis och Sauvignon Blanc är klassiska val. Undvik ekfatsviner — de tar över kräftornas delikata smak. Ett gott bubbel att starta kvällen med är ett måste.",
+            "guide": {
+                "title": "Vinerna till kräftskivan",
+                "points": [
+                    "Till kräftorna: Torr Riesling (tysk Trocken eller Alsace) är det perfekta valet — mineraldrivet och syrarikt.",
+                    "Chablis (oekad Chardonnay) är ett annat klassiskt kräftvin — elegant, rent och tillbakalutat.",
+                    "Starta kvällen med bubbel: Crémant d'Alsace eller en bra Cava ger festkänsla.",
+                    "Undvik tunga vita viner med ekfat. Syra och mineralitet är nyckelorden för kräftor.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilken vin är bäst till kräftor?", "Torr Riesling och Chablis är de klassiska valen. Båda har den höga syran och mineraliteten som lyfter kräftornas smak. Sauvignon Blanc från Sancerre eller Nya Zeeland fungerar också utmärkt."),
+                ("Kan man dricka rött vin till kräftor?", "Det är ovanligt och inte rekommenderat. Röda viners tanniner krockar med skaldjurssmaken. Om du måste ha rött, välj en lätt Pinot Noir serverad kyld."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and (w.get('type') in ('Vitt', 'Mousserande'))],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
     ]
 
 def score_label(score):
@@ -1460,7 +1609,8 @@ def get_cross_links(current_slug, all_pages):
         'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
-        'sasong': ['sommarvin', 'hostvin'],
+        'sasong': ['sommarvin', 'hostvin', 'vin-till-midsommar', 'vin-till-kraftskiva'],
+        'boxvin': ['basta-boxvin', 'basta-roda-boxvin', 'basta-vita-boxvin'],
     }
     # Find current page's category
     my_cat = None
@@ -1501,6 +1651,8 @@ def render_page(page, all_pages=None):
         'pris': 'Pris',
         'mat': 'Tillfällen & mat',
         'smak': 'Smakprofiler',
+        'boxvin': 'Boxvin',
+        'sasong': 'Säsong',
     }
     category_slugs = {
         'druva': ['basta-malbec', 'basta-merlot', 'basta-cabernet-sauvignon', 'basta-pinot-noir', 'basta-syrah-shiraz', 'basta-riesling', 'basta-tempranillo', 'basta-sangiovese', 'basta-chardonnay', 'basta-sauvignon-blanc', 'basta-zinfandel', 'basta-grenache', 'basta-carmenere'],
@@ -1510,11 +1662,12 @@ def render_page(page, all_pages=None):
         'pris': ['vin-under-80-kr', 'vin-under-90-kr', 'vin-under-100-kr', 'vin-under-150-kr', 'vin-under-200-kr', 'basta-premium-vin', 'prissankt-vin', 'ekologiskt-vin-under-150-kr'],
         'mat': ['vin-till-grillat', 'vin-till-fisk', 'vin-till-pasta', 'vin-till-ost', 'vin-till-dejt', 'vin-till-julmat', 'vin-till-kyckling', 'vin-till-brunch', 'vin-till-lax', 'vin-till-tacos', 'vin-till-pizza', 'vin-till-sushi', 'vin-till-lamm', 'vin-till-picknick', 'vin-till-svamp', 'vin-till-nyar'],
         'smak': ['fylliga-roda-vin', 'latta-vita-vin', 'fruktiga-roda-vin', 'torra-vita-vin'],
-        'sasong': ['sommarvin', 'hostvin'],
+        'sasong': ['sommarvin', 'hostvin', 'vin-till-midsommar', 'vin-till-kraftskiva'],
+        'boxvin': ['basta-boxvin', 'basta-roda-boxvin', 'basta-vita-boxvin'],
     }
     slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
     cross_sections = []
-    for cat_key in ['typ', 'druva', 'land', 'region', 'pris', 'mat', 'smak']:
+    for cat_key in ['typ', 'druva', 'land', 'region', 'pris', 'mat', 'smak', 'boxvin', 'sasong']:
         cat_pages = [slug_to_page[s] for s in category_slugs[cat_key] if s in slug_to_page and s != page['slug']]
         if not cat_pages:
             continue

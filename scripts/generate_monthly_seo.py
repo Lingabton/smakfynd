@@ -300,48 +300,7 @@ def main():
         budget,
     )
 
-    # 3. Bästa boxvin
-    box_wines = dedup_wines(sorted([w for w in bib if w.get('smakfynd_score', 0) > 0],
-                      key=lambda x: -x.get('smakfynd_score', 0)))[:20]
-    if box_wines:
-        make_page(
-            "basta-boxvin",
-            f"Bästa boxvin {YEAR} — Topp 20 bag-in-box på Systembolaget",
-            f"Bästa boxvinet {YEAR}? Vi har rankat alla {len(box_wines)}+ BiB-viner efter smak och pris. Röda, vita och rosé — här är boxvinerna som faktiskt är värda pengarna. {DATE_STR}.",
-            f"Bästa boxvin {YEAR} — topp bag-in-box på Systembolaget",
-            f"Vilket boxvin är bäst just nu? Sverige är världens största boxvinmarknad — men kvaliteten varierar enormt. Vi har rankat alla bag-in-box-viner på Systembolaget efter kvalitet per krona.",
-            f'<p style="margin:8px 0 0;font-size:14px;color:#4a4238;line-height:1.6">Bästa boxvinet {YEAR} behöver inte vara dyrt. Med rätt val får du utmärkt vin — ofta bättre än flaskor i samma prisklass. Listan uppdateras varje vecka med nya betyg och priser.</p>',
-            box_wines,
-        )
-
-    # 4. Vin till midsommar (seasonal — always useful)
-    midsommar = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
-                       and (w.get('type') in ('Vitt', 'Rosé', 'Mousserande'))
-                       and (w.get('price', 999) or 999) <= 200],
-                      key=lambda x: -x.get('smakfynd_score', 0)))[:20]
-    make_page(
-        "vin-till-midsommar",
-        f"Bästa vinerna till midsommar {YEAR} — Systembolaget",
-        f"Vin till midsommar? Här är de bästa vita, rosé och bubbel på Systembolaget. {DATE_STR}.",
-        f"Bästa vinerna till midsommar — {DATE_STR}",
-        "Midsommar kräver fräscht, lättdrucket och festligt. Här är våra toppval — vita, rosé och bubbel som passar perfekt till sill, jordgubbar och långa sommarkvällar.",
-        '<p style="margin:8px 0 0;font-size:14px;color:#4a4238;line-height:1.6">Till den klassiska midsommarmaten — matjessill, gräddfil, jordgubbar och nypotatis — vill du ha viner med friskhet och syra. Undvik tunga röda. Satsa på krispigt vitt, elegant rosé eller ett bra bubbel.</p>',
-        midsommar,
-    )
-
-    # 5. Vin till kräftskiva
-    kraftskiva = dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
-                        and (w.get('type') in ('Vitt', 'Mousserande'))],
-                       key=lambda x: -x.get('smakfynd_score', 0)))[:20]
-    make_page(
-        "vin-till-kraftskiva",
-        f"Bästa vinerna till kräftskiva {YEAR} — Systembolaget",
-        f"Vin till kräftskiva? Vita viner och bubbel som passar perfekt till kräftorna. {DATE_STR}.",
-        f"Bästa vinerna till kräftskiva — {DATE_STR}",
-        "Kräftskivan kräver vita viner med syra och mineralitet. Här är de bästa alternativen på Systembolaget.",
-        '<p style="margin:8px 0 0;font-size:14px;color:#4a4238;line-height:1.6">Till kräftor vill du ha ett torrt, syradrivet vitt vin eller ett krispigt bubbel. Riesling, Chablis och Sauvignon Blanc är klassiska val. Undvik ekfatsviner — de tar över smaken.</p>',
-        kraftskiva,
-    )
+    # Note: boxvin, midsommar, kraftskiva moved to generate_landing_pages.py for full template
 
     print(f"\nGenerated monthly SEO pages")
 
