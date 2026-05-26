@@ -4,10 +4,12 @@ Smakfynd Scoring v2 — Fixed
 Correctly maps Vivino cache (name|sub|country) and Expert cache (nr)
 """
 
-import json, statistics
+import json, statistics, logging
 from pathlib import Path
+from datetime import date
 
 DATA_DIR = Path(__file__).parent.parent / "data"
+LOG_DIR = Path(__file__).parent.parent / "logs"
 
 def load_data():
     sb = json.load(open(DATA_DIR / "systembolaget_raw.json"))
@@ -70,7 +72,7 @@ def compute_price_scores(wines):
     groups = {}
     # Group by type + package for base median
     for w in wines:
-        key = (w.get('cat2', ''), w.get('_pkg', ''))
+        key = (w.get('cat2', ''), w.get('pkg', ''))
         groups.setdefault(key, []).append(w)
     medians = {}
     for key, group in groups.items():
@@ -89,7 +91,7 @@ def compute_price_scores(wines):
                 tier_medians[(key, lo, hi)] = statistics.median(tier_prices)
 
     for w in wines:
-        key = (w.get('cat2', ''), w.get('_pkg', ''))
+        key = (w.get('cat2', ''), w.get('pkg', ''))
         vol = w.get('vol', 750)
         price = w.get('price', 0)
         if vol <= 0 or price <= 0:
@@ -228,6 +230,51 @@ def confidence(reviews, has_exp, conf=0):
         if conf and conf >= 90: s += 1
     return "hög" if s >= 4 else "medel" if s >= 2 else "låg"
 
+def detect_outliers(wines, threshold=5.0):
+    """Flag wines with price > threshold × category median. Logs to logs/outliers.log."""
+    LOG_DIR.mkdir(exist_ok=True)
+    log_file = LOG_DIR / "outliers.log"
+
+    # Build median prices per cat3 (fallback to cat2)
+    groups = {}
+    for w in wines:
+        cat = w.get('cat3') or w.get('cat2', 'Okänd')
+        price = w.get('price', 0) or 0
+        if price > 0:
+            groups.setdefault(cat, []).append(price)
+    medians = {cat: statistics.median(prices) for cat, prices in groups.items() if prices}
+
+    outliers = []
+    for w in wines:
+        cat = w.get('cat3') or w.get('cat2', 'Okänd')
+        price = w.get('price', 0) or 0
+        median = medians.get(cat)
+        if not median or price <= 0:
+            continue
+        ratio = price / median
+        if ratio > threshold:
+            outliers.append({
+                'nr': w.get('nr', ''),
+                'name': f"{w.get('name', '')} {w.get('sub', '')}".strip(),
+                'price': price,
+                'vol': w.get('vol', 750),
+                'category': cat,
+                'median': round(median),
+                'ratio': round(ratio, 1),
+            })
+
+    today = date.today().isoformat()
+    with open(log_file, 'a') as f:
+        if outliers:
+            f.write(f"\n--- {today} ---\n")
+            for o in sorted(outliers, key=lambda x: -x['ratio']):
+                f.write(f"  {o['nr']:>8}  {o['price']:>8}kr  {o['vol']}ml  "
+                        f"median:{o['median']}kr  {o['ratio']}x  {o['name'][:50]}\n")
+        else:
+            f.write(f"\n--- {today} --- Inga outliers\n")
+
+    return outliers
+
 def main():
     print("=" * 60)
     print("  SMAKFYND SCORING v2")
@@ -237,10 +284,31 @@ def main():
     print(f"Wines: {len(wines)}")
 
     for w in wines:
-        vol = w.get('vol', 750)
-        w['_pkg'] = 'Flaska' if vol == 750 else ('BiB' if vol >= 2000 else 'Stor')
+        vol = w.get('vol', 750) or 750
+        price = w.get('price', 0) or 0
+        pkg = w.get('pkg', '')
+        if pkg == 'BiB':
+            pass  # Scraper already classified correctly
+        elif pkg == 'Stor' or (not pkg and vol > 1500):
+            # Distinguish real BiB from large-format bottles:
+            # BiB: vol 2000-3000ml, affordable liter price (< 150 kr/L)
+            # Stor: expensive bottles (dubbelmagnum, jeroboam, trälåda)
+            liter_price = price / (vol / 1000) if vol > 0 and price > 0 else 999
+            if vol <= 3000 and liter_price < 150:
+                w['pkg'] = 'BiB'
+            else:
+                w['pkg'] = 'Stor'
+        elif not pkg:
+            w['pkg'] = 'Flaska'
 
     compute_price_scores(wines)
+
+    outliers = detect_outliers(wines)
+    if outliers:
+        print(f"\n  ⚠ OUTLIERS ({len(outliers)} wines with price > 5x category median):")
+        for o in sorted(outliers, key=lambda x: -x['ratio'])[:10]:
+            print(f"    {o['nr']:>8}  {o['price']:>8}kr  {o['ratio']}x median ({o['median']}kr)  {o['name'][:40]}")
+        print(f"    → Full list: logs/outliers.log")
 
     results = []
     n_crowd = n_expert = n_both = n_ws = 0
@@ -300,7 +368,7 @@ def main():
             'vol': p.get('vol', 750),
             'alc': p.get('alc', 0),
             'type': p.get('cat2', '').replace('Rött vin', 'Rött').replace('Vitt vin', 'Vitt').replace('Rosévin', 'Rosé').replace('Mousserande vin', 'Mousserande'),
-            'pkg': p.get('_pkg'),
+            'pkg': p.get('pkg'),
             'country': p.get('country', ''),
             'region': p.get('region', ''),
             'grape': p.get('grape', ''),

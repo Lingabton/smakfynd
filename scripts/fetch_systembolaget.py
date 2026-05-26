@@ -55,8 +55,8 @@ def normalize(p):
         "region": p.get("originLevel1", ""),
         "grape": ", ".join(p.get("grapes", []) or []),
         "pkg": {
-            "Flaska": "Flaska", "Bag-in-Box": "BiB",
-        }.get(p.get("packaging", ""), "Stor" if (p.get("volume") or 0) > 1500 else "Flaska"),
+            "Box": "BiB", "Påse": "BiB",
+        }.get(p.get("packagingLevel1") or "", "Stor" if (p.get("volume") or 0) > 1500 else "Flaska"),
         "organic": p.get("isOrganic", False),
         "assortment": p.get("assortmentText", ""),
         "taste_body": p.get("tasteClockBody"),

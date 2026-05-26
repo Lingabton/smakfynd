@@ -710,7 +710,27 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
         <div style={{ flexShrink: 0, textAlign: "center", width: 58, position: "relative" }}>
           <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
           <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
-          {p.confidence && <div style={{ fontSize: 7, color: p.confidence === "hög" ? t.green : t.txF, marginBottom: 3 }}>{p.confidence === "hög" ? "Säkert betyg" : p.confidence === "medel" ? "" : "Osäkert"}</div>}
+          {(() => {
+            const reviews = p.crowd_reviews || 0;
+            const hasCrowd = reviews >= 25 && p.crowd_score;
+            const hasExpert = !!p.expert_score;
+            const [dColor, dLabel, dTip] = hasCrowd && hasExpert
+              ? ["#4a90d9", "Komplett", "25+ omdömen och expertbetyg"]
+              : (p.crowd_score || p.expert_score)
+                ? ["#d4a843", "Partiell", hasCrowd ? "Crowd-betyg men inget expertbetyg" : p.expert_score ? "Expertbetyg men få omdömen" : "Begränsad data"]
+                : ["#999", "Begränsad", "Få datapunkter — osäker poäng"];
+            return (
+              <div style={{ position: "relative", marginBottom: 3 }}>
+                <span
+                  title={`${dLabel} data: ${dTip}`}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 7, color: dColor, cursor: "help" }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: dColor, display: "inline-block" }} />
+                  {dLabel}
+                </span>
+              </div>
+            );
+          })()}
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ fontSize: 7, color: t.txL, width: 14 }}>Kval</span>
