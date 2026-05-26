@@ -1192,13 +1192,36 @@ function Card({
       marginBottom: 2,
       fontWeight: 600
     }
-  }, label), p.confidence && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 7,
-      color: p.confidence === "hög" ? t.green : t.txF,
-      marginBottom: 3
-    }
-  }, p.confidence === "hög" ? "Säkert betyg" : p.confidence === "medel" ? "" : "Osäkert"), /*#__PURE__*/React.createElement("div", {
+  }, label), (() => {
+    const reviews = p.crowd_reviews || 0;
+    const hasCrowd = reviews >= 25 && p.crowd_score;
+    const hasExpert = !!p.expert_score;
+    const [dColor, dLabel, dTip] = hasCrowd && hasExpert ? ["#4a90d9", "Komplett", "25+ omdömen och expertbetyg"] : p.crowd_score || p.expert_score ? ["#d4a843", "Partiell", hasCrowd ? "Crowd-betyg men inget expertbetyg" : p.expert_score ? "Expertbetyg men få omdömen" : "Begränsad data"] : ["#999", "Begränsad", "Få datapunkter — osäker poäng"];
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "relative",
+        marginBottom: 3
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      title: `${dLabel} data: ${dTip}`,
+      style: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 3,
+        fontSize: 7,
+        color: dColor,
+        cursor: "help"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 6,
+        height: 6,
+        borderRadius: "50%",
+        background: dColor,
+        display: "inline-block"
+      }
+    }), dLabel));
+  })(), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
