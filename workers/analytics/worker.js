@@ -187,6 +187,48 @@ export default {
         }), { headers });
       }
 
+      // GET /trend — 4-week session, event and SB-click trend
+      if (request.method === "GET" && url.pathname === "/trend") {
+        const weeks = await env.DB.prepare(`
+          SELECT
+            CASE
+              WHEN ts >= datetime('now', '-7 days') THEN 'w0'
+              WHEN ts >= datetime('now', '-14 days') THEN 'w1'
+              WHEN ts >= datetime('now', '-21 days') THEN 'w2'
+              WHEN ts >= datetime('now', '-28 days') THEN 'w3'
+            END as week,
+            COUNT(DISTINCT session) as sessions,
+            COUNT(*) as events,
+            SUM(CASE WHEN event = 'sb_click' OR event = 'sb_click_from_landing' THEN 1 ELSE 0 END) as sb_clicks,
+            SUM(CASE WHEN event = 'pageview' THEN 1 ELSE 0 END) as landing_pageviews,
+            SUM(CASE WHEN event = 'app_click_from_landing' THEN 1 ELSE 0 END) as app_clicks_from_landing
+          FROM events
+          WHERE ts >= datetime('now', '-28 days')
+          GROUP BY week
+          ORDER BY week DESC
+        `).all();
+
+        const daily = await env.DB.prepare(`
+          SELECT DATE(ts) as day,
+            COUNT(DISTINCT session) as sessions,
+            SUM(CASE WHEN event = 'sb_click' OR event = 'sb_click_from_landing' THEN 1 ELSE 0 END) as sb_clicks
+          FROM events
+          WHERE ts >= datetime('now', '-28 days')
+          GROUP BY DATE(ts) ORDER BY day
+        `).all();
+
+        const labels = ['denna vecka', 'förra veckan', '2 veckor sedan', '3 veckor sedan'];
+        const result = (weeks.results || []).filter(r => r.week).map((r, i) => ({
+          ...r, label: labels[i] || r.week,
+        }));
+
+        return new Response(JSON.stringify({
+          weeks: result,
+          daily: daily.results,
+          generated: new Date().toISOString(),
+        }), { headers });
+      }
+
       // POST /ean — store EAN→productNumber mapping (crowdsourced)
       if (request.method === "POST" && url.pathname === "/ean") {
         const { ean, nr } = await request.json();
