@@ -120,6 +120,19 @@ Typ, druva, land, region, pris, mat, smak, säsong. Alla med:
 - `REPORT_EMAIL` (veckorapport-mottagare)
 - `FROM_EMAIL` (avsändaradress)
 
+## Säsongsuppdateringar
+
+Dessa sidor behöver manuell innehållsuppdatering vid specifika datum:
+
+| Datum | Sidor | Åtgärd |
+|-------|-------|--------|
+| 15 maj | `/vin-till-midsommar/`, `/vin-till-kraftskiva/` | Uppdatera intro, kontrollera vinlistan, säkerställ att årets säsongsviner finns |
+| 1 oktober | `/vin-till-julmat/` | Uppdatera för julens matsäsong, kontrollera glögg/julvin i sortimentet |
+| 1 november | `/vin-till-nyar/` | Uppdatera bubbel-rekommendationer för nyårsafton |
+| 1 november | Skapa `/basta-bubbel-{NÄSTA ÅR}/`, `/basta-rose-{NÄSTA ÅR}/` etc. | Tidigt positionera för nästa års söktermer |
+
+Kör `python3 scripts/generate_landing_pages.py` efter uppdatering — årtal och datum uppdateras automatiskt via `YEAR`/`DATE_STR`.
+
 ## Vanliga kommandon
 
 ```bash

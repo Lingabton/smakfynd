@@ -103,7 +103,7 @@ def make_pages():
             "meta": f"Topp 20 bästa röda viner på Systembolaget just nu. Rankade efter kvalitet per krona — crowd-betyg, expertrecensioner och prisvärde. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa röda vinerna på Systembolaget — {DATE_STR}",
             "intro": "Vi har analyserat tusentals röda viner och rankat dem efter kvalitet i förhållande till pris. Här är de bästa köpen just nu.",
-            "intro2": "Rött vin från Systembolaget finns i hundratals varianter — från lätta Pinot Noir till tunga Cabernet Sauvignon. Vår ranking väger samman expertbetyg, crowd-recensioner och pris för att hitta de röda viner som verkligen levererar kvalitet per krona.",
+            "intro2": "Rött vin från Systembolaget finns i hundratals varianter — från lätta Pinot Noir till tunga Cabernet Sauvignon. Vår ranking väger samman expertbetyg, crowd-recensioner och pris för att hitta de röda viner som verkligen levererar kvalitet per krona. Listan är populär även bland norrmän som letar gode kjøp på Systembolaget — priserna är ofta lägre än på Vinmonopolet.",
             "guide": {
                 "title": "Hur väljer man rött vin?",
                 "points": [
@@ -126,7 +126,7 @@ def make_pages():
             "meta": f"Bästa vita vinet {YEAR}? Topp 20 vita viner på Systembolaget — Chardonnay, Sauvignon Blanc, Riesling och fler. Rankade efter smak och prisvärde. {DATE_STR}.",
             "h1": f"Bästa vita vinerna på Systembolaget — {DATE_STR}",
             "intro": "Fräscha, fruktiga eller fyllda — här är de vita vinerna som ger mest smak för pengarna.",
-            "intro2": "Vita viner på Systembolaget spänner från mineraldrivna Chablis till fylliga, fatlagrade Chardonnay. Vi rankar utifrån Vivino-betyg, expertrecensioner och pris per kvalitet så att du enkelt hittar det bästa vita vinet oavsett budget.",
+            "intro2": "Vita viner på Systembolaget spänner från mineraldrivna Chablis till fylliga, fatlagrade Chardonnay. Vi rankar utifrån Vivino-betyg, expertrecensioner och pris per kvalitet så att du enkelt hittar det bästa vita vinet oavsett budget. Många norrmän hittar sina gode kjøp bland vita viner här — Systembolaget har ofta bredare urval och lägre priser än Vinmonopolet.",
             "guide": {
                 "title": "Hur väljer man vitt vin?",
                 "points": [
@@ -149,7 +149,7 @@ def make_pages():
             "meta": f"Bästa bubblet {YEAR}? Topp 20 mousserande viner på Systembolaget — cava, prosecco, crémant och champagne. Rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa bubbel {YEAR} — mousserande, champagne & cava",
             "intro": f"Bästa bubblet {YEAR}? Cava, prosecco, crémant eller champagne — här är de mousserande vinerna som ger mest fest för pengarna just nu.",
-            "intro2": f"Letar du efter bästa mousserande {YEAR}? Bubbel från Systembolaget inkluderar allt från spansk Cava under hundralappen till prestigefylld champagne. Crémant från Alsace och Loire är ofta de bästa fynden — champagnekvalitet till en bråkdel av priset. Listan uppdateras varje vecka.",
+            "intro2": f"Letar du efter bästa mousserande {YEAR}? Bubbel från Systembolaget inkluderar allt från spansk Cava under hundralappen till prestigefylld champagne. Crémant från Alsace och Loire är ofta de bästa fynden — champagnekvalitet till en bråkdel av priset. Listan uppdateras varje vecka. Også populær blant nordmenn som leter etter beste viner og gode kjøp til fest.",
             "guide": {
                 "title": "Hur väljer man bubbel?",
                 "points": [
