@@ -23,7 +23,9 @@ Regler:
 - single_dish (en tydlig rätt) → recommend_direct
 - multi_course utan konflikt → recommend_direct eller recommend_two_bottles
 - broad_category (bara "pasta", "kött") → needs_followup=true, ask_followup
-- mood_occasion (dejt, fest) → needs_followup=true, ask_followup`;
+- mood_occasion (dejt, fest) → needs_followup=true, ask_followup
+- UNDANTAG: Om användaren nämner pris/budget ("under 100 kr", "billigt") ELLER antal personer ("8 personer") → recommend_direct, INTE followup. Tillräcklig info finns.
+- UNDANTAG: Om användaren nämner "grillkväll", "grillat" utan specifik rätt → recommend_direct med kött-viner. Grill = kött om inget annat sägs.`;
 
 const RECOMMEND_PROMPT = `Du är en kunnig svensk vinrådgivare. Svara BARA med giltig JSON.
 
@@ -60,7 +62,10 @@ REGLER:
 - Om inget format nämns → sätt "format": "any"
 - DESSERTER (tårta, choklad, glass, frukt, paj): ALLTID keyword "sött" + typ Vitt eller Mousserande. Föreslå ALDRIG torrt rött vin till dessert. Bra druvor: Moscato, Riesling, Gewürztraminer. Sött rött (Lambrusco, Portvin) går också.
 - FISK OCH SKALDJUR (lax, torsk, brax, gös, abborre, sushi, räkor, hummer, musslor, ceviche): Alltid vitt eller rosé. Aldrig rött. Undantag: grillad tonfisk kan ha lätt rött.
-- GRILLAT KÖTT: Alltid rött med kropp. Syrah, Malbec, Cabernet.`;
+- GRILLAT KÖTT: Alltid rött med kropp. Syrah, Malbec, Cabernet.
+- TACOS: Fruktigt rött som Malbec, Garnacha eller Tempranillo som "tryggt val". Rosé som "lite roligare". ALDRIG vitt som tryggt val till tacos.
+- FEST/MÅNGA PERSONER: Överväg lådvin eller prisvärd bubbel (Cava). Nämn att box håller längre och ger bättre literpris.
+- BUDGET (under 100 kr, billigt): Fokusera på Chile, Argentina, Spanien, Sydafrika. Nämn priset i reasoning.`;
 
 const QUESTION_PROMPT = `Du är en kunnig svensk vinrådgivare. Ställ en kort följdfråga. Svara BARA med giltig JSON.
 
