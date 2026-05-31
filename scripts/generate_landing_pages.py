@@ -707,11 +707,29 @@ def make_pages():
         },
         {
             "slug": "vin-till-lax",
-            "title": f"Bästa vinerna till lax {YEAR}",
-            "meta": f"Vin till lax? Här är de bästa vita och rosévinerna som matchar lax perfekt. {DATE_STR}.",
+            "title": f"Vin till lax {YEAR} — bästa vinet till ugnsbakad, grillad & gravad lax",
+            "meta": f"Vin till lax? Riesling till ugnsbakad, Chardonnay till grillad, Sauvignon Blanc till gravad. Se topp 20 — uppdaterad {DATE_STR}.",
             "h1": f"Bästa vinerna till lax — {DATE_STR}",
-            "intro": "Lax är en av Sveriges mest älskade råvaror — och rätt vin gör måltiden komplett. Här är de bästa matchningarna.",
-            "intro2": "Till lax fungerar vita och roséer bäst. Fräsch Sauvignon Blanc, mineralisk Chablis eller en elegant Chardonnay lyfter både gravad, stekt och ugnsbakad lax. Lättare roséer med god syra passar också utmärkt, särskilt till grillad lax. Vi har filtrerat Systembolagets sortiment efter fiskpairing och valt de bästa vita och rosévinerna.",
+            "intro": "Lax är en av Sveriges mest älskade råvaror — och rätt vin gör måltiden komplett. Men olika tillagning kräver olika vin.",
+            "intro2_heading": "Vin till lax — tillagning avgör",
+            "intro2": "Till lax fungerar vita och roséer bäst. Men tillagningsmetoden är minst lika viktig som fisken: ugnsbakad lax med smör vill ha fylligare vin än gravad lax med hovmästarsås. Nedan guidar vi dig rätt oavsett hur du tillagar din lax.",
+            "intro3": "Vi har filtrerat Systembolagets sortiment efter fiskpairing och valt de bästa vita och rosévinerna. Alla viner i listan nedan fungerar till lax generellt — men läs våra tips för den perfekta matchningen.",
+            "guide": {
+                "title": "Vin till olika laxrätter",
+                "points": [
+                    "Lax i ugn: Fyllig Chardonnay eller Viognier. Smöret och fettet i ugnsbakad lax kräver ett vin med lite kropp. Fatlagrad Chardonnay från Bourgogne eller Australien är klassikern.",
+                    "Grillad lax: Rosé från Provence eller en torr Riesling. Grillsmakerna tål mer struktur — även en lätt Pinot Noir kan fungera här.",
+                    "Gravad lax: Fräsch Sauvignon Blanc eller torr Riesling. Syran i vinet balanserar sötman i hovmästarsåsen. Undvik fyllda, fatlagrade viner.",
+                    "Ugnsbakad lax med citron och örter: Albariño eller Grüner Veltliner — mineraliska viner som speglar citrusen i rätten.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilket vin passar bäst till lax i ugn?", "Ugnsbakad lax med smör och dill vill ha ett vin med lite fylligare kropp — Chardonnay (gärna fatlagrad), Viognier eller en fyllig Côtes du Rhône blanc. Smöret i rätten kräver ett vin som matchar i intensitet."),
+                ("Kan man dricka rött vin till lax?", "Generellt nej — rött vins tanniner krockar med fiskfettet och ger metallisk bismak. Undantaget är grillad lax, där en lätt Pinot Noir utan mycket tannin kan fungera bra."),
+                ("Vin till gravad lax med hovmästarsås?", "Gravad lax med hovmästarsås har sötma och syra som kräver ett fräscht, syradrivet vin. Torr Riesling från Alsace eller tysk Kabinett är perfekta val. Sauvignon Blanc från Loire fungerar också utmärkt."),
+                ("Vilket vin till laxpasta eller laxsoppa?", "Krämiga laxrätter som pasta och soppa vill ha Chardonnay eller Pinot Grigio med lite kropp. Syran skär igenom grädden medan vinets fruktighet kompletterar laxen."),
+                ("Ska man välja vitt eller rosé till lax?", "Vitt vin är det säkraste valet. Rosé fungerar utmärkt till grillad lax och lättare laxsallader — välj en torr Provence-rosé. Till gravad lax och lax i ugn är vitt nästan alltid bättre."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé')
                            and any('fisk' in (f or '').lower() for f in (w.get('food_pairings') or []))],
@@ -1034,10 +1052,26 @@ def make_pages():
         },
         {
             "slug": "vin-till-svamp",
-            "title": f"Bästa vinerna till svamprisotto och svamprätter {YEAR}",
-            "meta": f"Bästa viner till svamp, svamprisotto och tryffel. Jordiga röda och eleganta vita. {DATE_STR}.",
+            "title": f"Vin till svamp {YEAR} — svamprisotto, kantareller & tryffel",
+            "meta": f"Vin till svamp och svamprisotto — Pinot Noir, Nebbiolo och fyllig Chardonnay. Jordiga röda och eleganta vita. Topp 20 på Systembolaget.",
             "h1": f"Bästa vinerna till svamprätter — {DATE_STR}",
             "intro": "Svamp vill ha vin med jordiga toner och elegans. Pinot Noir, Nebbiolo och fyllda Chardonnay — här är de bästa vinerna till svamprisotto och kantareller.",
+            "intro2_heading": "Vin och svamp — en klassisk kombination",
+            "intro2": "Svamp är unikt i matlagning: den har umami-djup, jordiga toner och en textur som påminner om kött. Det gör svamprätter till fantastiska vinpartners — men det kräver rätt val. Tanninstarka viner krockar ofta med svampens mjuka textur, medan jordiga och eleganta viner förstärker smaken.",
+            "guide": {
+                "title": "Vin till olika svamprätter",
+                "points": [
+                    "Svamprisotto: Pinot Noir från Bourgogne eller Nebbiolo. Vinets jordighet matchar risottots krämighet och svampens umami.",
+                    "Stekta kantareller: Chardonnay med fatlagring. Smörstekta kantareller kräver ett vin med fyllig kropp och smörig karaktär.",
+                    "Svamppasta med gräddsås: Medelkroppad Barbera eller Sangiovese. Syran skär igenom grädden medan vinets fruktkärna balanserar svampen.",
+                    "Tryffel: Barolo eller äldre Pinot Noir. Tryffelns intensiva jordighet kräver ett vin med komplexitet och mognad.",
+                ]
+            },
+            "faq_visible": [
+                ("Vilket vin till svamprisotto?", "Pinot Noir från Bourgogne är klassikern — jordiga toner och silkig textur matchar risottots krämighet perfekt. Nebbiolo från Piemonte är ett annat utmärkt val. Välj viner med medelkropp och subtil frukt."),
+                ("Rött eller vitt vin till svamp?", "Båda fungerar, men på olika sätt. Rött vin (Pinot Noir, Nebbiolo) matchar svampens jordighet. Vitt vin (fatlagrad Chardonnay) kompletterar smörstekta svampar. Undvik tanninstarka röda — de krockar med svampens mjuka textur."),
+                ("Vin till kantareller?", "Kantareller har en delikat, nötig smak. Fatlagrad Chardonnay eller en lätt Pinot Noir är perfekta val. Undvik viner som är för kraftfulla — de dränker kantarellernas subtila smak."),
+            ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any(g in (w.get('grape') or '').lower() for g in ['pinot noir', 'nebbiolo', 'barbera', 'chardonnay', 'barolo'])
                            and (w.get('taste_body') or 0) >= 5],
