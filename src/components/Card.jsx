@@ -113,7 +113,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
               ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr`
-              : `Jämförbar kvalitet med ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
+              : `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
@@ -129,7 +129,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
             if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
             if (p.price <= 100 && s100 >= 65) vibes.push("Budgetfavorit");
-            if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
+            if (p.expert_score >= 8) vibes.push("Högt expertbetyg");
             return vibes.length > 0 ? (
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
                 {vibes.slice(0, 3).map(v => <span key={v} style={vibePill(t.txM)}>{v}</span>)}
@@ -287,7 +287,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Vindrickare</span>
+                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Köpare</span>
                       <span style={{ fontWeight: 700, color: "#6b8cce" }}>{p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "\u2014"}</span>
                     </div>
                     {p.crowd_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} /></div>}
@@ -345,7 +345,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               if (similar.length === 0) return null;
               return (
                 <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                  <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Jämförbara viner</div>
+                  <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Liknande viner</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {similar.map((w, i) => (
                       <div key={i}

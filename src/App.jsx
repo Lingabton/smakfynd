@@ -277,10 +277,10 @@ function SmakfyndApp() {
           margin: "0 0 6px", fontFamily: "'Newsreader', Georgia, serif", fontWeight: 400,
           fontSize: "clamp(32px, 6vw, 56px)", color: t.tx, lineHeight: 1.1, letterSpacing: "-0.02em",
         }}>
-          Bästa köpet i sin kategori
+          Bästa vinet för pengarna
         </h1>
         <p style={{ margin: "0 0 20px", fontSize: 13, color: t.txL }}>
-          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter värde
+          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter pris och kvalitet
         </p>
       </div>
 
@@ -291,10 +291,10 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>crowd-betyg</strong> från hundratusentals vindrickare, <strong>expertrecensioner</strong> från internationella kritiker och <strong>prisjämförelse</strong> inom varje kategori.
+              Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>betyg från vanliga köpare</strong>, <strong>expertrecensioner</strong> och <strong>prisjämförelse</strong> — allt i en enda poäng.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
-              Resultatet: <strong>en enda poäng</strong> som visar kvalitet per krona. Inte det "bästa" vinet — utan det bästa <em>köpet</em>.
+              Resultatet: <strong>en enda poäng</strong> som visar om vinet är värt pengarna. Inte det dyraste vinet — utan det smartaste köpet.
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Gabriel Linton</div>
@@ -327,9 +327,9 @@ function SmakfyndApp() {
             {/* The three components */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {[
-                ["👥", "Crowd-betyg", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre. Viner med färre än 25 omdömen rankas inte alls."],
-                ["🏆", "Expertrecensioner", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om crowd och experter är överens får vinet en extra bonus."],
-                ["💰", "Prisvärde", "Literpriset jämförs mot medianen i samma kategori. Rött jämförs med rött — aldrig med bubbel. Billigare än snittet med samma kvalitet = högre poäng."],
+                ["👥", "Betyg från köpare", "Vad vanliga människor tycker — baserat på hundratusentals omdömen. Fler betyg = säkrare poäng."],
+                ["🏆", "Expertbetyg", "Vad professionella vinkritiker tycker. Om köpare och experter är överens får vinet extra poäng."],
+                ["💰", "Prisvärde", "Vi jämför priset med liknande viner. Bra kvalitet till lågt pris = hög poäng."],
               ].map(([icon, title, desc], i) => (
                 <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>{icon}</span>
@@ -351,7 +351,7 @@ function SmakfyndApp() {
             <h3 style={{ margin: "0 0 10px", fontSize: 15, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Transparens</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
               {[
-                ["Datakällor", "Crowd-betyg hämtas från internationella vindrickare. Expertpoäng kommer från Wine Enthusiast (130 000 recensioner) och Wine-Searcher (aggregat från flera kritiker). Prisdata från Systembolaget."],
+                ["Datakällor", "Köparbetyg hämtas från internationella omdömen. Expertpoäng från professionella recensioner. Priser direkt från Systembolaget."],
                 ["Osäker matchning", "Vi matchar viner mot kritiker-databaser med namn och region. Ibland blir det fel — vi kräver ordöverlapp och filtrerar bort osäkra matchningar. Viner utan expertmatch rankas bara på crowd + pris."],
                 ["Vad poängen inte betyder", "Hög poäng betyder inte att vinet passar just dig — det betyder att det ger bra kvalitet för pengarna enligt crowd och experter. Smak är personligt. Använd smakprofilen och AI-matcharen för att hitta rätt."],
                 ["Ekologiskt", "Ekologiska viner får en liten poängbonus (+0.2 av 10). Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner eko."],
