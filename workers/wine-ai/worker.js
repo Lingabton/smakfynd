@@ -246,19 +246,35 @@ export default {
       }
 
       // STEP 1: Classify
-      const classification = await callAI(env.AI, CLASSIFY_PROMPT, meal, context || []);
+      let classification;
+      try {
+        classification = await callAI(env.AI, CLASSIFY_PROMPT, meal, context || []);
+      } catch (e) {
+        console.error("Classify failed:", e.message);
+        return new Response(JSON.stringify({ error: "AI-klassificering misslyckades. Försök igen.", _stage: "classify" }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       const strategy = classification.recommended_strategy || "recommend_direct";
       const needsFollowup = classification.needs_followup === true;
 
       // Follow-up for broad/vague input (only if no prior context)
       if (needsFollowup && !context?.length) {
-        const question = await callAI(
-          env.AI,
-          QUESTION_PROMPT,
-          `Måltid: "${meal}". Anledning till följdfråga: ${classification.followup_reason || "Bred input"}`,
-          context || []
-        );
+        let question;
+        try {
+          question = await callAI(
+            env.AI,
+            QUESTION_PROMPT,
+            `Måltid: "${meal}". Anledning till följdfråga: ${classification.followup_reason || "Bred input"}`,
+            context || []
+          );
+        } catch (e) {
+          console.error("Question failed:", e.message);
+          return new Response(JSON.stringify({ error: "AI-frågan misslyckades. Försök igen.", _stage: "question" }), {
+            status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         return new Response(JSON.stringify(question), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -269,12 +285,28 @@ export default {
         ? meal
         : `Rekommendera vin till: ${meal}. Strategi: ${strategy}. Rätter: ${JSON.stringify(classification.dishes || [meal])}`;
 
-      const recommendation = await callAI(
-        env.AI,
-        RECOMMEND_PROMPT,
-        recInput,
-        context || []
-      );
+      let recommendation;
+      try {
+        recommendation = await callAI(
+          env.AI,
+          RECOMMEND_PROMPT,
+          recInput,
+          context || []
+        );
+      } catch (e) {
+        console.error("Recommend failed:", e.message);
+        return new Response(JSON.stringify({ error: "AI-rekommendationen misslyckades. Försök igen.", _stage: "recommend" }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Validate response structure
+      if (!recommendation || (!recommendation.courses && !recommendation.criteria && recommendation.mode !== "question")) {
+        console.error("Invalid AI response structure:", JSON.stringify(recommendation).slice(0, 200));
+        return new Response(JSON.stringify({ error: "Oväntat AI-svar. Försök igen.", _stage: "validate" }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       return new Response(JSON.stringify(recommendation), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

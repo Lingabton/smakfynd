@@ -103,51 +103,68 @@ function WineResult({ m }) {
 function FoodMatch({ products }) {
   const [meal, setMeal] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingSlow, setLoadingSlow] = useState(false);
   const [aiResult, setAiResult] = useState(null);
   const [courseResults, setCourseResults] = useState([]);
   const [error, setError] = useState(null);
   const [conversation, setConversation] = useState([]); // conversation history for follow-ups
+  const [shared, setShared] = useState(false);
+  const lastMealRef = useRef("");
 
   const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
+    setLoadingSlow(false);
     setError(null);
+    lastMealRef.current = userMessage;
     const t0 = Date.now();
+    const slowTimer = setTimeout(() => setLoadingSlow(true), 8000);
 
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 25000);
-        const res = await fetch(WINE_AI_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            meal: userMessage,
-            context: existingContext || [],
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-        data = await res.json();
-        if (!data.error) break;
+        try {
+          const res = await fetch(WINE_AI_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              meal: userMessage,
+              context: existingContext || [],
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+          data = await res.json();
+          if (!data.error) break;
+        } catch (fetchErr) {
+          clearTimeout(timeout);
+          if (attempt === 1) throw fetchErr;
+        }
         if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
       }
+      if (!data) throw new Error("Inget svar från servern");
       if (data.error) throw new Error(data.error);
 
       setAiResult(data);
       trackAI(userMessage, data, Date.now() - t0);
 
       const fmt = data.format || (meal.toLowerCase().match(/lådvin|box|bib|bag.in.box/) ? "lådvin" : "any");
-      if (data.mode === "recommend" && data.courses) {
+      if (data.courses && Array.isArray(data.courses)) {
         setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.courses) {
-        setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.criteria) {
+      } else if (data.criteria && Array.isArray(data.criteria)) {
         setCourseResults(matchWinesForCourses([{ dish: meal, criteria: data.criteria }], products, fmt));
       }
     } catch (e) {
-      setError("Kunde inte hämta vinförslag just nu. Försök igen.");
+      const msg = e.name === "AbortError"
+        ? "Tog för lång tid. Försök igen med en kortare beskrivning."
+        : "Kunde inte hämta vinförslag just nu. Försök igen.";
+      setError(msg);
+      // Log error to analytics
+      try { fetch("https://smakfynd-analytics.smakfynd.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "ai_error", meal: userMessage, error: e.message, ts: new Date().toISOString() }) }).catch(() => {}); } catch (_) {}
     }
+    clearTimeout(slowTimer);
+    setLoadingSlow(false);
     setLoading(false);
   };
 
@@ -212,17 +229,27 @@ function FoodMatch({ products }) {
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
           <div style={{ width: 24, height: 24, margin: "0 auto 8px", border: `3px solid ${t.bdr}`, borderTopColor: t.wine, borderRadius: "50%", animation: "sfSpin 0.8s linear infinite" }} />
           <style>{`@keyframes sfSpin { to { transform: rotate(360deg) } }`}</style>
-          <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid, kan ta några sekunder...</div>
+          <div style={{ fontSize: 13, fontStyle: "italic" }}>{loadingSlow ? "Tar lite längre tid än vanligt..." : "Analyserar din måltid, kan ta några sekunder..."}</div>
         </div>
       )}
 
-      {error && <p style={{ marginTop: 10, fontSize: 12, color: t.deal }}>{error}</p>}
+      {error && (
+        <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <p style={{ margin: 0, fontSize: 12, color: t.deal }}>{error}</p>
+          <button onClick={() => sendToAI(lastMealRef.current, conversation.length ? conversation : [])}
+            style={{ padding: "4px 12px", borderRadius: 8, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}>
+            Försök igen
+          </button>
+        </div>
+      )}
 
       {aiResult && !loading && (
         <div style={{ marginTop: 14 }}>
-          <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 12px" }}>
-            {aiResult.reasoning}
-          </p>
+          {aiResult.reasoning && (
+            <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 12px" }}>
+              {aiResult.reasoning}
+            </p>
+          )}
 
           {/* MODE: Question — AI needs more info */}
           {aiResult.mode === "question" && <AIQuestion aiResult={aiResult} onFollowup={handleFollowup} />}
@@ -262,9 +289,7 @@ function FoodMatch({ products }) {
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
 
               {/* Share wine list */}
-              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
-                const [shared, setShared] = useState(false);
-                return (
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
                   <button onClick={() => {
                     const lines = courseResults.flatMap(c => {
                       const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
@@ -286,8 +311,7 @@ function FoodMatch({ products }) {
                     style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: shared ? "#2d6b3f10" : t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: shared ? "#2d6b3f" : t.txM, transition: "all 0.2s" }}>
                     <span style={{ fontSize: 14 }}>{shared ? "✓" : "↗"}</span> {shared ? "Kopierad!" : "Dela vinlista"}
                   </button>
-                );
-              })()}
+              )}
             </div>
           )}
         </div>
