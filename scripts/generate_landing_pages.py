@@ -1959,10 +1959,31 @@ def render_page(page, all_pages=None):
       </p>
     </div>
 
-    <div style="margin-top:24px;text-align:center">
-      <a href="https://smakfynd.se" style="display:inline-block;padding:14px 32px;border-radius:14px;background:linear-gradient(145deg,#8b2332,#6b1a27);color:#fff;font-size:15px;font-weight:600;text-decoration:none">
-        Utforska alla {len(all_wines)} viner på Smakfynd →
-      </a>
+    <div style="margin-top:32px;padding:24px 20px;border-radius:16px;background:linear-gradient(135deg,#fefcf8,#f7f3ec);border:1px solid #e6ddd0">
+      <h2 style="margin:0 0 12px;font-size:20px;font-family:'Newsreader',Georgia,serif;font-weight:400;color:#1e1710">Hitta din egen favorit</h2>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="sf-app-search" type="text" placeholder="Sök efter ett vin..."
+            style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid #d6cdc0;background:#fff;font-size:13px;color:#1e1710;outline:none;font-family:inherit"
+            onkeydown="if(event.key==='Enter'){{sfTrack('app_click_from_landing',{{action:'search',query:this.value}});location.href='https://smakfynd.se/#sok/'+encodeURIComponent(this.value)}}">
+          <button onclick="var q=document.getElementById('sf-app-search').value;sfTrack('app_click_from_landing',{{action:'search',query:q}});location.href='https://smakfynd.se/#sok/'+encodeURIComponent(q)"
+            style="padding:10px 16px;border-radius:10px;border:none;background:#8b2332;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">Sök</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="https://smakfynd.se/#ai" onclick="sfTrack('app_click_from_landing',{{action:'ai'}})"
+            style="flex:1;min-width:180px;padding:10px 14px;border-radius:10px;border:1px solid #d6cdc0;background:#fff;text-decoration:none;color:#1e1710;font-size:13px;display:flex;align-items:center;gap:8px;transition:border-color 0.2s"
+            onmouseover="this.style.borderColor='#8b2332'" onmouseout="this.style.borderColor='#d6cdc0'">
+            <span style="font-size:18px">🍷</span>
+            <span><strong style="font-size:13px">AI-vinmatchare</strong><br><span style="font-size:11px;color:#7a7060">Beskriv din middag, få vinförslag</span></span>
+          </a>
+          <a href="https://smakfynd.se/#sparade" onclick="sfTrack('app_click_from_landing',{{action:'saved'}})"
+            style="flex:1;min-width:180px;padding:10px 14px;border-radius:10px;border:1px solid #d6cdc0;background:#fff;text-decoration:none;color:#1e1710;font-size:13px;display:flex;align-items:center;gap:8px;transition:border-color 0.2s"
+            onmouseover="this.style.borderColor='#8b2332'" onmouseout="this.style.borderColor='#d6cdc0'">
+            <span style="font-size:18px">♡</span>
+            <span><strong style="font-size:13px">Spara favoriter</strong><br><span style="font-size:11px;color:#7a7060">Logga in och bygg din vinlista</span></span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <footer style="margin-top:40px;padding-top:20px;border-top:1px solid #e6ddd0;text-align:center;font-size:11px;color:#a89e8e">
@@ -1987,6 +2008,24 @@ def render_page(page, all_pages=None):
     .catch(function(){{b.textContent='Prenumerera';b.disabled=false}});
   }}
   </script>
+<script>
+(function(){{
+  var A="https://smakfynd-analytics.smakfynd.workers.dev";
+  var sid;try{{sid=sessionStorage.getItem("sf_sid");if(!sid){{sid=Math.random().toString(36).slice(2);sessionStorage.setItem("sf_sid",sid)}}}}catch(e){{sid="anon"}}
+  var dev=window.innerWidth<768?"mobile":"desktop";
+  var pg="/{page['slug']}/";
+  window.sfTrack=function(ev,data){{
+    try{{fetch(A+"/event",{{method:"POST",headers:{{"Content-Type":"application/json"}},body:JSON.stringify({{session:sid,event:ev,wine_nr:(data&&data.nr)||null,data:data||{{}},page:pg,device:dev,referrer:document.referrer}}),keepalive:true}}).catch(function(){{}})}}catch(e){{}}
+  }};
+  sfTrack("pageview",{{}});
+  document.addEventListener("click",function(e){{
+    var a=e.target.closest("a");if(!a)return;
+    var h=a.href||"";
+    if(h.indexOf("systembolaget.se/produkt")>-1){{var m=h.match(/\\/(\\d+)$/);sfTrack("sb_click_from_landing",{{nr:m?m[1]:null}})}}
+    else if(h.indexOf("smakfynd.se/#")>-1){{sfTrack("app_click_from_landing",{{action:"wine_detail",target:h}})}}
+  }});
+}})();
+</script>
 <script data-goatcounter="https://smakfynd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>'''
