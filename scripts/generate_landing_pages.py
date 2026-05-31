@@ -168,8 +168,8 @@ def make_pages():
         },
         {
             "slug": "basta-rose",
-            "title": f"Bästa rosévinet {YEAR} — Topp 20 rosévin rankat & testat",
-            "meta": f"Bästa rosévinet {YEAR}? Vi har rankat alla {YEAR} roséer på Systembolaget. Nr 1 just nu kostar under 150 kr. Se hela topp 20 — uppdaterad {DATE_STR}.",
+            "title": f"Årets rosévin {YEAR} — Topp 20 bra rosévin på Systembolaget",
+            "meta": f"Årets bästa rosévin {YEAR} — rankade av 50 000+ omdömen. Se topp 20 från Provence, Chile & Österrike. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa rosévin {YEAR} — årets topp 20 på Systembolaget",
             "intro": f"Bästa rosévinet just nu? Årets rosevin {YEAR} rankat efter kvalitet per krona — vi jämför alla roséer på Systembolaget så du slipper gissa.",
             "intro2": f"Rosé är Sveriges snabbast växande vinkategori. Provence dominerar topplistorna, men spanska Garnacha-roséer och italienska alternativ ger ofta bättre prisvärdhet. Oavsett om du söker bästa rosévinet {YEAR}, årets rosevin eller bara ett bra tips — här hittar du det. Listan uppdateras varje vecka.",
@@ -281,8 +281,8 @@ def make_pages():
         },
         {
             "slug": "basta-malbec",
-            "title": f"Bästa Malbec på Systembolaget {YEAR}",
-            "meta": f"Topp Malbec-viner på Systembolaget. Argentina, Frankrike och mer — rankade efter kvalitet per krona. {DATE_STR}.",
+            "title": f"Bästa Malbec på Systembolaget {YEAR} — Topp 10 från 78 kr",
+            "meta": f"Bästa Malbec Systembolaget {YEAR} — vi har rankat alla. Argentina, Frankrike & Australien. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa Malbec på Systembolaget — {DATE_STR}",
             "intro": "Malbec från Argentina är en favorit bland svenska vindrickare. Här är de som ger mest smak för pengarna.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
@@ -994,11 +994,13 @@ def make_pages():
         },
         {
             "slug": "basta-cava",
-            "title": f"Bästa Cava {YEAR} — Bäst i test på Systembolaget",
-            "meta": f"Bästa cavan {YEAR}? Topp cava-viner på Systembolaget — champagnekvalitet till halva priset. Rankade efter smak och pris. {DATE_STR}.",
+            "title": f"Cava bäst i test {YEAR} — Topp cava på Systembolaget från 89 kr",
+            "meta": f"Cava bäst i test {YEAR} — vi har rankat alla på Systembolaget. Brut, Reserva & ekologiska. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa Cava {YEAR} — topp cava på Systembolaget",
             "intro": f"Bästa cavan {YEAR}? Cava är Spaniens svar på champagne — fräscht, torrt och festligt till en bråkdel av priset. Här är de cava-viner som ger mest bubbel för pengarna.",
-            "intro2": "Cava görs med méthode traditionnelle (samma flaskjäsning som champagne) i Penedès-regionen i Katalonien. Druvorna Macabeo, Xarel·lo och Parellada ger fräscha, citrusdrivna bubblor. De bästa cavorna konkurrerar med champagne till en tredjedel av priset. Reserva och Gran Reserva har lagrats längre och ger mer komplexitet.",
+            "intro2_heading": f"Cava bäst i test {YEAR}",
+            "intro2": f"Cava görs med méthode traditionnelle (samma flaskjäsning som champagne) i Penedès-regionen i Katalonien. Druvorna Macabeo, Xarel·lo och Parellada ger fräscha, citrusdrivna bubblor. De bästa cavorna konkurrerar med champagne till en tredjedel av priset. Reserva och Gran Reserva har lagrats längre och ger mer komplexitet.",
+            "intro3": f"I vårt test {YEAR} har vi rankat alla cava-viner på Systembolaget efter kvalitet per krona. Totalt finns cava från 89 till 149 kr.",
             "guide": {
                 "title": "Så väljer du rätt Cava",
                 "points": [
@@ -1011,6 +1013,9 @@ def make_pages():
             "faq_visible": [
                 ("Vad är skillnaden mellan Cava och Prosecco?", "Cava jäser i flaskan (som champagne) medan Prosecco jäser i tank. Cava ger finare bubblor, mer komplexitet och torrare stil. Prosecco är lättare och fruktigare. Cava ger generellt mer champagnekänsla per krona."),
                 ("Kan man dricka Cava till mat?", "Absolut — Cava med hög syra fungerar utmärkt till skaldjur, sushi, tapas och till och med friterad mat. Den höga syran och de fina bubblorna rengör gommen mellan tuggorna."),
+                (f"Vilken cava är bäst i test {YEAR}?", f"I vårt test {YEAR} rankar vi alla cava-viner på Systembolaget efter crowd-betyg, expertrecensioner och prisvärde. Se toppen av listan ovan för årets vinnare."),
+                ("Vad betyder Brut Nature på en cava?", "Brut Nature är den torraste stilen — inget tillsatt socker alls efter jäsningen. Det ger ren, skarp smak som framhäver druvorna. Perfekt för dig som gillar torrt bubbel och vill undvika extra socker."),
+                ("Är cava billigare än champagne?", "Ja, betydligt. På Systembolaget kostar bra cava 89–149 kr medan champagne börjar runt 250 kr. Produktionsmetoden är identisk (méthode traditionnelle) men druvorna och regionen skiljer sig — Penedès i Katalonien istället för Champagne i Frankrike."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('country') == 'Spanien'],
@@ -1380,8 +1385,8 @@ def make_pages():
         # ─── Bubbel-kluster ───
         {
             "slug": "champagne-under-300-kr",
-            "title": f"Bästa champagne under 300 kr {YEAR} — Systembolaget",
-            "meta": f"Riktig champagne under 300 kr. Finns det? Ja. Här är de bästa — rankade efter kvalitet per krona. {DATE_STR}.",
+            "title": f"Bästa champagnen under 300 kr {YEAR} — 5 riktiga fynd",
+            "meta": f"Bästa champagnen under 300 kr på Systembolaget {YEAR}. Alla rankade — billigaste kostar 249 kr.",
             "h1": f"Bästa champagne under 300 kr — {DATE_STR}",
             "intro": "Riktig champagne behöver inte kosta en förmögenhet. Under 300 kr finns överraskande bra champagner — från små grower-producenter till välkända hus som ger mer än Veuve och Moët.",
             "intro2": "Champagne under 300 kr är en av de mest undervärderade kategorierna på Systembolaget. Många väljer Cava eller Prosecco för att spara pengar, men missar att det finns riktig champagne i samma prisklass. Vi har hittat de champagner som faktiskt levererar — med den komplexitet, finheten och mousset som gör champagne till champagne.",
@@ -1432,8 +1437,8 @@ def make_pages():
         },
         {
             "slug": "basta-cremant",
-            "title": f"Bästa Crémant på Systembolaget {YEAR}",
-            "meta": f"Bästa Crémant {YEAR} — champagnekvalitet till halva priset. Alsace, Loire, Bourgogne. Rankade efter kvalitet per krona. {DATE_STR}.",
+            "title": f"Bästa Crémant {YEAR} — Topp 10 champagnealternativ från 99 kr",
+            "meta": f"Bästa crémant {YEAR} på Systembolaget — Alsace, Loire & Bourgogne. Från 99 kr. Se hela listan.",
             "h1": f"Bästa Crémant — champagnekvalitet till halva priset",
             "intro": "Crémant är Frankrikes bäst bevarade vinhemlighet — samma metod som champagne, ofta samma druvor, men till halva priset. Här är de bästa Crémant-köpen just nu.",
             "intro2": "Crémant produceras med méthode traditionnelle (samma flaskjäsning som champagne) i flera franska regioner: Alsace, Loire, Bourgogne, Limoux och Jura. Crémant d'Alsace ger ofta bäst prisvärdhet, medan Crémant de Bourgogne kommer närmast champagnestilen. Crémant de Loire är fruktigare och lättare. Alla ger champagneupplevelse utan champagnepriset.",
@@ -1460,8 +1465,8 @@ def make_pages():
         # ─── Boxvin (moved from monthly_seo for full template) ───
         {
             "slug": "basta-boxvin",
-            "title": f"Bästa boxvinet {YEAR} — Topp 20 box röda, vita & rosé",
-            "meta": f"Bästa boxvinet {YEAR}? Vi har rankat alla bag-in-box på Systembolaget — röda, vita och rosé. Se vilken box som ger mest smak per krona. Uppdaterad {DATE_STR}.",
+            "title": f"Bästa vinboxen {YEAR} — Topp 20 boxvin på Systembolaget",
+            "meta": f"Bästa vinboxen {YEAR} — alla bag-in-box rankade. Röda, vita & rosé. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa boxvinet {YEAR} — topp bag-in-box på Systembolaget",
             "intro": f"Vilket boxvin är bäst just nu? Sverige är världens största boxvinmarknad — men kvaliteten varierar enormt. Vi har rankat alla bag-in-box-viner på Systembolaget efter kvalitet per krona.",
             "intro2": f"Bästa boxvinet {YEAR} behöver inte vara dyrt. Box ger ofta bättre literpris än flaska, och de bästa boxvinerna håller riktigt hög kvalitet. En öppnad box håller dessutom 4–6 veckor tack vare vakuumförpackningen. Vi rankar alla BiB-viner — röda, vita och rosé — baserat på crowd-betyg, expertrecensioner och prisvärde.",
@@ -1684,10 +1689,15 @@ def render_page(page, all_pages=None):
       {''.join(cross_sections)}
     </div>'''
 
-    # Intro2 — extended intro paragraph
+    # Intro2 — extended intro paragraph (with optional heading)
     intro2_html = ""
     if page.get('intro2'):
-        intro2_html = f'<p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page["intro2"]}</p>'
+        heading = ""
+        if page.get('intro2_heading'):
+            heading = f'<h2 style="margin:16px 0 8px;font-size:22px;font-family:\'Newsreader\',Georgia,serif;font-weight:400;color:#1e1710">{page["intro2_heading"]}</h2>\n      '
+        intro2_html = f'{heading}<p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page["intro2"]}</p>'
+        if page.get('intro3'):
+            intro2_html += f'\n      <p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page["intro3"]}</p>'
 
     # Guide section — buying advice
     guide_html = ""
