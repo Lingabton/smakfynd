@@ -372,7 +372,6 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <StarRating nr={p.nr} auth={auth} />
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
               <AlertButton nr={p.nr} wine={p} auth={auth} />
-              <CellarButton nr={p.nr} auth={auth} />
             </div>
           </div>
         </div>

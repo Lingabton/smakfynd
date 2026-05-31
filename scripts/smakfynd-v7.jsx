@@ -935,7 +935,6 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <StarRating nr={p.nr} auth={auth} />
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
               <AlertButton nr={p.nr} wine={p} auth={auth} />
-              <CellarButton nr={p.nr} auth={auth} />
             </div>
           </div>
         </div>
@@ -3169,51 +3168,20 @@ function SmakfyndApp() {
                 {showDeals && <a href="/prissankt/" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: t.deal, textDecoration: "none", alignSelf: "center", fontWeight: 500 }}>Se alla {products.filter(p => p.price_vs_launch_pct > 0).length} prissänkta →</a>}
               </div>
             </div>
-            {/* Country → Region hierarchical */}
-            <div>
-              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
-                  const cnt = products.filter(w => w.country === c).length;
-                  return <button key={c} onClick={() => { setSelCountry(selCountry === c ? null : c); setSelRegion(null); }} style={pill(selCountry === c)}>{c} ({cnt})</button>;
-                })}
-              </div>
-              {selCountry && (() => {
-                const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
-                if (regions.length === 0) return null;
-                return (
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6, paddingLeft: 12, borderLeft: `2px solid ${t.wine}30` }}>
-                    {regions.slice(0, 10).map(rg => {
-                      const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
-                      return <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg} ({cnt})</button>;
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
             {/* Food */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Passar till</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => (
+                {["Kött", "Fågel", "Fisk", "Pasta", "Grönsaker", "Ost"].map(f => (
                   <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
                 ))}
               </div>
             </div>
-            {/* Taste */}
-            <div>
-              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Smak</div>
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => (
-                  <button key={ts} onClick={() => setSelTaste(selTaste === ts ? null : ts)} style={pill(selTaste === ts)}>{ts}</button>
-                ))}
-              </div>
-            </div>
-            {/* Sort — visually different */}
+            {/* Sort — simplified */}
             <div style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 10 }}>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sortera</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {[["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
+                {[["smakfynd", "Bäst för pengarna"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["price_asc", "Lägst pris"], ["price_desc", "Högst pris"]].map(([k, l]) => (
                   <button key={k} onClick={() => setSortBy(k)} style={{
                     padding: "7px 14px", borderRadius: 8, border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
                     background: sortBy === k ? `${t.wine}08` : "transparent",
@@ -3222,6 +3190,43 @@ function SmakfyndApp() {
                 ))}
               </div>
             </div>
+            {/* Advanced — hidden behind toggle */}
+            <details style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 10 }}>
+              <summary style={{ fontSize: 11, color: t.txL, cursor: "pointer", fontFamily: "inherit" }}>Fler filter (land, smak)</summary>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                {/* Country → Region hierarchical */}
+                <div>
+                  <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
+                      const cnt = products.filter(w => w.country === c).length;
+                      return <button key={c} onClick={() => { setSelCountry(selCountry === c ? null : c); setSelRegion(null); }} style={pill(selCountry === c)}>{c} ({cnt})</button>;
+                    })}
+                  </div>
+                  {selCountry && (() => {
+                    const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
+                    if (regions.length === 0) return null;
+                    return (
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6, paddingLeft: 12, borderLeft: `2px solid ${t.wine}30` }}>
+                        {regions.slice(0, 10).map(rg => {
+                          const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
+                          return <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg} ({cnt})</button>;
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+                {/* Taste */}
+                <div>
+                  <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Smak</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    {["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => (
+                      <button key={ts} onClick={() => setSelTaste(selTaste === ts ? null : ts)} style={pill(selTaste === ts)}>{ts}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
         )}
 
@@ -3297,11 +3302,11 @@ function SmakfyndApp() {
             })}
             {/* CTA → AI matcher */}
             <div style={{ textAlign: "center", padding: "20px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
-              <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 6 }}>Vet du vad du ska äta?</div>
-              <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Vår AI matchar rätt vin till din middag.</p>
+              <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 6 }}>Vad ska du äta ikväll?</div>
+              <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Beskriv din middag — vi föreslår vinet.</p>
               <button onClick={() => { const el = document.getElementById("section-food"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                Prova AI-matchern ↓
+                Hitta vin till middagen ↓
               </button>
             </div>
           </div>
