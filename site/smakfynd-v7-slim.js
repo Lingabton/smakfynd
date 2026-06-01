@@ -235,10 +235,10 @@ const FAQS = [{
   a: "Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Hög kvalitet till lågt pris = hög poäng. Poängen visas på en skala 1–100."
 }, {
   q: "Var kommer betygen ifrån?",
-  a: "Crowd-betyg kommer från hundratusentals vindrickare världen över. Expertbetyg hämtas från erkända vinkritiker som James Suckling, Falstaff, Decanter och Wine Enthusiast. Prisvärdet beräknar vi själva genom att jämföra literpriset mot medianen i samma kategori — rött jämförs med rött, bubbel med bubbel."
+  a: "Köparbetyg kommer från hundratusentals vanliga vinköpare världen över. Expertbetyg hämtas från professionella vinkritiker. Prisvärdet beräknar vi själva genom att jämföra priset mot liknande viner — rött jämförs med rött, bubbel med bubbel."
 }, {
-  q: "Vad betyder Crowd- och Expert-staplarna?",
-  a: "Crowd visar vad vanliga vindrickare tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas betyder det att vi inte hittat kritikerrecensioner för det vinet — men crowd-betyget finns alltid."
+  q: "Vad betyder Köpare- och Expert-staplarna?",
+  a: "Köpare visar vad vanliga människor tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas har vi inte hittat kritikerrecensioner — men köparbetyget finns alltid."
 }, {
   q: "Hur fungerar AI-vinmatcharen?",
   a: "Beskriv vad du ska äta — till exempel 'grillad lax med potatisgratäng' eller 'toast skagen, sedan entrecôte'. Vår AI analyserar måltiden och föreslår viner för varje rätt i olika prisklasser, direkt från Systembolagets sortiment."
@@ -438,7 +438,7 @@ function ScoreBars({
       gap: 3
     }
   }, /*#__PURE__*/React.createElement(MiniBar, {
-    label: "Vindrickare",
+    label: "K\xF6pare",
     value: p.crowd_score,
     color: "#6b8cce"
   }), /*#__PURE__*/React.createElement(MiniBar, {
@@ -1130,7 +1130,7 @@ function Card({
     const sameGrape = pGrape && cGrape && cGrape === pGrape;
     const savings = Math.round(comparison.price - p.price);
     const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
-    const label = sameGrape ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr` : `Jämförbar kvalitet med ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
+    const label = sameGrape ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr` : `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 4,
@@ -1144,14 +1144,14 @@ function Card({
         fontSize: 10,
         color: t.txL
       }
-    }, "(vindrickare ger ", cCrowd, "/10)"));
+    }, "(k\xF6pare ger ", cCrowd, "/10)"));
   })(), (() => {
     const vibes = [];
     if (p.price_score >= 8) vibes.push("Prisvärt");
     if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
     if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
     if (p.price <= 100 && s100 >= 65) vibes.push("Budgetfavorit");
-    if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
+    if (p.expert_score >= 8) vibes.push("Högt expertbetyg");
     return vibes.length > 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
@@ -1585,7 +1585,7 @@ function Card({
       color: "#6b8cce",
       fontWeight: 600
     }
-  }, "Vindrickare"), /*#__PURE__*/React.createElement("span", {
+  }, "K\xF6pare"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontWeight: 700,
       color: "#6b8cce"
@@ -1685,7 +1685,14 @@ function Card({
       borderRadius: 2,
       background: t.txM
     }
-  }))))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
+  }))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txF,
+      fontStyle: "italic",
+      marginBottom: 10
+    }
+  }, "Oberoende po\xE4ng \u2014 inte sponsrad"), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "8px 12px",
       borderRadius: 8,
@@ -1724,7 +1731,7 @@ function Card({
         letterSpacing: "0.1em",
         marginBottom: 8
       }
-    }, "J\xE4mf\xF6rbara viner"), /*#__PURE__*/React.createElement("div", {
+    }, "Liknande viner"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
@@ -1799,9 +1806,6 @@ function Card({
   }, /*#__PURE__*/React.createElement(AlertButton, {
     nr: p.nr,
     wine: p,
-    auth: auth
-  }), /*#__PURE__*/React.createElement(CellarButton, {
-    nr: p.nr,
     auth: auth
   })))));
 }
@@ -2546,53 +2550,80 @@ function FoodMatch({
 }) {
   const [meal, setMeal] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingSlow, setLoadingSlow] = useState(false);
   const [aiResult, setAiResult] = useState(null);
   const [courseResults, setCourseResults] = useState([]);
   const [error, setError] = useState(null);
   const [conversation, setConversation] = useState([]); // conversation history for follow-ups
-
+  const [shared, setShared] = useState(false);
+  const lastMealRef = useRef("");
   const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
+    setLoadingSlow(false);
     setError(null);
+    lastMealRef.current = userMessage;
     const t0 = Date.now();
+    const slowTimer = setTimeout(() => setLoadingSlow(true), 8000);
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 25000);
-        const res = await fetch(WINE_AI_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            meal: userMessage,
-            context: existingContext || []
-          }),
-          signal: controller.signal
-        });
-        clearTimeout(timeout);
-        data = await res.json();
-        if (!data.error) break;
+        try {
+          const res = await fetch(WINE_AI_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              meal: userMessage,
+              context: existingContext || []
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          data = await res.json();
+          if (!data.error) break;
+        } catch (fetchErr) {
+          clearTimeout(timeout);
+          if (attempt === 1) throw fetchErr;
+        }
         if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
       }
+      if (!data) throw new Error("Inget svar från servern");
       if (data.error) throw new Error(data.error);
       setAiResult(data);
       trackAI(userMessage, data, Date.now() - t0);
       const fmt = data.format || (meal.toLowerCase().match(/lådvin|box|bib|bag.in.box/) ? "lådvin" : "any");
-      if (data.mode === "recommend" && data.courses) {
+      if (data.courses && Array.isArray(data.courses)) {
         setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.courses) {
-        setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.criteria) {
+      } else if (data.criteria && Array.isArray(data.criteria)) {
         setCourseResults(matchWinesForCourses([{
           dish: meal,
           criteria: data.criteria
         }], products, fmt));
       }
     } catch (e) {
-      setError("Kunde inte hämta vinförslag just nu. Försök igen.");
+      const msg = e.name === "AbortError" ? "Tog för lång tid. Försök igen med en kortare beskrivning." : "Kunde inte hämta vinförslag just nu. Försök igen.";
+      setError(msg);
+      // Log error to analytics
+      try {
+        fetch("https://smakfynd-analytics.smakfynd.workers.dev", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            event: "ai_error",
+            meal: userMessage,
+            error: e.message,
+            ts: new Date().toISOString()
+          })
+        }).catch(() => {});
+      } catch (_) {}
     }
+    clearTimeout(slowTimer);
+    setLoadingSlow(false);
     setLoading(false);
   };
   const handleSubmit = async () => {
@@ -2740,17 +2771,37 @@ function FoodMatch({
       fontSize: 13,
       fontStyle: "italic"
     }
-  }, "Analyserar din m\xE5ltid, kan ta n\xE5gra sekunder...")), error && /*#__PURE__*/React.createElement("p", {
+  }, loadingSlow ? "Tar lite längre tid än vanligt..." : "Analyserar din måltid, kan ta några sekunder...")), error && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10,
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
       fontSize: 12,
       color: t.deal
     }
-  }, error), aiResult && !loading && /*#__PURE__*/React.createElement("div", {
+  }, error), /*#__PURE__*/React.createElement("button", {
+    onClick: () => sendToAI(lastMealRef.current, conversation.length ? conversation : []),
+    style: {
+      padding: "4px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.bdr}`,
+      background: t.card,
+      color: t.txM,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: 500
+    }
+  }, "F\xF6rs\xF6k igen")), aiResult && !loading && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14
     }
-  }, /*#__PURE__*/React.createElement("p", {
+  }, aiResult.reasoning && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 13,
       color: t.txM,
@@ -2828,54 +2879,51 @@ function FoodMatch({
       fontSize: 12,
       color: t.txL
     }
-  }, "Hittade inga matchningar. Prova en annan beskrivning."), courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
-    const [shared, setShared] = useState(false);
-    return /*#__PURE__*/React.createElement("button", {
-      onClick: () => {
-        const lines = courseResults.flatMap(c => {
-          const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
-          return [...header, ...c.wines.filter(m => m.nr).map(m => {
-            const p = products.find(pr => String(pr.nr) === String(m.nr));
-            return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100) \u2014 smakfynd.se/#vin/${p.nr}` : null;
-          }).filter(Boolean)];
-        });
-        const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se \u2014 hitta bästa vinet`;
-        if (navigator.share) {
-          navigator.share({
-            title: `Vinlista till ${meal}`,
-            text
-          }).catch(() => {});
-        } else {
-          navigator.clipboard?.writeText(text);
-          setShared(true);
-          setTimeout(() => setShared(false), 2000);
-        }
-        track("share", {
-          type: "ai_list",
-          meal
-        });
-      },
-      style: {
-        marginTop: 10,
-        display: "flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "8px 14px",
-        borderRadius: 10,
-        border: `1px solid ${t.bdr}`,
-        background: shared ? "#2d6b3f10" : t.card,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        fontSize: 12,
-        color: shared ? "#2d6b3f" : t.txM,
-        transition: "all 0.2s"
+  }, "Hittade inga matchningar. Prova en annan beskrivning."), courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const lines = courseResults.flatMap(c => {
+        const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
+        return [...header, ...c.wines.filter(m => m.nr).map(m => {
+          const p = products.find(pr => String(pr.nr) === String(m.nr));
+          return p ? `  ${p.name} ${p.sub || ""} \u2014 ${p.price}\u00A0kr (${p.smakfynd_score}/100) \u2014 smakfynd.se/#vin/${p.nr}` : null;
+        }).filter(Boolean)];
+      });
+      const text = `Vinlista till ${meal}:\n${lines.join("\n")}\n\nSmakfynd.se \u2014 hitta bästa vinet`;
+      if (navigator.share) {
+        navigator.share({
+          title: `Vinlista till ${meal}`,
+          text
+        }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(text);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
       }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14
-      }
-    }, shared ? "✓" : "↗"), " ", shared ? "Kopierad!" : "Dela vinlista");
-  })())));
+      track("share", {
+        type: "ai_list",
+        meal
+      });
+    },
+    style: {
+      marginTop: 10,
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "8px 14px",
+      borderRadius: 10,
+      border: `1px solid ${t.bdr}`,
+      background: shared ? "#2d6b3f10" : t.card,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 12,
+      color: shared ? "#2d6b3f" : t.txM,
+      transition: "all 0.2s"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, shared ? "✓" : "↗"), " ", shared ? "Kopierad!" : "Dela vinlista"))));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -5246,13 +5294,20 @@ function SmakfyndApp() {
       lineHeight: 1.1,
       letterSpacing: "-0.02em"
     }
-  }, "B\xE4sta k\xF6pet i sin kategori"), /*#__PURE__*/React.createElement("p", {
+  }, "B\xE4sta vinet f\xF6r pengarna"), /*#__PURE__*/React.createElement("p", {
     style: {
-      margin: "0 0 20px",
+      margin: "0 0 4px",
       fontSize: 13,
       color: t.txL
     }
-  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner p\xE5 Systembolaget, rankade efter v\xE4rde")), /*#__PURE__*/React.createElement("div", {
+  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner p\xE5 Systembolaget, rankade efter pris och kvalitet"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 20px",
+      fontSize: 12,
+      color: t.txF,
+      fontStyle: "italic"
+    }
+  }, "Vi tj\xE4nar inget p\xE5 vad du k\xF6per. Bara \xE4rliga r\xE5d.")), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 680,
       margin: "0 auto",
@@ -5282,14 +5337,14 @@ function SmakfyndApp() {
       lineHeight: 1.7,
       margin: "0 0 12px"
     }
-  }, "Systembolaget har tusentals viner. Vi hj\xE4lper dig hitta de som faktiskt \xE4r v\xE4rda pengarna. Vi kombinerar ", /*#__PURE__*/React.createElement("strong", null, "crowd-betyg"), " fr\xE5n hundratusentals vindrickare, ", /*#__PURE__*/React.createElement("strong", null, "expertrecensioner"), " fr\xE5n internationella kritiker och ", /*#__PURE__*/React.createElement("strong", null, "prisj\xE4mf\xF6relse"), " inom varje kategori."), /*#__PURE__*/React.createElement("p", {
+  }, "Systembolaget har tusentals viner. Vi hj\xE4lper dig hitta de som faktiskt \xE4r v\xE4rda pengarna. Vi kombinerar ", /*#__PURE__*/React.createElement("strong", null, "betyg fr\xE5n vanliga k\xF6pare"), ", ", /*#__PURE__*/React.createElement("strong", null, "expertrecensioner"), " och ", /*#__PURE__*/React.createElement("strong", null, "prisj\xE4mf\xF6relse"), " \u2014 allt i en enda po\xE4ng."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 14,
       color: t.txM,
       lineHeight: 1.7,
       margin: "0 0 14px"
     }
-  }, "Resultatet: ", /*#__PURE__*/React.createElement("strong", null, "en enda po\xE4ng"), " som visar kvalitet per krona. Inte det \"b\xE4sta\" vinet \u2014 utan det b\xE4sta ", /*#__PURE__*/React.createElement("em", null, "k\xF6pet"), "."), /*#__PURE__*/React.createElement("div", {
+  }, "Resultatet: ", /*#__PURE__*/React.createElement("strong", null, "en enda po\xE4ng"), " som visar om vinet \xE4r v\xE4rt pengarna. Inte det dyraste vinet \u2014 utan det smartaste k\xF6pet."), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 16,
       borderRadius: 12,
@@ -5317,11 +5372,33 @@ function SmakfyndApp() {
       lineHeight: 1.6,
       margin: "8px 0 0"
     }
-  }, "Smakfynd b\xF6rjade f\xF6r att jag tyckte det var on\xF6digt sv\xE5rt att hitta bra vin p\xE5 Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar h\xE4nsyn till priset, inte bara kvaliteten. S\xE5 jag byggde det.")), /*#__PURE__*/React.createElement("p", {
+  }, "Smakfynd b\xF6rjade f\xF6r att jag tyckte det var on\xF6digt sv\xE5rt att hitta bra vin p\xE5 Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar h\xE4nsyn till priset, inte bara kvaliteten. S\xE5 jag byggde det.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14,
+      borderRadius: 10,
+      background: t.bg,
+      marginTop: 12,
+      border: `1px solid ${t.bdrL}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: t.tx,
+      marginBottom: 4
+    }
+  }, "Helt oberoende"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: t.txM,
+      lineHeight: 1.6,
+      margin: 0
+    }
+  }, "Smakfynd \xE4r helt oberoende. Vi har inga avtal med Systembolaget, inga sponsrade placeringar och inga annonser. Inget vin kan k\xF6pa sig en h\xF6gre po\xE4ng. Vi tj\xE4nar inga pengar p\xE5 vad du k\xF6per \u2014 vi hj\xE4lper bara dig v\xE4lja r\xE4tt.")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txL,
-      margin: 0
+      margin: "12px 0 0"
     }
   }, "Olav Innovation AB \xB7 Oberoende informationstj\xE4nst \xB7 Ingen koppling till Systembolaget \xB7 Vi s\xE4ljer inte alkohol"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5392,7 +5469,7 @@ function SmakfyndApp() {
       gap: 10,
       marginBottom: 16
     }
-  }, [["👥", "Crowd-betyg", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre. Viner med färre än 25 omdömen rankas inte alls."], ["🏆", "Expertrecensioner", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om crowd och experter är överens får vinet en extra bonus."], ["💰", "Prisvärde", "Literpriset jämförs mot medianen i samma kategori. Rött jämförs med rött — aldrig med bubbel. Billigare än snittet med samma kvalitet = högre poäng."]].map(([icon, title, desc], i) => /*#__PURE__*/React.createElement("div", {
+  }, [["👥", "Betyg från köpare", "Vad vanliga människor tycker — baserat på hundratusentals omdömen. Fler betyg = säkrare poäng."], ["🏆", "Expertbetyg", "Vad professionella vinkritiker tycker. Om köpare och experter är överens får vinet extra poäng."], ["💰", "Prisvärde", "Vi jämför priset med liknande viner. Bra kvalitet till lågt pris = hög poäng."]].map(([icon, title, desc], i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       display: "flex",
@@ -5448,7 +5525,7 @@ function SmakfyndApp() {
       gap: 8,
       marginBottom: 14
     }
-  }, [["Datakällor", "Crowd-betyg hämtas från internationella vindrickare. Expertpoäng kommer från Wine Enthusiast (130 000 recensioner) och Wine-Searcher (aggregat från flera kritiker). Prisdata från Systembolaget."], ["Osäker matchning", "Vi matchar viner mot kritiker-databaser med namn och region. Ibland blir det fel — vi kräver ordöverlapp och filtrerar bort osäkra matchningar. Viner utan expertmatch rankas bara på crowd + pris."], ["Vad poängen inte betyder", "Hög poäng betyder inte att vinet passar just dig — det betyder att det ger bra kvalitet för pengarna enligt crowd och experter. Smak är personligt. Använd smakprofilen och AI-matcharen för att hitta rätt."], ["Ekologiskt", "Ekologiska viner får en liten poängbonus (+0.2 av 10). Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner eko."]].map(([title, desc], i) => /*#__PURE__*/React.createElement("div", {
+  }, [["Datakällor", "Köparbetyg hämtas från internationella omdömen. Expertpoäng från professionella recensioner. Priser direkt från Systembolaget."], ["Osäker matchning", "Vi matchar viner mot kritiker-databaser med namn och region. Ibland blir det fel — vi kräver ordöverlapp och filtrerar bort osäkra matchningar. Viner utan expertmatch rankas bara på crowd + pris."], ["Vad poängen inte betyder", "Hög poäng betyder inte att vinet passar just dig — det betyder att det ger bra kvalitet för pengarna enligt crowd och experter. Smak är personligt. Använd smakprofilen och AI-matcharen för att hitta rätt."], ["Ekologiskt", "Ekologiska viner får en liten poängbonus (+0.2 av 10). Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner eko."]].map(([title, desc], i) => /*#__PURE__*/React.createElement("div", {
     key: i
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6020,6 +6097,76 @@ function SmakfyndApp() {
       textTransform: "uppercase",
       letterSpacing: "0.08em"
     }
+  }, "Passar till"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap"
+    }
+  }, ["Kött", "Fågel", "Fisk", "Pasta", "Grönsaker", "Ost"].map(f => /*#__PURE__*/React.createElement("button", {
+    key: f,
+    onClick: () => toggleFood(f),
+    style: pill(selFoods.includes(f))
+  }, f)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `1px solid ${t.bdrL}`,
+      paddingTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Sortera"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap"
+    }
+  }, [["smakfynd", "Bäst för pengarna"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["price_asc", "Lägst pris"], ["price_desc", "Högst pris"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => setSortBy(k),
+    style: {
+      padding: "7px 14px",
+      borderRadius: 8,
+      border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
+      background: sortBy === k ? `${t.wine}08` : "transparent",
+      color: sortBy === k ? t.wine : t.txM,
+      fontSize: 12,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: sortBy === k ? 600 : 400
+    }
+  }, l)))), /*#__PURE__*/React.createElement("details", {
+    style: {
+      borderTop: `1px solid ${t.bdrL}`,
+      paddingTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("summary", {
+    style: {
+      fontSize: 11,
+      color: t.txL,
+      cursor: "pointer",
+      fontFamily: "inherit"
+    }
+  }, "Fler filter (land, smak)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 10,
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txL,
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
   }, "Land"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -6064,24 +6211,6 @@ function SmakfyndApp() {
       textTransform: "uppercase",
       letterSpacing: "0.08em"
     }
-  }, "Passar till"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 5,
-      flexWrap: "wrap"
-    }
-  }, ["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => /*#__PURE__*/React.createElement("button", {
-    key: f,
-    onClick: () => toggleFood(f),
-    style: pill(selFoods.includes(f))
-  }, f)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      marginBottom: 6,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em"
-    }
   }, "Smak"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -6092,40 +6221,7 @@ function SmakfyndApp() {
     key: ts,
     onClick: () => setSelTaste(selTaste === ts ? null : ts),
     style: pill(selTaste === ts)
-  }, ts)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px solid ${t.bdrL}`,
-      paddingTop: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: t.txL,
-      marginBottom: 6,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em"
-    }
-  }, "Sortera"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 5,
-      flexWrap: "wrap"
-    }
-  }, [["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    onClick: () => setSortBy(k),
-    style: {
-      padding: "7px 14px",
-      borderRadius: 8,
-      border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
-      background: sortBy === k ? `${t.wine}08` : "transparent",
-      color: sortBy === k ? t.wine : t.txM,
-      fontSize: 12,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      fontWeight: sortBy === k ? 600 : 400
-    }
-  }, l))))), notFound && /*#__PURE__*/React.createElement("div", {
+  }, ts))))))), notFound && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 16px",
       marginBottom: 10,
@@ -6339,13 +6435,13 @@ function SmakfyndApp() {
       color: t.tx,
       marginBottom: 6
     }
-  }, "Vet du vad du ska \xE4ta?"), /*#__PURE__*/React.createElement("p", {
+  }, "Vad ska du \xE4ta ikv\xE4ll?"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txL,
       margin: "0 0 10px"
     }
-  }, "V\xE5r AI matchar r\xE4tt vin till din middag."), /*#__PURE__*/React.createElement("button", {
+  }, "Beskriv din middag \u2014 vi f\xF6resl\xE5r vinet."), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       const el = document.getElementById("section-food");
       if (el) el.scrollIntoView({
@@ -6363,7 +6459,7 @@ function SmakfyndApp() {
       cursor: "pointer",
       fontFamily: "inherit"
     }
-  }, "Prova AI-matchern \u2193"))) : /*#__PURE__*/React.createElement("div", {
+  }, "Hitta vin till middagen \u2193"))) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",

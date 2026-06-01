@@ -680,7 +680,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
-              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(vindrickare ger {cCrowd}/10)</span>}
+              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(köpare ger {cCrowd}/10)</span>}
             </div>
             );
           })()}
@@ -879,6 +879,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                   </div>
                 </div>
               </div>
+
+              <div style={{ fontSize: 10, color: t.txF, fontStyle: "italic", marginBottom: 10 }}>Oberoende poäng — inte sponsrad</div>
 
               {/* Price drop */}
               {p.launch_price && p.price_vs_launch_pct > 0 && (
@@ -2904,8 +2906,11 @@ function SmakfyndApp() {
         }}>
           Bästa vinet för pengarna
         </h1>
-        <p style={{ margin: "0 0 20px", fontSize: 13, color: t.txL }}>
+        <p style={{ margin: "0 0 4px", fontSize: 13, color: t.txL }}>
           {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter pris och kvalitet
+        </p>
+        <p style={{ margin: "0 0 20px", fontSize: 12, color: t.txF, fontStyle: "italic" }}>
+          Vi tjänar inget på vad du köper. Bara ärliga råd.
         </p>
       </div>
 
@@ -2930,7 +2935,13 @@ function SmakfyndApp() {
                 Smakfynd började för att jag tyckte det var onödigt svårt att hitta bra vin på Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar hänsyn till priset, inte bara kvaliteten. Så jag byggde det.
               </p>
             </div>
-            <p style={{ fontSize: 12, color: t.txL, margin: 0 }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
+            <div style={{ padding: 14, borderRadius: 10, background: t.bg, marginTop: 12, border: `1px solid ${t.bdrL}` }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Helt oberoende</div>
+              <p style={{ fontSize: 12, color: t.txM, lineHeight: 1.6, margin: 0 }}>
+                Smakfynd är helt oberoende. Vi har inga avtal med Systembolaget, inga sponsrade placeringar och inga annonser. Inget vin kan köpa sig en högre poäng. Vi tjänar inga pengar på vad du köper — vi hjälper bara dig välja rätt.
+              </p>
+            </div>
+            <p style={{ fontSize: 12, color: t.txL, margin: "12px 0 0" }}>Olav Innovation AB · Oberoende informationstjänst · Ingen koppling till Systembolaget · Vi säljer inte alkohol</p>
 
             <div style={{ padding: 16, borderRadius: 12, background: `${t.wine}06`, border: `1px solid ${t.wine}12`, marginTop: 12 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: t.tx, marginBottom: 4 }}>Stöd Smakfynd</div>
