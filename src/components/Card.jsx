@@ -117,7 +117,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
-              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(vindrickare ger {cCrowd}/10)</span>}
+              {cCrowd && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>(köpare ger {cCrowd}/10)</span>}
             </div>
             );
           })()}
@@ -316,6 +316,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                   </div>
                 </div>
               </div>
+
+              <div style={{ fontSize: 10, color: t.txF, fontStyle: "italic", marginBottom: 10 }}>Oberoende poäng — inte sponsrad</div>
 
               {/* Price drop */}
               {p.launch_price && p.price_vs_launch_pct > 0 && (
