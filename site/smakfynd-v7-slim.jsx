@@ -128,8 +128,8 @@ const FOOD_CATS = [
 
 const FAQS = [
   {q:"Hur beräknas Smakfynd-poängen?",a:"Varje vin bedöms på tre saker: crowd-betyg (vad vanliga människor tycker), expertrecensioner (vinkritiker som James Suckling, Decanter m.fl.) och prisvärde (hur priset förhåller sig till andra viner i samma kategori). Hög kvalitet till lågt pris = hög poäng. Poängen visas på en skala 1–100."},
-  {q:"Var kommer betygen ifrån?",a:"Crowd-betyg kommer från hundratusentals vindrickare världen över. Expertbetyg hämtas från erkända vinkritiker som James Suckling, Falstaff, Decanter och Wine Enthusiast. Prisvärdet beräknar vi själva genom att jämföra literpriset mot medianen i samma kategori — rött jämförs med rött, bubbel med bubbel."},
-  {q:"Vad betyder Crowd- och Expert-staplarna?",a:"Crowd visar vad vanliga vindrickare tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas betyder det att vi inte hittat kritikerrecensioner för det vinet — men crowd-betyget finns alltid."},
+  {q:"Var kommer betygen ifrån?",a:"Köparbetyg kommer från hundratusentals vanliga vinköpare världen över. Expertbetyg hämtas från professionella vinkritiker. Prisvärdet beräknar vi själva genom att jämföra priset mot liknande viner — rött jämförs med rött, bubbel med bubbel."},
+  {q:"Vad betyder Köpare- och Expert-staplarna?",a:"Köpare visar vad vanliga människor tycker (skala 1–10). Expert visar kritikerbetyg (skala 1–10). Om Expert-stapeln saknas har vi inte hittat kritikerrecensioner — men köparbetyget finns alltid."},
   {q:"Hur fungerar AI-vinmatcharen?",a:"Beskriv vad du ska äta — till exempel 'grillad lax med potatisgratäng' eller 'toast skagen, sedan entrecôte'. Vår AI analyserar måltiden och föreslår viner för varje rätt i olika prisklasser, direkt från Systembolagets sortiment."},
   {q:"Vad betyder prissänkt?",a:"Vi sparar priset varje vecka. När ett vin sänks i pris visar vi det gamla priset överstruket och procentuell sänkning. Systembolaget skyltar inte alltid med prissänkningar — vi håller koll åt dig."},
   {q:"Varför får ekologiska viner bonus?",a:"Vi ger ekologiska viner en liten poängbonus (+0.2 av 10) för att främja hållbarhet. Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner det ekologiska alternativet."},
@@ -265,7 +265,7 @@ function MiniBar({ label, value, max = 10, color }) {
 function ScoreBars({ p }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <MiniBar label="Vindrickare" value={p.crowd_score} color="#6b8cce" />
+      <MiniBar label="Köpare" value={p.crowd_score} color="#6b8cce" />
       <MiniBar label="Expert" value={p.expert_score} color="#b07d3b" />
     </div>
   );
@@ -676,7 +676,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             const cCrowd = comparison.crowd_score ? comparison.crowd_score.toFixed(1) : null;
             const label = sameGrape
               ? `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr — du sparar ${savings}\u00A0kr`
-              : `Jämförbar kvalitet med ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
+              : `Lika bra som viner för ${Math.round(comparison.price)}\u00A0kr-viner — du sparar ${savings}\u00A0kr`;
             return (
             <div style={{ marginTop: 4, fontSize: 11, color: t.green, fontWeight: 500 }}>
               {label}
@@ -692,7 +692,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             if (p.crowd_reviews >= 5000 && p.crowd_score >= 7.5) vibes.push("Tryggt vardagsvin");
             if ((p.food_pairings || []).some(f => /kött|grillat/i.test(f)) && (p.taste_body || 0) >= 7) vibes.push("Fynd till grillat");
             if (p.price <= 100 && s100 >= 65) vibes.push("Budgetfavorit");
-            if (p.expert_score >= 8) vibes.push("Kritikerfavorit");
+            if (p.expert_score >= 8) vibes.push("Högt expertbetyg");
             return vibes.length > 0 ? (
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
                 {vibes.slice(0, 3).map(v => <span key={v} style={vibePill(t.txM)}>{v}</span>)}
@@ -850,7 +850,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Vindrickare</span>
+                      <span style={{ color: "#6b8cce", fontWeight: 600 }}>Köpare</span>
                       <span style={{ fontWeight: 700, color: "#6b8cce" }}>{p.crowd_score ? `${p.crowd_score.toFixed(1)}/10` : "\u2014"}</span>
                     </div>
                     {p.crowd_score && <div style={{ height: 3, borderRadius: 2, background: t.bdr }}><div style={{ width: `${p.crowd_score * 10}%`, height: "100%", borderRadius: 2, background: "#6b8cce" }} /></div>}
@@ -908,7 +908,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               if (similar.length === 0) return null;
               return (
                 <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                  <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Jämförbara viner</div>
+                  <div style={{ fontSize: 9, color: t.txL, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Liknande viner</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {similar.map((w, i) => (
                       <div key={i}
@@ -935,7 +935,6 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             <StarRating nr={p.nr} auth={auth} />
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
               <AlertButton nr={p.nr} wine={p} auth={auth} />
-              <CellarButton nr={p.nr} auth={auth} />
             </div>
           </div>
         </div>
@@ -1346,51 +1345,68 @@ function WineResult({ m }) {
 function FoodMatch({ products }) {
   const [meal, setMeal] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingSlow, setLoadingSlow] = useState(false);
   const [aiResult, setAiResult] = useState(null);
   const [courseResults, setCourseResults] = useState([]);
   const [error, setError] = useState(null);
   const [conversation, setConversation] = useState([]); // conversation history for follow-ups
+  const [shared, setShared] = useState(false);
+  const lastMealRef = useRef("");
 
   const sendToAI = async (userMessage, existingContext) => {
     setLoading(true);
+    setLoadingSlow(false);
     setError(null);
+    lastMealRef.current = userMessage;
     const t0 = Date.now();
+    const slowTimer = setTimeout(() => setLoadingSlow(true), 8000);
 
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 25000);
-        const res = await fetch(WINE_AI_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            meal: userMessage,
-            context: existingContext || [],
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-        data = await res.json();
-        if (!data.error) break;
+        try {
+          const res = await fetch(WINE_AI_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              meal: userMessage,
+              context: existingContext || [],
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+          data = await res.json();
+          if (!data.error) break;
+        } catch (fetchErr) {
+          clearTimeout(timeout);
+          if (attempt === 1) throw fetchErr;
+        }
         if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
       }
+      if (!data) throw new Error("Inget svar från servern");
       if (data.error) throw new Error(data.error);
 
       setAiResult(data);
       trackAI(userMessage, data, Date.now() - t0);
 
       const fmt = data.format || (meal.toLowerCase().match(/lådvin|box|bib|bag.in.box/) ? "lådvin" : "any");
-      if (data.mode === "recommend" && data.courses) {
+      if (data.courses && Array.isArray(data.courses)) {
         setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.courses) {
-        setCourseResults(matchWinesForCourses(data.courses, products, fmt));
-      } else if (data.criteria) {
+      } else if (data.criteria && Array.isArray(data.criteria)) {
         setCourseResults(matchWinesForCourses([{ dish: meal, criteria: data.criteria }], products, fmt));
       }
     } catch (e) {
-      setError("Kunde inte hämta vinförslag just nu. Försök igen.");
+      const msg = e.name === "AbortError"
+        ? "Tog för lång tid. Försök igen med en kortare beskrivning."
+        : "Kunde inte hämta vinförslag just nu. Försök igen.";
+      setError(msg);
+      // Log error to analytics
+      try { fetch("https://smakfynd-analytics.smakfynd.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "ai_error", meal: userMessage, error: e.message, ts: new Date().toISOString() }) }).catch(() => {}); } catch (_) {}
     }
+    clearTimeout(slowTimer);
+    setLoadingSlow(false);
     setLoading(false);
   };
 
@@ -1455,17 +1471,27 @@ function FoodMatch({ products }) {
         <div style={{ textAlign: "center", padding: "20px 0", color: t.txL }}>
           <div style={{ width: 24, height: 24, margin: "0 auto 8px", border: `3px solid ${t.bdr}`, borderTopColor: t.wine, borderRadius: "50%", animation: "sfSpin 0.8s linear infinite" }} />
           <style>{`@keyframes sfSpin { to { transform: rotate(360deg) } }`}</style>
-          <div style={{ fontSize: 13, fontStyle: "italic" }}>Analyserar din måltid, kan ta några sekunder...</div>
+          <div style={{ fontSize: 13, fontStyle: "italic" }}>{loadingSlow ? "Tar lite längre tid än vanligt..." : "Analyserar din måltid, kan ta några sekunder..."}</div>
         </div>
       )}
 
-      {error && <p style={{ marginTop: 10, fontSize: 12, color: t.deal }}>{error}</p>}
+      {error && (
+        <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <p style={{ margin: 0, fontSize: 12, color: t.deal }}>{error}</p>
+          <button onClick={() => sendToAI(lastMealRef.current, conversation.length ? conversation : [])}
+            style={{ padding: "4px 12px", borderRadius: 8, border: `1px solid ${t.bdr}`, background: t.card, color: t.txM, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}>
+            Försök igen
+          </button>
+        </div>
+      )}
 
       {aiResult && !loading && (
         <div style={{ marginTop: 14 }}>
-          <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 12px" }}>
-            {aiResult.reasoning}
-          </p>
+          {aiResult.reasoning && (
+            <p style={{ fontSize: 13, color: t.txM, lineHeight: 1.5, margin: "0 0 12px" }}>
+              {aiResult.reasoning}
+            </p>
+          )}
 
           {/* MODE: Question — AI needs more info */}
           {aiResult.mode === "question" && <AIQuestion aiResult={aiResult} onFollowup={handleFollowup} />}
@@ -1505,9 +1531,7 @@ function FoodMatch({ products }) {
               {courseResults.length === 0 && aiResult.mode === "recommend" && <p style={{ fontSize: 12, color: t.txL }}>Hittade inga matchningar. Prova en annan beskrivning.</p>}
 
               {/* Share wine list */}
-              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (() => {
-                const [shared, setShared] = useState(false);
-                return (
+              {courseResults.length > 0 && courseResults.some(c => c.wines.length > 0) && (
                   <button onClick={() => {
                     const lines = courseResults.flatMap(c => {
                       const header = courseResults.length > 1 ? [`\n${c.dish}:`] : [];
@@ -1529,8 +1553,7 @@ function FoodMatch({ products }) {
                     style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 10, border: `1px solid ${t.bdr}`, background: shared ? "#2d6b3f10" : t.card, cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: shared ? "#2d6b3f" : t.txM, transition: "all 0.2s" }}>
                     <span style={{ fontSize: 14 }}>{shared ? "✓" : "↗"}</span> {shared ? "Kopierad!" : "Dela vinlista"}
                   </button>
-                );
-              })()}
+              )}
             </div>
           )}
         </div>
@@ -2879,10 +2902,10 @@ function SmakfyndApp() {
           margin: "0 0 6px", fontFamily: "'Newsreader', Georgia, serif", fontWeight: 400,
           fontSize: "clamp(32px, 6vw, 56px)", color: t.tx, lineHeight: 1.1, letterSpacing: "-0.02em",
         }}>
-          Bästa köpet i sin kategori
+          Bästa vinet för pengarna
         </h1>
         <p style={{ margin: "0 0 20px", fontSize: 13, color: t.txL }}>
-          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter värde
+          {products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : ""} viner på Systembolaget, rankade efter pris och kvalitet
         </p>
       </div>
 
@@ -2893,10 +2916,10 @@ function SmakfyndApp() {
           <div style={{ padding: 22, borderRadius: 16, background: t.card, border: `1px solid ${t.bdr}`, marginBottom: 20, animation: "scaleIn 0.25s ease" }}>
             <h2 style={{ margin: "0 0 12px", fontSize: 22, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Om Smakfynd</h2>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 12px" }}>
-              Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>crowd-betyg</strong> från hundratusentals vindrickare, <strong>expertrecensioner</strong> från internationella kritiker och <strong>prisjämförelse</strong> inom varje kategori.
+              Systembolaget har tusentals viner. Vi hjälper dig hitta de som faktiskt är värda pengarna. Vi kombinerar <strong>betyg från vanliga köpare</strong>, <strong>expertrecensioner</strong> och <strong>prisjämförelse</strong> — allt i en enda poäng.
             </p>
             <p style={{ fontSize: 14, color: t.txM, lineHeight: 1.7, margin: "0 0 14px" }}>
-              Resultatet: <strong>en enda poäng</strong> som visar kvalitet per krona. Inte det "bästa" vinet — utan det bästa <em>köpet</em>.
+              Resultatet: <strong>en enda poäng</strong> som visar om vinet är värt pengarna. Inte det dyraste vinet — utan det smartaste köpet.
             </p>
             <div style={{ padding: 16, borderRadius: 12, background: t.bg, marginBottom: 12 }}>
               <div style={{ fontSize: 15, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Gabriel Linton</div>
@@ -2929,9 +2952,9 @@ function SmakfyndApp() {
             {/* The three components */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {[
-                ["👥", "Crowd-betyg", "Betyg från hundratusentals vanliga vindrickare. Viner med fler omdömen väger tyngre. Viner med färre än 25 omdömen rankas inte alls."],
-                ["🏆", "Expertrecensioner", "Poäng från erkända vinkritiker som James Suckling, Decanter, Falstaff och Wine Enthusiast. Om crowd och experter är överens får vinet en extra bonus."],
-                ["💰", "Prisvärde", "Literpriset jämförs mot medianen i samma kategori. Rött jämförs med rött — aldrig med bubbel. Billigare än snittet med samma kvalitet = högre poäng."],
+                ["👥", "Betyg från köpare", "Vad vanliga människor tycker — baserat på hundratusentals omdömen. Fler betyg = säkrare poäng."],
+                ["🏆", "Expertbetyg", "Vad professionella vinkritiker tycker. Om köpare och experter är överens får vinet extra poäng."],
+                ["💰", "Prisvärde", "Vi jämför priset med liknande viner. Bra kvalitet till lågt pris = hög poäng."],
               ].map(([icon, title, desc], i) => (
                 <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>{icon}</span>
@@ -2953,7 +2976,7 @@ function SmakfyndApp() {
             <h3 style={{ margin: "0 0 10px", fontSize: 15, fontFamily: t.serif, fontWeight: 400, color: t.tx }}>Transparens</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
               {[
-                ["Datakällor", "Crowd-betyg hämtas från internationella vindrickare. Expertpoäng kommer från Wine Enthusiast (130 000 recensioner) och Wine-Searcher (aggregat från flera kritiker). Prisdata från Systembolaget."],
+                ["Datakällor", "Köparbetyg hämtas från internationella omdömen. Expertpoäng från professionella recensioner. Priser direkt från Systembolaget."],
                 ["Osäker matchning", "Vi matchar viner mot kritiker-databaser med namn och region. Ibland blir det fel — vi kräver ordöverlapp och filtrerar bort osäkra matchningar. Viner utan expertmatch rankas bara på crowd + pris."],
                 ["Vad poängen inte betyder", "Hög poäng betyder inte att vinet passar just dig — det betyder att det ger bra kvalitet för pengarna enligt crowd och experter. Smak är personligt. Använd smakprofilen och AI-matcharen för att hitta rätt."],
                 ["Ekologiskt", "Ekologiska viner får en liten poängbonus (+0.2 av 10). Det räcker inte för att lyfta ett dåligt vin, men vid lika kvalitet vinner eko."],
@@ -3145,51 +3168,20 @@ function SmakfyndApp() {
                 {showDeals && <a href="/prissankt/" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: t.deal, textDecoration: "none", alignSelf: "center", fontWeight: 500 }}>Se alla {products.filter(p => p.price_vs_launch_pct > 0).length} prissänkta →</a>}
               </div>
             </div>
-            {/* Country → Region hierarchical */}
-            <div>
-              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
-                  const cnt = products.filter(w => w.country === c).length;
-                  return <button key={c} onClick={() => { setSelCountry(selCountry === c ? null : c); setSelRegion(null); }} style={pill(selCountry === c)}>{c} ({cnt})</button>;
-                })}
-              </div>
-              {selCountry && (() => {
-                const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
-                if (regions.length === 0) return null;
-                return (
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6, paddingLeft: 12, borderLeft: `2px solid ${t.wine}30` }}>
-                    {regions.slice(0, 10).map(rg => {
-                      const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
-                      return <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg} ({cnt})</button>;
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
             {/* Food */}
             <div>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Passar till</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Kött", "Fågel", "Fisk", "Skaldjur", "Fläsk", "Grönsaker", "Ost", "Vilt", "Pasta", "Lamm"].map(f => (
+                {["Kött", "Fågel", "Fisk", "Pasta", "Grönsaker", "Ost"].map(f => (
                   <button key={f} onClick={() => toggleFood(f)} style={pill(selFoods.includes(f))}>{f}</button>
                 ))}
               </div>
             </div>
-            {/* Taste */}
-            <div>
-              <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Smak</div>
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => (
-                  <button key={ts} onClick={() => setSelTaste(selTaste === ts ? null : ts)} style={pill(selTaste === ts)}>{ts}</button>
-                ))}
-              </div>
-            </div>
-            {/* Sort — visually different */}
+            {/* Sort — simplified */}
             <div style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 10 }}>
               <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sortera</div>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {[["smakfynd", "Smakfynd-poäng"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["expert", "Expertbetyg"], ["crowd", "Crowd-betyg"], ["price_asc", "Pris ↑"], ["price_desc", "Pris ↓"]].map(([k, l]) => (
+                {[["smakfynd", "Bäst för pengarna"], ...(showDeals ? [["drop", "Störst sänkning"]] : []), ["price_asc", "Lägst pris"], ["price_desc", "Högst pris"]].map(([k, l]) => (
                   <button key={k} onClick={() => setSortBy(k)} style={{
                     padding: "7px 14px", borderRadius: 8, border: sortBy === k ? `2px solid ${t.wine}` : `1px solid ${t.bdr}`,
                     background: sortBy === k ? `${t.wine}08` : "transparent",
@@ -3198,6 +3190,43 @@ function SmakfyndApp() {
                 ))}
               </div>
             </div>
+            {/* Advanced — hidden behind toggle */}
+            <details style={{ borderTop: `1px solid ${t.bdrL}`, paddingTop: 10 }}>
+              <summary style={{ fontSize: 11, color: t.txL, cursor: "pointer", fontFamily: "inherit" }}>Fler filter (land, smak)</summary>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                {/* Country → Region hierarchical */}
+                <div>
+                  <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Land</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    {["Italien", "Frankrike", "Spanien", "USA", "Tyskland", "Sydafrika", "Chile", "Portugal", "Australien", "Argentina", "Nya Zeeland", "\u00d6sterrike"].map(c => {
+                      const cnt = products.filter(w => w.country === c).length;
+                      return <button key={c} onClick={() => { setSelCountry(selCountry === c ? null : c); setSelRegion(null); }} style={pill(selCountry === c)}>{c} ({cnt})</button>;
+                    })}
+                  </div>
+                  {selCountry && (() => {
+                    const regions = [...new Set(products.filter(w => w.country === selCountry && w.region).map(w => w.region))].sort();
+                    if (regions.length === 0) return null;
+                    return (
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6, paddingLeft: 12, borderLeft: `2px solid ${t.wine}30` }}>
+                        {regions.slice(0, 10).map(rg => {
+                          const cnt = products.filter(w => w.country === selCountry && w.region === rg).length;
+                          return <button key={rg} onClick={() => setSelRegion(selRegion === rg ? null : rg)} style={pill(selRegion === rg)}>{rg} ({cnt})</button>;
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+                {/* Taste */}
+                <div>
+                  <div style={{ fontSize: 10, color: t.txL, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Smak</div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    {["Fylligt", "Lätt", "Fruktigt", "Torrt"].map(ts => (
+                      <button key={ts} onClick={() => setSelTaste(selTaste === ts ? null : ts)} style={pill(selTaste === ts)}>{ts}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
         )}
 
@@ -3273,11 +3302,11 @@ function SmakfyndApp() {
             })}
             {/* CTA → AI matcher */}
             <div style={{ textAlign: "center", padding: "20px 16px", borderRadius: 14, background: t.card, border: `1px solid ${t.bdr}` }}>
-              <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 6 }}>Vet du vad du ska äta?</div>
-              <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Vår AI matchar rätt vin till din middag.</p>
+              <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 6 }}>Vad ska du äta ikväll?</div>
+              <p style={{ fontSize: 12, color: t.txL, margin: "0 0 10px" }}>Beskriv din middag — vi föreslår vinet.</p>
               <button onClick={() => { const el = document.getElementById("section-food"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: `linear-gradient(145deg, ${t.wine}, ${t.wineD})`, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                Prova AI-matchern ↓
+                Hitta vin till middagen ↓
               </button>
             </div>
           </div>
