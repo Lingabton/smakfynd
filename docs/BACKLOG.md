@@ -1,5 +1,5 @@
 # Smakfynd Feature Backlog
-*Uppdaterad 2026-05-09*
+*Uppdaterad 2026-06-06*
 
 ## Kvar att göra
 
@@ -10,10 +10,11 @@
 
 ### Datakvalitet
 - [x] Grape-fält patchad för 18 av 57 viner i topp 200 (namn-extraktion)
-- [ ] 39 viner i topp 200 saknar fortfarande grape — kräver manuell lookup
+- [x] Grape: fallback till expert_variety från Wine Enthusiast-cache (60% → 96% täckning, confidence ≥80%)
+- [x] Food pairings: regelbaserad prediktion från vintyp+druva (34% → 100% täckning)
+- [ ] 190 viner saknar fortfarande grape — har ingen expert-match alls
 - [ ] GSC API-integration (service account) — automatisk daglig hämtning istf manuell CSV
-- [ ] 70% av viner saknar food_pairings — begränsar mat-filter
-- [ ] 35% saknar image_url
+- [ ] 27% saknar image_url — men bara ordervaror, fast sortiment har 100%
 
 ### Att konfigurera (kräver Gabriel)
 - [ ] Cloudflare Email Routing: `hej@smakfynd.se` → `gabriel.linton@inn.no`
@@ -26,6 +27,11 @@
 - [ ] Reddit/Flashback/Facebook vingrupper
 
 ---
+
+## Klart (session 2026-06-06 — datakvalitet)
+- [x] Grape-fallback: expert_variety från Wine Enthusiast-cache när SB saknar druva (60% → 96%)
+- [x] Food pairings: regelbaserad prediktion från vintyp + druva (34% → 100%)
+- [x] Image_url utrett: bara ordervaror saknar bild, fast sortiment 100% — nedprioriterat
 
 ## Klart (session 2026-05-06/07 — persona-review)
 - [x] Prissänkta viner: 0→149 synliga (first_seen_prices backfillad, committad till repo)
