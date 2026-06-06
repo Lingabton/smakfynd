@@ -371,7 +371,7 @@ def main():
             'pkg': p.get('pkg'),
             'country': p.get('country', ''),
             'region': p.get('region', ''),
-            'grape': p.get('grape', ''),
+            'grape': p.get('grape', '') or (we.get('expert_variety', '') if we.get('match_confidence', 0) >= 80 else ''),
             'organic': p.get('organic', False),
             'style': p.get('style', ''),
             'cat3': p.get('cat3', ''),
