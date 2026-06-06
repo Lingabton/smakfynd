@@ -24,6 +24,34 @@ def load_data():
 SPAM_MARKERS = ['Gör som miljoner', 'Handla på världens', 'Användarvillkor',
                 'Integritetspolicy', 'App Om Kontakt', 'Cookie-inställningar']
 
+# Grape-aware food pairing prediction for wines missing SB tasteSymbols
+LIGHT_RED_GRAPES = {'pinot noir', 'gamay', 'grenache', 'garnacha', 'cinsault',
+                    'nerello mascalese', 'trousseau', 'poulsard', 'zweigelt', 'blaufränkisch'}
+HEAVY_RED_GRAPES = {'cabernet sauvignon', 'syrah', 'shiraz', 'nebbiolo', 'malbec',
+                    'tannat', 'mourvèdre', 'monastrell', 'petit verdot', 'aglianico',
+                    'sagrantino', 'touriga nacional'}
+
+def predict_food_pairings(wine_type, grape):
+    """Predict food pairings from wine type + grape, based on SB data patterns."""
+    g = (grape.split(',')[0].strip().lower() if grape else '')
+    if wine_type == 'Rött':
+        if g in LIGHT_RED_GRAPES:
+            return ['Fågel', 'Fläsk', 'Grönsaker']
+        else:  # heavy reds + default
+            return ['Lamm', 'Nöt', 'Vilt']
+    elif wine_type == 'Vitt':
+        if g in {'riesling', 'grüner veltliner', 'sauvignon blanc', 'albariño', 'muscadet', 'verdejo'}:
+            return ['Fisk', 'Skaldjur', 'Grönsaker']
+        elif g in {'chardonnay', 'viognier', 'chenin blanc', 'marsanne', 'roussanne'}:
+            return ['Fisk', 'Fågel', 'Grönsaker']
+        else:
+            return ['Fisk', 'Grönsaker', 'Skaldjur']
+    elif wine_type == 'Rosé':
+        return ['Sällskapsdryck', 'Grönsaker', 'Fågel', 'Fisk']
+    elif wine_type == 'Mousserande':
+        return ['Fisk', 'Skaldjur', 'Aperitif']
+    return []
+
 def get_vivino(p, vivino_cache):
     """Look up Vivino data using name|sub|country key format."""
     import re
@@ -376,7 +404,9 @@ def main():
             'style': p.get('style', ''),
             'cat3': p.get('cat3', ''),
             'image_url': p.get('image_url', ''),
-            'food_pairings': p.get('food_pairings', []),
+            'food_pairings': p.get('food_pairings', []) or predict_food_pairings(
+                p.get('cat2', '').replace('Rött vin', 'Rött').replace('Vitt vin', 'Vitt').replace('Rosévin', 'Rosé').replace('Mousserande vin', 'Mousserande'),
+                p.get('grape', '') or (we.get('expert_variety', '') if we.get('match_confidence', 0) >= 80 else '')),
             'assortment': p.get('assortment', ''),
             'taste_body': p.get('taste_body'),
             'taste_sweet': p.get('taste_sweet'),
