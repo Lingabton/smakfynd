@@ -140,9 +140,14 @@ $PYTHON scripts/generate_landing_pages.py 2>&1 | tail -3
 $PYTHON scripts/generate_monthly_seo.py 2>&1 | tail -2
 $PYTHON scripts/generate_prissankt.py 2>&1 | tail -2
 
-# ── Step 6.5: Build admin dashboard data ──
+# ── Step 6.5: Fetch GSC data ──
 echo ""
-echo "→ Step 6.5: Building admin data..."
+echo "→ Step 6.5: Fetching GSC data..."
+$PYTHON scripts/fetch_gsc.py 2>&1 | tail -3 || echo "  (GSC fetch skipped — no credentials)"
+
+# ── Step 6.6: Build admin dashboard data ──
+echo ""
+echo "→ Step 6.6: Building admin data..."
 $PYTHON scripts/build_admin.py 2>&1 | tail -2
 
 # Update sitemap with monthly pages

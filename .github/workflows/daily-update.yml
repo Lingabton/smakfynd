@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests rapidfuzz
+          pip install requests rapidfuzz google-auth google-api-python-client
 
       - name: Set up Node.js (for Babel)
         uses: actions/setup-node@v4
@@ -80,6 +80,19 @@ jobs:
           open('docs/sitemap.xml', 'w').write(sitemap)
           "
 
+      - name: Fetch GSC data
+        if: ${{ secrets.GSC_CREDENTIALS_JSON != '' }}
+        env:
+          GSC_CREDENTIALS_JSON: /tmp/gsc_creds.json
+        run: |
+          echo '${{ secrets.GSC_CREDENTIALS_JSON }}' > /tmp/gsc_creds.json
+          python3 scripts/fetch_gsc.py
+          rm -f /tmp/gsc_creds.json
+
+      - name: Build admin data
+        run: |
+          python3 scripts/build_admin.py
+
       - name: Save data cache
         uses: actions/cache/save@v4
         with:
@@ -92,7 +105,7 @@ jobs:
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/ data/history/ data/prissankt_bootstrap.json
+          git add docs/ site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
