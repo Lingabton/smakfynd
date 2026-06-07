@@ -1144,7 +1144,7 @@ function Card({
         fontSize: 10,
         color: t.txL
       }
-    }, "(vindrickare ger ", cCrowd, "/10)"));
+    }, "(k\xF6pare ger ", cCrowd, "/10)"));
   })(), (() => {
     const vibes = [];
     if (p.price_score >= 8) vibes.push("Prisvärt");
@@ -1685,7 +1685,14 @@ function Card({
       borderRadius: 2,
       background: t.txM
     }
-  }))))), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
+  }))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: t.txF,
+      fontStyle: "italic",
+      marginBottom: 10
+    }
+  }, "Oberoende po\xE4ng \u2014 inte sponsrad"), p.launch_price && p.price_vs_launch_pct > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "8px 12px",
       borderRadius: 8,
@@ -5289,11 +5296,18 @@ function SmakfyndApp() {
     }
   }, "B\xE4sta vinet f\xF6r pengarna"), /*#__PURE__*/React.createElement("p", {
     style: {
-      margin: "0 0 20px",
+      margin: "0 0 4px",
       fontSize: 13,
       color: t.txL
     }
-  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner p\xE5 Systembolaget, rankade efter pris och kvalitet")), /*#__PURE__*/React.createElement("div", {
+  }, products.length > 100 ? `${(Math.round(products.length / 100) * 100).toLocaleString("sv-SE")}+` : "", " viner p\xE5 Systembolaget, rankade efter pris och kvalitet"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 20px",
+      fontSize: 12,
+      color: t.txF,
+      fontStyle: "italic"
+    }
+  }, "Vi tj\xE4nar inget p\xE5 vad du k\xF6per. Bara \xE4rliga r\xE5d.")), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 680,
       margin: "0 auto",
@@ -5358,11 +5372,33 @@ function SmakfyndApp() {
       lineHeight: 1.6,
       margin: "8px 0 0"
     }
-  }, "Smakfynd b\xF6rjade f\xF6r att jag tyckte det var on\xF6digt sv\xE5rt att hitta bra vin p\xE5 Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar h\xE4nsyn till priset, inte bara kvaliteten. S\xE5 jag byggde det.")), /*#__PURE__*/React.createElement("p", {
+  }, "Smakfynd b\xF6rjade f\xF6r att jag tyckte det var on\xF6digt sv\xE5rt att hitta bra vin p\xE5 Systembolaget. All data fanns redan, crowd-betyg, kritikerrecensioner, priser, men ingen hade satt ihop det. Jag ville ha ett verktyg som tar h\xE4nsyn till priset, inte bara kvaliteten. S\xE5 jag byggde det.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14,
+      borderRadius: 10,
+      background: t.bg,
+      marginTop: 12,
+      border: `1px solid ${t.bdrL}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: t.tx,
+      marginBottom: 4
+    }
+  }, "Helt oberoende"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: t.txM,
+      lineHeight: 1.6,
+      margin: 0
+    }
+  }, "Smakfynd \xE4r helt oberoende. Vi har inga avtal med Systembolaget, inga sponsrade placeringar och inga annonser. Inget vin kan k\xF6pa sig en h\xF6gre po\xE4ng. Vi tj\xE4nar inga pengar p\xE5 vad du k\xF6per \u2014 vi hj\xE4lper bara dig v\xE4lja r\xE4tt.")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: t.txL,
-      margin: 0
+      margin: "12px 0 0"
     }
   }, "Olav Innovation AB \xB7 Oberoende informationstj\xE4nst \xB7 Ingen koppling till Systembolaget \xB7 Vi s\xE4ljer inte alkohol"), /*#__PURE__*/React.createElement("div", {
     style: {
