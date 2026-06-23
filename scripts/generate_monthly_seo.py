@@ -152,8 +152,9 @@ def make_page(slug, title, meta, h1, intro, content_html, wines, extra_sections=
                 "offers": {"@type": "Offer", "price": str(w.get('price', 0)), "priceCurrency": "SEK",
                            "availability": "https://schema.org/InStock",
                            "url": f"https://www.systembolaget.se/produkt/vin/{w.get('nr','')}"},
-                "aggregateRating": {"@type": "AggregateRating", "ratingValue": w.get('smakfynd_score', 0),
-                                    "bestRating": 100, "worstRating": 1, "ratingCount": w.get('crowd_reviews', 1)},
+                **({"aggregateRating": {"@type": "AggregateRating", "ratingValue": w.get('smakfynd_score', 0),
+                                    "bestRating": 100, "worstRating": 1, "ratingCount": w.get('crowd_reviews', 1)}}
+                   if w.get('crowd_reviews', 0) > 0 else {}),
             }
         })
 

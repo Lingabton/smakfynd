@@ -1791,13 +1791,13 @@ def render_page(page, all_pages=None):
                     "availability": "https://schema.org/InStock",
                     "url": f"https://www.systembolaget.se/produkt/vin/{nr}",
                 },
-                "aggregateRating": {
+                **({"aggregateRating": {
                     "@type": "AggregateRating",
                     "ratingValue": w.get('smakfynd_score', 0),
                     "bestRating": 100,
                     "worstRating": 1,
                     "ratingCount": w.get('crowd_reviews', 1),
-                },
+                }} if w.get('crowd_reviews', 0) > 0 else {}),
             }
         })
 
