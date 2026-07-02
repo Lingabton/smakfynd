@@ -102,43 +102,32 @@ admin_data = {
     ],
 }
 
-# --- Fetch analytics from CF D1 ---
+# --- Fetch analytics from worker HTTP endpoints ---
+ANALYTICS_BASE = "https://smakfynd-analytics.smakfynd.workers.dev"
 analytics = {}
 try:
-    def d1_query(sql):
+    def fetch_json(path):
         r = subprocess.run(
-            ["npx", "wrangler", "d1", "execute", "smakfynd-analytics", "--remote", "--json", "--command", sql],
-            capture_output=True, text=True, cwd=os.path.join(BASE, "workers", "analytics"), timeout=30
+            ["curl", "-sf", f"{ANALYTICS_BASE}{path}"],
+            capture_output=True, text=True, timeout=15
         )
-        if r.returncode == 0:
-            data = json.loads(r.stdout)
-            return data[0].get("results", []) if data else []
-        return []
+        return json.loads(r.stdout) if r.returncode == 0 else {}
 
-    # Event counts by type
-    events_by_type = d1_query("SELECT event, COUNT(*) as n FROM events GROUP BY event ORDER BY n DESC")
-
-    # Recent events
-    recent_events = d1_query("SELECT event, wine_nr, data, device, ts FROM events ORDER BY id DESC LIMIT 15")
-
-    # Top searches
-    top_searches = d1_query("SELECT query, result_count, COUNT(*) as n FROM searches GROUP BY query ORDER BY n DESC LIMIT 15")
-
-    # AI usage
-    ai_stats = d1_query("SELECT COUNT(*) as n, AVG(response_time_ms) as avg_ms FROM ai_logs")
-
-    # Daily event counts (last 14 days)
-    daily_events = d1_query("SELECT DATE(ts) as day, COUNT(*) as n FROM events WHERE ts > datetime('now', '-14 days') GROUP BY DATE(ts) ORDER BY day")
+    stats = fetch_json("/stats")
+    top_searches = fetch_json("/top-searches")
+    ai_queries = fetch_json("/ai-queries")
+    sessions = fetch_json("/sessions")
 
     analytics = {
-        "events_by_type": events_by_type,
-        "recent_events": recent_events,
-        "top_searches": top_searches,
-        "ai_stats": ai_stats[0] if ai_stats else {},
-        "daily_events": daily_events,
-        "total_events": sum(e.get("n", 0) for e in events_by_type),
+        "total_events": stats.get("total_events", 0),
+        "total_searches": stats.get("total_searches", 0),
+        "total_ai_queries": stats.get("total_ai_queries", 0),
+        "top_wines_7d": stats.get("top_wines_7d", []),
+        "top_searches": [{"query": s.get("query",""), "n": s.get("count",0)} for s in top_searches[:15]],
+        "ai_queries": ai_queries[:15] if isinstance(ai_queries, list) else [],
+        "sessions": sessions,
     }
-    print(f"  Analytics: {analytics['total_events']} events fetched")
+    print(f"  Analytics: {analytics['total_events']} events fetched via worker")
 except Exception as e:
     print(f"  Analytics: skipped ({e})")
 
@@ -150,31 +139,22 @@ history = json.load(open(HISTORY_FILE)) if os.path.exists(HISTORY_FILE) else []
 
 today = datetime.now().strftime("%Y-%m-%d")
 # Only add one entry per day (skip if today already recorded)
-if not history or history[-1].get("date") != today:
-    today_events = 0
-    today_searches = 0
-    today_ai = 0
-    for e in analytics.get("daily_events", []):
-        if e.get("day") == today:
-            today_events = e.get("n", 0)
-    for s in analytics.get("top_searches", []):
-        today_searches += s.get("n", 0)
-    today_ai = analytics.get("ai_stats", {}).get("n", 0)
-
-    history.append({
-        "date": today,
-        "events": analytics.get("total_events", 0),
-        "today_events": today_events,
-        "searches": today_searches,
-        "ai_queries": today_ai,
-        "wines": total,
-        "vivino_matches": vivino_with_rating,
-        "price_drops": len(drops),
-    })
-    json.dump(history, open(HISTORY_FILE, "w"), ensure_ascii=False, indent=2)
-    print(f"  History: {len(history)} days saved")
+entry = {
+    "date": today,
+    "events": analytics.get("total_events", 0),
+    "searches": analytics.get("total_searches", 0),
+    "ai_queries": analytics.get("total_ai_queries", 0),
+    "wines": total,
+    "vivino_matches": vivino_with_rating,
+    "price_drops": len(drops),
+}
+if history and history[-1].get("date") == today:
+    history[-1] = entry
+    print(f"  History: updated today's entry ({len(history)} days)")
 else:
-    print(f"  History: already recorded today ({len(history)} days)")
+    history.append(entry)
+    print(f"  History: new entry ({len(history)} days)")
+json.dump(history, open(HISTORY_FILE, "w"), ensure_ascii=False, indent=2)
 
 # --- Actionable insights ---
 insights = []
