@@ -2051,7 +2051,7 @@ def update_sitemap(pages):
   </url>''')
 
     # Also include any other landing page directories (from other generators)
-    skip = {'integritet', 'tack', 'sw.js', 'manifest.json'}
+    skip = {'integritet', 'tack', 'admin', 'specs', 'sw.js', 'manifest.json'}
     for d in sorted(os.listdir(DOCS)):
         full = os.path.join(DOCS, d)
         if os.path.isdir(full) and d not in slugs and d not in skip and os.path.exists(os.path.join(full, 'index.html')):
