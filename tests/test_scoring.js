@@ -48,12 +48,12 @@ assertRange("raw 6 → 1-21", rescale(6), 1, 21);
 
 // ── getScoreInfo tests ──
 console.log("getScoreInfo():");
-assert("score 95 → Exceptionellt", getScoreInfo(95)[0], "Exceptionellt fynd");
+assert("score 95 → Exceptionellt", getScoreInfo(95)[0], "Exceptionellt");
 assert("score 85 → Toppköp", getScoreInfo(85)[0], "Toppköp");
 assert("score 75 → Starkt fynd", getScoreInfo(75)[0], "Starkt fynd");
 assert("score 65 → Bra köp", getScoreInfo(65)[0], "Bra köp");
-assert("score 55 → Okej värde", getScoreInfo(55)[0], "Okej värde");
-assert("score 40 → Svagt värde", getScoreInfo(40)[0], "Svagt värde");
+assert("score 55 → Bra köp", getScoreInfo(55)[0], "Bra köp");
+assert("score 40 → Okej värde", getScoreInfo(40)[0], "Okej värde");
 
 // ── Summary ──
 console.log(`\n${passed} passed, ${failed} failed`);
