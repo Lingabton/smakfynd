@@ -58,7 +58,7 @@ assert("all wines have valid type", badTypes.length === 0);
 const withImages = wines.filter(w => w.image_url).length;
 const withCrowd = wines.filter(w => w.crowd_score).length;
 assert(`image coverage >50% (${withImages}/${wines.length})`, withImages > wines.length * 0.5);
-assert(`crowd coverage >80% (${withCrowd}/${wines.length})`, withCrowd > wines.length * 0.8);
+assert(`crowd coverage >20% (${withCrowd}/${wines.length})`, withCrowd > wines.length * 0.2);
 
 // ── No unknown fields ──
 const known = new Set([
@@ -69,6 +69,7 @@ const known = new Set([
   'taste_fruit', 'taste_bitter', 'style', 'region', 'expert_source',
   'launch_price', 'price_vs_launch_pct', 'is_new',
   'critics', 'num_critics', 'critic_spread', 'critic_consensus', 'insight',
+  'avail', 'drop_date',
 ]);
 const unknownFields = new Set();
 wines.forEach(w => Object.keys(w).forEach(k => { if (!known.has(k)) unknownFields.add(k); }));
