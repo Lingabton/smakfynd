@@ -81,12 +81,12 @@ jobs:
           "
 
       - name: Fetch GSC data
-        if: ${{ secrets.GSC_CREDENTIALS_JSON != '' }}
         env:
-          GSC_CREDENTIALS_JSON: /tmp/gsc_creds.json
+          GSC_CREDS: ${{ secrets.GSC_CREDENTIALS_JSON }}
+        if: env.GSC_CREDS != ''
         run: |
-          echo '${{ secrets.GSC_CREDENTIALS_JSON }}' > /tmp/gsc_creds.json
-          python3 scripts/fetch_gsc.py
+          echo "$GSC_CREDS" > /tmp/gsc_creds.json
+          GSC_CREDENTIALS_JSON=/tmp/gsc_creds.json python3 scripts/fetch_gsc.py
           rm -f /tmp/gsc_creds.json
 
       - name: Build admin data
