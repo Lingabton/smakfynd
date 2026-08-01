@@ -1,0 +1,73 @@
+{
+  "month": "augusti",
+  "year": 2026,
+  "picks": [
+    {
+      "nr": "630201",
+      "category": "Bästa köp under 100 kr",
+      "note": "En Shiraz, Cabernet sauvignon från Australien till 89.0 kr. Crowd-betyg: 0/10 från 0 omdömen. Expert: 8.2/10. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "257301",
+      "category": "Bäst i mellanklass",
+      "note": "Tempranillo, Graciano, Mazuelo från Spanien, Rioja. Experterna ger 7.9/10 och crowd 7.5/10. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "7203801",
+      "category": "Bästa vita just nu",
+      "note": "Riesling från Tyskland till 115.0 kr.  [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "794101",
+      "category": "Bubbel-favorit",
+      "note": "Från Frankrike till 539.0 kr. 3122 har betygsatt den. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "7342201",
+      "category": "Dold pärla",
+      "note": "Gérard Bertrand Corbières — Grenache, Mourvèdre, Syrah från Frankrike, 139.0 kr. Få har hittat den ännu (163 omdömen) men poängen talar för sig. [REDIGERA: Lägg till din personliga kommentar här]"
+    }
+  ],
+  "wines": {
+    "630201": {
+      "name": "Gurra Gurra Creek",
+      "sub": "Shiraz",
+      "price": 89.0,
+      "score": 92,
+      "country": "Australien",
+      "grape": "Shiraz, Cabernet sauvignon"
+    },
+    "257301": {
+      "name": "Marqués de Riscal",
+      "sub": "Reserva",
+      "price": 199.0,
+      "score": 91,
+      "country": "Spanien",
+      "grape": "Tempranillo, Graciano, Mazuelo"
+    },
+    "7203801": {
+      "name": "Ruppertsberger",
+      "sub": "Imperial Riesling",
+      "price": 115.0,
+      "score": 93,
+      "country": "Tyskland",
+      "grape": "Riesling"
+    },
+    "794101": {
+      "name": "Champagne Taittinger",
+      "sub": "Demi-Sec",
+      "price": 539.0,
+      "score": 92,
+      "country": "Frankrike",
+      "grape": "Chardonnay, Pinot meunier, Pinot noir"
+    },
+    "7342201": {
+      "name": "Gérard Bertrand",
+      "sub": "Corbières",
+      "price": 139.0,
+      "score": 93,
+      "country": "Frankrike",
+      "grape": "Grenache, Mourvèdre, Syrah"
+    }
+  }
+}
