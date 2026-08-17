@@ -98,6 +98,50 @@ function track(event, data) {
     }).catch(() => {});
   } catch (e) {}
 }
+// Session duration tracking
+const _sessionStart = Date.now();
+function _sendSessionEnd() {
+  const duration_s = Math.round((Date.now() - _sessionStart) / 1000);
+  if (duration_s < 1) return;
+  const device = window.innerWidth < 768 ? "mobile" : "desktop";
+  const payload = JSON.stringify({
+    session: _sid,
+    event: "session_end",
+    data: JSON.stringify({
+      duration_s
+    }),
+    page: location.hash || "/",
+    device,
+    referrer: document.referrer
+  });
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(ANALYTICS_URL + "/event", new Blob([payload], {
+      type: "application/json"
+    }));
+  } else {
+    fetch(ANALYTICS_URL + "/event", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: payload,
+      keepalive: true
+    }).catch(() => {});
+  }
+}
+let _sessionEnded = false;
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && !_sessionEnded) {
+    _sessionEnded = true;
+    _sendSessionEnd();
+  }
+});
+window.addEventListener("pagehide", () => {
+  if (!_sessionEnded) {
+    _sessionEnded = true;
+    _sendSessionEnd();
+  }
+});
 function trackSearch(query, count, clickedNr) {
   try {
     fetch(ANALYTICS_URL + "/search", {
