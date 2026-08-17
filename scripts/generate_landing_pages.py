@@ -1808,7 +1808,7 @@ def render_page(page, all_pages=None):
         "description": page['meta'],
         "numberOfItems": num_wines,
         "itemListElement": items_ld,
-    }, ensure_ascii=False)
+    }, ensure_ascii=False) if num_wines > 0 else None
 
     # Breadcrumb schema
     breadcrumb_ld = json.dumps({
@@ -1881,7 +1881,7 @@ def render_page(page, all_pages=None):
   <meta property="og:site_name" content="Smakfynd">
   <meta property="article:modified_time" content="{today_iso}">
 
-  <script type="application/ld+json">{ld_json}</script>
+  {'<script type="application/ld+json">' + ld_json + '</script>' if ld_json else ''}
   <script type="application/ld+json">{breadcrumb_ld}</script>
   <script type="application/ld+json">{faq_ld}</script>{recipe_ld}
 
