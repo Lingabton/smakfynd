@@ -99,9 +99,9 @@ def make_pages():
     return [
         {
             "slug": "basta-roda-vin",
-            "title": f"Bästa röda vinerna på Systembolaget {YEAR}",
-            "meta": f"Topp 20 bästa röda viner på Systembolaget just nu. Rankade efter kvalitet per krona — crowd-betyg, expertrecensioner och prisvärde. Uppdaterad {DATE_STR}.",
-            "h1": f"Bästa röda vinerna på Systembolaget — {DATE_STR}",
+            "title": f"Bästa röda vinet {YEAR} — Topp 20 rödvin på Systembolaget",
+            "meta": f"Bästa röda vinet och rödvin på Systembolaget {YEAR}. Topp 20 rankade efter kvalitet per krona — crowd-betyg, expertrecensioner och prisvärde. {DATE_STR}.",
+            "h1": f"Bästa röda vinerna på Systembolaget {YEAR}",
             "intro": "Vi har analyserat tusentals röda viner och rankat dem efter kvalitet i förhållande till pris. Här är de bästa köpen just nu.",
             "intro2": "Rött vin från Systembolaget finns i hundratals varianter — från lätta Pinot Noir till tunga Cabernet Sauvignon. Vår ranking väger samman expertbetyg, crowd-recensioner och pris för att hitta de röda viner som verkligen levererar kvalitet per krona. Listan är populär även bland norrmän som letar gode kjøp på Systembolaget — priserna är ofta lägre än på Vinmonopolet.",
             "guide": {
@@ -122,9 +122,9 @@ def make_pages():
         },
         {
             "slug": "basta-vita-vin",
-            "title": f"Bästa vita vinet {YEAR} — Topp 20 vita viner på Systembolaget",
-            "meta": f"Bästa vita vinet {YEAR}? Topp 20 vita viner på Systembolaget — Chardonnay, Sauvignon Blanc, Riesling och fler. Rankade efter smak och prisvärde. {DATE_STR}.",
-            "h1": f"Bästa vita vinerna på Systembolaget — {DATE_STR}",
+            "title": f"Vitt vin bäst i test {YEAR} — Bästa vita vinet på Systembolaget",
+            "meta": f"Vitt vin bäst i test {YEAR}. Bästa vita vinet på Systembolaget — Chardonnay, Sauvignon Blanc, Riesling och fler. Topp 20 rankade efter smak och prisvärde. {DATE_STR}.",
+            "h1": f"Bästa vita vinet {YEAR} — vitt vin bäst i test",
             "intro": "Fräscha, fruktiga eller fyllda — här är de vita vinerna som ger mest smak för pengarna.",
             "intro2": "Vita viner på Systembolaget spänner från mineraldrivna Chablis till fylliga, fatlagrade Chardonnay. Vi rankar utifrån Vivino-betyg, expertrecensioner och pris per kvalitet så att du enkelt hittar det bästa vita vinet oavsett budget. Många norrmän hittar sina gode kjøp bland vita viner här — Systembolaget har ofta bredare urval och lägre priser än Vinmonopolet.",
             "guide": {
@@ -191,9 +191,9 @@ def make_pages():
         },
         {
             "slug": "vin-under-100-kr",
-            "title": f"Bästa vinerna under 100 kr på Systembolaget {YEAR}",
-            "meta": f"Prisvärda viner under 100 kr. Rankade efter kvalitet — inte bara pris. Uppdaterad {DATE_STR}.",
-            "h1": f"Bästa vinerna under 100 kr — {DATE_STR}",
+            "title": f"Bästa vinet under 100 kr {YEAR} — Topp 20 billiga viner på Systembolaget",
+            "meta": f"Bästa vinet under 100 kr på Systembolaget {YEAR}. Billigt och bra vin — rankade efter kvalitet, inte bara pris. Uppdaterad {DATE_STR}.",
+            "h1": f"Bästa vinerna under 100 kr {YEAR}",
             "intro": "Under hundralappen och ändå riktigt bra? Det finns fler än du tror. Här är de bästa budgetvinerna just nu.",
             "intro2": "Billigt vin behöver inte vara dåligt vin. Bland Systembolagets viner under 100 kr hittar du överraskande bra kvalitet, särskilt från Chile, Sydafrika och Spanien. Vi filtrerar bort plonket och visar bara de som faktiskt smakar bra.",
             "guide": {
@@ -348,9 +348,9 @@ def make_pages():
         },
         {
             "slug": "basta-riesling",
-            "title": f"Bästa Riesling {YEAR} — Topp Riesling på Systembolaget",
-            "meta": f"Bästa Riesling {YEAR}? Topp Riesling-viner från Tyskland, Alsace och Australien. Från stentorrt till halvsött — rankade efter kvalitet per krona. {DATE_STR}.",
-            "h1": f"Bästa Riesling på Systembolaget — {DATE_STR}",
+            "title": f"Bästa Riesling på Systembolaget {YEAR} — Topp Riesling rankade",
+            "meta": f"Bästa Riesling på Systembolaget {YEAR}. Topp Riesling-viner från Tyskland, Alsace och Australien. Från stentorrt till halvsött — rankade efter kvalitet per krona. {DATE_STR}.",
+            "h1": f"Bästa Riesling på Systembolaget {YEAR}",
             "intro": "Riesling är en av världens mest mångsidiga vita druvor — från stentorrt till sött. Här är de bästa.",
             "intro2": "Riesling på Systembolaget kommer framförallt från Tyskland (Mosel, Pfalz, Rheingau) och Alsace i Frankrike. Druvan uttrycker terroir som få andra — mineralisk, syradriven och med fantastisk lagringspotential. Torr Riesling (Trocken) från Pfalz och Alsace passar utmärkt till asiatisk mat och fisk, medan halvsöt Kabinett från Mosel är perfekt som aperitif.",
             "guide": {
@@ -604,9 +604,9 @@ def make_pages():
         },
         {
             "slug": "prissankt-vin",
-            "title": f"Prissänkta viner på Systembolaget {YEAR}",
-            "meta": f"Viner som nyligen sänkts i pris på Systembolaget. Hitta fynden innan de försvinner. {DATE_STR}.",
-            "h1": f"Prissänkta viner just nu — {DATE_STR}",
+            "title": f"Prissänkta viner Systembolaget {YEAR} — Nedsatta viner just nu",
+            "meta": f"Prissänkta viner på Systembolaget {YEAR}. Nedsatta viner och prissänkt vin — hitta fynden innan de försvinner. {DATE_STR}.",
+            "h1": f"Prissänkta viner på Systembolaget {YEAR}",
             "intro": "Systembolaget skyltar inte alltid med prissänkningar. Vi håller koll åt dig — här är de bästa fynden.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price_vs_launch_pct') or 0) > 0],
@@ -1102,9 +1102,9 @@ def make_pages():
         # Champagne (bredare än bara under 300 kr)
         {
             "slug": "basta-champagne",
-            "title": f"Bästa champagnen {YEAR} — Topp 20 på Systembolaget",
-            "meta": f"Bästa champagnen {YEAR}? Från Brut under 300 kr till prestige-cuvéer. Topp 20 champagne rankade efter smak och pris. {DATE_STR}.",
-            "h1": f"Bästa champagnen {YEAR} — rankad topplista",
+            "title": f"Champagne bäst i test {YEAR} — Bästa champagnen på Systembolaget",
+            "meta": f"Champagne bäst i test {YEAR}. Topp 20 champagne på Systembolaget — från prisvärd under 300 kr till prestige-cuvéer. Rankade efter smak och pris. {DATE_STR}.",
+            "h1": f"Champagne bäst i test {YEAR} — bästa champagnen på Systembolaget",
             "intro": f"Bästa champagnen på Systembolaget just nu? Vi har rankat alla champagner — från prisvärda under 300 kr till prestigefyllda hus som Krug och Pol Roger.",
             "intro2": f"Champagne är den ultimata festdrycken, men kvaliteten varierar enormt. Grower-champagne (små producenter) ger ofta bättre prisvärdhet än de stora husen. Blanc de Blancs (100% Chardonnay) är elegant, Blanc de Noirs (Pinot Noir) mer kraftfull. Vi jämför alla champagner på Systembolaget baserat på expert- och crowd-betyg.",
             "guide": {
@@ -1300,9 +1300,9 @@ def make_pages():
         # ─── Norska besökare ───
         {
             "slug": "basta-vin-for-norrman",
-            "title": f"Bästa vinköpen på Systembolaget för norrmän {YEAR}",
-            "meta": f"Norsk i Sverige? Här är de bästa vinerna på Systembolaget {YEAR}. Billigare och bättre urval än Vinmonopolet. Rankade efter kvalitet per krona.",
-            "h1": f"Bästa vinköpen på Systembolaget — för norska besökare",
+            "title": f"Beste kjøp Systembolaget {YEAR} — Bästa vinerna för norrmän",
+            "meta": f"Beste kjøp og gode vinkjøp Systembolaget {YEAR}. Billigere og bedre utvalg enn Vinmonopolet. Rankade efter kvalitet per krona.",
+            "h1": f"Beste kjøp Systembolaget {YEAR} — bästa vinerna för norrmän",
             "intro": "Svenska Systembolaget har ofta lägre priser och bredare sortiment än Vinmonopolet. Här är vinerna som ger mest valuta, särskilt utvalda för dig som handlar på Systembolaget under Sverigebesöket.",
             "intro2": "Priserna på Systembolaget ligger i genomsnitt 20-40% lägre än Vinmonopolet i samma kvalitetsklass. Dessutom har Systembolaget ett bredare fast sortiment. Vi har rankat alla viner efter kvalitet i förhållande till priset. Passa på att fylla bilen med dessa fynd.",
             "guide": {
@@ -1324,9 +1324,9 @@ def make_pages():
 
         {
             "slug": "gode-kjop-pa-systembolaget",
-            "title": f"Gode kjøp på Systembolaget {YEAR} — for nordmenn",
-            "meta": f"Gode vinkjøp på Systembolaget {YEAR}. Billigere og bedre utvalg enn Vinmonopolet. Rangert etter kvalitet per krone.",
-            "h1": f"Gode kjøp på Systembolaget — for nordmenn",
+            "title": f"Gode kjøp på Systembolaget {YEAR} — Beste vinkjøp for nordmenn",
+            "meta": f"Gode kjøp på Systembolaget {YEAR}. Beste vinkjøp — billigere og bedre utvalg enn Vinmonopolet. Rangert etter kvalitet per krone.",
+            "h1": f"Gode kjøp på Systembolaget {YEAR} — beste vinkjøp for nordmenn",
             "intro": "Svenske Systembolaget har ofte lavere priser og bredere sortiment enn Vinmonopolet. Her er vinene som gir mest valuta, spesielt utvalgt for deg som handler på Systembolaget under Sverigeturen.",
             "intro2": "Prisene på Systembolaget ligger i gjennomsnitt 20-40% lavere enn Vinmonopolet i samme kvalitetsklasse. I tillegg har Systembolaget et bredere fast sortiment. Vi har rangert alle viner etter kvalitet i forhold til prisen. Pass på å fylle bilen med disse funnene.",
             "guide": {
@@ -1419,9 +1419,9 @@ def make_pages():
         # ─── Bubbel-kluster ───
         {
             "slug": "champagne-under-300-kr",
-            "title": f"Bästa champagnen under 300 kr {YEAR} — 5 riktiga fynd",
-            "meta": f"Bästa champagnen under 300 kr på Systembolaget {YEAR}. Alla rankade — billigaste kostar 249 kr.",
-            "h1": f"Bästa champagne under 300 kr — {DATE_STR}",
+            "title": f"Bästa champagne under 300 kr {YEAR} — Prisvärd champagne på Systembolaget",
+            "meta": f"Bästa prisvärd champagne under 300 kr på Systembolaget {YEAR}. Topp 10 rankade efter smak — från 249 kr. Bäst i test {DATE_STR}.",
+            "h1": f"Bästa champagne under 300 kr {YEAR} — prisvärd champagne på Systembolaget",
             "intro": "Riktig champagne behöver inte kosta en förmögenhet. Under 300 kr finns överraskande bra champagner — från små grower-producenter till välkända hus som ger mer än Veuve och Moët.",
             "intro2": "Champagne under 300 kr är en av de mest undervärderade kategorierna på Systembolaget. Många väljer Cava eller Prosecco för att spara pengar, men missar att det finns riktig champagne i samma prisklass. Vi har hittat de champagner som faktiskt levererar — med den komplexitet, finheten och mousset som gör champagne till champagne.",
             "guide": {
@@ -1442,6 +1442,34 @@ def make_pages():
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) < 300],
+                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+        },
+        {
+            "slug": "champagne-under-500-kr",
+            "title": f"Bästa champagne under 500 kr {YEAR} — Topp champagne på Systembolaget",
+            "meta": f"Bästa champagnen under 500 kr på Systembolaget {YEAR}. Prisvärd champagne 300–500 kr — grower, Blanc de Blancs & mer. Rankade efter smak. {DATE_STR}.",
+            "h1": f"Bästa champagne under 500 kr {YEAR}",
+            "intro": "Mellan 300 och 500 kr öppnar sig champagne-världen på riktigt. Här hittar du grower-champagne, Blanc de Blancs och hus som Palmer, Henriot och Deutz — viner som slår de stora namnen.",
+            "intro2": f"Prisklassen 300–500 kr är champagnens sweet spot. Du får riktigt bra champagne utan att betala för prestige-etiketten. Grower-champagne (små producenter, RM på etiketten) dominerar i denna prisklass och ger ofta bättre kvalitet per krona än de stora husen. Vi har rankat alla champagner under 500 kr på Systembolaget efter crowd-betyg, expertrecensioner och prisvärde.",
+            "guide": {
+                "title": "Champagne 300–500 kr — vad får man?",
+                "points": [
+                    "Grower-champagne (RM) — små producenter med egna druvor. Ofta mer personlighet och terroir.",
+                    "Blanc de Blancs (100% Chardonnay) i denna prisklass är ofta enastående elegant.",
+                    "Årgångschampagne börjar dyka upp runt 400–500 kr — extra komplexitet och karaktär.",
+                    "Palmer & Co, Henriot och Deutz ger champagne-husstil till rimligt pris.",
+                ]
+            },
+            "faq_visible": [
+                ("Är champagne under 500 kr bra?", "Ja — prisklassen 300–500 kr är sweet spot. Du får kvalitet som matchar eller överträffar stora hus som Veuve Clicquot och Moët, men från mindre kända producenter med mer fokus på vin än varumärke."),
+                ("Vad är grower-champagne?", "Grower-champagne (Récoltant-Manipulant, RM) görs av producenter som odlar egna druvor och gör eget vin. Till skillnad från stora hus som köper druvor ger growers mer terroir-driven, personlig champagne — ofta till bättre pris."),
+            ],
+            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and 'frankrike' == (w.get('country') or '').lower()
+                           and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
+                           and (w.get('price', 999) or 999) >= 300
+                           and (w.get('price', 999) or 999) < 500],
                           key=lambda x: -x.get('smakfynd_score', 0)))[:20],
         },
         {
@@ -1499,8 +1527,8 @@ def make_pages():
         # ─── Boxvin (moved from monthly_seo for full template) ───
         {
             "slug": "basta-boxvin",
-            "title": f"Bästa vinboxen {YEAR} — Topp 20 boxvin på Systembolaget",
-            "meta": f"Bästa vinboxen {YEAR} — alla bag-in-box rankade. Röda, vita & rosé. Uppdaterad {DATE_STR}.",
+            "title": f"Bästa boxvin {YEAR} — Topp bag-in-box (BiB) på Systembolaget",
+            "meta": f"Bästa boxvinet och bag-in-box {YEAR}. Topp vinboxar — röda, vita & rosé — rankade efter kvalitet. Bäst i test {DATE_STR}.",
             "h1": f"Bästa boxvinet {YEAR} — topp bag-in-box på Systembolaget",
             "intro": f"Vilket boxvin är bäst just nu? Sverige är världens största boxvinmarknad — men kvaliteten varierar enormt. Vi har rankat alla bag-in-box-viner på Systembolaget efter kvalitet per krona.",
             "intro2": f"Bästa boxvinet {YEAR} behöver inte vara dyrt. Box ger ofta bättre literpris än flaska, och de bästa boxvinerna håller riktigt hög kvalitet. En öppnad box håller dessutom 4–6 veckor tack vare vakuumförpackningen. Vi rankar alla BiB-viner — röda, vita och rosé — baserat på crowd-betyg, expertrecensioner och prisvärde.",
@@ -1861,6 +1889,19 @@ def render_page(page, all_pages=None):
         }
         recipe_ld = f'\n  <script type="application/ld+json">{json.dumps(recipe_data, ensure_ascii=False)}</script>'
 
+    webpage_ld = json.dumps({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": page['title'],
+        "description": page['meta'],
+        "url": f"https://smakfynd.se/{page['slug']}/",
+        "inLanguage": "sv",
+        "isPartOf": {"@type": "WebSite", "name": "Smakfynd", "url": "https://smakfynd.se"},
+        "about": {"@type": "Thing", "name": page['h1'].split(' — ')[0]},
+        "dateModified": today_iso,
+        "author": {"@type": "Person", "name": "Gabriel Linton"},
+    }, ensure_ascii=False)
+
     return f'''<!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -1883,7 +1924,8 @@ def render_page(page, all_pages=None):
 
   {'<script type="application/ld+json">' + ld_json + '</script>' if ld_json else ''}
   <script type="application/ld+json">{breadcrumb_ld}</script>
-  <script type="application/ld+json">{faq_ld}</script>{recipe_ld}
+  <script type="application/ld+json">{faq_ld}</script>
+  <script type="application/ld+json">{webpage_ld}</script>{recipe_ld}
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
