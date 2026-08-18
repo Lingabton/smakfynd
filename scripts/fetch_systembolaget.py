@@ -118,7 +118,12 @@ def fetch_all():
             page += 1
             time.sleep(0.5)
 
-    return list(all_products.values())
+    products = list(all_products.values())
+    if len(products) < 1000:
+        print(f"\n  WARNING: Only {len(products)} products fetched (expected 3000+).")
+        print("  API may be down or key expired. Aborting to prevent data loss.")
+        raise SystemExit(1)
+    return products
 
 def save_price_snapshot(products):
     """Save daily price snapshot for price drop detection."""

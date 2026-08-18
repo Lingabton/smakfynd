@@ -298,7 +298,7 @@ print(f"  Crowd: {has_crowd} | Expert: {has_expert} | Both: {has_both} | Taste: 
 
 # Inject into JSX template — keep SAMPLE_PRODUCTS empty (data loaded from wines.json)
 jsx = open(SITE_FILE).read()
-js_data = json.dumps(mini, ensure_ascii=False, separators=(',', ':'))
+# NOTE: js_data is built AFTER QA cleaning below
 jsx = jsx.replace(
     'const SAMPLE_PRODUCTS = []; // Will be replaced by loaded data OR fetched from DATA_URL',
     'const SAMPLE_PRODUCTS = []; // Data loaded async from wines.json'
@@ -338,7 +338,8 @@ open(OUTPUT, 'w').write(jsx)
 size = os.path.getsize(OUTPUT) / 1024
 print(f"Built: {OUTPUT} ({size:.0f} KB)")
 
-# Also write separate wines.json for async loading
+# Build wines.json from QA-cleaned data
+js_data = json.dumps(mini, ensure_ascii=False, separators=(',', ':'))
 WINES_JSON = str(BASE / "docs" / "wines.json")
 open(WINES_JSON, 'w').write(js_data)
 json_size = os.path.getsize(WINES_JSON) / 1024

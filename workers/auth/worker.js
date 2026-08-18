@@ -499,7 +499,8 @@ export default {
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error("Auth error:", e.message, e.stack);
+      return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers });
     }
   },
 };

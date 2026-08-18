@@ -15,8 +15,8 @@ const t = {
   // Text
   tx: "#1a1510",
   txM: "#3a2a1f",      // warm near-black for body links
-  txL: "#6b6355",
-  txF: "#9e9588",
+  txL: "#5a5347",
+  txF: "#756b5e",
   // Semantic
   green: "#3d7a4a",    // olive-green for positive signals (comparisons)
   greenL: "#3d7a4a10",

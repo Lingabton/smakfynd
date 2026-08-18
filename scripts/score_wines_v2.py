@@ -4,7 +4,7 @@ Smakfynd Scoring v2 — Fixed
 Correctly maps Vivino cache (name|sub|country) and Expert cache (nr)
 """
 
-import json, statistics, logging
+import json, os, statistics, logging
 from pathlib import Path
 from datetime import date
 
@@ -433,7 +433,10 @@ def main():
 
     results.sort(key=lambda x: -x['smakfynd_score'])
     out = DATA_DIR / "smakfynd_ranked_v2.json"
-    json.dump(results, open(out, 'w'), ensure_ascii=False, indent=1)
+    tmp = DATA_DIR / "smakfynd_ranked_v2.json.tmp"
+    with open(tmp, 'w') as f:
+        json.dump(results, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, out)
 
     print(f"\n  Scored:     {len(results)}")
     print(f"  Has crowd:  {n_crowd}")

@@ -181,8 +181,8 @@ const t = {
   // Text
   tx: "#1a1510",
   txM: "#3a2a1f",      // warm near-black for body links
-  txL: "#6b6355",
-  txF: "#9e9588",
+  txL: "#5a5347",
+  txF: "#756b5e",
   // Semantic
   green: "#3d7a4a",    // olive-green for positive signals (comparisons)
   greenL: "#3d7a4a10",
@@ -2833,7 +2833,11 @@ function SmakfyndApp() {
     r = r.filter(p => p.package === pkg);
     if (cat !== "all" && !search) r = r.filter(p => p.category === cat);
     if (price !== "all") { const [a, b] = price.split("-").map(Number); r = r.filter(p => p.price >= a && p.price <= b); }
-    if (search) { const q = search.toLowerCase(); r = r.filter(p => [p.name, p.sub, p.country, p.grape, p.style, p.organic ? "eko ekologisk organic" : ""].some(f => (f || "").toLowerCase().includes(q))); }
+    if (search) {
+      const q = search.toLowerCase();
+      const substring = r.filter(p => [p.name, p.sub, p.country, p.grape, p.style, p.organic ? "eko ekologisk organic" : ""].some(f => (f || "").toLowerCase().includes(q)));
+      r = substring.length > 0 ? substring : (typeof fuzzySearch === "function" ? fuzzySearch(r, search, ["name", "sub", "country", "grape"], 50) : []);
+    }
     if (showNew) r = r.filter(p => p.is_new);
     if (showDeals) r = r.filter(p => p.price_vs_launch_pct > 0);
     if (showEco) r = r.filter(p => p.organic);
@@ -3356,17 +3360,11 @@ function SmakfyndApp() {
             {filtered.slice(1, 5).map((p, i) => <Card key={p.id || i} p={p} rank={i + 2} delay={Math.min((i + 1) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 5 && <NewsletterCTA compact={true} />}
             {filtered.slice(5, 10).map((p, i) => <Card key={p.id || i} p={p} rank={i + 6} delay={Math.min((i + 5) * 0.04, 0.4)} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
-            {filtered.length > 10 && (
-              <div style={{ padding: "16px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}`, marginTop: 4 }}>
-                <div style={{ fontSize: 14, fontFamily: t.serif, color: t.tx, marginBottom: 4 }}>Veckans 5 fynd</div>
-                <div style={{ fontSize: 12, color: t.txL }}>Handplockade viner — kommer snart.</div>
-              </div>
-            )}
             {filtered.slice(10, 50).map((p, i) => <Card key={p.id || i} p={p} rank={i + 11} delay={0} allProducts={products} autoOpen={String(p.nr) === String(autoOpenNr)} auth={auth} />)}
             {filtered.length > 50 && (
               <div style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14, background: t.surface, border: `1px solid ${t.bdr}` }}>
                 <div style={{ fontSize: 14, color: t.txM, marginBottom: 8 }}>Visar topp 50 av {filtered.length} viner</div>
-                <div style={{ fontSize: 12, color: t.txL }}>Använd filter för att hitta fler, eller logga in för att se hela listan.</div>
+                <div style={{ fontSize: 12, color: t.txL }}>Använd filter eller sök för att hitta fler viner.</div>
               </div>
             )}
           </div>

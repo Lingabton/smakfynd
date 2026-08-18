@@ -83,6 +83,9 @@
 
 <script>
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+const ADMIN_KEY = localStorage.getItem("sf_admin_key") || prompt("Admin key:");
+if (ADMIN_KEY) localStorage.setItem("sf_admin_key", ADMIN_KEY);
+function adminFetch(url) { return fetch(url, { headers: { "X-Admin-Key": ADMIN_KEY } }); }
 const SUPABASE_URL = "https://bfzzsniebwxwrnkmeymg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenpzbmllYnd4d3Jua21leW1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjMzMzgsImV4cCI6MjA5Mjc5OTMzOH0.DxlxqgJ8ANtAaOS95wX1hr6Cd7oEP7l3pJQAy52L778";
 let D = null, live = {}, flagD = {};
@@ -221,9 +224,9 @@ async function fetchLive() {
   el.innerHTML = '<div style="text-align:center;padding:20px;color:#9e9588"><span class="live"></span> Hämtar realtidsdata...</div>';
   try {
     const [stats, searches, aiQ] = await Promise.all([
-      fetch(ANALYTICS_URL+'/stats').then(r=>r.json()),
-      fetch(ANALYTICS_URL+'/top-searches').then(r=>r.json()),
-      fetch(ANALYTICS_URL+'/ai-queries').then(r=>r.json()),
+      adminFetch(ANALYTICS_URL+'/stats').then(r=>r.json()),
+      adminFetch(ANALYTICS_URL+'/top-searches').then(r=>r.json()),
+      adminFetch(ANALYTICS_URL+'/ai-queries').then(r=>r.json()),
     ]);
     // Try Supabase user count
     let userCount = '–', subCount = '–';

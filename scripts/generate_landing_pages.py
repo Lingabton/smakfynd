@@ -1895,15 +1895,18 @@ def render_page(page, all_pages=None):
         "name": page['title'],
         "description": page['meta'],
         "url": f"https://smakfynd.se/{page['slug']}/",
-        "inLanguage": "sv",
+        "inLanguage": "nb" if page['slug'] == "gode-kjop-pa-systembolaget" else "sv",
         "isPartOf": {"@type": "WebSite", "name": "Smakfynd", "url": "https://smakfynd.se"},
         "about": {"@type": "Thing", "name": page['h1'].split(' — ')[0]},
         "dateModified": today_iso,
         "author": {"@type": "Person", "name": "Gabriel Linton"},
     }, ensure_ascii=False)
 
+    html_lang = "nb" if page['slug'] == "gode-kjop-pa-systembolaget" else "sv"
+    og_locale = "nb_NO" if page['slug'] == "gode-kjop-pa-systembolaget" else "sv_SE"
+
     return f'''<!DOCTYPE html>
-<html lang="sv">
+<html lang="{html_lang}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1918,7 +1921,7 @@ def render_page(page, all_pages=None):
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://smakfynd.se/{page['slug']}/">
   <meta property="og:image" content="https://smakfynd.se/og-image.png">
-  <meta property="og:locale" content="sv_SE">
+  <meta property="og:locale" content="{og_locale}">
   <meta property="og:site_name" content="Smakfynd">
   <meta property="article:modified_time" content="{today_iso}">
 

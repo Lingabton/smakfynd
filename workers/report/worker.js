@@ -223,18 +223,20 @@ export default {
     }
   },
 
-  // HTTP trigger — for testing: GET /report
+  // HTTP trigger — for testing: GET /report (admin only)
   async fetch(request, env) {
     const url = new URL(request.url);
+    const adminKey = request.headers.get("X-Admin-Key") || url.searchParams.get("key");
     if (url.pathname === "/report") {
+      if (adminKey !== env.ADMIN_KEY) return new Response("Unauthorized", { status: 401 });
       const html = await buildReport(env.DB);
       return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
     if (url.pathname === "/send") {
-      // Manual trigger — same as scheduled
+      if (adminKey !== env.ADMIN_KEY) return new Response("Unauthorized", { status: 401 });
       await this.scheduled({}, env);
       return new Response("Report sent!");
     }
-    return new Response("Smakfynd Report Worker. GET /report to preview, /send to trigger email.", { status: 200 });
+    return new Response("Smakfynd Report Worker", { status: 200 });
   },
 };

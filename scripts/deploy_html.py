@@ -222,6 +222,7 @@ html = f"""<!DOCTYPE html>
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://gc.zgo.at 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' https://product-cdn.systembolaget.se data:; connect-src 'self' https://*.smakfynd.workers.dev https://bfzzsniebwxwrnkmeymg.supabase.co https://smakfynd.goatcounter.com;">
 
   <link rel="canonical" href="https://smakfynd.se">
 
@@ -263,7 +264,7 @@ html = f"""<!DOCTYPE html>
       --bg: #f5f1ea; --surface: #fdfbf7; --card: #ffffff;
       --bdr: #e2d8c8; --bdr-light: #ede6da;
       --wine: #8b2332; --wine-dark: #6b1a27;
-      --tx: #1a1510; --tx-mid: #3d3830; --tx-light: #6b6355; --tx-faint: #9e9588;
+      --tx: #1a1510; --tx-mid: #3d3830; --tx-light: #5a5347; --tx-faint: #756b5e;
       --green: #2d7a3e; --deal: #c44020; --gold: #b08d40;
       --radius-card: 14px; --radius-pill: 100px; --radius-input: 12px;
       --font-serif: 'Instrument Serif', Georgia, serif;
@@ -273,16 +274,19 @@ html = f"""<!DOCTYPE html>
       --sh-lg: 0 8px 24px rgba(26,21,16,0.08);
     }}
     body {{ margin: 0; background: var(--bg); font-family: var(--font-sans); color: var(--tx); -webkit-font-smoothing: antialiased; }}
+    .skip-link {{ position: absolute; top: -40px; left: 0; background: #8b2332; color: #fff; padding: 8px 16px; z-index: 9999; font-size: 14px; text-decoration: none; }}
+    .skip-link:focus {{ top: 0; }}
   </style>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" integrity="sha512-QVs8Lo43F9lSuBykadDb0oSXDL/BbZ588urWVCRwSIoewQv/Ewg1f84mK3U790bZ0FfhFa1YSQUmIhG+pIRKeg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
+  <a class="skip-link" href="#root">Hoppa till innehåll</a>
   <div id="root"></div>
 
   <!-- Noscript fallback: visible to search engines and AI crawlers -->

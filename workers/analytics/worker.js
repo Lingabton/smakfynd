@@ -4,6 +4,11 @@
  * Free tier: 5M rows read/day, 100k rows written/day
  */
 
+function requireAdmin(request, env) {
+  const key = request.headers.get("X-Admin-Key") || new URL(request.url).searchParams.get("key");
+  return key === env.ADMIN_KEY;
+}
+
 // Simple in-memory rate limiter (resets on Worker restart)
 const rateLimits = new Map();
 function checkRateLimit(ip, limit = 100, windowMs = 60000) {
@@ -99,8 +104,9 @@ export default {
         return new Response(JSON.stringify({ ok: true }), { headers });
       }
 
-      // POST /prices — bulk insert price snapshot
+      // POST /prices — bulk insert price snapshot (admin only)
       if (request.method === "POST" && url.pathname === "/prices") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const { date, prices } = await request.json();
         if (!date || !prices) {
           return new Response(JSON.stringify({ error: "date and prices required" }), { status: 400, headers });
@@ -113,8 +119,9 @@ export default {
         return new Response(JSON.stringify({ ok: true, count: prices.length }), { headers });
       }
 
-      // GET /stats — basic dashboard data
+      // GET /stats — basic dashboard data (admin only)
       if (request.method === "GET" && url.pathname === "/stats") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const [events, searches, ai, popular] = await Promise.all([
           env.DB.prepare("SELECT COUNT(*) as c FROM events").first(),
           env.DB.prepare("SELECT COUNT(*) as c FROM searches").first(),
@@ -133,8 +140,9 @@ export default {
         }), { headers });
       }
 
-      // GET /top-searches — most common search queries
+      // GET /top-searches — most common search queries (admin only)
       if (request.method === "GET" && url.pathname === "/top-searches") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const result = await env.DB.prepare(
           `SELECT query, COUNT(*) as count FROM searches
            WHERE ts >= datetime('now', '-30 days')
@@ -143,8 +151,9 @@ export default {
         return new Response(JSON.stringify(result.results), { headers });
       }
 
-      // GET /ai-queries — recent AI interactions
+      // GET /ai-queries — recent AI interactions (admin only)
       if (request.method === "GET" && url.pathname === "/ai-queries") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const result = await env.DB.prepare(
           `SELECT meal, mode, wines_suggested, latency_ms, ts
            FROM ai_logs ORDER BY ts DESC LIMIT 100`
@@ -152,8 +161,9 @@ export default {
         return new Response(JSON.stringify(result.results), { headers });
       }
 
-      // GET /sessions — session duration stats
+      // GET /sessions — session duration stats (admin only)
       if (request.method === "GET" && url.pathname === "/sessions") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const result = await env.DB.prepare(
           `SELECT
              COUNT(*) as total_sessions,
@@ -187,8 +197,9 @@ export default {
         }), { headers });
       }
 
-      // GET /trend — 4-week session, event and SB-click trend
+      // GET /trend — 4-week session, event and SB-click trend (admin only)
       if (request.method === "GET" && url.pathname === "/trend") {
+        if (!requireAdmin(request, env)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
         const weeks = await env.DB.prepare(`
           SELECT
             CASE
@@ -252,8 +263,8 @@ export default {
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     } catch (e) {
-      console.error("Analytics error:", e.message);
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error("Analytics error:", e.message, e.stack);
+      return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers });
     }
   },
 };

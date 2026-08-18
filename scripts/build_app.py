@@ -4,7 +4,7 @@ Concatenate src/ files into a single JSX file for Babel transpilation.
 Order matters — dependencies must come before dependents.
 """
 
-import os
+import os, sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.dirname(SCRIPT_DIR)
@@ -40,7 +40,7 @@ for f in FILES:
     path = os.path.join(SRC, f)
     if not os.path.exists(path):
         print(f"  MISSING: {f}")
-        continue
+        sys.exit(1)
     content = open(path).read()
     lines = content.count('\n')
     total_lines += lines

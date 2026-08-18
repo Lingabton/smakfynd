@@ -321,8 +321,8 @@ const t = {
   tx: "#1a1510",
   txM: "#3a2a1f",
   // warm near-black for body links
-  txL: "#6b6355",
-  txF: "#9e9588",
+  txL: "#5a5347",
+  txF: "#756b5e",
   // Semantic
   green: "#3d7a4a",
   // olive-green for positive signals (comparisons)
@@ -5153,7 +5153,8 @@ function SmakfyndApp() {
     }
     if (search) {
       const q = search.toLowerCase();
-      r = r.filter(p => [p.name, p.sub, p.country, p.grape, p.style, p.organic ? "eko ekologisk organic" : ""].some(f => (f || "").toLowerCase().includes(q)));
+      const substring = r.filter(p => [p.name, p.sub, p.country, p.grape, p.style, p.organic ? "eko ekologisk organic" : ""].some(f => (f || "").toLowerCase().includes(q)));
+      r = substring.length > 0 ? substring : typeof fuzzySearch === "function" ? fuzzySearch(r, search, ["name", "sub", "country", "grape"], 50) : [];
     }
     if (showNew) r = r.filter(p => p.is_new);
     if (showDeals) r = r.filter(p => p.price_vs_launch_pct > 0);
@@ -6544,27 +6545,7 @@ function SmakfyndApp() {
     allProducts: products,
     autoOpen: String(p.nr) === String(autoOpenNr),
     auth: auth
-  })), filtered.length > 10 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px 20px",
-      borderRadius: 14,
-      background: t.surface,
-      border: `1px solid ${t.bdr}`,
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14,
-      fontFamily: t.serif,
-      color: t.tx,
-      marginBottom: 4
-    }
-  }, "Veckans 5 fynd"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: t.txL
-    }
-  }, "Handplockade viner \u2014 kommer snart.")), filtered.slice(10, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
+  })), filtered.slice(10, 50).map((p, i) => /*#__PURE__*/React.createElement(Card, {
     key: p.id || i,
     p: p,
     rank: i + 11,
@@ -6591,7 +6572,7 @@ function SmakfyndApp() {
       fontSize: 12,
       color: t.txL
     }
-  }, "Anv\xE4nd filter f\xF6r att hitta fler, eller logga in f\xF6r att se hela listan."))), /*#__PURE__*/React.createElement(Methodology, null), /*#__PURE__*/React.createElement(NewsletterCTA, null), /*#__PURE__*/React.createElement("footer", {
+  }, "Anv\xE4nd filter eller s\xF6k f\xF6r att hitta fler viner."))), /*#__PURE__*/React.createElement(Methodology, null), /*#__PURE__*/React.createElement(NewsletterCTA, null), /*#__PURE__*/React.createElement("footer", {
     style: {
       marginTop: 40,
       paddingTop: 24,
