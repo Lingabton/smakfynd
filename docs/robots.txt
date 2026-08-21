@@ -1,9 +1,6 @@
 User-agent: *
 Allow: /
 
-Disallow: /wines.json
-Disallow: /sw.js
-Disallow: /manifest.json
 Disallow: /admin/
 
 Sitemap: https://smakfynd.se/sitemap.xml
