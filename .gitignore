@@ -5,6 +5,7 @@ data/*
 !data/analytics_history.json
 !data/gsc_history.json
 !data/history
+!data/page_hashes.json
 vivino_log.txt
 node_modules/
 

@@ -8,13 +8,15 @@ Run: python3 scripts/generate_landing_pages.py
 Output: docs/basta-roda-vin/, docs/vin-under-100-kr/, etc.
 """
 
-import json, os
+import json, os, re
 from datetime import datetime
 from pathlib import Path
+import hashlib, subprocess
 
 BASE = str(Path(__file__).parent.parent)
 DATA_PATH = os.path.join(BASE, "data", "smakfynd_ranked_v2.json")
 DOCS = os.path.join(BASE, "docs")
+HASH_FILE = os.path.join(BASE, "data", "page_hashes.json")
 
 # Load all wines
 all_wines = json.load(open(DATA_PATH))
@@ -2075,35 +2077,87 @@ def render_page(page, all_pages=None):
 </body>
 </html>'''
 
+def _content_hash(html):
+    """Hash meaningful content, ignoring timestamps and cache busters."""
+    cleaned = re.sub(r'\?v=\d+', '', html)
+    cleaned = re.sub(r'Uppdaterad \w+ \d{4}', '', cleaned)
+    cleaned = re.sub(r'\d{4}-\d{2}-\d{2}', '', cleaned)
+    cleaned = re.sub(r'(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december) \d{4}', '', cleaned)
+    return hashlib.md5(cleaned.encode()).hexdigest()
+
+
+def _seed_date_from_git(page_path):
+    """Get last meaningful commit date for a page from git history."""
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ad", "--date=short", "--", page_path],
+            cwd=BASE, capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return datetime.now().strftime('%Y-%m-%d')
+
+
 def update_sitemap(pages):
     today = datetime.now().strftime('%Y-%m-%d')
-    urls = [f'''  <url>
+
+    # Load existing hashes — shared with the page write guard
+    hashes = {}
+    if os.path.exists(HASH_FILE):
+        hashes = json.load(open(HASH_FILE))
+
+    def get_lastmod(slug, page_path):
+        idx = os.path.join(page_path, "index.html") if os.path.isdir(page_path) else page_path
+        if not os.path.exists(idx):
+            return today
+        html = open(idx).read()
+        h = _content_hash(html)
+        entry = hashes.get(slug, {})
+        old_hash = entry.get("hash")
+        old_date = entry.get("lastmod")
+        if old_hash == h and old_date:
+            return old_date
+        elif old_hash is None and old_date is None:
+            seeded = _seed_date_from_git(idx)
+            hashes[slug] = {"hash": h, "lastmod": seeded}
+            return seeded
+        else:
+            hashes[slug] = {"hash": h, "lastmod": today}
+            return today
+
+    urls = []
+    home_path = os.path.join(DOCS, "index.html")
+    home_mod = get_lastmod("/", home_path)
+    urls.append(f'''  <url>
     <loc>https://smakfynd.se</loc>
-    <lastmod>{today}</lastmod>
+    <lastmod>{home_mod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>''']
+  </url>''')
 
-    # Collect slugs from generated pages
     slugs = set()
     for p in pages:
         slugs.add(p["slug"])
+        page_dir = os.path.join(DOCS, p["slug"])
+        mod = get_lastmod(p["slug"], page_dir)
         urls.append(f'''  <url>
     <loc>https://smakfynd.se/{p["slug"]}/</loc>
-    <lastmod>{today}</lastmod>
+    <lastmod>{mod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>''')
 
-    # Also include any other landing page directories (from other generators)
     skip = {'integritet', 'tack', 'admin', 'specs', 'sw.js', 'manifest.json'}
     for d in sorted(os.listdir(DOCS)):
         full = os.path.join(DOCS, d)
         if os.path.isdir(full) and d not in slugs and d not in skip and os.path.exists(os.path.join(full, 'index.html')):
             slugs.add(d)
+            mod = get_lastmod(d, full)
             urls.append(f'''  <url>
     <loc>https://smakfynd.se/{d}/</loc>
-    <lastmod>{today}</lastmod>
+    <lastmod>{mod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>''')
@@ -2116,7 +2170,11 @@ def update_sitemap(pages):
     path = os.path.join(DOCS, 'sitemap.xml')
     with open(path, 'w') as f:
         f.write(sitemap)
+
+    json.dump(hashes, open(HASH_FILE, 'w'), indent=2)
     print(f"Sitemap: {len(urls)} URLs → {path}")
+    dates = set(e.get("lastmod") for e in hashes.values() if isinstance(e, dict))
+    print(f"  Lastmod dates: {len(dates)} distinct values")
 
 def main():
     pages = make_pages()

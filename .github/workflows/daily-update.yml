@@ -67,18 +67,6 @@ jobs:
           python3 scripts/generate_landing_pages.py
           python3 scripts/generate_monthly_seo.py
           python3 scripts/generate_prissankt.py
-          # Add monthly pages to sitemap
-          python3 -c "
-          from datetime import datetime
-          today = datetime.now().strftime('%Y-%m-%d')
-          sitemap = open('docs/sitemap.xml').read()
-          month_sv = ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'][datetime.now().month - 1]
-          monthly = [f'basta-vin-{month_sv}-{datetime.now().year}', 'billigt-och-bra-vin', 'basta-boxvin', 'vin-till-midsommar', 'vin-till-kraftskiva']
-          for slug in monthly:
-              if slug not in sitemap:
-                  sitemap = sitemap.replace('</urlset>', f'  <url>\n    <loc>https://smakfynd.se/{slug}/</loc>\n    <lastmod>{today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n</urlset>')
-          open('docs/sitemap.xml', 'w').write(sitemap)
-          "
 
       - name: Fetch GSC data
         env:
@@ -105,7 +93,7 @@ jobs:
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json
+          git add docs/ site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json data/page_hashes.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
