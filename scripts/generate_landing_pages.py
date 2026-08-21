@@ -1693,7 +1693,7 @@ def get_cross_links(current_slug, all_pages):
     other = [p for p in all_pages if p['slug'] != current_slug and p.get('wines') and p['slug'] not in tags.get(my_cat, [])]
     return (same[:2] + other[:3])[:5]
 
-def render_page(page, all_pages=None):
+def render_page(page, all_pages=None, modified_date=None):
     is_deals = page['slug'] == 'prissankt-vin'
     wines_html = '\n'.join(render_wine_row(w, i+1, sortable=is_deals) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
@@ -1792,8 +1792,9 @@ def render_page(page, all_pages=None):
       </dl>
     </div>'''
 
-    # Today's date for article meta
-    today_iso = datetime.now().strftime('%Y-%m-%d')
+    # article:modified_time — use the date of last real content change,
+    # not today's date, to avoid signalling false churn to crawlers.
+    today_iso = modified_date or datetime.now().strftime('%Y-%m-%d')
 
     # JSON-LD for the wine list
     items_ld = []
@@ -2178,28 +2179,50 @@ def update_sitemap(pages):
 
 def main():
     pages = make_pages()
-    generated = 0
+    today = datetime.now().strftime('%Y-%m-%d')
+
+    # Load existing page hashes (shared with sitemap lastmod)
+    hashes = {}
+    if os.path.exists(HASH_FILE):
+        hashes = json.load(open(HASH_FILE))
+
+    written = 0
+    skipped = 0
 
     for page in pages:
         if not page['wines'] and page['slug'] not in ('alkoholfritt-vin',):
             print(f"  Skip {page['slug']} (no wines)")
             continue
 
-        # Create directory
-        page_dir = os.path.join(DOCS, page['slug'])
+        slug = page['slug']
+        page_dir = os.path.join(DOCS, slug)
+        out_path = os.path.join(page_dir, 'index.html')
         os.makedirs(page_dir, exist_ok=True)
 
-        # Write HTML
-        html = render_page(page, all_pages=pages)
-        out_path = os.path.join(page_dir, 'index.html')
-        with open(out_path, 'w') as f:
-            f.write(html)
+        # Determine the modified date for this page
+        entry = hashes.get(slug, {})
 
-        print(f"  {page['slug']}/: {len(page['wines'])} wines ({os.path.getsize(out_path)/1024:.0f} KB)")
-        generated += 1
+        # Render with today to compute content hash
+        html = render_page(page, all_pages=pages, modified_date=today)
+        new_hash = _content_hash(html)
+        old_hash = entry.get("hash")
+
+        if old_hash == new_hash:
+            # Content unchanged — do not rewrite the file
+            skipped += 1
+        else:
+            # Content changed — write the file with today's date
+            hashes[slug] = {"hash": new_hash, "lastmod": today}
+            with open(out_path, 'w') as f:
+                f.write(html)
+            print(f"  {slug}/: {len(page['wines'])} wines ({os.path.getsize(out_path)/1024:.0f} KB) [CHANGED]")
+            written += 1
+
+    # Persist hashes (shared with sitemap)
+    json.dump(hashes, open(HASH_FILE, 'w'), indent=2)
 
     update_sitemap(pages)
-    print(f"\nGenerated {generated} landing pages")
+    print(f"\nLanding pages: {written} written, {skipped} unchanged")
 
 if __name__ == "__main__":
     main()
