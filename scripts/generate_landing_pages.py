@@ -2088,14 +2088,38 @@ def _content_hash(html):
 
 
 def _seed_date_from_git(page_path):
-    """Get last meaningful commit date for a page from git history."""
+    """Find when the current content hash was introduced, not when the file was last touched.
+    Walks git history computing content hashes until it finds a revision with different content.
+    The commit after that is the one that introduced the current content."""
     try:
+        # Get current content hash
+        current_html = open(page_path).read()
+        current_h = _content_hash(current_html)
+
+        # Walk commits that touched this file
         result = subprocess.run(
-            ["git", "log", "-1", "--format=%ad", "--date=short", "--", page_path],
-            cwd=BASE, capture_output=True, text=True, timeout=5
+            ["git", "log", "--format=%H %ad", "--date=short", "--", page_path],
+            cwd=BASE, capture_output=True, text=True, timeout=10
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+        if result.returncode != 0 or not result.stdout.strip():
+            return datetime.now().strftime('%Y-%m-%d')
+
+        commits = [line.split(' ', 1) for line in result.stdout.strip().split('\n') if line]
+        # Find the oldest consecutive commit carrying the current hash
+        last_matching_date = commits[0][1] if commits else datetime.now().strftime('%Y-%m-%d')
+        for sha, date in commits:
+            try:
+                html = subprocess.run(
+                    ["git", "show", f"{sha}:{page_path}"],
+                    cwd=BASE, capture_output=True, text=True, timeout=5
+                ).stdout
+                if _content_hash(html) == current_h:
+                    last_matching_date = date
+                else:
+                    break  # Found a revision with different content
+            except Exception:
+                break
+        return last_matching_date
     except Exception:
         pass
     return datetime.now().strftime('%Y-%m-%d')

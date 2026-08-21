@@ -1,8 +1,4 @@
 {
-  "/": {
-    "hash": "5ae4550b6660005a41342d37a4da24e7",
-    "lastmod": "2026-08-21"
-  },
   "basta-roda-vin": {
     "hash": "01525dabc2b4837eb07cfd9f7fc489f8",
     "lastmod": "2026-08-21"
@@ -353,6 +349,10 @@
   },
   "vin-till-kraftskiva": {
     "hash": "ee3b4e7bccec61277ec12f2a3407ddfc",
+    "lastmod": "2026-08-21"
+  },
+  "/": {
+    "hash": "5ae4550b6660005a41342d37a4da24e7",
     "lastmod": "2026-08-21"
   },
   "basta-bag-in-box": {
