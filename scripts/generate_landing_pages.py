@@ -120,7 +120,7 @@ def make_pages():
                 ("Hur länge håller ett öppnat rött vin?", "Ett öppnat rött vin håller 3–5 dagar i kylen med korken i. Fylligare viner håller längre. Lätta röda som Pinot Noir bör drickas inom 2–3 dagar."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vita-vin",
@@ -143,7 +143,7 @@ def make_pages():
                 ("Ska vitt vin alltid serveras kallt?", "Ja, men inte iskallt. 8–10°C är idealt för de flesta vita viner. Riktigt fyllda, fatlagrade vita viner kan serveras lite varmare, runt 10–12°C."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-bubbel",
@@ -166,7 +166,7 @@ def make_pages():
                 ("Kan man dricka bubbel till mat?", "Absolut! Bubbel med hög syra som Champagne och Crémant passar utmärkt till skaldjur, sushi och lätta förrätter. Även friterad mat funkar förvånansvärt bra."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Mousserande' and w.get('pkg') == 'Flaska'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-rose",
@@ -189,7 +189,7 @@ def make_pages():
                 ("Vad är skillnaden på billig och dyr rosé?", "Dyrare Provence-roséer ger ofta mer komplexitet och elegans. Men i prisklassen under 150 kr finns det roséer från Spanien, Italien och Sydafrika som presterar lika bra i blindtester. Pris är inte alltid = kvalitet."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-under-100-kr",
@@ -212,7 +212,7 @@ def make_pages():
                 ("Vilket är det bästa billiga röda vinet?", "Det varierar, men chilensk Cabernet Sauvignon och argentinsk Malbec brukar dominera i prisklassen under 100 kr. Kolla vår topplista för det senaste."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-under-150-kr",
@@ -235,7 +235,7 @@ def make_pages():
                 ("Är dyrare vin alltid bättre?", "Nej. Vår data visar att sambandet mellan pris och kvalitet är starkast under 200 kr. Över det betalar du ofta för varumärke, region eller sällsynthet — inte nödvändigtvis bättre smak."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-grillat",
@@ -268,7 +268,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any('fisk' in (f or '').lower() or 'skaldjur' in (f or '').lower()
                                    for f in (w.get('food_pairings') or []))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-pasta",
@@ -279,7 +279,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 5 and (w.get('taste_body') or 0) <= 9
                            and (w.get('price', 0) or 0) <= 200],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-malbec",
@@ -290,7 +290,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'malbec' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-cabernet-sauvignon",
@@ -302,7 +302,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'cabernet sauvignon' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "ekologiskt-vin",
@@ -311,7 +311,7 @@ def make_pages():
             "h1": f"Bästa ekologiska vinerna — {DATE_STR}",
             "intro": "Ekologiskt och gott behöver inte vara dyrt. Här är de bästa eko-vinerna på Systembolaget.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('organic')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-ost",
@@ -321,7 +321,7 @@ def make_pages():
             "intro": "Ost och vin är en klassisk kombination. Här är vinerna som passar bäst — från mjuk brie till lagrad cheddar.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any('ost' in (f or '').lower() for f in (w.get('food_pairings') or []))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Druvor ───
@@ -335,7 +335,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'pinot noir' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-syrah-shiraz",
@@ -346,7 +346,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and ('syrah' in (w.get('grape', '') or '').lower() or 'shiraz' in (w.get('grape', '') or '').lower())],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-riesling",
@@ -371,7 +371,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'riesling' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-tempranillo",
@@ -382,7 +382,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'tempranillo' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-sangiovese",
@@ -393,7 +393,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'sangiovese' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-chardonnay",
@@ -404,7 +404,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'chardonnay' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-sauvignon-blanc",
@@ -415,7 +415,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'sauvignon blanc' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-zinfandel",
@@ -426,7 +426,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'zinfandel' in (w.get('grape', '') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Länder ───
@@ -451,7 +451,7 @@ def make_pages():
                 ("Vilka italienska viner passar till pasta?", "Till tomatsås: Sangiovese (Chianti) eller Montepulciano d'Abruzzo. Till krämig pasta: en fyllig vit som Vermentino. Till pesto: Vermentino eller en lätt Pinot Grigio."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Italien'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-franska-vin",
@@ -474,7 +474,7 @@ def make_pages():
                 ("Vad betyder AOC och AOP på franska viner?", "AOC (Appellation d'Origine Contrôlée) och AOP (Appellation d'Origine Protégée) är samma sak — en kvalitetsgaranti som säkerställer att vinet kommer från en specifik region och följer lokala regler för druvor och produktion."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Frankrike'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-spanska-vin",
@@ -497,7 +497,7 @@ def make_pages():
                 ("Vilken spansk vinregion är bäst?", "Rioja är den mest kända och pålitliga. Ribera del Duero ger kraftfullare stil. Priorat är för den som vill ha koncentrerat och komplext. För budgetfynd: kolla Jumilla och Campo de Borja."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Spanien'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-chilenska-vin",
@@ -507,7 +507,7 @@ def make_pages():
             "intro": "Chile levererar fantastisk kvalitet till låga priser. Här är de bästa chilenska fynden.",
             "intro2": "Chilenska viner dominerar budgetsegmentet på Systembolaget med druvor som Cabernet Sauvignon, Carmenère och Sauvignon Blanc. Vinregionerna sträcker sig från svala Casablanca till varma Maule. Chile är perfekt för dig som vill ha kvalitetsvin utan att betala europapremium.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Chile'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-sydafrikanska-vin",
@@ -517,7 +517,7 @@ def make_pages():
             "intro": "Sydafrika är en underskattad vinproducent med fantastisk prisvärdhet. Här är de bästa köpen.",
             "intro2": "Sydafrikanska viner på Systembolaget är ofta bland de mest prisvärda. Pinotage är landets signaturdruva, men Chenin Blanc, Shiraz och Cabernet ger också utmärkt kvalitet. Vinregionen Stellenbosch producerar Sydafrikas mest ansedda viner.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Sydafrika'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-australiska-vin",
@@ -526,7 +526,7 @@ def make_pages():
             "h1": f"Bästa australiska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Australien gör kraftfulla, generösa viner. Här är de bästa fynden på Systembolaget.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Australien'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-portugisiska-vin",
@@ -535,7 +535,7 @@ def make_pages():
             "h1": f"Bästa portugisiska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Portugal är ett av Europas mest prisvärda vinländer. Här är de bästa köpen.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Portugal'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Tillfällen ───
@@ -547,7 +547,7 @@ def make_pages():
             "intro": "En dejt förtjänar ett vin som imponerar. Här är vinerna som ger rätt känsla — elegant, omtyckt och prisvärt.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('expert_score') or 0) >= 7 and (w.get('price', 0) or 0) >= 120 and (w.get('price', 0) or 0) <= 300],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-julmat",
@@ -559,7 +559,7 @@ def make_pages():
                            and any(k in (f or '').lower() for k in ['fläsk', 'skinka', 'kött', 'fisk', 'lamm']
                                    for f in (w.get('food_pairings') or []))
                            and (w.get('smakfynd_score', 0) or 0) >= 70],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-kyckling",
@@ -570,7 +570,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any('fågel' in (f or '').lower() or 'kyckling' in (f or '').lower()
                                    for f in (w.get('food_pairings') or []))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Pris ───
@@ -591,7 +591,7 @@ def make_pages():
                 ]
             },
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-premium-vin",
@@ -602,7 +602,7 @@ def make_pages():
             "intro2": "Premiumviner mellan 200 och 500 kr på Systembolaget inkluderar lagade Bordeaux, Barolo, topprankade Rhône-viner och exklusiva Nya världen-producenter. Här spelar expertbetyg stor roll — skillnaden mellan bra och fantastiskt syns tydligt i denna prisklass.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 200 and (w.get('price', 0) or 0) <= 500],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "prissankt-vin",
@@ -624,7 +624,7 @@ def make_pages():
             "intro": "Du gillar kraftfulla, fylliga viner? Här är de röda som ger mest smak — med hög kropp och intensitet.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 8],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "latta-vita-vin",
@@ -634,7 +634,7 @@ def make_pages():
             "intro": "Fräscht, lätt och syradriven? Här är de vita vinerna som fungerar perfekt som aperitif eller till lättare rätter.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Vitt'
                            and (w.get('taste_body') or 12) <= 5],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Regioner ───
@@ -647,7 +647,7 @@ def make_pages():
             "intro2": "Bordeaux terroir är unikt: havsnära klimat, grus- och lerjordar och sekler av vinkunskap skapar viner med struktur, elegans och lagringspotential. På Systembolaget finns allt från prisvärda Côtes de Bordeaux till exklusiva Saint-Émilion och Médoc. Vi har rankat alla Bordeaux-viner efter kvalitet per krona för att hitta de verkliga fynden.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Bordeaux'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-toscana",
@@ -658,7 +658,7 @@ def make_pages():
             "intro2": "Toscana levererar viner i alla prisklasser. Chianti Classico DOCG ger pålitlig kvalitet med Sangiovese-druvan i centrum, medan Brunello di Montalcino och Vino Nobile di Montepulciano erbjuder djupare komplexitet. Super Toscans blandar internationella druvor med italiensk finesse. Vi har rankat alla Toscana-viner efter kvalitet per krona.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Toscana'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-rioja",
@@ -669,7 +669,7 @@ def make_pages():
             "intro2": "Rioja-viner delas in efter lagringstid: Joven (ung), Crianza (1 år i fat), Reserva (3 år totalt) och Gran Reserva (5 år totalt). Tempranillo dominerar, ofta med inslag av Garnacha och Graciano. Crianza ger ofta bäst prisvärdhet, medan Reserva och Gran Reserva erbjuder mer komplexitet och mognad. Vi rankar alla Rioja-viner efter smak och prisvärdhet.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Rioja'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-bourgogne",
@@ -680,7 +680,7 @@ def make_pages():
             "intro2": "Bourgogne producerar världens mest eftertraktade Pinot Noir (röda) och Chardonnay (vita). Regionen är känd för sitt terroirfokus där varje vingård ger unika karaktärsdrag. Från fräsch Chablis till fyllig Meursault bland vita, och från elegant Beaune till kraftfull Gevrey-Chambertin bland röda — Bourgogne har enorm bredd. Priserna varierar kraftigt, men det finns fynd att göra.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Bourgogne'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-rhonedalen",
@@ -691,7 +691,7 @@ def make_pages():
             "intro2": "Rhônedalen delas i norra och södra. Norra Rhône ger koncentrerade Syrah-viner från Côte-Rôtie, Hermitage och Cornas. Södra Rhône domineras av GSM-blandningar (Grenache, Syrah, Mourvèdre) med Châteauneuf-du-Pape som kronjuvel. Côtes du Rhône och Côtes du Rhône Villages erbjuder fantastisk prisvärdhet och är ofta bland Systembolagets bästa köp.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Rhonedalen'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Fler tillfällen ───
@@ -705,7 +705,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('type') == 'Mousserande'
                                 or (w.get('type') in ('Vitt', 'Rosé') and (w.get('taste_body') or 12) <= 6))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-lax",
@@ -735,7 +735,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé')
                            and any('fisk' in (f or '').lower() for f in (w.get('food_pairings') or []))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-tacos",
@@ -748,7 +748,7 @@ def make_pages():
                            and (w.get('price', 999) or 999) <= 150
                            and ((w.get('type') == 'Rött' and (w.get('taste_body') or 0) >= 4 and (w.get('taste_body') or 0) <= 8)
                                 or w.get('type') == 'Rosé')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Fler regioner ───
@@ -761,7 +761,7 @@ def make_pages():
             "intro2": "Bara mousserande vin från Champagne-regionen i Frankrike får kallas Champagne. Till skillnad från Cava, Prosecco och Crémant genomgår äkta Champagne en andra jäsning på flaskan som ger den karaktäristiska finheten, de små bubblorna och den komplexa smaken av brioche och rostad nöt. Priserna är högre, men kvalitetsskillnaden mot andra mousserande viner märks tydligt. Vi har rankat alla äkta Champagne-viner i Systembolagets fasta sortiment efter kvalitet per krona.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Champagne' and w.get('type') == 'Mousserande'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-languedoc",
@@ -772,7 +772,7 @@ def make_pages():
             "intro2": "Languedoc-Roussillon är Frankrikes största vinregion och en guldgruva för prisvärda viner. Här odlas Syrah, Grenache, Carignan och Mourvèdre i medelhavsklimat som ger mogna, generösa viner med kryddiga och fruktiga toner. Regionen har genomgått en kvalitetsrevolution de senaste decennierna — dagens Languedoc-viner håller ofta samma nivå som betydligt dyrare Rhône- och Bordeaux-viner. Ett av Systembolagets bäst bevarade vinfynd.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and 'languedoc' in (w.get('region') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-vin-fran-alsace",
@@ -783,7 +783,7 @@ def make_pages():
             "intro2": "Alsace i nordöstra Frankrike producerar några av världens bästa vita viner. Riesling ger mineraliska, torra viner med fantastisk lagringspotential, medan Gewürztraminer bjuder på exotiska aromer av lychee, ros och kryddor. Pinot Gris levererar fylliga, runda viner och Crémant d'Alsace är ett av Frankrikes bästa mousserande fynd. Alsace-viner säljs på druva (inte region som i övriga Frankrike), vilket gör det lätt att välja rätt.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Alsace'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-kaliforniska-vin",
@@ -806,7 +806,7 @@ def make_pages():
                 ("Vad skiljer kaliforniskt vin från europeiskt?", "Kalifornien ger generellt mognare, fruktigare viner med mer generös stil. Europeiska viner tenderar att vara stramare och mer jordiga. Ingen stil är bättre — det handlar om smak."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Fler pris & smakprofiler ───
@@ -831,7 +831,7 @@ def make_pages():
                 ("Vilket är det bästa billigaste vinet?", "Det varierar, men i prisklassen under 80 kr dominerar chilensk Cabernet Sauvignon och sydafrikansk Chenin Blanc. Kolla vår topplista för det senaste — den uppdateras varje vecka."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "fruktiga-roda-vin",
@@ -855,7 +855,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_fruit') or 0) >= 8],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "ekologiskt-vin-under-150-kr",
@@ -879,7 +879,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('organic') and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 150],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "torra-vita-vin",
@@ -903,7 +903,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_sweet') is not None and (w.get('taste_sweet') or 0) <= 3)],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Nya sidor: seasonal + long-tail ───
@@ -914,7 +914,7 @@ def make_pages():
             "h1": f"Bästa vinerna under 90 kr — {DATE_STR}",
             "intro": "Du behöver inte spendera mycket för att dricka bra. Här är de bästa vinerna under 90 kr — vardagsfavoriter med hög poäng.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "sommarvin",
@@ -925,7 +925,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
                            and (w.get('price', 999) or 999) <= 200],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "hostvin",
@@ -935,7 +935,7 @@ def make_pages():
             "intro": "Hösten kallar på varma, fylliga viner. Här är de röda vinerna som passar perfekt till viltstuvning, svampsås och mörka novemberkvällar.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 7],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-pizza",
@@ -946,7 +946,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('country') == 'Italien' or w.get('grape', '').lower() in ('sangiovese', 'primitivo', 'montepulciano'))
                            and w.get('type') in ('Rött', 'Vitt')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-sushi",
@@ -957,7 +957,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
                            and (w.get('taste_sweet') is None or (w.get('taste_sweet') or 0) <= 4)],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-lamm",
@@ -968,7 +968,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 7
                            and any(g in (w.get('grape') or '').lower() for g in ['syrah', 'shiraz', 'tempranillo', 'cabernet', 'malbec', 'grenache', 'mourvèdre'])],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-picknick",
@@ -979,7 +979,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Rosé', 'Vitt', 'Mousserande')
                            and (w.get('price', 999) or 999) <= 150],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-merlot",
@@ -990,7 +990,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'merlot' in (w.get('grape') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-grenache",
@@ -1001,7 +1001,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and any(g in (w.get('grape') or '').lower() for g in ['grenache', 'garnacha'])],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-argentinska-vin",
@@ -1010,7 +1010,7 @@ def make_pages():
             "h1": f"Bästa argentinska vinerna — {DATE_STR}",
             "intro": "Argentina = Malbec. Men det finns mer — Torrontés, Cabernet Franc och spännande blandningar. Här är de bästa argentinska vinerna just nu.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Argentina'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-cava",
@@ -1039,7 +1039,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('country') == 'Spanien'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "mousserande-vin-under-150-kr",
@@ -1050,7 +1050,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and (w.get('price', 999) or 999) < 150],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-svamp",
@@ -1077,7 +1077,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and any(g in (w.get('grape') or '').lower() for g in ['pinot noir', 'nebbiolo', 'barbera', 'chardonnay', 'barolo'])
                            and (w.get('taste_body') or 0) >= 5],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-nyar",
@@ -1086,7 +1086,7 @@ def make_pages():
             "h1": f"Bästa vinerna till nyår",
             "intro": "Nyår kräver bubbel! Här är de bästa mousserande vinerna för att fira in det nya året — från prisvärd Cava till exklusiv Champagne.",
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Mousserande'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-carmenere",
@@ -1097,7 +1097,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'carm' in (w.get('grape') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         # ─── Nya SEO-sidor (maj 2026) ───
 
@@ -1124,7 +1124,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('region') == 'Champagne'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # Röda boxviner
@@ -1138,7 +1138,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
                            and w.get('type') == 'Rött' and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # Vita boxviner
@@ -1165,7 +1165,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
                            and w.get('type') == 'Vitt' and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # Alkoholfritt vin (informationssida — data saknas i scoring)
@@ -1216,7 +1216,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('organic')
                            and any(g in (w.get('grape') or '').lower() for g in ['gamay', 'cabernet franc', 'chenin', 'grenache', 'cinsault', 'carignan'])],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # Vin för nybörjare
@@ -1244,7 +1244,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) <= 150
                            and w.get('smakfynd_score', 0) >= 80],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Presenter ───
@@ -1271,7 +1271,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 500
                            and w.get('smakfynd_score', 0) >= 80],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Situationsbaserade (kompletterande) ───
@@ -1285,7 +1285,7 @@ def make_pages():
                            and (w.get('price', 0) or 0) <= 150
                            and w.get('smakfynd_score', 0) >= 75
                            and (w.get('taste_body') or 6) <= 8],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "vin-till-svarforaldrar",
@@ -1296,7 +1296,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 350
                            and w.get('smakfynd_score', 0) >= 80],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Norska besökare ───
@@ -1321,7 +1321,7 @@ def make_pages():
                 ("Hur mycket vin får man ta med till Norge?", "Kvoten för skattefri införsel är begränsad. Kontrollera aktuella regler på toll.no innan du åker. Du kan ta med mer men betalar avgift."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         {
@@ -1345,7 +1345,7 @@ def make_pages():
                 ("Hvor mye vin kan man ta med til Norge?", "Kvoten for avgiftsfri innførsel er begrenset. Sjekk gjeldende regler på toll.no før du reiser. Du kan ta med mer, men betaler avgift."),
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Rosé-kluster (breakout-kategori) ───
@@ -1371,7 +1371,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 100],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-provence-rose",
@@ -1395,7 +1395,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and ('provence' in (w.get('region') or '').lower() or 'frankrike' == w.get('country','').lower())],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "rose-till-grillat",
@@ -1415,7 +1415,7 @@ def make_pages():
             },
             "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_body') or 0) >= 4],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Bubbel-kluster ───
@@ -1444,7 +1444,7 @@ def make_pages():
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) < 300],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "champagne-under-500-kr",
@@ -1472,7 +1472,7 @@ def make_pages():
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) >= 300
                            and (w.get('price', 999) or 999) < 500],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-prosecco",
@@ -1497,7 +1497,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and w.get('country') == 'Italien'],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
             "slug": "basta-cremant",
@@ -1523,7 +1523,7 @@ def make_pages():
                            and w.get('type') == 'Mousserande'
                            and w.get('country') == 'Frankrike'
                            and 'champagne' not in (w.get('region') or '').lower()],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Boxvin (moved from monthly_seo for full template) ───
@@ -1551,7 +1551,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
                            and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Midsommar (moved from monthly_seo for full template) ───
@@ -1579,7 +1579,7 @@ def make_pages():
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('type') in ('Vitt', 'Rosé', 'Mousserande'))
                            and (w.get('price', 999) or 999) <= 200],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
         # ─── Kräftskiva (moved from monthly_seo for full template) ───
@@ -1605,7 +1605,7 @@ def make_pages():
             ],
             "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
                            and (w.get('type') in ('Vitt', 'Mousserande'))],
-                          key=lambda x: -x.get('smakfynd_score', 0)))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
     ]
 

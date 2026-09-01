@@ -100,7 +100,7 @@ if format_removed:
 # Deduplicate: keep highest-scored wine when name+sub is identical
 seen_keys = {}
 deduped = []
-for p in sorted(data, key=lambda x: -(x.get('smakfynd_score', 0))):
+for p in sorted(data, key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))):
     key = (p.get('name', '').strip().lower(), (p.get('sub', '') or '').strip().lower())
     if key not in seen_keys:
         seen_keys[key] = True
@@ -116,7 +116,7 @@ print(f"Fast sortiment: {len(fast)} | Tillfälligt/övrigt: {len(tillfälligt)}"
 print(f"After filter: {len(data)} products")
 
 # Include ALL scored wines — entire Systembolaget sortiment is searchable
-slim = sorted(data, key=lambda x: -(x.get('smakfynd_score', 0)))
+slim = sorted(data, key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', ''))))
 fast_count = sum(1 for p in slim if p.get('assortment') == 'Fast sortiment')
 other_count = len(slim) - fast_count
 print(f"  All wines: {len(slim)} (fast: {fast_count}, övrigt: {other_count})")
@@ -149,6 +149,7 @@ for p in slim:
         "country": p.get("country", ""),
         "grape": p.get("grape", ""),
         "smakfynd_score": p.get("smakfynd_score", 0),
+        "_score_raw": p.get("_score_raw", 0),
         "crowd_score": p.get("crowd_score"),
         "crowd_reviews": p.get("crowd_reviews", 0),
         "expert_score": p.get("expert_score"),
@@ -174,11 +175,6 @@ for p in slim:
     if p.get("style"): m["style"] = p["style"]
     if p.get("region"): m["region"] = p["region"]
     if p.get("expert_source"): m["expert_source"] = p["expert_source"]
-    if p.get("critics"):
-        m["critics"] = [{"c": c["critic"], "s": c["score"]} for c in p["critics"][:6]]
-    if p.get("num_critics"): m["num_critics"] = p["num_critics"]
-    if p.get("critic_spread") is not None: m["critic_spread"] = p["critic_spread"]
-    if p.get("critic_consensus"): m["critic_consensus"] = p["critic_consensus"]
     if p.get("launch_price"): m["launch_price"] = p["launch_price"]
     if p.get("price_vs_launch_pct"): m["price_vs_launch_pct"] = p["price_vs_launch_pct"]
     if p.get("drop_date"): m["drop_date"] = p["drop_date"]
@@ -193,7 +189,7 @@ for m in mini:
 
 # Sort each category by score descending
 for cat in by_cat:
-    by_cat[cat].sort(key=lambda x: -x.get("smakfynd_score", 0))
+    by_cat[cat].sort(key=lambda x: (-x.get("_score_raw", 0), str(x.get("nr", ""))))
 
 # Pre-compute rankings
 by_country_cat = {}
@@ -201,10 +197,10 @@ for m in mini:
     key = (m.get("country", ""), m.get("type", ""))
     by_country_cat.setdefault(key, []).append(m)
 for key in by_country_cat:
-    by_country_cat[key].sort(key=lambda x: -x.get("smakfynd_score", 0))
+    by_country_cat[key].sort(key=lambda x: (-x.get("_score_raw", 0), str(x.get("nr", ""))))
 
 # Reviews ranking
-by_reviews = sorted([m for m in mini if m.get("crowd_reviews")], key=lambda x: -x.get("crowd_reviews", 0))
+by_reviews = sorted([m for m in mini if m.get("crowd_reviews")], key=lambda x: (-x.get("crowd_reviews", 0), str(x.get("nr", ""))))
 top_reviewed_nrs = set(m["nr"] for m in by_reviews[:20])
 
 n_insights = 0

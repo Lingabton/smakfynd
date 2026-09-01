@@ -32,8 +32,7 @@ OPTIONAL_FIELDS = {
     "taste_fruit": (int, float), "taste_bitter": (int, float),
     "style": str, "region": str, "expert_source": str,
     "launch_price": (int, float), "price_vs_launch_pct": (int, float),
-    "is_new": bool, "critics": list, "num_critics": (int, float),
-    "critic_spread": (int, float), "critic_consensus": str,
+    "is_new": bool,
     "insight": str, "avail": (int, float), "drop_date": str,
     "vintage": (int, str),
 }
@@ -207,15 +206,22 @@ def validate(path):
         if 0 < len(articles) < MIN_WINES_PER_PAGE:
             warnings.append(f"[THIN_PAGE] /{slug}/: only {len(articles)} wines (min {MIN_WINES_PER_PAGE})")
 
-    # ── Corpus count shift >10% ──
+    # ── Corpus count stability (PA-3) ──
+    # Primary: anchor to locked constant. The count is a trust claim on every page.
+    LOCKED_CORPUS_COUNT = 4143  # Locked Aug 2026
+    locked_pct = abs(n - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
+    if locked_pct > 1:
+        errors.append(f"[CORPUS_SHIFT] Wine count {n} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
+
+    # Secondary: run-over-run drift check
     prev_count_file = DATA_DIR / "deploy" / "prev_corpus_count.txt"
     if prev_count_file.exists():
         try:
             prev_count = int(prev_count_file.read_text().strip())
             if prev_count > 0:
-                change_pct = abs(n - prev_count) / prev_count * 100
-                if change_pct > 10:
-                    errors.append(f"[CORPUS_SHIFT] Wine count {prev_count} -> {n} ({change_pct:.1f}%)")
+                run_pct = abs(n - prev_count) / prev_count * 100
+                if run_pct > 1:
+                    warnings.append(f"[CORPUS_DRIFT] Run-over-run: {prev_count} -> {n} ({run_pct:.1f}%)")
         except ValueError:
             pass
     prev_count_file.parent.mkdir(parents=True, exist_ok=True)

@@ -71,56 +71,89 @@ def normalize(p):
         "is_regional": p.get("isRegionalRestricted", False),
     }
 
+def fetch_category(cat_name, page_size, requests, delay=0.5):
+    """Fetch a single category. Returns (products_dict, expected_total)."""
+    products = {}
+    page = 1
+    expected_total = None
+    while True:
+        params = {
+            CAT_LEVEL: cat_name,
+            "size": page_size,
+            "page": page,
+            "sortBy": "Score",
+            "sortDirection": "Descending",
+        }
+        try:
+            r = requests.get(API_BASE, headers=HEADERS, params=params, timeout=30)
+            r.raise_for_status()
+            data = r.json()
+        except Exception as e:
+            print(f"    Error page {page}: {e}")
+            break
+
+        items = data.get("products", [])
+        if not items:
+            break
+
+        total = data.get("metadata", {}).get("docCount", 0)
+        if expected_total is None and total > 0:
+            expected_total = total
+
+        for p in items:
+            nr = str(p.get("productNumber", ""))
+            if nr and nr not in products:
+                products[nr] = normalize(p)
+
+        print(f"    Page {page}: {len(items)} products (cat: {len(products)}/{total})")
+
+        if len(products) >= total or len(items) < page_size:
+            break
+
+        page += 1
+        time.sleep(delay)
+
+    return products, expected_total or 0
+
+
 def fetch_all():
-    """Fetch all wine products from SB API."""
+    """Fetch all wine products from SB API with retry and guards."""
     import requests
+
+    allow_short = "--allow-short-fetch" in sys.argv
 
     all_products = {}
     page_size = 30
+    cat_results = {}
 
     for cat_name, _ in CATEGORIES:
         print(f"  Fetching {cat_name}...")
-        page = 1
-        cat_count = 0
-        while True:
-            params = {
-                CAT_LEVEL: cat_name,
-                "size": page_size,
-                "page": page,
-                "sortBy": "Score",
-                "sortDirection": "Descending",
-            }
-            try:
-                r = requests.get(API_BASE, headers=HEADERS, params=params, timeout=30)
-                r.raise_for_status()
-                data = r.json()
-            except Exception as e:
-                print(f"    Error page {page}: {e}")
-                break
+        products, expected = fetch_category(cat_name, page_size, requests)
 
-            products = data.get("products", [])
-            if not products:
-                break
+        # Retry once with backoff if short
+        if expected > 0 and len(products) / expected < 0.98:
+            pct = len(products) / expected * 100
+            print(f"    Short fetch ({pct:.0f}%), retrying with 2s delay...")
+            time.sleep(5)
+            products, expected = fetch_category(cat_name, page_size, requests, delay=2.0)
 
-            total = data.get("metadata", {}).get("docCount", 0)
+        all_products.update(products)
+        cat_results[cat_name] = (len(products), expected)
 
-            for p in products:
-                nr = str(p.get("productNumber", ""))
-                if nr and nr not in all_products:
-                    all_products[nr] = normalize(p)
-                    cat_count += 1
-
-            print(f"    Page {page}: {len(products)} products (cat: {cat_count}/{total}, all: {len(all_products)})")
-
-            if cat_count >= total or len(products) < page_size:
-                break
-
-            page += 1
-            time.sleep(0.5)
+    # Per-category docCount guard: abort if any category returned <98% of expected
+    for cat_name, (fetched, expected) in cat_results.items():
+        if expected > 0:
+            pct = fetched / expected * 100
+            print(f"  {cat_name}: {fetched}/{expected} ({pct:.0f}%)")
+            if pct < 98 and not allow_short:
+                print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%) — short fetch detected.")
+                print("  Aborting to prevent corpus collapse. Use --allow-short-fetch to override.")
+                raise SystemExit(1)
 
     products = list(all_products.values())
-    if len(products) < 1000:
-        print(f"\n  WARNING: Only {len(products)} products fetched (expected 3000+).")
+    # Absolute floor: API down or key expired
+    if len(products) < 8000 and not allow_short:
+        print(f"\n  ABORT: Only {len(products)} products fetched (expected 10000+).")
         print("  API may be down or key expired. Aborting to prevent data loss.")
         raise SystemExit(1)
     return products
