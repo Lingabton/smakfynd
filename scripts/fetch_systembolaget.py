@@ -29,6 +29,17 @@ CATEGORIES = [
     ("Mousserande vin", "vin"),
 ]
 
+# Per-category expected unique product counts. Recorded 2026-09-02 after
+# full pagination under Score sort. docCount overcounts due to API sort
+# instability (~20% duplicates); these are the true unique counts.
+# Update deliberately when the guard fires on real assortment change.
+EXPECTED_UNIQUE = {
+    "Rött vin": 5446,
+    "Vitt vin": 3622,
+    "Rosévin": 514,
+    "Mousserande vin": 1916,
+}
+
 # SB moved wine types from categoryLevel1 to categoryLevel2.
 # categoryLevel1 is now "Vin" for all wine types.
 CAT_LEVEL = "categoryLevel2"
@@ -72,16 +83,10 @@ def normalize(p):
     }
 
 def fetch_category(cat_name, page_size, requests, delay=0.5):
-    """Fetch a single category. Returns (products_dict, expected_total).
-
-    Completion: pages until last page < page_size OR 5 consecutive pages
-    yield zero new unique products, whichever comes first.
-    """
+    """Fetch a single category with per-page retry. Returns (products_dict, docCount)."""
     products = {}
     page = 1
-    expected_total = None
-    consecutive_no_new = 0
-    end_reason = None
+    doc_count = None
     while True:
         params = {
             CAT_LEVEL: cat_name,
@@ -90,23 +95,32 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
             "sortBy": "Score",
             "sortDirection": "Descending",
         }
-        try:
-            r = requests.get(API_BASE, headers=HEADERS, params=params, timeout=30)
-            r.raise_for_status()
-            data = r.json()
-        except Exception as e:
-            print(f"    Error page {page}: {e}")
-            end_reason = f"error: {e}"
-            break
+
+        # 3 attempts per page with exponential backoff
+        data = None
+        for attempt in range(3):
+            try:
+                r = requests.get(API_BASE, headers=HEADERS, params=params, timeout=30)
+                r.raise_for_status()
+                data = r.json()
+                break
+            except Exception as e:
+                backoff = [1, 2, 4][attempt]
+                if attempt < 2:
+                    print(f"    RETRY page {page} attempt {attempt+1}: {e} (backoff {backoff}s)")
+                    time.sleep(backoff)
+                else:
+                    print(f"    FATAL page {page} after 3 attempts: {e}")
+                    print(f"    ABORT: {cat_name} page {page} — persistent failure after 3 attempts.")
+                    raise SystemExit(1)
 
         items = data.get("products", [])
         if not items:
-            end_reason = "empty page"
             break
 
         total = data.get("metadata", {}).get("docCount", 0)
-        if expected_total is None and total > 0:
-            expected_total = total
+        if doc_count is None and total > 0:
+            doc_count = total
 
         before = len(products)
         for p in items:
@@ -115,26 +129,17 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
                 products[nr] = normalize(p)
         new_count = len(products) - before
 
-        if new_count == 0:
-            consecutive_no_new += 1
-        else:
-            consecutive_no_new = 0
-
-        print(f"    Page {page}: {len(items)} returned, {new_count} new (unique: {len(products)}/{total})")
+        if page % 50 == 0 or len(items) < page_size:
+            print(f"    Page {page}: {len(items)} returned, {new_count} new (unique: {len(products)})")
 
         if len(items) < page_size:
-            end_reason = "last page (short)"
-            break
-
-        if consecutive_no_new >= 5:
-            end_reason = "5 consecutive pages with zero new products"
             break
 
         page += 1
         time.sleep(delay)
 
-    print(f"    [{cat_name}] Done: {len(products)} unique, {page} pages, ended by: {end_reason}")
-    return products, expected_total or 0
+    print(f"    [{cat_name}] {len(products)} unique in {page} pages (docCount: {doc_count})")
+    return products, doc_count or 0
 
 
 def fetch_all():
@@ -149,22 +154,22 @@ def fetch_all():
 
     for cat_name, _ in CATEGORIES:
         print(f"  Fetching {cat_name}...")
-        products, expected = fetch_category(cat_name, page_size, requests)
+        products, doc_count = fetch_category(cat_name, page_size, requests)
         all_products.update(products)
-        cat_results[cat_name] = (len(products), expected)
+        cat_results[cat_name] = len(products)
 
-    # Disabled — docCount is not a reliable completeness reference under
-    # unstable sort. Pending fetch stability investigation.
-    # for cat_name, (fetched, expected) in cat_results.items():
-    #     if expected > 0:
-    #         pct = fetched / expected * 100
-    #         if pct < 98 and not allow_short:
-    #             print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%)")
-    #             raise SystemExit(1)
-
-    for cat_name, (fetched, expected) in cat_results.items():
-        pct = fetched / expected * 100 if expected > 0 else 0
-        print(f"  {cat_name}: {fetched} unique (docCount: {expected}, {pct:.0f}%)")
+    # Per-category guard: compare against expected unique counts, not docCount
+    for cat_name, fetched in cat_results.items():
+        expected = EXPECTED_UNIQUE.get(cat_name)
+        if expected:
+            pct = fetched / expected * 100
+            print(f"  {cat_name}: {fetched}/{expected} expected ({pct:.0f}%)")
+            if pct < 97 and not allow_short:
+                print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%) — below 97% threshold.")
+                print("  Use --allow-short-fetch to override.")
+                raise SystemExit(1)
+        else:
+            print(f"  {cat_name}: {fetched} (no expected count set)")
 
     products = list(all_products.values())
     # Absolute floor: API down or key expired
