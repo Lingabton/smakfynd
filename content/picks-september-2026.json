@@ -1,0 +1,47 @@
+{
+  "month": "september",
+  "year": 2026,
+  "picks": [
+    {
+      "nr": "7203801",
+      "category": "Bästa vita just nu",
+      "note": "Riesling från Tyskland till 115.0 kr.  [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "794101",
+      "category": "Bubbel-favorit",
+      "note": "Från Frankrike till 549.0 kr. 3122 har betygsatt den. [REDIGERA: Lägg till din personliga kommentar här]"
+    },
+    {
+      "nr": "1228401",
+      "category": "Dold pärla",
+      "note": "Jean Biecher Riesling Organic Réserve — Riesling från Frankrike, 119.0 kr. Få har hittat den ännu (0 omdömen) men poängen talar för sig. [REDIGERA: Lägg till din personliga kommentar här]"
+    }
+  ],
+  "wines": {
+    "7203801": {
+      "name": "Ruppertsberger",
+      "sub": "Imperial Riesling",
+      "price": 115.0,
+      "score": 93,
+      "country": "Tyskland",
+      "grape": "Riesling"
+    },
+    "794101": {
+      "name": "Champagne Taittinger",
+      "sub": "Demi-Sec",
+      "price": 549.0,
+      "score": 91,
+      "country": "Frankrike",
+      "grape": "Chardonnay, Pinot meunier, Pinot noir"
+    },
+    "1228401": {
+      "name": "Jean Biecher",
+      "sub": "Riesling Organic Réserve",
+      "price": 119.0,
+      "score": 93,
+      "country": "Frankrike",
+      "grape": "Riesling"
+    }
+  }
+}
