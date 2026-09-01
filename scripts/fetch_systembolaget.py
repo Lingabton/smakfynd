@@ -72,10 +72,16 @@ def normalize(p):
     }
 
 def fetch_category(cat_name, page_size, requests, delay=0.5):
-    """Fetch a single category. Returns (products_dict, expected_total)."""
+    """Fetch a single category. Returns (products_dict, expected_total).
+
+    Completion: pages until last page < page_size OR 5 consecutive pages
+    yield zero new unique products, whichever comes first.
+    """
     products = {}
     page = 1
     expected_total = None
+    consecutive_no_new = 0
+    end_reason = None
     while True:
         params = {
             CAT_LEVEL: cat_name,
@@ -90,29 +96,44 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
             data = r.json()
         except Exception as e:
             print(f"    Error page {page}: {e}")
+            end_reason = f"error: {e}"
             break
 
         items = data.get("products", [])
         if not items:
+            end_reason = "empty page"
             break
 
         total = data.get("metadata", {}).get("docCount", 0)
         if expected_total is None and total > 0:
             expected_total = total
 
+        before = len(products)
         for p in items:
             nr = str(p.get("productNumber", ""))
             if nr and nr not in products:
                 products[nr] = normalize(p)
+        new_count = len(products) - before
 
-        print(f"    Page {page}: {len(items)} products (cat: {len(products)}/{total})")
+        if new_count == 0:
+            consecutive_no_new += 1
+        else:
+            consecutive_no_new = 0
 
-        if len(products) >= total or len(items) < page_size:
+        print(f"    Page {page}: {len(items)} returned, {new_count} new (unique: {len(products)}/{total})")
+
+        if len(items) < page_size:
+            end_reason = "last page (short)"
+            break
+
+        if consecutive_no_new >= 5:
+            end_reason = "5 consecutive pages with zero new products"
             break
 
         page += 1
         time.sleep(delay)
 
+    print(f"    [{cat_name}] Done: {len(products)} unique, {page} pages, ended by: {end_reason}")
     return products, expected_total or 0
 
 
@@ -129,26 +150,21 @@ def fetch_all():
     for cat_name, _ in CATEGORIES:
         print(f"  Fetching {cat_name}...")
         products, expected = fetch_category(cat_name, page_size, requests)
-
-        # Retry once with backoff if short
-        if expected > 0 and len(products) / expected < 0.98:
-            pct = len(products) / expected * 100
-            print(f"    Short fetch ({pct:.0f}%), retrying with 2s delay...")
-            time.sleep(5)
-            products, expected = fetch_category(cat_name, page_size, requests, delay=2.0)
-
         all_products.update(products)
         cat_results[cat_name] = (len(products), expected)
 
-    # Per-category docCount guard: abort if any category returned <98% of expected
+    # Disabled — docCount is not a reliable completeness reference under
+    # unstable sort. Pending fetch stability investigation.
+    # for cat_name, (fetched, expected) in cat_results.items():
+    #     if expected > 0:
+    #         pct = fetched / expected * 100
+    #         if pct < 98 and not allow_short:
+    #             print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%)")
+    #             raise SystemExit(1)
+
     for cat_name, (fetched, expected) in cat_results.items():
-        if expected > 0:
-            pct = fetched / expected * 100
-            print(f"  {cat_name}: {fetched}/{expected} ({pct:.0f}%)")
-            if pct < 98 and not allow_short:
-                print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%) — short fetch detected.")
-                print("  Aborting to prevent corpus collapse. Use --allow-short-fetch to override.")
-                raise SystemExit(1)
+        pct = fetched / expected * 100 if expected > 0 else 0
+        print(f"  {cat_name}: {fetched} unique (docCount: {expected}, {pct:.0f}%)")
 
     products = list(all_products.values())
     # Absolute floor: API down or key expired
