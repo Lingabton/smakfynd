@@ -58,9 +58,10 @@ from constants import IN_STORE
 
 in_store = [w for w in all_wines if w.get('assortment') in IN_STORE]
 
-# Standard bottle filter for price-threshold pages: in-store + vol >= 750ml
-# Small formats (<750ml) are excluded from price lists (a 375ml at 70kr is not a value find)
-# Large formats (>750ml) and boxes survive
+# Standard bottle filter: vol >= 750ml (excludes half-bottles/piccolos)
+all_std = [w for w in all_wines if (w.get('vol') or 750) >= 750]
+
+# In-store + standard: default for price-threshold pages
 in_store_std = [w for w in in_store if (w.get('vol') or 750) >= 750]
 
 def dedup_wines(wines, max_per_producer=2):
@@ -1448,7 +1449,8 @@ def make_pages():
                 ("Finns det bra champagne under 300 kr?", "Ja. Flera champagner i denna prisklass får höga betyg från både crowd och experter. Hemligheten är att leta efter mindre kända producenter (grower-champagne) snarare än de stora husen."),
                 ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris. Kvalitetsmässigt kan bra Cava matcha billig champagne, men riktig champagne har en komplexitet som är svår att replikera."),
             ],
-            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska'
+            "ignore_in_store_filter": True,
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
@@ -2033,7 +2035,7 @@ def render_page(page, all_pages=None, modified_date=None):
     }
     </script>'''}
 
-    <p style="font-size:12px;color:#8a7a6a;margin:0 0 12px;padding:8px 12px;background:#fefcf8;border:1px solid #e6ddd0;border-radius:8px">Visar viner som finns i butik. <a href="https://smakfynd.se/#{page['slug']}/" style="color:#8b2332">Visa även beställningsvaror →</a></p>
+    {'<p style="font-size:12px;color:#8a7a6a;margin:0 0 12px;padding:8px 12px;background:#fefcf8;border:1px solid #e6ddd0;border-radius:8px">Visar viner som finns i butik. <a href="https://smakfynd.se/#' + page['slug'] + '/" style="color:#8b2332">Visa även beställningsvaror →</a></p>' if not page.get('ignore_in_store_filter') else ''}
 
     <ol style="list-style:none;padding:0;margin:0" id="wine-list">
 {wines_html}
