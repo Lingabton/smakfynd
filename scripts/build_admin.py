@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 """Build admin dashboard data: stats, data quality, flagged Vivino matches, analytics."""
-import json, os, subprocess
+import json, os, sys, subprocess
 from datetime import datetime
 from collections import Counter
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+from constants import load_wines
+
 DATA_DIR = os.path.join(BASE, "data")
 DOCS_DIR = os.path.join(BASE, "docs")
 ADMIN_DIR = os.path.join(DOCS_DIR, "admin")
 os.makedirs(ADMIN_DIR, exist_ok=True)
 
 # Load data sources
-ranked = json.load(open(os.path.join(DATA_DIR, "smakfynd_ranked_v2.json"))) if os.path.exists(os.path.join(DATA_DIR, "smakfynd_ranked_v2.json")) else []
+ranked_path = os.path.join(DATA_DIR, "smakfynd_ranked_v2.json")
+ranked = load_wines(ranked_path) if os.path.exists(ranked_path) else []
 wines_file = os.path.join(DOCS_DIR, "wines.json")
-wines = json.load(open(wines_file)) if os.path.exists(wines_file) else []
+wines = load_wines(wines_file) if os.path.exists(wines_file) else []
 vivino = json.load(open(os.path.join(DATA_DIR, "vivino_cache.json"))) if os.path.exists(os.path.join(DATA_DIR, "vivino_cache.json")) else {}
 flagged = json.load(open(os.path.join(DATA_DIR, "vivino_flagged.json"))) if os.path.exists(os.path.join(DATA_DIR, "vivino_flagged.json")) else {}
 expert = json.load(open(os.path.join(DATA_DIR, "expert_cache.json"))) if os.path.exists(os.path.join(DATA_DIR, "expert_cache.json")) else {}

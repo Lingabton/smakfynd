@@ -1,7 +1,22 @@
 # Shared constants for Smakfynd pipeline scripts
+import json
 
 # Wines physically available in Systembolaget stores.
 # Fast = permanent range, Tillfälligt = seasonal/limited (on shelves in select stores),
 # Lokalt & Småskaligt = regional (on shelves locally).
 # Ordervaror and Webblanseringar are NOT in-store — order only.
 IN_STORE = {"Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"}
+
+
+def load_wines(path):
+    """Load a wines file, accepting both the {meta, wines} envelope and a flat array.
+
+    Returns the wine list (always a list of dicts).
+    Works with docs/wines.json (envelope) and data/smakfynd_ranked_v2.json (flat).
+    """
+    data = json.load(open(path))
+    if isinstance(data, dict) and "wines" in data:
+        return data["wines"]
+    if isinstance(data, list):
+        return data
+    raise ValueError(f"Unexpected format in {path}: neither list nor {{meta, wines}}")

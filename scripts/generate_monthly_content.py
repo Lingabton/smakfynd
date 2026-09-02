@@ -15,6 +15,9 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.dirname(SCRIPT_DIR)
+sys.path.insert(0, SCRIPT_DIR)
+from constants import load_wines
+
 DATA_PATH_RANKED = os.path.join(BASE, "data", "smakfynd_ranked_v2.json")
 DATA_PATH_SLIM = os.path.join(BASE, "docs", "wines.json")
 DATA_PATH = DATA_PATH_RANKED if os.path.exists(DATA_PATH_RANKED) else DATA_PATH_SLIM
@@ -24,7 +27,7 @@ MONTH_SV = ['januari','februari','mars','april','maj','juni',
             'juli','augusti','september','oktober','november','december'][NOW.month - 1]
 YEAR = NOW.year
 
-all_wines = json.load(open(DATA_PATH))
+all_wines = load_wines(DATA_PATH)
 fast = [w for w in all_wines if w.get('assortment') == 'Fast sortiment' and w.get('pkg') == 'Flaska']
 
 def pick_wines():

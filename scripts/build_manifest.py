@@ -46,14 +46,14 @@ def row_count(path):
     if not path.exists():
         return None
     try:
-        data = json.load(open(path))
-        if isinstance(data, list):
-            return len(data)
-        elif isinstance(data, dict):
-            return len(data)
-        return None
+        from constants import load_wines
+        return len(load_wines(str(path)))
     except Exception:
-        return None
+        try:
+            data = json.load(open(path))
+            return len(data) if isinstance(data, list) else None
+        except Exception:
+            return None
 
 
 def emit_manifest():
