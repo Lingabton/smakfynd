@@ -55,8 +55,9 @@ for p in all_wines:
 fast = [w for w in all_wines if w.get('assortment') == 'Fast sortiment']
 
 # Standard bottle filter: exclude small formats (<750ml) from price-threshold pages
-# Large formats (>750ml) and boxes are honest value and survive
-fast_std = [w for w in fast if (w.get('vol') or 750) >= 750]
+# Volume filter only — assortment is NOT restricted (Ordervaror are legitimate value entries)
+# Large formats (>750ml) and boxes survive
+all_std = [w for w in all_wines if (w.get('vol') or 750) >= 750]
 
 def dedup_wines(wines, max_per_producer=2):
     """Remove duplicates and limit per producer. Hide large formats when standard exists."""
@@ -215,7 +216,7 @@ def make_pages():
                 ("Finns det bra vin under 100 kr?", "Ja, absolut. Särskilt från Chile, Argentina och Spanien hittar du viner som fått höga crowd-betyg och goda expertrecensioner. Nyckeln är att kolla kvalitetsrankingar istället för att gissa i hyllan."),
                 ("Vilket är det bästa billiga röda vinet?", "Det varierar, men chilensk Cabernet Sauvignon och argentinsk Malbec brukar dominera i prisklassen under 100 kr. Kolla vår topplista för det senaste."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -238,7 +239,7 @@ def make_pages():
                 ("Vilken typ av vin ska man välja under 150 kr?", "I denna prisklass fungerar alla typer bra. Röda viner från Spanien och Italien ger ofta mest komplexitet per krona. Vita viner som Sauvignon Blanc och Riesling är säkra kort. Mousserande (Cava, Crémant) ger champagnekänsla till en bråkdel av priset."),
                 ("Är dyrare vin alltid bättre?", "Nej. Vår data visar att sambandet mellan pris och kvalitet är starkast under 200 kr. Över det betalar du ofta för varumärke, region eller sällsynthet — inte nödvändigtvis bättre smak."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -594,7 +595,7 @@ def make_pages():
                     "Ekologiska viner i denna prisklass har blivit markant bättre de senaste åren.",
                 ]
             },
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -834,7 +835,7 @@ def make_pages():
                 ("Finns det drinkbart vin under 80 kr?", "Ja, det finns faktiskt riktigt trevliga viner under 80 kr. Framförallt från Chile och Sydafrika hittar du fruktiga, välgjorda viner som fungerar utmärkt till vardags. Nyckeln är att kolla betyg istället för att gissa."),
                 ("Vilket är det bästa billigaste vinet?", "Det varierar, men i prisklassen under 80 kr dominerar chilensk Cabernet Sauvignon och sydafrikansk Chenin Blanc. Kolla vår topplista för det senaste — den uppdateras varje vecka."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -881,7 +882,7 @@ def make_pages():
                 ("Smakar ekologiskt vin annorlunda?", "Inte nödvändigtvis, men många upplever att eko-viner har en renare, mer autentisk smak. Lägre svavelhalt kan ge en mer levande fruktkänsla. Kvalitetsskillnaden handlar mer om producenten än om certifieringen."),
                 ("Är ekologiskt vin bättre?", "Ekologiskt vin är bättre för miljön tack vare färre kemiska bekämpningsmedel och mer hållbar odling. Smäckmässigt beror det på producenten — men de bästa eko-vinerna håller absolut samma nivå som konventionella viner."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('organic') and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('organic') and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -917,7 +918,7 @@ def make_pages():
             "meta": f"Topp 20 bästa viner under 90 kr. Prisvärt och gott — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa vinerna under 90 kr — {DATE_STR}",
             "intro": "Du behöver inte spendera mycket för att dricka bra. Här är de bästa vinerna under 90 kr — vardagsfavoriter med hög poäng.",
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -1051,7 +1052,7 @@ def make_pages():
             "meta": f"Bubbel under 150 kr — festligt utan att ruinera dig. Rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa mousserande vinerna under 150 kr — {DATE_STR}",
             "intro": "Du behöver inte betala champagne-pris för riktigt bra bubbel. Här är de bästa mousserande vinerna under 150 kr — perfekta för fredagsmys, fest eller bara för att det är onsdag.",
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1373,7 +1374,7 @@ def make_pages():
                 ("Finns det bra rosé under 100 kr?", f"Ja. Flera roséer under hundralappen får över 75 av 100 i Smakfynd-poäng, vilket innebär att de slår betydligt dyrare alternativ i blind provning. De bästa kommer ofta från Spanien och Sydafrika."),
                 ("Vad skiljer billig rosé från dyr?", "Främst producent och region. Provence-rosé kostar mer pga varumärke och efterfrågan, inte nödvändigtvis kvalitet. Spanska roséer görs med samma metoder men har lägre marknadspris."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 100],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1443,7 +1444,7 @@ def make_pages():
                 ("Finns det bra champagne under 300 kr?", "Ja. Flera champagner i denna prisklass får höga betyg från både crowd och experter. Hemligheten är att leta efter mindre kända producenter (grower-champagne) snarare än de stora husen."),
                 ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris. Kvalitetsmässigt kan bra Cava matcha billig champagne, men riktig champagne har en komplexitet som är svår att replikera."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
@@ -1470,7 +1471,7 @@ def make_pages():
                 ("Är champagne under 500 kr bra?", "Ja — prisklassen 300–500 kr är sweet spot. Du får kvalitet som matchar eller överträffar stora hus som Veuve Clicquot och Moët, men från mindre kända producenter med mer fokus på vin än varumärke."),
                 ("Vad är grower-champagne?", "Grower-champagne (Récoltant-Manipulant, RM) görs av producenter som odlar egna druvor och gör eget vin. Till skillnad från stora hus som köper druvor ger growers mer terroir-driven, personlig champagne — ofta till bättre pris."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
