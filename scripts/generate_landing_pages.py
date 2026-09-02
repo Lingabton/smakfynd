@@ -2226,12 +2226,23 @@ def main():
     if os.path.exists(HASH_FILE):
         hashes = json.load(open(HASH_FILE))
 
+    # Allowlist: DEPLOY_PAGES env var limits which pages are written
+    # e.g. DEPLOY_PAGES="champagne-under-300-kr,vin-under-80-kr" python3 scripts/generate_landing_pages.py
+    deploy_allowlist = None
+    if os.environ.get("DEPLOY_PAGES"):
+        deploy_allowlist = set(s.strip() for s in os.environ["DEPLOY_PAGES"].split(",") if s.strip())
+        print(f"  DEPLOY_PAGES allowlist: {len(deploy_allowlist)} pages")
+
     written = 0
     skipped = 0
 
     for page in pages:
 
         slug = page['slug']
+
+        if deploy_allowlist is not None and slug not in deploy_allowlist:
+            skipped += 1
+            continue
         page_dir = os.path.join(DOCS, slug)
         out_path = os.path.join(page_dir, 'index.html')
         os.makedirs(page_dir, exist_ok=True)
