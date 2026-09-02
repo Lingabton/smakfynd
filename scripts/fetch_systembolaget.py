@@ -29,15 +29,15 @@ CATEGORIES = [
     ("Mousserande vin", "vin"),
 ]
 
-# Per-category expected unique product counts. Recorded 2026-09-02 after
-# full pagination under Score sort. docCount overcounts due to API sort
-# instability (~20% duplicates); these are the true unique counts.
+# Per-category expected unique product counts. Recorded 2026-09-02 from
+# two-pass Name sort (Ascending + Descending union). Near-complete under
+# a total-order sort — Name is near-unique so pagination is near-complete.
 # Update deliberately when the guard fires on real assortment change.
 EXPECTED_UNIQUE = {
-    "Rött vin": 5446,
-    "Vitt vin": 3622,
-    "Rosévin": 514,
-    "Mousserande vin": 1916,
+    "Rött vin": 7067,
+    "Vitt vin": 4446,
+    "Rosévin": 572,
+    "Mousserande vin": 2300,
 }
 
 # SB moved wine types from categoryLevel1 to categoryLevel2.
@@ -82,8 +82,8 @@ def normalize(p):
         "is_regional": p.get("isRegionalRestricted", False),
     }
 
-def fetch_category(cat_name, page_size, requests, delay=0.5):
-    """Fetch a single category with per-page retry. Returns (products_dict, docCount)."""
+def fetch_pages(cat_name, page_size, requests, sort_by="Name", sort_dir="Ascending", delay=0.5):
+    """Paginate one sort pass. Returns (products_dict, docCount, pages)."""
     products = {}
     page = 1
     doc_count = None
@@ -92,8 +92,8 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
             CAT_LEVEL: cat_name,
             "size": page_size,
             "page": page,
-            "sortBy": "Score",
-            "sortDirection": "Descending",
+            "sortBy": sort_by,
+            "sortDirection": sort_dir,
         }
 
         # 3 attempts per page with exponential backoff
@@ -107,11 +107,11 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
             except Exception as e:
                 backoff = [1, 2, 4][attempt]
                 if attempt < 2:
-                    print(f"    RETRY page {page} attempt {attempt+1}: {e} (backoff {backoff}s)")
+                    print(f"    RETRY {sort_dir} page {page} attempt {attempt+1}: {e} (backoff {backoff}s)")
                     time.sleep(backoff)
                 else:
-                    print(f"    FATAL page {page} after 3 attempts: {e}")
-                    print(f"    ABORT: {cat_name} page {page} — persistent failure after 3 attempts.")
+                    print(f"    FATAL {sort_dir} page {page} after 3 attempts: {e}")
+                    print(f"    ABORT: {cat_name} {sort_dir} page {page} — persistent failure.")
                     raise SystemExit(1)
 
         items = data.get("products", [])
@@ -130,7 +130,7 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
         new_count = len(products) - before
 
         if page % 50 == 0 or len(items) < page_size:
-            print(f"    Page {page}: {len(items)} returned, {new_count} new (unique: {len(products)})")
+            print(f"    {sort_dir} p{page}: {len(items)} returned, {new_count} new (unique: {len(products)})")
 
         if len(items) < page_size:
             break
@@ -138,8 +138,29 @@ def fetch_category(cat_name, page_size, requests, delay=0.5):
         page += 1
         time.sleep(delay)
 
-    print(f"    [{cat_name}] {len(products)} unique in {page} pages (docCount: {doc_count})")
-    return products, doc_count or 0
+    return products, doc_count or 0, page
+
+
+def fetch_category(cat_name, page_size, requests, delay=0.5):
+    """Fetch a category with two Name-sort passes (Asc + Desc) for completeness.
+
+    Name sort provides a near-total order, so pagination is near-complete.
+    Two passes (Ascending + Descending) close the residual gap to ~0.02%.
+    """
+    # Pass 1: Name/Ascending
+    products, doc_count, pages_asc = fetch_pages(
+        cat_name, page_size, requests, "Name", "Ascending", delay)
+    count_asc = len(products)
+
+    # Pass 2: Name/Descending — union with pass 1
+    desc_products, _, pages_desc = fetch_pages(
+        cat_name, page_size, requests, "Name", "Descending", delay)
+    for nr, p in desc_products.items():
+        if nr not in products:
+            products[nr] = p
+
+    print(f"    [{cat_name}] {len(products)} unique (Asc: {count_asc}, +{len(products)-count_asc} from Desc, docCount: {doc_count})")
+    return products, doc_count
 
 
 def fetch_all():
@@ -156,20 +177,28 @@ def fetch_all():
         print(f"  Fetching {cat_name}...")
         products, doc_count = fetch_category(cat_name, page_size, requests)
         all_products.update(products)
-        cat_results[cat_name] = len(products)
+        cat_results[cat_name] = (len(products), doc_count)
 
-    # Per-category guard: compare against expected unique counts, not docCount
-    for cat_name, fetched in cat_results.items():
+    # Guard 1: per-category expected unique counts (catches assortment drift)
+    for cat_name, (fetched, _) in cat_results.items():
         expected = EXPECTED_UNIQUE.get(cat_name)
         if expected:
             pct = fetched / expected * 100
             print(f"  {cat_name}: {fetched}/{expected} expected ({pct:.0f}%)")
             if pct < 97 and not allow_short:
-                print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%) — below 97% threshold.")
+                print(f"\n  ABORT: {cat_name} returned {fetched}/{expected} ({pct:.0f}%) — below 97% of expected unique.")
                 print("  Use --allow-short-fetch to override.")
                 raise SystemExit(1)
-        else:
-            print(f"  {cat_name}: {fetched} (no expected count set)")
+
+    # Guard 2: per-category docCount (catches fetch failure)
+    for cat_name, (fetched, doc_count) in cat_results.items():
+        if doc_count > 0:
+            pct = fetched / doc_count * 100
+            print(f"  {cat_name}: {fetched}/{doc_count} docCount ({pct:.0f}%)")
+            if pct < 98 and not allow_short:
+                print(f"\n  ABORT: {cat_name} returned {fetched}/{doc_count} ({pct:.0f}%) — below 98% of docCount.")
+                print("  Use --allow-short-fetch to override.")
+                raise SystemExit(1)
 
     products = list(all_products.values())
     # Absolute floor: API down or key expired
