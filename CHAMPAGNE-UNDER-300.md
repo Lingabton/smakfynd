@@ -1,36 +1,42 @@
-# Champagne under 300 kr — 2026-09-02
+# Champagne under 300 kr — 2026-09-02 (corrected)
 
-15 wines at 750 ml under 300 kr in the current corpus. Up from 4 in the deployed version (Score sort missed most of them).
+**Previous version of this document was wrong.** It listed 15 wines "at 750 ml" — but 13 of them were half-bottles (375ml) and piccolos. The query did not filter on volume.
 
-| Nr | Name | Price | Assortment | Crowd | Expert | Score |
-|---|---|---|---|---|---|---|
-| 7316801 | Baron-Fuenté Galipettes | 299 kr | Ordervaror | -- | E:7.6 | 78 |
-| 768602 | André Clouet Grande Réserve | 219 kr | Fast sortiment | C:7.2 | -- | 59 |
-| 7294702 | Pommery Brut Royal | 249 kr | Ordervaror | C:7.2 | -- | 47 |
-| 7743302 | Piper Heidsieck Brut | 299 kr | Ordervaror | C:7.4 | -- | 41 |
-| 7881902 | Chanoine Freres Brut | 236 kr | Ordervaror | -- | E:7.6 | 40 |
-| 5282502 | Palmer & Co Rosé Solera | 299 kr | Ordervaror | C:7.2 | E:6.7 | 37 |
-| 7468104 | Piper Heidsieck Brut | 199 kr | Ordervaror | C:7.4 | -- | 36 |
-| 5924601 | Baron-Fuenté Brut Tradition | 299 kr | Ordervaror | -- | E:6.4 | 35 |
-| 7719604 | Pommery Brut Royal | 189 kr | Ordervaror | C:7.2 | E:6.4 | 32 |
-| 8894604 | Nicolas Feuillatte Brut Réserve | 175 kr | Ordervaror | C:7.2 | E:6.1 | 31 |
-| 737202 | Palmer & Co La Réserve Brut | 239 kr | Fast sortiment | -- | E:6.7 | 28 |
-| 755502 | Bonnet Grande Réserve Brut | 229 kr | Ordervaror | -- | E:6.1 | 26 |
-| 747102 | Bonnet Perle Rosée Brut | 255 kr | Fast sortiment | -- | E:6.1 | 26 |
-| 742202 | Taittinger Brut Réserve | 299 kr | Ordervaror | -- | E:6.4 | 26 |
-| 751804 | Moët & Chandon Brut Impérial | 179 kr | Fast sortiment | -- | E:6.4 | 25 |
+## Full bottles (750ml+) under 300 kr
 
-## Notes
+Only **2 wines** qualify:
 
-- **3 in Fast sortiment** (André Clouet 219 kr, Palmer & Co 239 kr, Bonnet Perle Rosée 255 kr, Moët 179 kr — actually 4)
-- **12 Ordervaror** — available by order only, not on shelves
-- Only **1 wine** has both crowd and expert scores (Palmer & Co Rosé Solera)
-- Only **2 wines** have crowd scores from Vivino with no expert backup
-- Most rely on expert scores alone — predominantly low-to-mid expert ratings (6.1–7.6)
-- The top-scored wine (Baron-Fuenté, 78/100) has expert only, no crowd validation
-- Moët & Chandon at 179 kr is the cheapest but scores lowest (25/100) due to low expert rating
-- Nicolas Feuillatte at 175 kr has both signals and decent ratings
+| Nr | Name | Price | Vol | Assortment | Crowd | Expert | Score |
+|---|---|---|---|---|---|---|---|
+| 7316801 | Baron-Fuenté Galipettes | 299 kr | 750 ml | Ordervaror | -- | E:7.6 | 78 |
+| 5924601 | Baron-Fuenté Brut Tradition | 299 kr | 750 ml | Ordervaror | -- | E:6.4 | 35 |
+
+Both are Baron-Fuenté, both Ordervaror (not on shelves), both 299 kr.
+
+## Half-bottles (375ml) under 300 kr — excluded from the page
+
+| Nr | Name | Price | Vol | Assortment |
+|---|---|---|---|---|
+| 768602 | Andre Clouet Grande Reserve | 219 kr | 375 ml | Fast sortiment |
+| 7294702 | Pommery Brut Royal | 249 kr | 375 ml | Ordervaror |
+| 7743302 | Piper Heidsieck Brut | 299 kr | 375 ml | Ordervaror |
+| 7881902 | Chanoine Freres Brut | 236 kr | 375 ml | Ordervaror |
+| 5282502 | Palmer & Co Rose Solera | 299 kr | 375 ml | Ordervaror |
+| 7468104 | Piper Heidsieck Brut | 199 kr | 375 ml | Ordervaror |
+| 7719604 | Pommery Brut Royal | 189 kr | 375 ml | Ordervaror |
+| 8894604 | Nicolas Feuillatte Brut Reserve | 175 kr | 375 ml | Ordervaror |
+| 737202 | Palmer & Co La Reserve Brut | 239 kr | 375 ml | Fast sortiment |
+| 755502 | Bonnet Grande Reserve Brut | 229 kr | 375 ml | Ordervaror |
+| 747102 | Bonnet Perle Rosee Brut | 255 kr | 375 ml | Fast sortiment |
+| 742202 | Taittinger Brut Reserve | 299 kr | 375 ml | Ordervaror |
+| 751804 | Moet & Chandon Brut Imperial | 179 kr | 375 ml | Fast sortiment |
+
+## Page status
+
+- 2 wines is below the MIN_PAGE_WINES=3 threshold
+- Page has noindex applied
+- Both qualifying wines are Ordervaror — a visitor cannot buy either in-store
 
 ## For Gabriel
 
-Page copy is yours to write. The main editorial question: should the page include Ordervaror (12 of 15)? Users can't buy them in-store, only via special order. A page titled "champagne under 300 kr" might disappoint if most wines aren't on the shelf.
+The honest answer is: there is essentially no champagne under 300 kr in a full bottle on Systembolaget's shelves. Page copy is yours to write.

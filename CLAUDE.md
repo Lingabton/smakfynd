@@ -104,6 +104,7 @@ Konsensusbonus om crowd + expert överens.
 - **wines.json töms ibland vid rebase** — kör alltid `build_slim.py` efter merge-konflikter
 - **CSP**: Meta-tag i index.html (GitHub Pages stödjer inte HTTP-headers)
 - **Token**: localStorage (inte httpOnly cookie) — workers är på annan subdomain
+- **Push to a named branch at end of every session** — even unfinished work. A branch on origin costs nothing and survives any local operation. Work has been lost twice to branch resets (build_manifest.py, Sprint 1 fixes) and recovered only because someone checked reflog
 
 ## Landningssidor (67 st)
 
