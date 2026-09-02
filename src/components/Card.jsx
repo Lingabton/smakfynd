@@ -91,10 +91,10 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             {!p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
-          {/* Row 2: Sub + Vintage + Price */}
+          {/* Row 2: Sub + Vintage + Volume + Price */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 2 }}>
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}
+              {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}{p.vol && p.vol !== 750 && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>{p.vol} ml</span>}
             </span>
             <span style={{ flexShrink: 0, marginLeft: 8, textAlign: "right" }}>
               {p.launch_price && <span style={{ fontSize: 11, color: t.txL, textDecoration: "line-through", marginRight: 4 }}>{p.launch_price}</span>}
@@ -103,6 +103,16 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               </span>
             </span>
           </div>
+
+          {/* Availability */}
+          {p.assortment && p.assortment !== "Fast sortiment" && (
+            <div style={{ fontSize: 10, color: "#8a7a6a", marginTop: 2 }}>
+              {p.assortment === "Ordervaror" ? "Beställningsvara" : p.assortment}
+            </div>
+          )}
+          {p.assortment === "Fast sortiment" && (
+            <div style={{ fontSize: 10, color: t.green, marginTop: 2 }}>Finns i butik</div>
+          )}
 
           {/* Row 3: Comparison line */}
           {comparison && (() => {

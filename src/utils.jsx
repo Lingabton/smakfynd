@@ -27,11 +27,11 @@ function wineSimilarity(a, b) {
   return sim;
 }
 
+// 85+ Exceptionellt fynd | 75-84 Toppköp | 65-74 Starkt fynd | 50-64 Okej värde | <50 no badge
 function getScoreInfo(s100) {
-  if (s100 >= 90) return ["Exceptionellt", "#1a7a2e", ""];
-  if (s100 >= 80) return ["Toppköp", t.green, ""];
-  if (s100 >= 70) return ["Starkt fynd", "#5a7542", ""];
-  if (s100 >= 55) return ["Bra köp", "#7a7054", ""];
-  if (s100 >= 40) return ["Okej värde", "#8a7a6a", ""];
-  return ["Svagt värde", "#8a7a6a", ""];
+  if (s100 >= 85) return ["Exceptionellt fynd", "#1a7a2e", ""];
+  if (s100 >= 75) return ["Toppköp", t.green, ""];
+  if (s100 >= 65) return ["Starkt fynd", "#5a7542", ""];
+  if (s100 >= 50) return ["Okej värde", "#7a7054", ""];
+  return ["", "", ""];  // No badge below 50
 }
