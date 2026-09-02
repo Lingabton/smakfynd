@@ -1,42 +1,42 @@
-# Champagne under 300 kr — 2026-09-02 (corrected)
+# Champagne under 300 kr — 2026-09-02 (final)
 
-**Previous version of this document was wrong.** It listed 15 wines "at 750 ml" — but 13 of them were half-bottles (375ml) and piccolos. The query did not filter on volume.
+## The finding
 
-## Full bottles (750ml+) under 300 kr
+There is essentially no champagne under 300 kr in a full bottle at Systembolaget's in-store range. Two full bottles exist, both Baron-Fuenté at 299 kr, both order-only. Thirteen of the fifteen sub-300kr entries are 375ml half-bottles.
 
-Only **2 wines** qualify:
+## Full bottles (750ml) under 300 kr
 
-| Nr | Name | Price | Vol | Assortment | Crowd | Expert | Score |
-|---|---|---|---|---|---|---|---|
-| 7316801 | Baron-Fuenté Galipettes | 299 kr | 750 ml | Ordervaror | -- | E:7.6 | 78 |
-| 5924601 | Baron-Fuenté Brut Tradition | 299 kr | 750 ml | Ordervaror | -- | E:6.4 | 35 |
+| Nr | Name | Price | Vol | Assortment | Expert | Score |
+|---|---|---|---|---|---|---|
+| 7316801 | Baron-Fuenté Galipettes | 299 kr | 750 ml | Ordervaror | E:7.6 | 78 |
+| 5924601 | Baron-Fuenté Brut Tradition | 299 kr | 750 ml | Ordervaror | E:6.4 | 35 |
 
-Both are Baron-Fuenté, both Ordervaror (not on shelves), both 299 kr.
+Neither is available in-store. Both require a special order.
 
-## Half-bottles (375ml) under 300 kr — excluded from the page
+## Alternatives pool (in-store, 750ml, mousserande, <300kr, non-champagne)
 
-| Nr | Name | Price | Vol | Assortment |
-|---|---|---|---|---|
-| 768602 | Andre Clouet Grande Reserve | 219 kr | 375 ml | Fast sortiment |
-| 7294702 | Pommery Brut Royal | 249 kr | 375 ml | Ordervaror |
-| 7743302 | Piper Heidsieck Brut | 299 kr | 375 ml | Ordervaror |
-| 7881902 | Chanoine Freres Brut | 236 kr | 375 ml | Ordervaror |
-| 5282502 | Palmer & Co Rose Solera | 299 kr | 375 ml | Ordervaror |
-| 7468104 | Piper Heidsieck Brut | 199 kr | 375 ml | Ordervaror |
-| 7719604 | Pommery Brut Royal | 189 kr | 375 ml | Ordervaror |
-| 8894604 | Nicolas Feuillatte Brut Reserve | 175 kr | 375 ml | Ordervaror |
-| 737202 | Palmer & Co La Reserve Brut | 239 kr | 375 ml | Fast sortiment |
-| 755502 | Bonnet Grande Reserve Brut | 229 kr | 375 ml | Ordervaror |
-| 747102 | Bonnet Perle Rosee Brut | 255 kr | 375 ml | Fast sortiment |
-| 742202 | Taittinger Brut Reserve | 299 kr | 375 ml | Ordervaror |
-| 751804 | Moet & Chandon Brut Imperial | 179 kr | 375 ml | Fast sortiment |
+44 wines available. Top 10 by score:
+
+| Nr | Name | Price | Country | Region | Score |
+|---|---|---|---|---|---|
+| 210301 | Derbusco Cives Franciacorta Brut | 249 kr | Italien | Lombardiet | 84 |
+| 771101 | Asti Cinzano | 109 kr | Italien | Piemonte | 83 |
+| 7786501 | Louis Bouillot Crémant de Bourgogne | 169 kr | Frankrike | Bourgogne | 83 |
+| 759501 | Salasar Crémant de Limoux Brut | 139 kr | Frankrike | Languedoc | 82 |
+| 778101 | Louis Bouillot Crémant Rosé Brut | 159 kr | Frankrike | Bourgogne | 82 |
+| 762801 | Pongrácz Brut | 139 kr | Sydafrika | Western Cape | 80 |
+| 3066101 | Fuchs und Hase Pet Nat Vol 2 | 229 kr | Österrike | | 79 |
+| 9508801 | Textures de Pedra Raventós i Blanc | 299 kr | Spanien | Katalonien | 78 |
+| 772101 | Ferrari Brut Organic | 195 kr | Italien | Trentino | 76 |
+| 756701 | Rotari Brut Riserva | 139 kr | Italien | Trentino | 76 |
 
 ## Page status
 
-- 2 wines is below the MIN_PAGE_WINES=3 threshold
-- Page has noindex applied
-- Both qualifying wines are Ordervaror — a visitor cannot buy either in-store
+- Primary list: 0 wines (no in-store full-bottle champagne under 300kr)
+- Alternatives section: 10 wines (crémant, cava, franciacorta, prosecco)
+- noindex: NOT applied (total 10 wines >= MIN_PAGE_WINES)
+- Intro placeholder: needs Gabriel's editorial copy
 
 ## For Gabriel
 
-The honest answer is: there is essentially no champagne under 300 kr in a full bottle on Systembolaget's shelves. Page copy is yours to write.
+Page copy is yours. The honest page is "there is no champagne under 300 kr in a full bottle on Systembolaget's shelves — here is why, and here is what gives you more for that money."

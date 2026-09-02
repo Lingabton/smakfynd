@@ -1,6 +1,6 @@
-# Page Census — 2026-09-02 (post Sprint 1 fixes)
+# Page Census — 2026-09-02 (post in-store default)
 
-Sorted by GSC impressions (Mar 31 – Jun 30 2026). "Before" = currently deployed on origin/main. "After" = new build with Name sort + Sprint 1 fixes (4,362-wine corpus, small-format exclusion, Norwegian removal, dynamic counts).
+"Before" = currently deployed on origin/main. "After" = new build with in-store default + Sprint 1 fixes + alternatives.
 
 ## Top traffic pages
 
@@ -10,60 +10,62 @@ Sorted by GSC impressions (Mar 31 – Jun 30 2026). "Before" = currently deploye
 | /basta-rose/ | 1,923 | 95 | 20 | 20 | 0 | stable |
 | /basta-vita-vin/ | 1,399 | 85 | 20 | 20 | 0 | stable |
 | /basta-boxvin/ | 909 | 38 | 20 | 20 | 0 | stable |
-| /champagne-under-300-kr/ | 644 | 23 | 4 | **0** | -4 | **ZERO — needs attention** |
+| /champagne-under-300-kr/ | 644 | 23 | 4 | **10** | +6 | alternatives |
 | /vin-under-100-kr/ | 530 | 25 | 20 | 20 | 0 | stable |
 | /basta-roda-vin/ | 499 | 43 | 20 | 20 | 0 | stable |
-| /basta-cava/ | 483 | 24 | 7 | 7 | 0 | stable |
+| /basta-cava/ | 483 | 24 | 7 | 9 | +2 | gain |
 | /vin-under-150-kr/ | 359 | 21 | 20 | 20 | 0 | stable |
-| /basta-malbec/ | 182 | 10 | 17 | 16 | -1 | minor |
+| /basta-malbec/ | 182 | 10 | 17 | 20 | +3 | gain |
 
-## Champagne-under-300 — editorial decision needed
+## Pages under 20 wines (flagged)
 
-This page went from 4 wines to 0 after the small-format exclusion (S1-1). The 4 wines on the deployed page include 2 at 375ml (Palmer & Co 239kr, Bonnet 255kr). After removing those, only 2 remain — below the MIN_PAGE_WINES=3 threshold.
+| Page | Before | After | Notes |
+|---|---|---|---|
+| /vin-under-80-kr/ | 20 | **16** | In-store filter + vol exclusion. fix_count handles title |
+| /champagne-under-500-kr/ | 16 | **13** | In-store filter removed some Ordervaror |
+| /basta-rose-under-100-kr/ | 13 | **10** | In-store + vol filter |
+| /basta-carmenere/ | 4 | 4 | Niche grape, stable |
+| /basta-provence-rose/ | 9 | 10 | Slight gain |
+| /basta-cremant/ | 10 | 11 | Slight gain |
+| /naturvin/ | 1 | **14** | Major gain from Tillfälligt sortiment inclusion |
 
-The page has 644 impressions and 23 clicks. It is now noindex. Options:
-1. Relax to include all standard formats >= 375ml on this specific page (champagne half-bottles are a legitimate product)
-2. Wait for the full corpus to include more qualifying wines (the Name sort recovery may have added champagnes)
-3. Retire the page
+## Pages with losses (3 total)
 
-Currently: page is written with 0 wines and noindex. It will not appear in search results.
+| Page | Before | After | D | Reason |
+|---|---|---|---|---|
+| /vin-under-80-kr/ | 20 | 16 | -4 | Small format + in-store filter |
+| /champagne-under-500-kr/ | 16 | 13 | -3 | In-store filter |
+| /basta-rose-under-100-kr/ | 13 | 10 | -3 | Small format + in-store filter |
 
-## Pages with large gains (>5 wines)
+## Pages with large gains (32 gained)
+
+The in-store default with Tillfälligt sortiment expanded most pages. Key winners:
 
 | Page | Before | After | D |
 |---|---|---|---|
+| /basta-vin-fran-rhonedalen/ | 1 | 19 | +18 |
 | /basta-vin-fran-toscana/ | 3 | 20 | +17 |
-| /basta-vin-fran-rioja/ | 3 | 17 | +14 |
-| /basta-vin-fran-bordeaux/ | 5 | 16 | +11 |
-| /vin-present/ | 8 | 18 | +10 |
-| /basta-argentinska-vin/ | 4 | 13 | +9 |
-| /basta-australiska-vin/ | 11 | 20 | +9 |
-| /vin-till-svarforaldrar/ | 6 | 15 | +9 |
-| /basta-portugisiska-vin/ | 8 | 16 | +8 |
-| /naturvin/ | 1 | 6 | +5 |
-
-## Pages with losses
-
-| Page | Before | After | D |
-|---|---|---|---|
-| /champagne-under-300-kr/ | 4 | 0 | -4 (small-format exclusion) |
-| /basta-zinfandel/ | 10 | 7 | -3 |
-| /basta-grenache/ | 10 | 9 | -1 |
-| /basta-malbec/ | 17 | 16 | -1 |
+| /basta-vin-fran-rioja/ | 3 | 20 | +17 |
+| /naturvin/ | 1 | 14 | +13 |
+| /basta-vin-fran-bordeaux/ | 5 | 20 | +15 |
 
 ## Summary
 
 - 101 landing pages total
-- 71 pages unchanged
-- 18 pages gained wines
-- 4 pages lost wines (1 to zero)
-- 1 page at zero: /champagne-under-300-kr/ (noindex applied)
-- No other page dropped below threshold or lost more than half
+- 66 pages stable
+- 32 pages gained wines
+- 3 pages lost wines (small format + in-store filtering)
+- No page at zero
+- champagne-under-300 now has 10 wines via alternatives mechanism (0 primary + 10 alt)
 
-## Allowlist mechanism ready
+## Allowlist ready
 
-`DEPLOY_PAGES` env var limits which pages are written. Proposed batch 1:
+Batch 1 (moved champagne to batch 2 per instructions):
+```
+vin-under-80-kr,vin-under-90-kr,vin-under-100-kr,basta-rose-under-100-kr
+```
 
-```bash
-DEPLOY_PAGES="champagne-under-300-kr,vin-under-80-kr,vin-under-90-kr,vin-under-100-kr,basta-rose-under-100-kr" python3 scripts/generate_landing_pages.py
+Batch 2 (needs Gabriel's champagne intro):
+```
+champagne-under-300-kr,basta-bubbel,basta-roda-vin,basta-vita-vin,basta-rose
 ```
