@@ -63,8 +63,13 @@ function SmakfyndApp() {
       try {
         const res = await fetch(DATA_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const raw = await res.json();
+        // Support both {meta, wines} envelope and flat array (backwards compat)
+        const data = raw.wines || raw;
         if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
+        if (raw.meta?.in_store_assortments) {
+          window.__IN_STORE = new Set(raw.meta.in_store_assortments);
+        }
         setAllData(data);
         setLoading(false);
         return;
@@ -181,8 +186,8 @@ function SmakfyndApp() {
 
   const filtered = useMemo(() => {
     let r = [...products];
-    const IN_STORE = ["Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"];
-    if (!showOrder && !showBest) r = r.filter(p => IN_STORE.includes(p.assortment));
+    const inStore = window.__IN_STORE || new Set(["Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"]);
+    if (!showOrder && !showBest) r = r.filter(p => inStore.has(p.assortment));
     else if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
     if (cat !== "all" && !search) r = r.filter(p => p.category === cat);

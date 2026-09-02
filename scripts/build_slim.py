@@ -334,8 +334,20 @@ open(OUTPUT, 'w').write(jsx)
 size = os.path.getsize(OUTPUT) / 1024
 print(f"Built: {OUTPUT} ({size:.0f} KB)")
 
-# Build wines.json from QA-cleaned data
-js_data = json.dumps(mini, ensure_ascii=False, separators=(',', ':'))
+# Build wines.json with metadata from single source of truth
+import sys
+sys.path.insert(0, str(BASE / "scripts"))
+from constants import IN_STORE
+
+wines_payload = {
+    "meta": {
+        "in_store_assortments": sorted(IN_STORE),
+        "count": len(mini),
+        "built": __import__("datetime").date.today().isoformat(),
+    },
+    "wines": mini,
+}
+js_data = json.dumps(wines_payload, ensure_ascii=False, separators=(',', ':'))
 WINES_JSON = str(BASE / "docs" / "wines.json")
 open(WINES_JSON, 'w').write(js_data)
 json_size = os.path.getsize(WINES_JSON) / 1024
@@ -343,8 +355,9 @@ print(f"Built: {WINES_JSON} ({json_size:.0f} KB)")
 
 # Validate wines.json is not empty/corrupted
 validation = json.loads(open(WINES_JSON).read())
-if not isinstance(validation, list) or len(validation) < 100:
-    print(f"FATAL: wines.json has only {len(validation) if isinstance(validation, list) else 0} wines — aborting!")
+wines_list = validation.get("wines", []) if isinstance(validation, dict) else validation
+if not isinstance(wines_list, list) or len(wines_list) < 100:
+    print(f"FATAL: wines.json has only {len(wines_list)} wines — aborting!")
     os.remove(WINES_JSON)
     exit(1)
-print(f"QA: {len(validation)} wines validated")
+print(f"QA: {len(wines_list)} wines validated")

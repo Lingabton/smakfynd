@@ -102,14 +102,27 @@ def get_page_articles(slug):
 
 
 def validate(path):
-    wines = json.load(open(path))
+    raw = json.load(open(path))
+    # Support both {meta, wines} envelope and flat array
+    if isinstance(raw, dict) and "wines" in raw:
+        wines = raw["wines"]
+        meta = raw.get("meta", {})
+    elif isinstance(raw, list):
+        wines = raw
+        meta = {}
+    else:
+        return ["[SCHEMA] Root is neither an array nor {meta, wines} envelope"], []
+
     wines_by_nr = {str(w.get("nr", "")): w for w in wines}
     errors = []
     warnings = []
 
-    if not isinstance(wines, list):
-        errors.append("[SCHEMA] Root is not an array")
-        return errors, warnings
+    # IN_STORE consistency check: Python constant must match wines.json metadata
+    sys.path.insert(0, str(Path(__file__).parent))
+    from constants import IN_STORE
+    json_in_store = set(meta.get("in_store_assortments", []))
+    if json_in_store and json_in_store != IN_STORE:
+        errors.append(f"[IN_STORE_MISMATCH] Python: {sorted(IN_STORE)}, wines.json: {sorted(json_in_store)}")
 
     if len(wines) < 100:
         errors.append(f"[SCHEMA] Only {len(wines)} wines — expected 1000+")
