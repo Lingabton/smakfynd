@@ -334,15 +334,87 @@ open(OUTPUT, 'w').write(jsx)
 size = os.path.getsize(OUTPUT) / 1024
 print(f"Built: {OUTPUT} ({size:.0f} KB)")
 
-# Build wines.json with metadata from single source of truth
+# ── Add unscored wines with taste profiles ──
+# These wines lack crowd/expert ratings but carry SB taste data
 import sys
 sys.path.insert(0, str(BASE / "scripts"))
 from constants import IN_STORE
+from score_wines_v2 import predict_food_pairings
+
+sb_raw_path = os.path.join(DATA_DIR, "systembolaget_raw.json")
+if os.path.exists(sb_raw_path):
+    sb_raw = json.load(open(sb_raw_path))
+    scored_nrs = {m["nr"] for m in mini}
+    unscored_count = 0
+    for p in sb_raw:
+        nr = str(p.get("nr", ""))
+        if not nr or nr in scored_nrs:
+            continue
+        if p.get("cat1") != "Vin":
+            continue
+        # Must have at least one taste field
+        if not any(p.get(f) is not None for f in ["taste_body", "taste_sweet", "taste_fruit", "taste_bitter"]):
+            continue
+
+        wine_type = p.get("cat2", "").replace("Rött vin", "Rött").replace("Vitt vin", "Vitt").replace("Rosévin", "Rosé").replace("Mousserande vin", "Mousserande")
+        grape = p.get("grape", "")
+        food = p.get("food_pairings", [])
+        food_predicted = False
+        if not food or not any(f for f in food):
+            food = predict_food_pairings(wine_type, grape)
+            food_predicted = True
+
+        m = {
+            "nr": nr,
+            "name": (p.get("name", "") or "").strip().rstrip(" —-–"),
+            "sub": (p.get("sub", "") or "").strip().rstrip(" —-–"),
+            "price": p.get("price", 0),
+            "vol": p.get("vol", 750),
+            "type": wine_type,
+            "pkg": p.get("pkg", "Flaska"),
+            "country": p.get("country", ""),
+            "grape": grape,
+            "smakfynd_score": 0,
+            "_score_raw": 0,
+            "unrated": True,
+            "confidence": "ingen",
+            "assortment": p.get("assortment", ""),
+        }
+        img = p.get("image_url", "")
+        if img: m["image_url"] = img
+        if p.get("vintage"): m["vintage"] = p["vintage"]
+        if p.get("organic"): m["organic"] = True
+        if p.get("cat3"): m["cat3"] = p["cat3"]
+        if food: m["food_pairings"] = food
+        if food_predicted: m["food_predicted"] = True
+        if p.get("taste_body") is not None: m["taste_body"] = p["taste_body"]
+        if p.get("taste_sweet") is not None: m["taste_sweet"] = p["taste_sweet"]
+        if p.get("taste_fruit") is not None: m["taste_fruit"] = p["taste_fruit"]
+        if p.get("taste_bitter") is not None: m["taste_bitter"] = p["taste_bitter"]
+        if p.get("style"): m["style"] = p["style"]
+        if p.get("region"): m["region"] = p["region"]
+        mini.append(m)
+        unscored_count += 1
+
+    print(f"Unrated wines added: {unscored_count} (with taste profiles)")
+else:
+    print("WARN: systembolaget_raw.json not found — no unrated wines added")
+
+# Sort deterministically: scored wines first by _score_raw desc, then unrated by nr
+mini.sort(key=lambda x: (-x.get('_score_raw', 0), 0 if x.get('unrated') else -1, str(x.get('nr', ''))))
+
+# Build wines.json with metadata from single source of truth
+
+scored_count = sum(1 for m in mini if not m.get("unrated"))
+unrated_count = sum(1 for m in mini if m.get("unrated"))
+print(f"Total wines.json: {len(mini)} (scored: {scored_count}, unrated: {unrated_count})")
 
 wines_payload = {
     "meta": {
         "in_store_assortments": sorted(IN_STORE),
         "count": len(mini),
+        "scored": scored_count,
+        "unrated": unrated_count,
         "built": __import__("datetime").date.today().isoformat(),
     },
     "wines": mini,

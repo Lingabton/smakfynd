@@ -137,8 +137,11 @@ def validate(path):
                 errors.append(f"[SCHEMA] {w.get('name','?')} (#{w.get('nr','?')}): '{field}' wrong type")
 
         score = w.get('smakfynd_score', 0)
-        if score < 1 or score > 99:
+        is_unrated = w.get('unrated', False)
+        if not is_unrated and (score < 1 or score > 99):
             errors.append(f"[SCHEMA] {w.get('name','?')}: score {score} out of range 1-99")
+        if is_unrated and score != 0:
+            errors.append(f"[SCHEMA] {w.get('name','?')}: unrated wine has score {score} (expected 0)")
 
         price = w.get('price', 0)
         wine_type = w.get('type', '')
@@ -157,12 +160,14 @@ def validate(path):
         if w.get('taste_body'): has_taste += 1
 
     n = len(wines)
+    n_scored = sum(1 for w in wines if not w.get('unrated'))
+    n_unrated = n - n_scored
     if has_image < n * 0.5:
         warnings.append(f"[COVERAGE] Low image: {has_image}/{n} ({has_image*100//n}%)")
-    if has_crowd < n * 0.8:
-        warnings.append(f"[COVERAGE] Low crowd: {has_crowd}/{n} ({has_crowd*100//n}%)")
+    if n_scored > 0 and has_crowd < n_scored * 0.8:
+        warnings.append(f"[COVERAGE] Low crowd: {has_crowd}/{n_scored} scored ({has_crowd*100//n_scored}%)")
 
-    print(f"Validated {n} wines: {has_image} images, {has_crowd} crowd, {has_expert} expert, {has_taste} taste")
+    print(f"Validated {n} wines ({n_scored} scored, {n_unrated} unrated): {has_image} images, {has_crowd} crowd, {has_expert} expert, {has_taste} taste")
 
     # ── Small format in price-threshold pages ──
     for slug in PRICE_THRESHOLD_SLUGS:
@@ -220,11 +225,13 @@ def validate(path):
             warnings.append(f"[THIN_PAGE] /{slug}/: only {len(articles)} wines (min {MIN_WINES_PER_PAGE})")
 
     # ── Corpus count stability (PA-3) ──
-    # Primary: anchor to locked constant. The count is a trust claim on every page.
+    # Primary: anchor to locked constant. Counts scored wines only — unrated wines
+    # carry taste profiles but no Smakfynd score and are not part of the ranking claim.
     LOCKED_CORPUS_COUNT = 4362  # Updated Sep 2026: Name sort recovers full catalog
-    locked_pct = abs(n - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
+    n_scored = sum(1 for w in wines if not w.get('unrated'))
+    locked_pct = abs(n_scored - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
     if locked_pct > 1:
-        errors.append(f"[CORPUS_SHIFT] Wine count {n} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
+        errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
 
     # Secondary: run-over-run drift check
     prev_count_file = DATA_DIR / "deploy" / "prev_corpus_count.txt"

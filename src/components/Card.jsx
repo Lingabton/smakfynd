@@ -58,7 +58,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
   return (
     <div
       role="button" tabIndex={0} aria-expanded={open}
-      aria-label={`${p.name} ${p.sub || ''}, ${s100} poäng, ${p.price}\u00A0kr`}
+      aria-label={`${p.name} ${p.sub || ''}, ${p.unrated ? 'ej betygsatt' : s100 + ' poäng'}, ${p.price}\u00A0kr`}
       onClick={handleOpen}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
       style={{
@@ -87,8 +87,8 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             }}>{p.name}</h3>
             {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
             {p.price_vs_launch_pct > 0 && <span style={statusPill(`−${p.price_vs_launch_pct}%`, t.deal)}>−{p.price_vs_launch_pct}%</span>}
-            {!p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
-            {!p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
+            {!p.unrated && !p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.unrated && !p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
           {/* Row 2: Sub + Vintage + Volume + Price */}
@@ -153,10 +153,26 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
           </div>
         </div>
 
-        {/* Score with split bars + "?" */}
+        {/* Score or "Ej betygsatt" */}
         <div style={{ flexShrink: 0, textAlign: "center", width: 58, position: "relative" }}>
-          <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
-          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
+          {p.unrated ? (
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#8a7a6a", lineHeight: 1.2 }}>Ej</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#8a7a6a", marginBottom: 2 }}>betygsatt</div>
+              {p.taste_body != null && (
+                <div style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 3 }}>
+                  {[["F", p.taste_body], ["S", p.taste_sweet], ["Sy", p.taste_fruit]].map(([l, v]) =>
+                    v != null ? <div key={l} style={{ fontSize: 8, color: "#8a7a6a", lineHeight: 1 }} title={l === "F" ? "Fyllighet" : l === "S" ? "Sötma" : "Syra"}>{l}{v}</div> : null
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
+              <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
+            </div>
+          )}
           {(() => {
             const reviews = p.crowd_reviews || 0;
             const hasCrowd = reviews >= 25 && p.crowd_score;
