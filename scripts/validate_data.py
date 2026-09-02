@@ -208,7 +208,7 @@ def validate(path):
 
     # ── Corpus count stability (PA-3) ──
     # Primary: anchor to locked constant. The count is a trust claim on every page.
-    LOCKED_CORPUS_COUNT = 4143  # Locked Aug 2026
+    LOCKED_CORPUS_COUNT = 4362  # Updated Sep 2026: Name sort recovers full catalog
     locked_pct = abs(n - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
     if locked_pct > 1:
         errors.append(f"[CORPUS_SHIFT] Wine count {n} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
