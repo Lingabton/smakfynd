@@ -37,8 +37,8 @@ function SmakfyndApp() {
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
   const [storeMode, setStoreMode] = useState(false);
-  const [shopOnly, setShopOnly] = useState(() => {
-    try { return localStorage.getItem("smakfynd_shop_only") === "true"; } catch { return false; }
+  const [showOrder, setShowOrder] = useState(() => {
+    try { return localStorage.getItem("smakfynd_show_order") === "true"; } catch { return false; }
   });
   const [cat, setCat] = useState(initHash.cat || "Rött");
   const [price, setPrice] = useState("all");
@@ -181,7 +181,8 @@ function SmakfyndApp() {
 
   const filtered = useMemo(() => {
     let r = [...products];
-    if (shopOnly) r = r.filter(p => p.assortment === "Fast sortiment");
+    const IN_STORE = ["Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"];
+    if (!showOrder && !showBest) r = r.filter(p => IN_STORE.includes(p.assortment));
     else if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
     if (cat !== "all" && !search) r = r.filter(p => p.category === cat);
@@ -207,7 +208,7 @@ function SmakfyndApp() {
     else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));
     else if (sortBy === "drop") r.sort((a, b) => (b.price_vs_launch_pct || 0) - (a.price_vs_launch_pct || 0));
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, shopOnly, selCountry, selFoods, selRegion, selTaste, sortBy]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, showOrder, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
   const baseFiltered = useMemo(() => {
     let r = products;
@@ -498,20 +499,20 @@ function SmakfyndApp() {
           ))}
         </div>
 
-        {/* ═══ SHOP MODE TOGGLE ═══ */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: "8px 12px", background: shopOnly ? "#f0f7f0" : "#fefcf8", border: `1px solid ${shopOnly ? t.green : t.bdrL}`, borderRadius: 10, cursor: "pointer" }}
+        {/* ═══ AVAILABILITY TOGGLE ═══ */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: "8px 12px", background: showOrder ? "#fefcf8" : "#f0f7f0", border: `1px solid ${showOrder ? t.bdrL : t.green}`, borderRadius: 10, cursor: "pointer" }}
           onClick={() => {
-            const next = !shopOnly;
-            setShopOnly(next);
-            try { localStorage.setItem("smakfynd_shop_only", String(next)); } catch {}
-            if (typeof trackEvent === "function") trackEvent("shop_toggle", { enabled: next });
+            const next = !showOrder;
+            setShowOrder(next);
+            try { localStorage.setItem("smakfynd_show_order", String(next)); } catch {}
+            if (typeof trackEvent === "function") trackEvent("order_toggle", { show_order: next });
           }}>
-          <span style={{ fontSize: 18 }}>{shopOnly ? "\uD83D\uDED2" : "\uD83C\uDFEA"}</span>
-          <span style={{ fontSize: 13, fontWeight: 500, color: shopOnly ? "#1a7a2e" : t.txM }}>
-            Jag står i butiken
+          <span style={{ fontSize: 18 }}>{showOrder ? "\uD83C\uDFEA" : "\uD83D\uDED2"}</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: showOrder ? t.txM : "#1a7a2e" }}>
+            {showOrder ? "Visar alla viner" : "Visar viner som finns i butik"}
           </span>
-          <span style={{ marginLeft: "auto", fontSize: 11, color: t.txL }}>
-            {shopOnly ? "Visar bara butikssortiment" : "Visar alla viner"}
+          <span style={{ marginLeft: "auto", fontSize: 11, color: showOrder ? t.wine : t.txL, textDecoration: showOrder ? "none" : "underline", cursor: "pointer" }}>
+            {showOrder ? "Visa bara butik" : "Visa även beställningsvaror"}
           </span>
         </div>
 

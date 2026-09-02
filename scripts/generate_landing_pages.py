@@ -52,12 +52,16 @@ for p in all_wines:
         if drop_pct >= 5:
             p['price_vs_launch_pct'] = drop_pct
 
-fast = [w for w in all_wines if w.get('assortment') == 'Fast sortiment']
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+from constants import IN_STORE
 
-# Standard bottle filter: exclude small formats (<750ml) from price-threshold pages
-# Volume filter only — assortment is NOT restricted (Ordervaror are legitimate value entries)
+in_store = [w for w in all_wines if w.get('assortment') in IN_STORE]
+
+# Standard bottle filter for price-threshold pages: in-store + vol >= 750ml
+# Small formats (<750ml) are excluded from price lists (a 375ml at 70kr is not a value find)
 # Large formats (>750ml) and boxes survive
-all_std = [w for w in all_wines if (w.get('vol') or 750) >= 750]
+in_store_std = [w for w in in_store if (w.get('vol') or 750) >= 750]
 
 def dedup_wines(wines, max_per_producer=2):
     """Remove duplicates and limit per producer. Hide large formats when standard exists."""
@@ -124,7 +128,7 @@ def make_pages():
                 ("Vilket rött vin är bäst för nybörjare?", "Börja med en medelkroppad Malbec eller Merlot — de är fruktiga, lättdruckna och fungerar till de flesta rätter. Sök efter viner med smakfynd-poäng över 75 i prisklassen 90–130 kr."),
                 ("Hur länge håller ett öppnat rött vin?", "Ett öppnat rött vin håller 3–5 dagar i kylen med korken i. Fylligare viner håller längre. Lätta röda som Pinot Noir bör drickas inom 2–3 dagar."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -147,7 +151,7 @@ def make_pages():
                 ("Vilken är den bästa vita druvan för nybörjare?", "Sauvignon Blanc är ett bra val — fräsch, fruktig och lätt att tycka om. Riesling är ett annat utmärkt alternativ med balanserad syra och fruktighet."),
                 ("Ska vitt vin alltid serveras kallt?", "Ja, men inte iskallt. 8–10°C är idealt för de flesta vita viner. Riktigt fyllda, fatlagrade vita viner kan serveras lite varmare, runt 10–12°C."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -170,7 +174,7 @@ def make_pages():
                 ("Vad är skillnaden mellan Cava, Prosecco och Champagne?", "Champagne kommer från Champagne i Frankrike och jäser i flaskan. Cava är Spaniens motsvarighet med samma metod men lägre pris. Prosecco jäser i tank och blir lättare och fruktigare."),
                 ("Kan man dricka bubbel till mat?", "Absolut! Bubbel med hög syra som Champagne och Crémant passar utmärkt till skaldjur, sushi och lätta förrätter. Även friterad mat funkar förvånansvärt bra."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Mousserande' and w.get('pkg') == 'Flaska'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Mousserande' and w.get('pkg') == 'Flaska'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -193,7 +197,7 @@ def make_pages():
                 (f"Vilken rosé är bäst i test {YEAR}?", f"Vi rankar alla roséer på Systembolaget efter en kombination av crowd-betyg, expertrecensioner och prisvärde. Bästa rosé just nu hittar du högst upp på den här sidan — listan uppdateras varje vecka."),
                 ("Vad är skillnaden på billig och dyr rosé?", "Dyrare Provence-roséer ger ofta mer komplexitet och elegans. Men i prisklassen under 150 kr finns det roséer från Spanien, Italien och Sydafrika som presterar lika bra i blindtester. Pris är inte alltid = kvalitet."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -216,7 +220,7 @@ def make_pages():
                 ("Finns det bra vin under 100 kr?", "Ja, absolut. Särskilt från Chile, Argentina och Spanien hittar du viner som fått höga crowd-betyg och goda expertrecensioner. Nyckeln är att kolla kvalitetsrankingar istället för att gissa i hyllan."),
                 ("Vilket är det bästa billiga röda vinet?", "Det varierar, men chilensk Cabernet Sauvignon och argentinsk Malbec brukar dominera i prisklassen under 100 kr. Kolla vår topplista för det senaste."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 100],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -239,7 +243,7 @@ def make_pages():
                 ("Vilken typ av vin ska man välja under 150 kr?", "I denna prisklass fungerar alla typer bra. Röda viner från Spanien och Italien ger ofta mest komplexitet per krona. Vita viner som Sauvignon Blanc och Riesling är säkra kort. Mousserande (Cava, Crémant) ger champagnekänsla till en bråkdel av priset."),
                 ("Är dyrare vin alltid bättre?", "Nej. Vår data visar att sambandet mellan pris och kvalitet är starkast under 200 kr. Över det betalar du ofta för varumärke, region eller sällsynthet — inte nödvändigtvis bättre smak."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -258,7 +262,7 @@ def make_pages():
                     "Undvik för lätta eller för tanninstarka viner — de försvinner mot grillade smaker.",
                 ]
             },
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('taste_body') or 0) >= 7
                            and any(k in (f or '').lower() for k in ['kött', 'grillat', 'nöt', 'lamm', 'biff', 'vilt', 'fläsk']
                                    for f in (w.get('food_pairings') or []))],
@@ -270,7 +274,7 @@ def make_pages():
             "meta": f"Vin till fisk och skaldjur? Här är de bästa vita och roséer på Systembolaget. {DATE_STR}.",
             "h1": f"Bästa vinerna till fisk & skaldjur — {DATE_STR}",
             "intro": "Fisk och skaldjur vill ha fräscht, syra och ibland lite mineralitet. Här är de bästa matchningarna.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and any('fisk' in (f or '').lower() or 'skaldjur' in (f or '').lower()
                                    for f in (w.get('food_pairings') or []))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -281,7 +285,7 @@ def make_pages():
             "meta": f"Vin till pasta? Topp 20 bästa valen på Systembolaget — oavsett sås. {DATE_STR}.",
             "h1": f"Bästa vinerna till pasta — {DATE_STR}",
             "intro": "Pasta och vin hör ihop. Oavsett om det är carbonara, bolognese eller pesto — här hittar du rätt vin.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 5 and (w.get('taste_body') or 0) <= 9
                            and (w.get('price', 0) or 0) <= 200],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -292,7 +296,7 @@ def make_pages():
             "meta": f"Bästa Malbec Systembolaget {YEAR} — vi har rankat alla. Argentina, Frankrike & Australien. Uppdaterad {DATE_STR}.",
             "h1": f"Bästa Malbec på Systembolaget — {DATE_STR}",
             "intro": "Malbec från Argentina är en favorit bland svenska vindrickare. Här är de som ger mest smak för pengarna.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'malbec' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -304,7 +308,7 @@ def make_pages():
             "h1": f"Bästa Cabernet Sauvignon på Systembolaget — {DATE_STR}",
             "intro": "Cabernet Sauvignon — världens mest kända rödvinsdruva. Här är de bästa köpen på Systembolaget.",
             "intro2": "Cabernet Sauvignon från Systembolaget finns i alla prisklasser — från chilenska budgetviner till prestigefyllda Bordeaux-blandningar. Druvan ger strukturerade viner med svarta vinbär, ceder och ofta fatlagring. Perfekt till kötträtter och grillat.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'cabernet sauvignon' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -315,7 +319,7 @@ def make_pages():
             "meta": f"Topp 20 ekologiska viner. Hållbart och prisvärt — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa ekologiska vinerna — {DATE_STR}",
             "intro": "Ekologiskt och gott behöver inte vara dyrt. Här är de bästa eko-vinerna på Systembolaget.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('organic')],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('organic')],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -324,7 +328,7 @@ def make_pages():
             "meta": f"Vin till ostbrickan? Här är de bästa matchningarna på Systembolaget. {DATE_STR}.",
             "h1": f"Bästa vinerna till ost — {DATE_STR}",
             "intro": "Ost och vin är en klassisk kombination. Här är vinerna som passar bäst — från mjuk brie till lagrad cheddar.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and any('ost' in (f or '').lower() for f in (w.get('food_pairings') or []))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -337,7 +341,7 @@ def make_pages():
             "h1": f"Bästa Pinot Noir på Systembolaget — {DATE_STR}",
             "intro": "Pinot Noir är elegant, fruktig och mångsidig. Här är de bästa köpen — från Bourgogne till Nya Zeeland.",
             "intro2": "Pinot Noir på Systembolaget sträcker sig från eleganta Bourgogne till fruktdrivna Nya Zeeland-varianter. Druvan är känslig och svårodlad, vilket gör prisvärdhet extra viktig. Vi jämför alla Pinot Noir-viner i fast sortiment baserat på smak och pris.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'pinot noir' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -348,7 +352,7 @@ def make_pages():
             "meta": f"Topp Syrah- och Shiraz-viner. Kraftfulla och kryddiga — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Syrah & Shiraz på Systembolaget — {DATE_STR}",
             "intro": "Syrah (eller Shiraz) ger kraftfulla viner med peppar och mörka bär. Här är de bästa fynden.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and ('syrah' in (w.get('grape', '') or '').lower() or 'shiraz' in (w.get('grape', '') or '').lower())],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -373,7 +377,7 @@ def make_pages():
                 ("Är Riesling alltid sött?", "Nej! De flesta Riesling-viner på Systembolaget är torra eller halvtorra. Kolla smakprofilen — sötma 1–3 av 12 betyder torrt. Trocken på etiketten garanterar torr stil."),
                 ("Vilken Riesling är bäst för nybörjare?", "Börja med en tysk Kabinett — den har lägre alkohol, mild sötma och tydlig fruktighet. Det är ett av vinvärldens mest tillgängliga viner. Vill du ha torrt, prova en Pfalz Trocken."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'riesling' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -384,7 +388,7 @@ def make_pages():
             "meta": f"Topp Tempranillo-viner. Rioja, Ribera del Duero och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Tempranillo på Systembolaget — {DATE_STR}",
             "intro": "Tempranillo är Spaniens stolthet — fylliga viner med vanilj och körsbär. Här är de bästa köpen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'tempranillo' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -395,7 +399,7 @@ def make_pages():
             "meta": f"Topp Sangiovese-viner — Chianti, Brunello och mer. Rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Sangiovese på Systembolaget — {DATE_STR}",
             "intro": "Sangiovese är druvan bakom Chianti och Brunello di Montalcino. Här är de bästa italienska fynden.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'sangiovese' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -406,7 +410,7 @@ def make_pages():
             "meta": f"Topp Chardonnay-viner. Bourgogne, Australien och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Chardonnay på Systembolaget — {DATE_STR}",
             "intro": "Chardonnay — från fräsch och mineralisk till fyllig och fatlagrad. Här är de bästa köpen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'chardonnay' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -417,7 +421,7 @@ def make_pages():
             "meta": f"Topp Sauvignon Blanc-viner. Fräscha och aromatiska — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Sauvignon Blanc på Systembolaget — {DATE_STR}",
             "intro": "Sauvignon Blanc är fräsch, syrig och perfekt till sommar och fisk. Här är de bästa fynden.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Vitt'
                            and 'sauvignon blanc' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -428,7 +432,7 @@ def make_pages():
             "meta": f"Topp Zinfandel-viner. Kraftfulla, fruktiga och generösa — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Zinfandel på Systembolaget — {DATE_STR}",
             "intro": "Zinfandel ger generösa, fruktdrivna viner med kryddighet. Här är de bästa köpen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'zinfandel' in (w.get('grape', '') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -455,7 +459,7 @@ def make_pages():
                 ("Vad är skillnaden mellan Chianti och Chianti Classico?", "Chianti Classico kommer från det ursprungliga, mindre området i Toscana och har strängare kvalitetskrav. Vanlig Chianti kan komma från ett mycket större område med lägre minimikrav. Classico är nästan alltid bättre."),
                 ("Vilka italienska viner passar till pasta?", "Till tomatsås: Sangiovese (Chianti) eller Montepulciano d'Abruzzo. Till krämig pasta: en fyllig vit som Vermentino. Till pesto: Vermentino eller en lätt Pinot Grigio."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Italien'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Italien'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -478,7 +482,7 @@ def make_pages():
                 ("Är fransk vin alltid bäst?", "Nej, men Frankrike har den bredaste kvaliteten. Problemet är att franskt vin ofta är dyrare. I prisklassen under 120 kr får du ofta mer för pengarna från Chile eller Spanien."),
                 ("Vad betyder AOC och AOP på franska viner?", "AOC (Appellation d'Origine Contrôlée) och AOP (Appellation d'Origine Protégée) är samma sak — en kvalitetsgaranti som säkerställer att vinet kommer från en specifik region och följer lokala regler för druvor och produktion."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Frankrike'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Frankrike'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -501,7 +505,7 @@ def make_pages():
                 ("Vad betyder Crianza, Reserva och Gran Reserva?", "Crianza har lagrats minst 1 år i fat, Reserva minst 3 år (varav 1 i fat), och Gran Reserva minst 5 år (varav 2 i fat). Längre lagring ger mer komplexitet men inte alltid bättre smak — Crianza är ofta fräschast."),
                 ("Vilken spansk vinregion är bäst?", "Rioja är den mest kända och pålitliga. Ribera del Duero ger kraftfullare stil. Priorat är för den som vill ha koncentrerat och komplext. För budgetfynd: kolla Jumilla och Campo de Borja."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Spanien'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Spanien'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -511,7 +515,7 @@ def make_pages():
             "h1": f"Bästa chilenska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Chile levererar fantastisk kvalitet till låga priser. Här är de bästa chilenska fynden.",
             "intro2": "Chilenska viner dominerar budgetsegmentet på Systembolaget med druvor som Cabernet Sauvignon, Carmenère och Sauvignon Blanc. Vinregionerna sträcker sig från svala Casablanca till varma Maule. Chile är perfekt för dig som vill ha kvalitetsvin utan att betala europapremium.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Chile'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Chile'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -521,7 +525,7 @@ def make_pages():
             "h1": f"Bästa sydafrikanska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Sydafrika är en underskattad vinproducent med fantastisk prisvärdhet. Här är de bästa köpen.",
             "intro2": "Sydafrikanska viner på Systembolaget är ofta bland de mest prisvärda. Pinotage är landets signaturdruva, men Chenin Blanc, Shiraz och Cabernet ger också utmärkt kvalitet. Vinregionen Stellenbosch producerar Sydafrikas mest ansedda viner.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Sydafrika'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Sydafrika'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -530,7 +534,7 @@ def make_pages():
             "meta": f"Topp australiska viner. Shiraz, Chardonnay och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa australiska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Australien gör kraftfulla, generösa viner. Här är de bästa fynden på Systembolaget.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Australien'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Australien'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -539,7 +543,7 @@ def make_pages():
             "meta": f"Topp portugisiska viner. Douro, Alentejo och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa portugisiska vinerna på Systembolaget — {DATE_STR}",
             "intro": "Portugal är ett av Europas mest prisvärda vinländer. Här är de bästa köpen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Portugal'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Portugal'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
@@ -550,7 +554,7 @@ def make_pages():
             "meta": f"Romantisk middag? Här är vinerna som imponerar utan att kosta skjortan. Rankade efter kvalitet. {DATE_STR}.",
             "h1": f"Bästa vinerna till en dejt — {DATE_STR}",
             "intro": "En dejt förtjänar ett vin som imponerar. Här är vinerna som ger rätt känsla — elegant, omtyckt och prisvärt.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('expert_score') or 0) >= 7 and (w.get('price', 0) or 0) >= 120 and (w.get('price', 0) or 0) <= 300],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -560,7 +564,7 @@ def make_pages():
             "meta": f"Vin till julbordet? Här är de bästa matchningarna till julskinka, Janssons och lax. {DATE_STR}.",
             "h1": f"Bästa vinerna till julmat — {DATE_STR}",
             "intro": "Julbordet har allt — skinka, lax, sill och köttbullar. Här är vinerna som funkar till hela julmenyn.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and any(k in (f or '').lower() for k in ['fläsk', 'skinka', 'kött', 'fisk', 'lamm']
                                    for f in (w.get('food_pairings') or []))
                            and (w.get('smakfynd_score', 0) or 0) >= 70],
@@ -572,7 +576,7 @@ def make_pages():
             "meta": f"Vin till kyckling? Här är de bästa matchningarna på Systembolaget. {DATE_STR}.",
             "h1": f"Bästa vinerna till kyckling — {DATE_STR}",
             "intro": "Kyckling är mångsidigt — och det gäller vinvalet också. Här är de bästa alternativen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and any('fågel' in (f or '').lower() or 'kyckling' in (f or '').lower()
                                    for f in (w.get('food_pairings') or []))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -595,7 +599,7 @@ def make_pages():
                     "Ekologiska viner i denna prisklass har blivit markant bättre de senaste åren.",
                 ]
             },
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 200],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -605,7 +609,7 @@ def make_pages():
             "h1": f"Bästa premiumviner 200–500 kr — {DATE_STR}",
             "intro": "I premiumklassen hittar du viner med riktigt höga betyg. Här är de som ger bäst valuta.",
             "intro2": "Premiumviner mellan 200 och 500 kr på Systembolaget inkluderar lagade Bordeaux, Barolo, topprankade Rhône-viner och exklusiva Nya världen-producenter. Här spelar expertbetyg stor roll — skillnaden mellan bra och fantastiskt syns tydligt i denna prisklass.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 200 and (w.get('price', 0) or 0) <= 500],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -615,7 +619,7 @@ def make_pages():
             "meta": f"Prissänkta viner på Systembolaget {YEAR}. Nedsatta viner och prissänkt vin — hitta fynden innan de försvinner. {DATE_STR}.",
             "h1": f"Prissänkta viner på Systembolaget {YEAR}",
             "intro": "Systembolaget skyltar inte alltid med prissänkningar. Vi håller koll åt dig — här är de bästa fynden.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price_vs_launch_pct') or 0) > 0],
                           key=lambda x: -(x.get('price_vs_launch_pct', 0) or 0)))[:20],
         },
@@ -627,7 +631,7 @@ def make_pages():
             "meta": f"Topp 20 fylliga röda viner. Kraftfulla, smakrika och generösa — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa fylliga röda vinerna — {DATE_STR}",
             "intro": "Du gillar kraftfulla, fylliga viner? Här är de röda som ger mest smak — med hög kropp och intensitet.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 8],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -637,7 +641,7 @@ def make_pages():
             "meta": f"Fräscha, lätta vita viner. Perfekta till sommar och fisk — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa lätta vita vinerna — {DATE_STR}",
             "intro": "Fräscht, lätt och syradriven? Här är de vita vinerna som fungerar perfekt som aperitif eller till lättare rätter.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Vitt'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Vitt'
                            and (w.get('taste_body') or 12) <= 5],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -650,7 +654,7 @@ def make_pages():
             "h1": f"Bästa Bordeaux-viner på Systembolaget — {DATE_STR}",
             "intro": "Bordeaux är vinvärldens mest ikoniska region — hem för legendariska châteaux och tidlösa blandningar av Cabernet Sauvignon och Merlot.",
             "intro2": "Bordeaux terroir är unikt: havsnära klimat, grus- och lerjordar och sekler av vinkunskap skapar viner med struktur, elegans och lagringspotential. På Systembolaget finns allt från prisvärda Côtes de Bordeaux till exklusiva Saint-Émilion och Médoc. Vi har rankat alla Bordeaux-viner efter kvalitet per krona för att hitta de verkliga fynden.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Bordeaux'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -661,7 +665,7 @@ def make_pages():
             "h1": f"Bästa Toscana-viner på Systembolaget — {DATE_STR}",
             "intro": "Toscana är hem för Italiens mest älskade viner — från vardaglig Chianti till magnifik Brunello di Montalcino.",
             "intro2": "Toscana levererar viner i alla prisklasser. Chianti Classico DOCG ger pålitlig kvalitet med Sangiovese-druvan i centrum, medan Brunello di Montalcino och Vino Nobile di Montepulciano erbjuder djupare komplexitet. Super Toscans blandar internationella druvor med italiensk finesse. Vi har rankat alla Toscana-viner efter kvalitet per krona.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Toscana'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -672,7 +676,7 @@ def make_pages():
             "h1": f"Bästa Rioja-viner på Systembolaget — {DATE_STR}",
             "intro": "Rioja är Spaniens mest klassiska vinregion — känd för eleganta Tempranillo-viner med vanilj, körsbär och kryddiga toner.",
             "intro2": "Rioja-viner delas in efter lagringstid: Joven (ung), Crianza (1 år i fat), Reserva (3 år totalt) och Gran Reserva (5 år totalt). Tempranillo dominerar, ofta med inslag av Garnacha och Graciano. Crianza ger ofta bäst prisvärdhet, medan Reserva och Gran Reserva erbjuder mer komplexitet och mognad. Vi rankar alla Rioja-viner efter smak och prisvärdhet.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Rioja'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -683,7 +687,7 @@ def make_pages():
             "h1": f"Bästa Bourgogne-viner på Systembolaget — {DATE_STR}",
             "intro": "Bourgogne är Pinot Noirs och Chardonnays hemland — eleganta viner med oöverträffad terroirkänsla.",
             "intro2": "Bourgogne producerar världens mest eftertraktade Pinot Noir (röda) och Chardonnay (vita). Regionen är känd för sitt terroirfokus där varje vingård ger unika karaktärsdrag. Från fräsch Chablis till fyllig Meursault bland vita, och från elegant Beaune till kraftfull Gevrey-Chambertin bland röda — Bourgogne har enorm bredd. Priserna varierar kraftigt, men det finns fynd att göra.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Bourgogne'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -694,7 +698,7 @@ def make_pages():
             "h1": f"Bästa Rhône-viner på Systembolaget — {DATE_STR}",
             "intro": "Rhônedalen erbjuder kraftfulla, kryddiga viner — från eleganta norra Rhône-Syraher till generösa södra Rhône-blandningar.",
             "intro2": "Rhônedalen delas i norra och södra. Norra Rhône ger koncentrerade Syrah-viner från Côte-Rôtie, Hermitage och Cornas. Södra Rhône domineras av GSM-blandningar (Grenache, Syrah, Mourvèdre) med Châteauneuf-du-Pape som kronjuvel. Côtes du Rhône och Côtes du Rhône Villages erbjuder fantastisk prisvärdhet och är ofta bland Systembolagets bästa köp.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Rhonedalen'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -707,7 +711,7 @@ def make_pages():
             "h1": f"Bästa vinerna till brunch — {DATE_STR}",
             "intro": "Brunch och bubbel hör ihop, men även lätta vita och roséer lyfter en söndagsbrunch. Här är de bästa alternativen.",
             "intro2": "Till brunch vill du ha viner som är fräscha, lätta och festliga. Mousserande viner som Cava, Prosecco och Crémant är givna val — de funkar till allt från äggbenedict till frukt. Lätta vita viner och torra roséer kompletterar perfekt om du vill ha något stillsamt. Vi har valt ut de bästa brunchvinerna baserat på smak och prisvärdhet.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('type') == 'Mousserande'
                                 or (w.get('type') in ('Vitt', 'Rosé') and (w.get('taste_body') or 12) <= 6))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -737,7 +741,7 @@ def make_pages():
                 ("Vilket vin till laxpasta eller laxsoppa?", "Krämiga laxrätter som pasta och soppa vill ha Chardonnay eller Pinot Grigio med lite kropp. Syran skär igenom grädden medan vinets fruktighet kompletterar laxen."),
                 ("Ska man välja vitt eller rosé till lax?", "Vitt vin är det säkraste valet. Rosé fungerar utmärkt till grillad lax och lättare laxsallader — välj en torr Provence-rosé. Till gravad lax och lax i ugn är vitt nästan alltid bättre."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé')
                            and any('fisk' in (f or '').lower() for f in (w.get('food_pairings') or []))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -749,7 +753,7 @@ def make_pages():
             "h1": f"Bästa vinerna till tacos — {DATE_STR}",
             "intro": "Tacofredag förtjänar ett gott vin. Fruktiga röda med medelfyllig kropp eller en fräsch rosé funkar perfekt.",
             "intro2": "Till tacos vill du ha avslappnade, fruktiga viner som inte tar över smaken. Medelkroppade röda viner som Malbec, Tempranillo och Garnacha passar utmärkt — de har frukt och krydda som kompletterar tacokryddorna. Rosé är ett annat toppval, särskilt till kyckling- och fisktacos. Vi har valt prisvärda viner under 150 kr som gör fredagstacosen ännu godare.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) <= 150
                            and ((w.get('type') == 'Rött' and (w.get('taste_body') or 0) >= 4 and (w.get('taste_body') or 0) <= 8)
                                 or w.get('type') == 'Rosé')],
@@ -764,7 +768,7 @@ def make_pages():
             "h1": f"Bästa Champagne på Systembolaget — {DATE_STR}",
             "intro": "Äkta Champagne — inte bara bubbel. Här är de mousserande vinerna från Champagne som verkligen levererar.",
             "intro2": "Bara mousserande vin från Champagne-regionen i Frankrike får kallas Champagne. Till skillnad från Cava, Prosecco och Crémant genomgår äkta Champagne en andra jäsning på flaskan som ger den karaktäristiska finheten, de små bubblorna och den komplexa smaken av brioche och rostad nöt. Priserna är högre, men kvalitetsskillnaden mot andra mousserande viner märks tydligt. Vi har rankat alla äkta Champagne-viner i Systembolagets fasta sortiment efter kvalitet per krona.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Champagne' and w.get('type') == 'Mousserande'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -775,7 +779,7 @@ def make_pages():
             "h1": f"Bästa Languedoc-viner på Systembolaget — {DATE_STR}",
             "intro": "Languedoc är södra Frankrikes vinparadis — fantastisk kvalitet till priser som Bordeaux bara kan drömma om.",
             "intro2": "Languedoc-Roussillon är Frankrikes största vinregion och en guldgruva för prisvärda viner. Här odlas Syrah, Grenache, Carignan och Mourvèdre i medelhavsklimat som ger mogna, generösa viner med kryddiga och fruktiga toner. Regionen har genomgått en kvalitetsrevolution de senaste decennierna — dagens Languedoc-viner håller ofta samma nivå som betydligt dyrare Rhône- och Bordeaux-viner. Ett av Systembolagets bäst bevarade vinfynd.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and 'languedoc' in (w.get('region') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -786,7 +790,7 @@ def make_pages():
             "h1": f"Bästa Alsace-viner på Systembolaget — {DATE_STR}",
             "intro": "Alsace är Frankrikes vita vinmecka — hem för aromatiska Riesling och Gewürztraminer av världsklass.",
             "intro2": "Alsace i nordöstra Frankrike producerar några av världens bästa vita viner. Riesling ger mineraliska, torra viner med fantastisk lagringspotential, medan Gewürztraminer bjuder på exotiska aromer av lychee, ros och kryddor. Pinot Gris levererar fylliga, runda viner och Crémant d'Alsace är ett av Frankrikes bästa mousserande fynd. Alsace-viner säljs på druva (inte region som i övriga Frankrike), vilket gör det lätt att välja rätt.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('region') or '') == 'Alsace'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -810,7 +814,7 @@ def make_pages():
                 ("Är kaliforniskt vin dyrt?", "Det varierar enormt. Napa Valley-viner kostar ofta 200–500 kr på Systembolaget, men kaliforniska viner från Lodi, Central Coast och Sonoma finns redan från 100 kr med bra kvalitet."),
                 ("Vad skiljer kaliforniskt vin från europeiskt?", "Kalifornien ger generellt mognare, fruktigare viner med mer generös stil. Europeiska viner tenderar att vara stramare och mer jordiga. Ingen stil är bättre — det handlar om smak."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'USA'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
@@ -835,7 +839,7 @@ def make_pages():
                 ("Finns det drinkbart vin under 80 kr?", "Ja, det finns faktiskt riktigt trevliga viner under 80 kr. Framförallt från Chile och Sydafrika hittar du fruktiga, välgjorda viner som fungerar utmärkt till vardags. Nyckeln är att kolla betyg istället för att gissa."),
                 ("Vilket är det bästa billigaste vinet?", "Det varierar, men i prisklassen under 80 kr dominerar chilensk Cabernet Sauvignon och sydafrikansk Chenin Blanc. Kolla vår topplista för det senaste — den uppdateras varje vecka."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 80],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -858,7 +862,7 @@ def make_pages():
                 ("Vilka druvor ger mest fruktiga röda viner?", "Malbec, Zinfandel, Garnacha och Shiraz är de mest fruktdrivna röda druvorna. Primitivo (Italiens version av Zinfandel) ger också mycket frukt. Merlot kan vara fruktig men tenderar att vara mer mjuk och rund."),
                 ("Passar fruktiga röda viner till mat?", "Absolut! Fruktiga röda viner är fantastiska till grillat, pizza, tacos och kryddiga rätter. Fruktigheten balanserar starka smaker och gör vinerna väldigt mångsidiga."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Rött' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_fruit') or 0) >= 8],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -882,7 +886,7 @@ def make_pages():
                 ("Smakar ekologiskt vin annorlunda?", "Inte nödvändigtvis, men många upplever att eko-viner har en renare, mer autentisk smak. Lägre svavelhalt kan ge en mer levande fruktkänsla. Kvalitetsskillnaden handlar mer om producenten än om certifieringen."),
                 ("Är ekologiskt vin bättre?", "Ekologiskt vin är bättre för miljön tack vare färre kemiska bekämpningsmedel och mer hållbar odling. Smäckmässigt beror det på producenten — men de bästa eko-vinerna håller absolut samma nivå som konventionella viner."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('organic') and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('organic') and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -906,7 +910,7 @@ def make_pages():
                 ("Vad betyder torrt vin?", "Torrt vin har lite eller inget restsocker — under 4 gram per liter. Det innebär att all druvsockret har jäst ut till alkohol. Torrt betyder inte surt eller tråkigt — det betyder att vinet låter frukt, syra och mineralitet tala istället för sötma."),
                 ("Vilka vita druvor ger torrast vin?", "Sauvignon Blanc, Chablis (Chardonnay), Muscadet, Grüner Veltliner och Albariño är bland de druvor som oftast ger riktigt torra vita viner. Riesling kan vara torrt men varierar — kolla alltid smakprofilen."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Vitt' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_sweet') is not None and (w.get('taste_sweet') or 0) <= 3)],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -918,7 +922,7 @@ def make_pages():
             "meta": f"Topp 20 bästa viner under 90 kr. Prisvärt och gott — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa vinerna under 90 kr — {DATE_STR}",
             "intro": "Du behöver inte spendera mycket för att dricka bra. Här är de bästa vinerna under 90 kr — vardagsfavoriter med hög poäng.",
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska' and (w.get('price', 999) or 999) < 90],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -927,7 +931,7 @@ def make_pages():
             "meta": f"Bästa sommarviner på Systembolaget {YEAR}. Fräscha vita, rosé och bubbel för grillkvällar och picknick. {DATE_STR}.",
             "h1": f"Bästa sommarvinerna {YEAR}",
             "intro": "Sommar = fräscht, kylt och enkelt. Här är de vita, rosé och mousserande vinerna som passar perfekt till grillkvällar, picknick och sena sommarkvällar.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
                            and (w.get('price', 999) or 999) <= 200],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -938,7 +942,7 @@ def make_pages():
             "meta": f"Bästa höstviner: fylliga röda till mörka kvällar, vilt och gratänger. {DATE_STR}.",
             "h1": f"Bästa höstvinerna {YEAR}",
             "intro": "Hösten kallar på varma, fylliga viner. Här är de röda vinerna som passar perfekt till viltstuvning, svampsås och mörka novemberkvällar.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 7],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -948,7 +952,7 @@ def make_pages():
             "meta": f"Vilket vin passar till pizza? Topp 20 bästa vinerna till pizza — från Margherita till pepperoni. {DATE_STR}.",
             "h1": f"Bästa vinerna till pizza — {DATE_STR}",
             "intro": "Pizza och vin är en klassisk kombo. Italienska röda och friska vita — här är de bästa vinerna till pizzakvällen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('country') == 'Italien' or w.get('grape', '').lower() in ('sangiovese', 'primitivo', 'montepulciano'))
                            and w.get('type') in ('Rött', 'Vitt')],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -959,7 +963,7 @@ def make_pages():
             "meta": f"Bästa viner till sushi och japansk mat. Fräscha vita, torr rosé och lätt bubbel. {DATE_STR}.",
             "h1": f"Bästa vinerna till sushi — {DATE_STR}",
             "intro": "Sushi kräver vin med fräschör och precision. Fräscha vita, torra roséer och mousserande — här är de bästa vinerna till sushi.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Vitt', 'Rosé', 'Mousserande')
                            and (w.get('taste_sweet') is None or (w.get('taste_sweet') or 0) <= 4)],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -970,7 +974,7 @@ def make_pages():
             "meta": f"Bästa viner till lamm, grillat lamm och lammkotletter. Kraftiga röda med kryddig karaktär. {DATE_STR}.",
             "h1": f"Bästa vinerna till lamm — {DATE_STR}",
             "intro": "Lamm vill ha vin med struktur och kryddighet. Syrah, Tempranillo och Cabernet Sauvignon — här är de bästa vinerna till lammrätter.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Rött'
                            and (w.get('taste_body') or 0) >= 7
                            and any(g in (w.get('grape') or '').lower() for g in ['syrah', 'shiraz', 'tempranillo', 'cabernet', 'malbec', 'grenache', 'mourvèdre'])],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -981,7 +985,7 @@ def make_pages():
             "meta": f"Bästa picknick-viner — lätta, fräscha och enkla att ta med. {DATE_STR}.",
             "h1": f"Bästa vinerna till picknick — {DATE_STR}",
             "intro": "Picknick = lättsamt, fräscht och gärna kylt. Här är de bästa vinerna att ta med i korgen — från roséer till lätta bubbel.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') in ('Rosé', 'Vitt', 'Mousserande')
                            and (w.get('price', 999) or 999) <= 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -992,7 +996,7 @@ def make_pages():
             "meta": f"Topp 20 bästa Merlot på Systembolaget. Mjuka, fruktiga och eleganta — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa Merlot-vinerna — {DATE_STR}",
             "intro": "Merlot är den mjuka, tillgängliga favoriten. Fruktigt, rundt och vänligt — perfekt för den som vill ha ett rött vin utan för mycket tanniner.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'merlot' in (w.get('grape') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1003,7 +1007,7 @@ def make_pages():
             "meta": f"Topp 20 Grenache/Garnacha från Systembolaget. Kryddigt, fruktigt, generöst. {DATE_STR}.",
             "h1": f"Bästa Grenache-vinerna — {DATE_STR}",
             "intro": "Grenache (eller Garnacha) ger generösa, kryddiga röda viner med bärtoner och värme. Populär i Rhônedalen, Spanien och Australien.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and any(g in (w.get('grape') or '').lower() for g in ['grenache', 'garnacha'])],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1014,7 +1018,7 @@ def make_pages():
             "meta": f"Topp 20 argentinska viner. Malbec, Torrontés och mer — rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa argentinska vinerna — {DATE_STR}",
             "intro": "Argentina = Malbec. Men det finns mer — Torrontés, Cabernet Franc och spännande blandningar. Här är de bästa argentinska vinerna just nu.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('country') == 'Argentina'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('country') == 'Argentina'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -1042,7 +1046,7 @@ def make_pages():
                 ("Vad betyder Brut Nature på en cava?", "Brut Nature är den torraste stilen — inget tillsatt socker alls efter jäsningen. Det ger ren, skarp smak som framhäver druvorna. Perfekt för dig som gillar torrt bubbel och vill undvika extra socker."),
                 ("Är cava billigare än champagne?", "Ja, betydligt. På Systembolaget kostar bra cava 89–149 kr medan champagne börjar runt 250 kr. Produktionsmetoden är identisk (méthode traditionnelle) men druvorna och regionen skiljer sig — Penedès i Katalonien istället för Champagne i Frankrike."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('country') == 'Spanien'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1052,7 +1056,7 @@ def make_pages():
             "meta": f"Bubbel under 150 kr — festligt utan att ruinera dig. Rankade efter kvalitet per krona. {DATE_STR}.",
             "h1": f"Bästa mousserande vinerna under 150 kr — {DATE_STR}",
             "intro": "Du behöver inte betala champagne-pris för riktigt bra bubbel. Här är de bästa mousserande vinerna under 150 kr — perfekta för fredagsmys, fest eller bara för att det är onsdag.",
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and (w.get('price', 999) or 999) < 150],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1079,7 +1083,7 @@ def make_pages():
                 ("Rött eller vitt vin till svamp?", "Båda fungerar, men på olika sätt. Rött vin (Pinot Noir, Nebbiolo) matchar svampens jordighet. Vitt vin (fatlagrad Chardonnay) kompletterar smörstekta svampar. Undvik tanninstarka röda — de krockar med svampens mjuka textur."),
                 ("Vin till kantareller?", "Kantareller har en delikat, nötig smak. Fatlagrad Chardonnay eller en lätt Pinot Noir är perfekta val. Undvik viner som är för kraftfulla — de dränker kantarellernas subtila smak."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and any(g in (w.get('grape') or '').lower() for g in ['pinot noir', 'nebbiolo', 'barbera', 'chardonnay', 'barolo'])
                            and (w.get('taste_body') or 0) >= 5],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1090,7 +1094,7 @@ def make_pages():
             "meta": f"Bästa bubbel och vin till nyårsfirandet. Champagne, Cava, Prosecco och mer. {DATE_STR}.",
             "h1": f"Bästa vinerna till nyår",
             "intro": "Nyår kräver bubbel! Här är de bästa mousserande vinerna för att fira in det nya året — från prisvärd Cava till exklusiv Champagne.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('type') == 'Mousserande'],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('type') == 'Mousserande'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
         {
@@ -1099,7 +1103,7 @@ def make_pages():
             "meta": f"Topp Carménère — Chiles underskattade druva. Kryddigt och unikt. {DATE_STR}.",
             "h1": f"Bästa Carménère-vinerna — {DATE_STR}",
             "intro": "Carménère — Chiles signaturdruva med kryddiga, gröna och mörka bärtoner. Unik och ofta undervärderad. Här är de bästa köpen.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Rött'
                            and 'carm' in (w.get('grape') or '').lower()],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1127,7 +1131,7 @@ def make_pages():
                 ("Vilken champagne är bäst för pengarna?", "Grower-champagne och kooperativ som Beaumont des Crayères ger ofta bäst prisvärdhet. De stora husen (Moët, Veuve Clicquot) betalar du delvis för varumärket."),
                 ("Vad är skillnaden på Brut och Extra Brut?", "Brut har upp till 12 g/l restsocker, Extra Brut under 6 g/l. Extra Brut är torrare och visar mer av vinets karaktär. De flesta föredrar Brut till festliga tillfällen."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande' and w.get('region') == 'Champagne'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1140,7 +1144,7 @@ def make_pages():
             "h1": f"Bästa röda boxvin {YEAR}",
             "intro": f"Bästa röda boxvinet just nu? Röda bag-in-box har blivit mycket bättre — här är de som faktiskt levererar kvalitet per krona.",
             "intro2": "Sverige är världens största marknad för boxvin, och kvaliteten har exploderat. Röda boxviner från Spanien (Tempranillo, Garnacha) och Sydamerika (Malbec) dominerar topplistorna. Vi rankar alla röda BiB-viner efter smak och pris.",
-            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'BiB'
                            and w.get('type') == 'Rött' and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1167,7 +1171,7 @@ def make_pages():
                 ("Hur länge håller öppnad vit boxvin?", "En öppnad vit box håller 4–6 veckor i kylskåp. Vakuumförpackningen skyddar vinet från oxidering, till skillnad från en öppnad flaska som håller max en vecka."),
                 ("Är vit boxvin sämre än flaskor?", "Inte nödvändigtvis. Samma vin kan finnas i både box och flaska. Boxen ger ofta bättre literpris och håller längre öppnad. Kvaliteten har förbättrats enormt de senaste åren."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'BiB'
                            and w.get('type') == 'Vitt' and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1218,7 +1222,7 @@ def make_pages():
                 ("Smakar naturvin annorlunda?", "Ja, ofta. Naturvin kan vara mer oförutsägbart — fruktdrivet, jordigt eller funkigt. Börja med ett pet-nat (naturligt mousserande) eller en lättare röd som Gamay om du är nybörjare."),
                 ("Är allt ekologiskt vin naturvin?", "Nej. Ekologiskt vin reglerar odlingen men tillåter tillsatser i vinmakningen. Naturvin minimerar ingrepp i hela processen — från druva till flaska."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('organic')
                            and any(g in (w.get('grape') or '').lower() for g in ['gamay', 'cabernet franc', 'chenin', 'grenache', 'cinsault', 'carignan'])],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1246,7 +1250,7 @@ def make_pages():
                 ("Vad betyder torrt vin?", "Torrt = inte sött. De flesta röda viner och många vita är torra. Det har inget med hur de känns i munnen att göra — ett torrt vin kan vara fruktigt och lättdrucket."),
                 ("Måste jag kunna mycket om vin för att välja rätt?", "Nej. Smakfynd-poängen sammanfattar expertbetyg och prisvärde i en enda siffra. Välj det med högst poäng i din prisklass — klart."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) <= 150
                            and w.get('smakfynd_score', 0) >= 80],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1273,7 +1277,7 @@ def make_pages():
                 ("Hur mycket ska man spendera på vin i present?", "150–300 kr ger en uppskattad present. Under 100 kr kan kännas billigt, och över 500 kr behöver du bara om du vet att mottagaren är vinintresserad."),
                 ("Rött eller vitt i present?", "Rött är säkrast om du inte vet mottagarens preferenser. En fyllig Rioja, Barolo eller Bordeaux är alltid uppskattat. Bubbel fungerar också universellt."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 500
                            and w.get('smakfynd_score', 0) >= 80],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1286,7 +1290,7 @@ def make_pages():
             "meta": f"Fredagsmys med vin? Här är de bästa vinerna för en avslappnad fredagskväll — prisvärda och lättdruckna. {DATE_STR}.",
             "h1": f"Bästa vinet till fredagsmys — {DATE_STR}",
             "intro": "Fredagsmysets vin ska vara lättdrucket, okomplicerat och prisvärt. Här är våra favoriter för soffhänget.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) <= 150
                            and w.get('smakfynd_score', 0) >= 75
                            and (w.get('taste_body') or 6) <= 8],
@@ -1298,7 +1302,7 @@ def make_pages():
             "meta": f"Ska svärföräldrarna på middag? Välj vin som imponerar utan att vara pretentiöst. Här är de säkra valen. {DATE_STR}.",
             "h1": f"Bästa vinet till middagen med svärföräldrarna",
             "intro": "Ett vin som visar att du har bra smak — utan att det ser ut som du anstränger dig för mycket. Klassiker som aldrig svikar.",
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('price', 0) or 0) >= 150 and (w.get('price', 0) or 0) <= 350
                            and w.get('smakfynd_score', 0) >= 80],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1325,7 +1329,7 @@ def make_pages():
                 ("Hur mycket billigare är Systembolaget jämfört med Vinmonopolet?", "I genomsnitt 20-40% billigare, beroende på vinkategori. Röda viner och lådvin har störst prisskillnad. Champagne och premium-viner kan vara 100-300 kr billigare per flaska."),
                 ("Hur mycket vin får man ta med till Norge?", "Kvoten för skattefri införsel är begränsad. Kontrollera aktuella regler på toll.no innan du åker. Du kan ta med mer men betalar avgift."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
@@ -1349,7 +1353,7 @@ def make_pages():
                 ("Hvor mye billigere er Systembolaget enn Vinmonopolet?", "I gjennomsnitt 20-40% billigere, avhengig av vinkategori. Røde viner og pappvin har størst prisforskjell. Champagne og premium-viner kan være 100-300 kr billigere per flaske."),
                 ("Hvor mye vin kan man ta med til Norge?", "Kvoten for avgiftsfri innførsel er begrenset. Sjekk gjeldende regler på toll.no før du reiser. Du kan ta med mer, men betaler avgift."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska' and w.get('smakfynd_score', 0) >= 75],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
 
@@ -1374,7 +1378,7 @@ def make_pages():
                 ("Finns det bra rosé under 100 kr?", f"Ja. Flera roséer under hundralappen får över 75 av 100 i Smakfynd-poäng, vilket innebär att de slår betydligt dyrare alternativ i blind provning. De bästa kommer ofta från Spanien och Sydafrika."),
                 ("Vad skiljer billig rosé från dyr?", "Främst producent och region. Provence-rosé kostar mer pga varumärke och efterfrågan, inte nödvändigtvis kvalitet. Spanska roséer görs med samma metoder men har lägre marknadspris."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and (w.get('price', 999) or 999) < 100],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1398,7 +1402,7 @@ def make_pages():
                 ("Är Provence-rosé värt det högre priset?", "Ibland. De bästa Provence-roséerna har en elegans och mineralitet som är svår att matcha. Men under 130 kr hittar du spanska och italienska roséer som kommer mycket nära. Över 150 kr börjar Provence-kvaliteten verkligen skilja sig."),
                 ("Vilka druvor används i Provence-rosé?", "Grenache, Cinsault, Mourvèdre och Syrah är de vanligaste. Blandningen varierar — mer Grenache ger frukt, mer Mourvèdre ger struktur, mer Cinsault ger lätthet."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and ('provence' in (w.get('region') or '').lower() or 'frankrike' == w.get('country','').lower())],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1418,7 +1422,7 @@ def make_pages():
                     "Ha alltid rosén i ishink vid grillen. Den värms snabbt utomhus.",
                 ]
             },
-            "wines": dedup_wines(sorted([w for w in fast if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('type') == 'Rosé' and w.get('pkg') == 'Flaska'
                            and (w.get('taste_body') or 0) >= 4],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1444,12 +1448,19 @@ def make_pages():
                 ("Finns det bra champagne under 300 kr?", "Ja. Flera champagner i denna prisklass får höga betyg från både crowd och experter. Hemligheten är att leta efter mindre kända producenter (grower-champagne) snarare än de stora husen."),
                 ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris. Kvalitetsmässigt kan bra Cava matcha billig champagne, men riktig champagne har en komplexitet som är svår att replikera."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) < 300],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
+            "alternatives_title": "Rekommenderade alternativ — bubbel under 300 kr",
+            "alternatives": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
+                           and w.get('type') == 'Mousserande'
+                           and (w.get('vol') or 750) >= 750
+                           and (w.get('price', 999) or 999) < 300
+                           and not ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:10],
         },
         {
             "slug": "champagne-under-500-kr",
@@ -1471,7 +1482,7 @@ def make_pages():
                 ("Är champagne under 500 kr bra?", "Ja — prisklassen 300–500 kr är sweet spot. Du får kvalitet som matchar eller överträffar stora hus som Veuve Clicquot och Moët, men från mindre kända producenter med mer fokus på vin än varumärke."),
                 ("Vad är grower-champagne?", "Grower-champagne (Récoltant-Manipulant, RM) görs av producenter som odlar egna druvor och gör eget vin. Till skillnad från stora hus som köper druvor ger growers mer terroir-driven, personlig champagne — ofta till bättre pris."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
@@ -1499,7 +1510,7 @@ def make_pages():
                 ("Vad är skillnaden mellan Prosecco DOC och DOCG?", "DOCG (Denominazione di Origine Controllata e Garantita) är den högsta kvalitetsnivån. Prosecco DOCG kommer från det begränsade området Conegliano-Valdobbiadene i Veneto och har striktare produktionsregler. DOC-prosecco kan produceras i ett mycket större område."),
                 ("Är Prosecco lika bra som champagne?", "Det är olika stilar. Prosecco är lättare, fruktigare och gjord för att drickas ung. Champagne har mer komplexitet, jästighet och åldringskapacitet. Prosecco är perfekt som aperitif, champagne fungerar bättre till mat."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and w.get('country') == 'Italien'],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1524,7 +1535,7 @@ def make_pages():
                 ("Vad är Crémant?", "Crémant är franskt mousserande vin som görs med samma metod som champagne (flaskjäsning) men utanför Champagne-regionen. Namnet kommer från 'crème' — den krämiga mousset. Det är juridiskt skyddat och har strikta kvalitetskrav."),
                 ("Är Crémant lika bra som champagne?", "De bästa Crémant-vinerna kan mäta sig med ingångs-champagne, och slår ofta champagne i samma prisklass. Skillnaden är subtil — champagne har generellt mer komplexitet och jästkaraktär, men Crémant ger 80-90% av upplevelsen till 40-60% av priset."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and w.get('country') == 'Frankrike'
                            and 'champagne' not in (w.get('region') or '').lower()],
@@ -1553,7 +1564,7 @@ def make_pages():
                 ("Hur länge håller öppnat boxvin?", "En öppnad bag-in-box håller 4–6 veckor tack vare vakuumförpackningen som skyddar vinet från luft. En öppnad flaska håller max 3–5 dagar."),
                 ("Vilket boxvin passar till grillat?", "Välj en fyllig röd box — spansk Tempranillo eller argentinsk Malbec fungerar utmärkt. Till grillad kyckling och fisk funkar en fräsch vit box eller rosé."),
             ],
-            "wines": dedup_wines(sorted([w for w in all_wines if w.get('pkg') == 'BiB'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'BiB'
                            and w.get('smakfynd_score', 0) > 0
                            and w.get('assortment') in ('Fast sortiment', 'Tillfälligt sortiment')],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1581,7 +1592,7 @@ def make_pages():
                 ("Hur mycket vin behöver man till midsommar?", "Räkna med 1 flaska per person för ett längre midsommarfirande. Blanda gärna vita, rosé och bubbel. Ha alltid extra kylda flaskor redo — det går åt mer än man tror i värmen."),
                 ("Kan man dricka rött vin till midsommar?", "Det går, men det är inte optimalt. Midsommarmaten (sill, lax, potatis) passar bättre med vita, rosé och bubbel. Om du ändå vill ha rött, välj en lätt, kyld Pinot Noir."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('type') in ('Vitt', 'Rosé', 'Mousserande'))
                            and (w.get('price', 999) or 999) <= 200],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
@@ -1608,7 +1619,7 @@ def make_pages():
                 ("Vilken vin är bäst till kräftor?", "Torr Riesling och Chablis är de klassiska valen. Båda har den höga syran och mineraliteten som lyfter kräftornas smak. Sauvignon Blanc från Sancerre eller Nya Zeeland fungerar också utmärkt."),
                 ("Kan man dricka rött vin till kräftor?", "Det är ovanligt och inte rekommenderat. Röda viners tanniner krockar med skaldjurssmaken. Om du måste ha rött, välj en lätt Pinot Noir serverad kyld."),
             ],
-            "wines": dedup_wines(sorted([w for w in fast if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and (w.get('type') in ('Vitt', 'Mousserande'))],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
         },
@@ -1702,6 +1713,23 @@ def render_page(page, all_pages=None, modified_date=None):
     is_deals = page['slug'] == 'prissankt-vin'
     wines_html = '\n'.join(render_wine_row(w, i+1, sortable=is_deals) for i, w in enumerate(page['wines']))
     num_wines = len(page['wines'])
+
+    # Alternatives section (e.g. crémant/cava on champagne pages)
+    alternatives = page.get('alternatives', [])
+    alt_title = page.get('alternatives_title', '')
+    alt_html = ''
+    if alternatives:
+        alt_wines = '\n'.join(render_wine_row(w, i+1) for i, w in enumerate(alternatives))
+        alt_html = f'''
+    <section style="margin-top:32px;padding-top:24px;border-top:2px solid #e6ddd0">
+      <h2 style="font-size:20px;font-family:'Newsreader',Georgia,serif;font-weight:400;margin:0 0 16px;color:#1e1710">{alt_title}</h2>
+      <ol style="list-style:none;padding:0;margin:0">
+{alt_wines}
+      </ol>
+    </section>'''
+
+    # Total wines for noindex check: primary + alternatives
+    total_wines = num_wines + len(alternatives)
 
     # Dynamic count: replace hardcoded "Topp 20" / "Topp 10" with actual count
     def fix_count(text):
@@ -1923,7 +1951,7 @@ def render_page(page, all_pages=None, modified_date=None):
 
     # Thin page: noindex if fewer than 3 wines
     MIN_PAGE_WINES = 3
-    noindex_tag = '  <meta name="robots" content="noindex, follow">\n' if num_wines < MIN_PAGE_WINES else ''
+    noindex_tag = '  <meta name="robots" content="noindex, follow">\n' if total_wines < MIN_PAGE_WINES else ''
 
     return f'''<!DOCTYPE html>
 <html lang="{html_lang}">
@@ -2005,9 +2033,12 @@ def render_page(page, all_pages=None, modified_date=None):
     }
     </script>'''}
 
+    <p style="font-size:12px;color:#8a7a6a;margin:0 0 12px;padding:8px 12px;background:#fefcf8;border:1px solid #e6ddd0;border-radius:8px">Visar viner som finns i butik. <a href="https://smakfynd.se/#{page['slug']}/" style="color:#8b2332">Visa även beställningsvaror →</a></p>
+
     <ol style="list-style:none;padding:0;margin:0" id="wine-list">
 {wines_html}
     </ol>
+{alt_html}
 
     {cross_html}
 
