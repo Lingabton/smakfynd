@@ -68,6 +68,10 @@ jobs:
           python3 scripts/generate_monthly_seo.py
           python3 scripts/generate_prissankt.py
 
+      - name: Validate data
+        run: |
+          python3 scripts/validate_data.py
+
       - name: Fetch GSC data
         env:
           GSC_CREDS: ${{ secrets.GSC_CREDENTIALS_JSON }}
