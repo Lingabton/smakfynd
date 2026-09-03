@@ -396,7 +396,32 @@ if os.path.exists(sb_raw_path):
         mini.append(m)
         unscored_count += 1
 
-    print(f"Unrated wines added: {unscored_count} (with taste profiles)")
+    # Apply the same filters to unrated wines: dedup name+sub, hide large format when standard exists
+    scored_keys = {(m.get("name","").strip().lower(), (m.get("sub","") or "").strip().lower()) for m in mini if not m.get("unrated")}
+    unrated_in = [m for m in mini if m.get("unrated")]
+    # Remove name+sub duplicates (keep first by nr sort)
+    seen_unrated = set()
+    deduped_unrated = []
+    for m in sorted(unrated_in, key=lambda x: str(x.get("nr",""))):
+        key = (m.get("name","").strip().lower(), (m.get("sub","") or "").strip().lower())
+        if key in seen_unrated or key in scored_keys:
+            continue
+        seen_unrated.add(key)
+        deduped_unrated.append(m)
+    # Remove small formats (vol < 750) where a standard bottle exists
+    standard_keys = {(m.get("name","").strip().lower(), (m.get("sub","") or "").strip().lower())
+                     for m in mini if (m.get("vol") or 750) <= 750}
+    standard_keys |= {(m.get("name","").strip().lower(), (m.get("sub","") or "").strip().lower())
+                      for m in deduped_unrated if (m.get("vol") or 750) <= 750}
+    # Keep all >= 750, or < 750 only if no standard exists
+    filtered_unrated = [m for m in deduped_unrated if (m.get("vol") or 750) >= 750
+                        or (m.get("name","").strip().lower(), (m.get("sub","") or "").strip().lower()) not in standard_keys]
+
+    removed_dedup = len(unrated_in) - len(deduped_unrated)
+    removed_format = len(deduped_unrated) - len(filtered_unrated)
+    mini = [m for m in mini if not m.get("unrated")] + filtered_unrated
+
+    print(f"Unrated wines: {unscored_count} raw, -{removed_dedup} dedup, -{removed_format} format = {len(filtered_unrated)} kept")
 else:
     print("WARN: systembolaget_raw.json not found — no unrated wines added")
 
