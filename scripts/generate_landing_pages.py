@@ -55,8 +55,43 @@ for p in all_wines:
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from constants import IN_STORE
+from score_wines_v2 import predict_food_pairings
 
 in_store = [w for w in all_wines if w.get('assortment') in IN_STORE]
+
+# Load raw SB data for pages that need the full catalog (incl. unrated)
+RAW_PATH = os.path.join(BASE, "data", "systembolaget_raw.json")
+raw_wines = json.load(open(RAW_PATH)) if os.path.exists(RAW_PATH) else []
+scored_nrs = {str(w.get('nr','')) for w in all_wines}
+
+# Build full catalog: scored wines + unrated wines from raw
+full_catalog = list(all_wines)
+for p in raw_wines:
+    nr = str(p.get('nr',''))
+    if nr in scored_nrs or p.get('cat1') != 'Vin':
+        continue
+    wine_type = p.get('cat2','').replace('Rött vin','Rött').replace('Vitt vin','Vitt').replace('Rosévin','Rosé').replace('Mousserande vin','Mousserande')
+    grape = p.get('grape','')
+    food = p.get('food_pairings', [])
+    food_predicted = False
+    if not food or not any(f for f in food):
+        food = predict_food_pairings(wine_type, grape)
+        food_predicted = True
+    full_catalog.append({
+        'nr': nr, 'name': p.get('name',''), 'sub': p.get('sub',''),
+        'price': p.get('price',0), 'vol': p.get('vol',750),
+        'type': wine_type, 'pkg': p.get('pkg','Flaska'),
+        'country': p.get('country',''), 'region': p.get('region',''),
+        'grape': grape, 'organic': p.get('organic',False),
+        'cat3': p.get('cat3',''), 'assortment': p.get('assortment',''),
+        'image_url': p.get('image_url',''),
+        'smakfynd_score': 0, '_score_raw': 0, 'unrated': True,
+        'taste_body': p.get('taste_body'), 'taste_sweet': p.get('taste_sweet'),
+        'taste_fruit': p.get('taste_fruit'), 'taste_bitter': p.get('taste_bitter'),
+        'food_pairings': food, 'food_predicted': food_predicted if food_predicted else None,
+    })
+
+full_catalog_std = [w for w in full_catalog if (w.get('vol') or 750) >= 750]
 
 # Standard bottle filter: vol >= 750ml (excludes half-bottles/piccolos)
 all_std = [w for w in all_wines if (w.get('vol') or 750) >= 750]
@@ -1431,32 +1466,33 @@ def make_pages():
         # ─── Bubbel-kluster ───
         {
             "slug": "champagne-under-300-kr",
-            "title": f"Bästa champagne under 300 kr {YEAR} — Prisvärd champagne på Systembolaget",
-            "meta": f"Bästa prisvärd champagne under 300 kr på Systembolaget {YEAR}. Topp 10 rankade efter smak — från 249 kr. Bäst i test {DATE_STR}.",
-            "h1": f"Bästa champagne under 300 kr {YEAR} — prisvärd champagne på Systembolaget",
-            "intro": "Riktig champagne behöver inte kosta en förmögenhet. Under 300 kr finns överraskande bra champagner — från små grower-producenter till välkända hus som ger mer än Veuve och Moët.",
-            "intro2": "Champagne under 300 kr är en av de mest undervärderade kategorierna på Systembolaget. Många väljer Cava eller Prosecco för att spara pengar, men missar att det finns riktig champagne i samma prisklass. Vi har hittat de champagner som faktiskt levererar — med den komplexitet, finheten och mousset som gör champagne till champagne.",
+            # Title and meta: placeholder — Gabriel supplies final wording
+            "title": f"Champagne under 300 kr på Systembolaget {YEAR}",
+            "meta": f"Alla {len([w for w in full_catalog_std if w.get('type')=='Mousserande' and 'frankrike'==(w.get('country') or '').lower() and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower()) and (w.get('price',999) or 999)<300])} helflaskor champagne under 300 kr på Systembolaget — {DATE_STR}.",
+            "h1": f"Champagne under 300 kr — hela sortimentet ({YEAR})",
+            "intro": "[PLACEHOLDER — Gabriel skriver intro]",
+            "intro2": f"Senast kontrollerat: {DATE_STR}.",
+            "byline": "Skriven av Gabriel Linton, dryckesutbildad vid Grythyttan",
             "guide": {
                 "title": "Champagne under 300 kr — vad ska man leta efter?",
                 "points": [
                     "Grower-champagne (RM på etiketten) ger ofta bäst kvalitet per krona. De gör vin från egna druvor, inte inköpta.",
                     "Blanc de Blancs (100% Chardonnay) ger elegans och citrus. Blanc de Noirs (Pinot Noir/Meunier) ger fylligare, fruktigare stil.",
                     "Brut Nature eller Extra Brut har ingen tillsatt socker — renare smak, bättre till mat.",
-                    "Årgångschampagne under 300 kr är sällsynt men finns — håll ögonen öppna.",
                 ]
             },
             "faq_visible": [
-                ("Finns det bra champagne under 300 kr?", "Ja. Flera champagner i denna prisklass får höga betyg från både crowd och experter. Hemligheten är att leta efter mindre kända producenter (grower-champagne) snarare än de stora husen."),
-                ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris. Kvalitetsmässigt kan bra Cava matcha billig champagne, men riktig champagne har en komplexitet som är svår att replikera."),
+                ("Finns det bra champagne under 300 kr?", f"Det finns {len([w for w in full_catalog_std if w.get('type')=='Mousserande' and 'frankrike'==(w.get('country') or '').lower() and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower()) and (w.get('price',999) or 999)<300])} helflaskor champagne under 300 kr på Systembolaget. De flesta är relativt okända producenter som inte har tillräckligt med recensioner för att betygsättas."),
+                ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris."),
             ],
             "ignore_in_store_filter": True,
-            "wines": dedup_wines(sorted([w for w in all_std if w.get('pkg') == 'Flaska'
+            "wines": dedup_wines(sorted([w for w in full_catalog_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) < 300],
                           key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
-            "alternatives_title": "Rekommenderade alternativ — bubbel under 300 kr",
+            "alternatives_title": "Rekommenderade alternativ — bubbel under 300 kr som vi har betygsatt",
             "alternatives": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and (w.get('vol') or 750) >= 750
@@ -1999,6 +2035,7 @@ def render_page(page, all_pages=None, modified_date=None):
       </h1>
       <p style="margin:0 0 16px;font-size:15px;color:#4a4238;line-height:1.6">{page['intro']}</p>
       {intro2_html}
+      {'<p style="margin:0 0 8px;font-size:12px;color:#7a7060;font-style:italic">' + page['byline'] + '</p>' if page.get('byline') else ''}
       <p style="margin:0;font-size:12px;color:#7a7060">
         Uppdaterad {DATE_STR} · Baserat på {len(all_wines)} viner · <a href="https://smakfynd.se" style="color:#8b2332">Utforska alla viner →</a>
       </p>
