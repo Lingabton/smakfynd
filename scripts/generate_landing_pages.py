@@ -99,8 +99,12 @@ all_std = [w for w in all_wines if (w.get('vol') or 750) >= 750]
 # In-store + standard: default for price-threshold pages
 in_store_std = [w for w in in_store if (w.get('vol') or 750) >= 750]
 
-def dedup_wines(wines, max_per_producer=2):
-    """Remove duplicates and limit per producer. Hide large formats when standard exists."""
+def dedup_wines(wines, max_per_producer=2, ignore_producer_cap=False):
+    """Remove duplicates and limit per producer. Hide large formats when standard exists.
+
+    ignore_producer_cap: skip the per-producer limit. Use on completeness pages
+    that claim to show every wine matching a filter.
+    """
     # Step 1: find which wines have standard (750ml) bottles
     standard = set()
     for w in wines:
@@ -125,10 +129,11 @@ def dedup_wines(wines, max_per_producer=2):
         seen.add(dup_key)
 
         # Limit per producer (name = producer proxy)
-        producer = w.get('name','').strip()
-        producer_count[producer] = producer_count.get(producer, 0) + 1
-        if producer_count[producer] > max_per_producer:
-            continue
+        if not ignore_producer_cap:
+            producer = w.get('name','').strip()
+            producer_count[producer] = producer_count.get(producer, 0) + 1
+            if producer_count[producer] > max_per_producer:
+                continue
 
         result.append(w)
     return result
@@ -1486,12 +1491,14 @@ def make_pages():
                 ("Vad är skillnaden mellan champagne och Cava?", "Champagne kommer bara från Champagne i Frankrike och jäser i flaskan (méthode traditionnelle). Cava använder samma metod men andra druvor och har generellt ett lägre pris."),
             ],
             "ignore_in_store_filter": True,
+            "ignore_producer_cap": True,
             "wines": dedup_wines(sorted([w for w in full_catalog_std if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
                            and 'frankrike' == (w.get('country') or '').lower()
                            and ('champagne' in (w.get('region') or '').lower() or 'champagne' in (w.get('cat3') or '').lower())
                            and (w.get('price', 999) or 999) < 300],
-                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))))[:20],
+                          key=lambda x: (-x.get('_score_raw', 0), str(x.get('nr', '')))),
+                          ignore_producer_cap=True)[:20],
             "alternatives_title": "Rekommenderade alternativ — bubbel under 300 kr som vi har betygsatt",
             "alternatives": dedup_wines(sorted([w for w in in_store if w.get('pkg') == 'Flaska'
                            and w.get('type') == 'Mousserande'
