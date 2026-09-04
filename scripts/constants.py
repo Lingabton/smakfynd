@@ -7,6 +7,12 @@ import json
 # Ordervaror and Webblanseringar are NOT in-store — order only.
 IN_STORE = {"Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"}
 
+# The number of scored wines published on the site. This is the number
+# shown on every page as "Baserat på N viner" and validated against
+# the actual wines.json count. Update only in a commit that states
+# old → new values and the reason.
+LOCKED_CORPUS_COUNT = 4362  # Sep 2026: Name sort, after dedup
+
 
 def load_wines(path):
     """Load a wines file, accepting both the {meta, wines} envelope and a flat array.

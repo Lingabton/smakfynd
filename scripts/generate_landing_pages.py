@@ -54,7 +54,7 @@ for p in all_wines:
 
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
-from constants import IN_STORE
+from constants import IN_STORE, LOCKED_CORPUS_COUNT
 from score_wines_v2 import predict_food_pairings
 
 in_store = [w for w in all_wines if w.get('assortment') in IN_STORE]
@@ -2037,7 +2037,7 @@ def render_page(page, all_pages=None, modified_date=None):
       {intro2_html}
       {'<p style="margin:0 0 8px;font-size:12px;color:#7a7060;font-style:italic">' + page['byline'] + '</p>' if page.get('byline') else ''}
       <p style="margin:0;font-size:12px;color:#7a7060">
-        Uppdaterad {DATE_STR} · Baserat på {len(all_wines)} viner · <a href="https://smakfynd.se" style="color:#8b2332">Utforska alla viner →</a>
+        Uppdaterad {DATE_STR} · Baserat på {LOCKED_CORPUS_COUNT} rankade viner · <a href="https://smakfynd.se" style="color:#8b2332">Utforska alla viner →</a>
       </p>
     </header>
 

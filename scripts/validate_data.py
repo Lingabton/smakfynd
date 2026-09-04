@@ -117,9 +117,9 @@ def validate(path):
     errors = []
     warnings = []
 
-    # IN_STORE consistency check: Python constant must match wines.json metadata
+    # Constants consistency checks
     sys.path.insert(0, str(Path(__file__).parent))
-    from constants import IN_STORE
+    from constants import IN_STORE, LOCKED_CORPUS_COUNT
     json_in_store = set(meta.get("in_store_assortments", []))
     if json_in_store and json_in_store != IN_STORE:
         errors.append(f"[IN_STORE_MISMATCH] Python: {sorted(IN_STORE)}, wines.json: {sorted(json_in_store)}")
@@ -225,9 +225,7 @@ def validate(path):
             warnings.append(f"[THIN_PAGE] /{slug}/: only {len(articles)} wines (min {MIN_WINES_PER_PAGE})")
 
     # ── Corpus count stability (PA-3) ──
-    # Primary: anchor to locked constant. Counts scored wines only — unrated wines
-    # carry taste profiles but no Smakfynd score and are not part of the ranking claim.
-    LOCKED_CORPUS_COUNT = 4362  # Updated Sep 2026: Name sort recovers full catalog
+    # Primary: anchor to locked constant (from constants.py). Counts scored wines only.
     n_scored = sum(1 for w in wines if not w.get('unrated'))
     locked_pct = abs(n_scored - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
     if locked_pct > 1:
@@ -279,6 +277,24 @@ def validate(path):
         for token in NORWEGIAN_TOKENS:
             if token.lower() in body.lower():
                 errors.append(f"[NORWEGIAN_IN_SV] /{slug}/: found '{token}'")
+
+    # ── Corpus count in rendered HTML ──
+    # The number shown on pages must match LOCKED_CORPUS_COUNT
+    import re as _re
+    for slug in sorted(os.listdir(DOCS)):
+        page_dir = DOCS / slug
+        if not page_dir.is_dir():
+            continue
+        idx = page_dir / "index.html"
+        if not idx.exists():
+            continue
+        html = idx.read_text()
+        # Match "Baserat på N rankade viner" or "Baserat på N viner"
+        m = _re.search(r'Baserat på (\d[\d\s]*) (?:rankade )?viner', html)
+        if m:
+            rendered_count = int(m.group(1).replace(' ', ''))
+            if rendered_count != LOCKED_CORPUS_COUNT:
+                errors.append(f"[CORPUS_NUMBER] /{slug}/: shows {rendered_count}, expected {LOCKED_CORPUS_COUNT}")
 
     return errors, warnings
 
