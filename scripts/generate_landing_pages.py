@@ -1817,16 +1817,34 @@ def render_page(page, all_pages=None, modified_date=None):
         'boxvin': ['basta-boxvin', 'basta-roda-boxvin', 'basta-vita-boxvin'],
     }
     slug_to_page = {p['slug']: p for p in (all_pages or []) if p.get('wines')}
+
+    # Find which category the current page belongs to
+    my_cats = [k for k, slugs in category_slugs.items() if page['slug'] in slugs]
+
+    # Contextual links: same-category siblings (max 5) + 2 from each of 3 related categories
     cross_sections = []
+    total_links = 0
+    MAX_LINKS = 15
+
     for cat_key in ['typ', 'druva', 'land', 'region', 'pris', 'mat', 'smak', 'boxvin', 'sasong']:
+        if total_links >= MAX_LINKS:
+            break
         cat_pages = [slug_to_page[s] for s in category_slugs[cat_key] if s in slug_to_page and s != page['slug']]
         if not cat_pages:
             continue
+        # Same category: show up to 5; other categories: show up to 2
+        is_same = cat_key in my_cats
+        limit = 5 if is_same else 2
+        remaining = MAX_LINKS - total_links
+        show = cat_pages[:min(limit, remaining)]
+        if not show:
+            continue
         links = ' · '.join(
-            f'<a href="/{p["slug"]}/" style="color:#8b2332;text-decoration:none">{p["title"].split(" — ")[0].split(" på ")[0]}</a>'
-            for p in cat_pages
+            f'<a href="/{p["slug"]}/" style="color:#8b2332;text-decoration:none">{p["title"].split(" — ")[0].split(" på ")[0].replace(f" {YEAR}", "")}</a>'
+            for p in show
         )
         cross_sections.append(f'<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:#7a7060;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{category_labels[cat_key]}</div><div style="font-size:13px;color:#4a4238;line-height:2">{links}</div></div>')
+        total_links += len(show)
     cross_html = ""
     if cross_sections:
         cross_html = f'''
