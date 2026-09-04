@@ -62,6 +62,8 @@ jobs:
       - name: Validate
         run: |
           python3 scripts/validate_data.py
+          python3 scripts/verify_determinism.py
+          python3 scripts/health_digest.py
           node tests/test_scoring.js
           node tests/test_data.js
 
