@@ -177,6 +177,33 @@ def validate(path, is_primary=True):
     if not is_primary:
         return errors, warnings
 
+    # ── AggregateRating without real data ──
+    import re as _re2
+    for slug in sorted(os.listdir(DOCS)):
+        page_dir = DOCS / slug
+        if not page_dir.is_dir():
+            continue
+        idx = page_dir / "index.html"
+        if not idx.exists():
+            continue
+        html_content = idx.read_text()
+        for ld_block in _re2.findall(r'<script type="application/ld\+json">(.*?)</script>', html_content, _re2.DOTALL):
+            try:
+                ld = json.loads(ld_block)
+                items = ld.get("itemListElement", []) if ld.get("@type") == "ItemList" else []
+                for item_wrap in items:
+                    item = item_wrap.get("item", {})
+                    ar = item.get("aggregateRating", {})
+                    if ar:
+                        rc = ar.get("ratingCount", 0)
+                        rv = ar.get("ratingValue", 0)
+                        if rc < 25:
+                            errors.append(f"[FAKE_RATING] /{slug}/: {item.get('name','?')} has ratingCount={rc} (<25)")
+                        if rv == 0:
+                            errors.append(f"[FAKE_RATING] /{slug}/: {item.get('name','?')} has ratingValue=0")
+            except (json.JSONDecodeError, AttributeError):
+                pass
+
     # ── Small format in price-threshold pages ──
     for slug in PRICE_THRESHOLD_SLUGS:
         articles = get_page_articles(slug)

@@ -1901,7 +1901,7 @@ def render_page(page, all_pages=None, modified_date=None):
                     "@type": "Offer",
                     "price": str(w.get('price', 0)),
                     "priceCurrency": "SEK",
-                    "availability": "https://schema.org/InStock",
+                    "availability": "https://schema.org/InStock" if w.get('assortment') in IN_STORE else "https://schema.org/PreOrder",
                     "url": f"https://www.systembolaget.se/produkt/vin/{nr}",
                 },
                 **({"aggregateRating": {
@@ -1909,8 +1909,8 @@ def render_page(page, all_pages=None, modified_date=None):
                     "ratingValue": w.get('smakfynd_score', 0),
                     "bestRating": 100,
                     "worstRating": 1,
-                    "ratingCount": w.get('crowd_reviews', 1),
-                }} if w.get('crowd_reviews', 0) > 0 else {}),
+                    "ratingCount": w.get('crowd_reviews', 0),
+                }} if w.get('crowd_reviews', 0) >= 25 and w.get('smakfynd_score', 0) > 0 else {}),
             }
         })
 
