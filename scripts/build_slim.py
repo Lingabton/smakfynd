@@ -428,33 +428,50 @@ else:
 # Sort deterministically: scored wines first by _score_raw desc, then unrated by nr
 mini.sort(key=lambda x: (-x.get('_score_raw', 0), 0 if x.get('unrated') else -1, str(x.get('nr', ''))))
 
-# Build wines.json with metadata from single source of truth
+# Build wines.json (scored) + wines-unrated.json (lazy-loaded)
 
-scored_count = sum(1 for m in mini if not m.get("unrated"))
-unrated_count = sum(1 for m in mini if m.get("unrated"))
-print(f"Total wines.json: {len(mini)} (scored: {scored_count}, unrated: {unrated_count})")
+scored_wines = [m for m in mini if not m.get("unrated")]
+unrated_wines = [m for m in mini if m.get("unrated")]
+print(f"Split: {len(scored_wines)} scored + {len(unrated_wines)} unrated")
 
-wines_payload = {
+build_date = __import__("datetime").date.today().isoformat()
+
+# wines.json — scored only, first paint, the only file a crawler needs
+scored_payload = {
     "meta": {
         "in_store_assortments": sorted(IN_STORE),
-        "count": len(mini),
-        "scored": scored_count,
-        "unrated": unrated_count,
-        "built": __import__("datetime").date.today().isoformat(),
+        "count": len(scored_wines),
+        "scored": len(scored_wines),
+        "unrated_available": len(unrated_wines),
+        "built": build_date,
     },
-    "wines": mini,
+    "wines": scored_wines,
 }
-js_data = json.dumps(wines_payload, ensure_ascii=False, separators=(',', ':'))
 WINES_JSON = str(BASE / "docs" / "wines.json")
-open(WINES_JSON, 'w').write(js_data)
-json_size = os.path.getsize(WINES_JSON) / 1024
-print(f"Built: {WINES_JSON} ({json_size:.0f} KB)")
+open(WINES_JSON, 'w').write(json.dumps(scored_payload, ensure_ascii=False, separators=(',', ':')))
+print(f"Built: {WINES_JSON} ({os.path.getsize(WINES_JSON)/1024:.0f} KB)")
 
-# Validate wines.json is not empty/corrupted
-validation = json.loads(open(WINES_JSON).read())
-wines_list = validation.get("wines", []) if isinstance(validation, dict) else validation
-if not isinstance(wines_list, list) or len(wines_list) < 100:
-    print(f"FATAL: wines.json has only {len(wines_list)} wines — aborting!")
-    os.remove(WINES_JSON)
-    exit(1)
-print(f"QA: {len(wines_list)} wines validated")
+# wines-unrated.json — slim records, lazy-loaded on search/toggle/hash miss
+UNRATED_DROP = {'smakfynd_score', '_score_raw', 'crowd_score', 'crowd_reviews',
+                'expert_score', 'price_score', 'confidence', 'expert_source',
+                'launch_price', 'price_vs_launch_pct', 'drop_date', 'insight', 'avail'}
+slim_unrated = [{k: v for k, v in w.items() if k not in UNRATED_DROP} for w in unrated_wines]
+unrated_payload = {
+    "meta": {
+        "count": len(slim_unrated),
+        "built": build_date,
+    },
+    "wines": slim_unrated,
+}
+UNRATED_JSON = str(BASE / "docs" / "wines-unrated.json")
+open(UNRATED_JSON, 'w').write(json.dumps(unrated_payload, ensure_ascii=False, separators=(',', ':')))
+print(f"Built: {UNRATED_JSON} ({os.path.getsize(UNRATED_JSON)/1024:.0f} KB)")
+
+# Validate both files
+for path, label, min_count in [(WINES_JSON, "scored", 100), (UNRATED_JSON, "unrated", 100)]:
+    data = json.loads(open(path).read())
+    wines_list = data.get("wines", []) if isinstance(data, dict) else data
+    if not isinstance(wines_list, list) or len(wines_list) < min_count:
+        print(f"FATAL: {label} has only {len(wines_list)} wines — aborting!")
+        exit(1)
+    print(f"QA {label}: {len(wines_list)} wines validated")

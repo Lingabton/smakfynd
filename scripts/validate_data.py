@@ -101,7 +101,7 @@ def get_page_articles(slug):
     return ext.articles
 
 
-def validate(path):
+def validate(path, is_primary=True):
     raw = json.load(open(path))
     # Support both {meta, wines} envelope and flat array
     if isinstance(raw, dict) and "wines" in raw:
@@ -129,19 +129,23 @@ def validate(path):
 
     has_image = has_crowd = has_expert = has_taste = 0
 
+    # Fields that only exist on scored wines (not in slim unrated records)
+    SCORED_ONLY_FIELDS = {'smakfynd_score', '_score_raw', 'crowd_score', 'crowd_reviews',
+                          'expert_score', 'price_score', 'confidence'}
+
     for i, w in enumerate(wines):
+        is_unrated = w.get('unrated', False)
         for field, expected_type in REQUIRED_FIELDS.items():
+            if is_unrated and field in SCORED_ONLY_FIELDS:
+                continue  # slim unrated records don't carry score fields
             if field not in w:
                 errors.append(f"[SCHEMA] {w.get('name','?')} (#{w.get('nr','?')}): missing '{field}'")
             elif not isinstance(w[field], expected_type if isinstance(expected_type, tuple) else (expected_type,)):
                 errors.append(f"[SCHEMA] {w.get('name','?')} (#{w.get('nr','?')}): '{field}' wrong type")
 
         score = w.get('smakfynd_score', 0)
-        is_unrated = w.get('unrated', False)
         if not is_unrated and (score < 1 or score > 99):
             errors.append(f"[SCHEMA] {w.get('name','?')}: score {score} out of range 1-99")
-        if is_unrated and score != 0:
-            errors.append(f"[SCHEMA] {w.get('name','?')}: unrated wine has score {score} (expected 0)")
 
         price = w.get('price', 0)
         wine_type = w.get('type', '')
@@ -168,6 +172,10 @@ def validate(path):
         warnings.append(f"[COVERAGE] Low crowd: {has_crowd}/{n_scored} scored ({has_crowd*100//n_scored}%)")
 
     print(f"Validated {n} wines ({n_scored} scored, {n_unrated} unrated): {has_image} images, {has_crowd} crowd, {has_expert} expert, {has_taste} taste")
+
+    # Page-level checks only for primary file
+    if not is_primary:
+        return errors, warnings
 
     # ── Small format in price-threshold pages ──
     for slug in PRICE_THRESHOLD_SLUGS:
@@ -224,12 +232,12 @@ def validate(path):
         if 0 < len(articles) < MIN_WINES_PER_PAGE:
             warnings.append(f"[THIN_PAGE] /{slug}/: only {len(articles)} wines (min {MIN_WINES_PER_PAGE})")
 
-    # ── Corpus count stability (PA-3) ──
-    # Primary: anchor to locked constant (from constants.py). Counts scored wines only.
-    n_scored = sum(1 for w in wines if not w.get('unrated'))
-    locked_pct = abs(n_scored - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
-    if locked_pct > 1:
-        errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
+    # ── Corpus count stability (PA-3) — primary file only ──
+    if is_primary:
+        n_scored = sum(1 for w in wines if not w.get('unrated'))
+        locked_pct = abs(n_scored - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
+        if locked_pct > 1:
+            errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
 
     # Secondary: run-over-run drift check
     prev_count_file = DATA_DIR / "deploy" / "prev_corpus_count.txt"
@@ -303,6 +311,13 @@ if __name__ == "__main__":
     default = str(DOCS / "wines.json")
     path = sys.argv[1] if len(sys.argv) > 1 else default
     errors, warnings = validate(path)
+
+    # Also validate wines-unrated.json if it exists
+    unrated_path = str(DOCS / "wines-unrated.json")
+    if os.path.exists(unrated_path):
+        u_errors, u_warnings = validate(unrated_path, is_primary=False)
+        errors.extend(u_errors)
+        warnings.extend(u_warnings)
 
     for w in warnings:
         print(f"  WARN: {w}")

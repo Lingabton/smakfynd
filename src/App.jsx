@@ -55,7 +55,10 @@ function SmakfyndApp() {
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
   const [notFound, setNotFound] = useState(false);
 
-  // Load data with retry
+  // Load scored wines (first paint) + lazy-load unrated on demand
+  const unratedLoadedRef = React.useRef(false);
+  const unratedLoadingRef = React.useRef(false);
+
   const loadData = async (attempt = 1) => {
     setLoading(true);
     setLoadError(null);
@@ -64,7 +67,6 @@ function SmakfyndApp() {
         const res = await fetch(DATA_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const raw = await res.json();
-        // Support both {meta, wines} envelope and flat array (backwards compat)
         const data = raw.wines || raw;
         if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
         if (raw.meta?.in_store_assortments) {
@@ -82,6 +84,24 @@ function SmakfyndApp() {
       }
     }
     setLoading(false);
+  };
+
+  const loadUnrated = async () => {
+    if (unratedLoadedRef.current || unratedLoadingRef.current) return;
+    unratedLoadingRef.current = true;
+    try {
+      const res = await fetch("wines-unrated.json?v=__BUILD_TS__");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw = await res.json();
+      const data = raw.wines || raw;
+      if (Array.isArray(data) && data.length > 0) {
+        setAllData(prev => [...prev, ...data]);
+        unratedLoadedRef.current = true;
+      }
+    } catch(e) {
+      if (typeof trackEvent === "function") trackEvent("unrated_load_fail", { error: String(e) });
+      unratedLoadingRef.current = false; // allow retry on next interaction
+    }
   };
   useEffect(() => { loadData(); }, []);
 
@@ -114,6 +134,10 @@ function SmakfyndApp() {
           const el = document.querySelector('[aria-expanded]');
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
+      } else if (!unratedLoadedRef.current) {
+        // Wine not in scored set — try loading unrated
+        loadUnrated();
+        return; // effect will re-run when allData updates
       } else {
         setNotFound(true);
         setTimeout(() => setNotFound(false), 3000);
@@ -486,7 +510,7 @@ function SmakfyndApp() {
               color: t.tx, outline: "none", boxSizing: "border-box",
               transition: "border-color 0.2s, box-shadow 0.2s",
             }}
-            onFocus={e => { setSearchFocused(true); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
+            onFocus={e => { setSearchFocused(true); loadUnrated(); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
             onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: t.txL, pointerEvents: "none" }}>⌕</span>
@@ -509,6 +533,7 @@ function SmakfyndApp() {
           onClick={() => {
             const next = !showOrder;
             setShowOrder(next);
+            if (next) loadUnrated();
             try { localStorage.setItem("smakfynd_show_order", String(next)); } catch {}
             if (typeof trackEvent === "function") trackEvent("order_toggle", { show_order: next });
           }}>
