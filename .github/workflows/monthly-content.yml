@@ -20,12 +20,35 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install dependencies
+        run: pip install requests rapidfuzz
+
+      - name: Create data directories
+        run: mkdir -p data/history data/logs
+
+      - name: Restore data caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/vivino_cache.json
+            data/expert_cache.json
+          key: wine-data-${{ github.run_number }}
+          restore-keys: |
+            wine-data-
+
+      - name: Fetch and score (needed for content generation)
+        run: |
+          python3 scripts/fetch_systembolaget.py
+          python3 scripts/score_wines_v2.py
+
       - name: Generate monthly content
         run: python3 scripts/generate_monthly_content.py
 
       - name: Generate Gabriels val page
         run: python3 scripts/gabriels_val.py || echo "Gabriels val needs manual PICKS update"
 
+      # NOTE: Requires repo setting: Settings → Actions → General →
+      # "Allow GitHub Actions to create and approve pull requests" = enabled
       - name: Create PR with suggestions
         uses: peter-evans/create-pull-request@v6
         with:
