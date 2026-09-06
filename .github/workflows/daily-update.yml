@@ -105,17 +105,47 @@ jobs:
           git config user.email "bot@smakfynd.se"
           git add docs/ site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json data/page_hashes.json
 
-          # Hard cap: fail if more than 10 landing pages changed
-          CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
-          if [ "$CHANGED_PAGES" -gt 10 ]; then
-            echo "ABORT: $CHANGED_PAGES landing pages changed (max 10). This looks like a full rebuild — not a daily update."
-            echo "Check that DEPLOY_PAGES is set from shipped_pages.json."
+          # Manifest check: only allow known-safe files to be committed
+          # Shipped landing pages come from shipped_pages.json
+          SHIPPED=$(python3 -c "
+          import json, os
+          f = 'data/deploy/shipped_pages.json'
+          pages = json.load(open(f)) if os.path.exists(f) else []
+          allowed = set()
+          for p in pages:
+              allowed.add(f'docs/{p}/index.html')
+          # Always-allowed infrastructure files
+          for f in ['docs/sitemap.xml', 'docs/sitemap-fixed.xml', 'docs/sitemap-all.xml',
+                     'docs/admin/data.json']:
+              allowed.add(f)
+          # Print allowed set for the shell
+          print('\n'.join(sorted(allowed)))
+          ")
+
+          # Check every staged docs/ file against the allowed list
+          BLOCKED=""
+          for f in $(git diff --cached --name-only -- docs/); do
+            # Skip non-file entries and always-allowed patterns
+            case "$f" in
+              docs/admin/*) continue ;;
+            esac
+            if ! echo "$SHIPPED" | grep -qxF "$f"; then
+              BLOCKED="$BLOCKED $f"
+            fi
+          done
+
+          if [ -n "$BLOCKED" ]; then
+            echo "ABORT: These files are not in the shipped manifest and cannot be committed:"
+            for f in $BLOCKED; do echo "  $f"; done
+            echo ""
+            echo "To deploy docs/index.html or docs/wines*.json, add them to a deliberate SPA batch."
             exit 1
           fi
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
+            CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
             echo "Pages changed: $CHANGED_PAGES"
             git commit -m "data: daily price update $(date '+%Y-%m-%d')"
             git push

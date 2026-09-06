@@ -94,16 +94,40 @@ jobs:
           git config user.email "bot@smakfynd.se"
           git add docs/ site/
 
-          # Hard cap: fail if more than 10 landing pages changed
-          CHANGED_PAGES=$(git diff --staged --name-only -- 'docs/*/index.html' | wc -l)
-          if [ "$CHANGED_PAGES" -gt 10 ]; then
-            echo "ABORT: $CHANGED_PAGES landing pages changed (max 10)."
+          # Manifest check: only allow shipped pages + infrastructure
+          SHIPPED=$(python3 -c "
+          import json, os
+          f = 'data/deploy/shipped_pages.json'
+          pages = json.load(open(f)) if os.path.exists(f) else []
+          allowed = set()
+          for p in pages:
+              allowed.add(f'docs/{p}/index.html')
+          for f in ['docs/sitemap.xml', 'docs/sitemap-fixed.xml', 'docs/sitemap-all.xml',
+                     'docs/admin/data.json']:
+              allowed.add(f)
+          print('\n'.join(sorted(allowed)))
+          ")
+
+          BLOCKED=""
+          for f in $(git diff --staged --name-only -- docs/); do
+            case "$f" in
+              docs/admin/*) continue ;;
+            esac
+            if ! echo "$SHIPPED" | grep -qxF "$f"; then
+              BLOCKED="$BLOCKED $f"
+            fi
+          done
+
+          if [ -n "$BLOCKED" ]; then
+            echo "ABORT: Unshipped files staged:"
+            for f in $BLOCKED; do echo "  $f"; done
             exit 1
           fi
 
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
+            CHANGED_PAGES=$(git diff --staged --name-only -- 'docs/*/index.html' | wc -l)
             echo "Pages changed: $CHANGED_PAGES"
             git commit -m "Weekly update: fresh scores & landing pages [auto]"
             git push
