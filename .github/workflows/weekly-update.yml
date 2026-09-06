@@ -57,7 +57,13 @@ jobs:
           python3 scripts/build_app.py
           python3 scripts/build_slim.py
           python3 scripts/deploy_html.py
-          python3 scripts/generate_landing_pages.py
+          # Only regenerate pages that have shipped in a batch
+          ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(','.join(json.load(open(f))) if os.path.exists(f) else '')")
+          if [ -n "$ALLOWLIST" ]; then
+            DEPLOY_PAGES="$ALLOWLIST" python3 scripts/generate_landing_pages.py
+          else
+            echo "No shipped pages — skipping landing page generation"
+          fi
 
       - name: Validate
         run: |
@@ -87,9 +93,18 @@ jobs:
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
           git add docs/ site/
+
+          # Hard cap: fail if more than 10 landing pages changed
+          CHANGED_PAGES=$(git diff --staged --name-only -- 'docs/*/index.html' | wc -l)
+          if [ "$CHANGED_PAGES" -gt 10 ]; then
+            echo "ABORT: $CHANGED_PAGES landing pages changed (max 10)."
+            exit 1
+          fi
+
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
+            echo "Pages changed: $CHANGED_PAGES"
             git commit -m "Weekly update: fresh scores & landing pages [auto]"
             git push
           fi

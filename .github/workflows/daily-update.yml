@@ -64,7 +64,13 @@ jobs:
 
       - name: Generate landing pages + price drops
         run: |
-          python3 scripts/generate_landing_pages.py
+          # Only regenerate pages that have shipped in a batch
+          ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(','.join(json.load(open(f))) if os.path.exists(f) else '')")
+          if [ -n "$ALLOWLIST" ]; then
+            DEPLOY_PAGES="$ALLOWLIST" python3 scripts/generate_landing_pages.py
+          else
+            echo "No shipped pages — skipping landing page generation"
+          fi
           python3 scripts/generate_monthly_seo.py
           python3 scripts/generate_prissankt.py
 
@@ -98,9 +104,19 @@ jobs:
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
           git add docs/ site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json data/page_hashes.json
+
+          # Hard cap: fail if more than 10 landing pages changed
+          CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
+          if [ "$CHANGED_PAGES" -gt 10 ]; then
+            echo "ABORT: $CHANGED_PAGES landing pages changed (max 10). This looks like a full rebuild — not a daily update."
+            echo "Check that DEPLOY_PAGES is set from shipped_pages.json."
+            exit 1
+          fi
+
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
+            echo "Pages changed: $CHANGED_PAGES"
             git commit -m "data: daily price update $(date '+%Y-%m-%d')"
             git push
           fi
