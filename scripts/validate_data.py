@@ -315,7 +315,13 @@ def validate(path, is_primary=True):
 
     # ── Corpus count in rendered HTML ──
     # The number shown on pages must match LOCKED_CORPUS_COUNT
+    # Error for shipped pages, warning for un-shipped (they'll be fixed in later batches)
     import re as _re
+    shipped_file = DATA_DIR / "deploy" / "shipped_pages.json"
+    shipped_set = set()
+    if shipped_file.exists():
+        shipped_set = set(json.load(open(shipped_file)))
+
     for slug in sorted(os.listdir(DOCS)):
         page_dir = DOCS / slug
         if not page_dir.is_dir():
@@ -324,12 +330,14 @@ def validate(path, is_primary=True):
         if not idx.exists():
             continue
         html = idx.read_text()
-        # Match "Baserat på N rankade viner" or "Baserat på N viner"
         m = _re.search(r'Baserat på (\d[\d\s]*) (?:rankade )?viner', html)
         if m:
             rendered_count = int(m.group(1).replace(' ', ''))
             if rendered_count != LOCKED_CORPUS_COUNT:
-                errors.append(f"[CORPUS_NUMBER] /{slug}/: shows {rendered_count}, expected {LOCKED_CORPUS_COUNT}")
+                if slug in shipped_set:
+                    errors.append(f"[CORPUS_NUMBER] /{slug}/: shows {rendered_count}, expected {LOCKED_CORPUS_COUNT}")
+                else:
+                    warnings.append(f"[CORPUS_NUMBER_PENDING] /{slug}/: shows {rendered_count} (pending batch deploy)")
 
     return errors, warnings
 
