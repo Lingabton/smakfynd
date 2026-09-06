@@ -2299,17 +2299,64 @@ def update_sitemap(pages):
     <priority>0.7</priority>
   </url>''')
 
-    sitemap = f'''<?xml version="1.0" encoding="UTF-8"?>
+    # Write the full sitemap as sitemap-all.xml
+    sitemap_all = f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {chr(10).join(urls)}
 </urlset>
 '''
-    path = os.path.join(DOCS, 'sitemap.xml')
-    with open(path, 'w') as f:
-        f.write(sitemap)
+    all_path = os.path.join(DOCS, 'sitemap-all.xml')
+    with open(all_path, 'w') as f:
+        f.write(sitemap_all)
+
+    # Write sitemap-fixed.xml — only pages that have shipped in a batch
+    # Read the shipped list from data/deploy/shipped_pages.json
+    shipped_file = os.path.join(BASE, 'data', 'deploy', 'shipped_pages.json')
+    shipped = []
+    if os.path.exists(shipped_file):
+        shipped = json.load(open(shipped_file))
+    fixed_urls = []
+    for u in urls:
+        for slug in shipped:
+            if f'/{slug}/' in u or (slug == '/' and 'smakfynd.se</loc>' in u):
+                fixed_urls.append(u)
+                break
+    if fixed_urls:
+        sitemap_fixed = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{chr(10).join(fixed_urls)}
+</urlset>
+'''
+        fixed_path = os.path.join(DOCS, 'sitemap-fixed.xml')
+        with open(fixed_path, 'w') as f:
+            f.write(sitemap_fixed)
+        print(f"Sitemap-fixed: {len(fixed_urls)} URLs → {fixed_path}")
+
+    # Write sitemap index pointing to both
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    index_entries = [f'''  <sitemap>
+    <loc>https://smakfynd.se/sitemap-fixed.xml</loc>
+    <lastmod>{today_str}</lastmod>
+  </sitemap>''']
+    index_entries.append(f'''  <sitemap>
+    <loc>https://smakfynd.se/sitemap-all.xml</loc>
+    <lastmod>{today_str}</lastmod>
+  </sitemap>''')
+
+    sitemap_index = f'''<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{chr(10).join(index_entries)}
+</sitemapindex>
+'''
+    index_path = os.path.join(DOCS, 'sitemap.xml')
+    with open(index_path, 'w') as f:
+        f.write(sitemap_index)
 
     json.dump(hashes, open(HASH_FILE, 'w'), indent=2)
-    print(f"Sitemap: {len(urls)} URLs → {path}")
+    distinct_mods = len(set(re.findall(r'<lastmod>(.*?)</lastmod>', sitemap_all)))
+    print(f"Sitemap index: {index_path}")
+    print(f"Sitemap-all: {len(urls)} URLs")
+    print(f"  Lastmod dates: {distinct_mods} distinct values")
     dates = set(e.get("lastmod") for e in hashes.values() if isinstance(e, dict))
     print(f"  Lastmod dates: {len(dates)} distinct values")
 
