@@ -55,9 +55,36 @@ def check_corpus():
     if pct > 1:
         return status("red", f"Scored wines {scored} vs locked {LOCKED} ({pct:.1f}% drift)",
                       "Check fetch and scoring pipeline. See RUNBOOK.md §corpus-drift")
+
+    # Track scored count as a time series for trend detection
+    series_file = DATA_DIR / "deploy" / "scored_history.json"
+    series = []
+    if series_file.exists():
+        try:
+            series = json.load(open(series_file))
+        except (json.JSONDecodeError, ValueError):
+            series = []
+    today = datetime.now().strftime("%Y-%m-%d")
+    # Append today's count if not already recorded
+    if not series or series[-1].get("date") != today:
+        series.append({"date": today, "scored": scored})
+        series_file.parent.mkdir(parents=True, exist_ok=True)
+        json.dump(series, open(series_file, "w"), indent=2)
+
+    # Check for sustained downward trend (last 7 entries)
+    trend_msg = ""
+    if len(series) >= 7:
+        recent = [e["scored"] for e in series[-7:]]
+        oldest, newest = recent[0], recent[-1]
+        if newest < oldest - 50:
+            trend_msg = f" TREND: {oldest}→{newest} over last 7 readings"
+            if pct <= 0.5:
+                return status("amber", f"Scored wines {scored} (locked {LOCKED}){trend_msg}",
+                              "Scored count declining — check for catalog or scoring changes")
+
     if pct > 0.5:
-        return status("amber", f"Scored wines {scored} vs locked {LOCKED} ({pct:.1f}%)")
-    return status("green", f"Scored wines {scored} (locked {LOCKED})")
+        return status("amber", f"Scored wines {scored} vs locked {LOCKED} ({pct:.1f}%){trend_msg}")
+    return status("green", f"Scored wines {scored} (locked {LOCKED}){trend_msg}")
 
 
 def check_validator():
