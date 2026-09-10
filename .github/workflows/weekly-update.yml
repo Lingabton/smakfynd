@@ -92,9 +92,17 @@ jobs:
         run: |
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
-          git add docs/ site/
+          # Stage only allowed docs/ files
+          git add site/
+          ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(' '.join(f'docs/{p}/index.html' for p in json.load(open(f)))) if os.path.exists(f) else ''")
+          for f in $ALLOWLIST; do [ -f "$f" ] && git add "$f"; done
+          for f in docs/sitemap.xml docs/sitemap-fixed.xml docs/sitemap-all.xml docs/admin/data.json \
+                   docs/prissankt/index.html docs/prissankt-vin/index.html docs/billigt-och-bra-vin/index.html; do
+            [ -f "$f" ] && git add "$f"
+          done
+          for f in docs/basta-vin-*-202*/index.html; do [ -f "$f" ] && git add "$f"; done
 
-          # Manifest check: only allow shipped pages + infrastructure
+          # Manifest check: verify nothing unexpected slipped through
           SHIPPED=$(python3 -c "
           import json, os, glob
           f = 'data/deploy/shipped_pages.json'
