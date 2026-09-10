@@ -96,7 +96,7 @@ jobs:
 
           # Manifest check: only allow shipped pages + infrastructure
           SHIPPED=$(python3 -c "
-          import json, os
+          import json, os, glob
           f = 'data/deploy/shipped_pages.json'
           pages = json.load(open(f)) if os.path.exists(f) else []
           allowed = set()
@@ -105,6 +105,11 @@ jobs:
           for f in ['docs/sitemap.xml', 'docs/sitemap-fixed.xml', 'docs/sitemap-all.xml',
                      'docs/admin/data.json']:
               allowed.add(f)
+          for pattern in ['docs/prissankt/index.html', 'docs/prissankt-vin/index.html',
+                          'docs/billigt-och-bra-vin/index.html']:
+              allowed.add(pattern)
+          for d in glob.glob('docs/basta-vin-*-202*/'):
+              allowed.add(os.path.join(d, 'index.html'))
           print('\n'.join(sorted(allowed)))
           ")
 
