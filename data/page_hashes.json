@@ -1,359 +1,359 @@
 {
   "basta-roda-vin": {
-    "hash": "9594599364f2e9e42c3d0c073a372136",
-    "lastmod": "2026-08-31"
+    "hash": "b7e3f63226b07e8d0f80d7c3cfe0db26",
+    "lastmod": "2026-09-10"
   },
   "basta-vita-vin": {
-    "hash": "57d545a21bcfb402e9add87f63849912",
-    "lastmod": "2026-09-01"
+    "hash": "e8088b58570edf47acd4315177421d1f",
+    "lastmod": "2026-09-10"
   },
   "basta-bubbel": {
-    "hash": "7509c5ebcd9c4ea54f631148ec2f74ab",
-    "lastmod": "2026-09-01"
+    "hash": "6871d2f4124645a92def936059eb3dc1",
+    "lastmod": "2026-09-10"
   },
   "basta-rose": {
-    "hash": "3dc33f3c5bf5a627b586985cdc5d4c7b",
-    "lastmod": "2026-09-01"
+    "hash": "ca90a1a769de4c2fd9d24096d693eb48",
+    "lastmod": "2026-09-10"
   },
   "vin-under-100-kr": {
-    "hash": "b2ae5facb3749c8d49803ba5e524c25f",
-    "lastmod": "2026-09-01"
+    "hash": "064d1424c29caebd6aabdc8d8b16e15e",
+    "lastmod": "2026-09-10"
   },
   "vin-under-150-kr": {
-    "hash": "894ff703d38280597e1aae6165c363c8",
-    "lastmod": "2026-09-01"
+    "hash": "281f1b36b24aef43db76c5f82d77faa2",
+    "lastmod": "2026-09-10"
   },
   "vin-till-grillat": {
-    "hash": "f42b4c1fa71d6f5f806bf9bed52b1438",
-    "lastmod": "2026-09-01"
+    "hash": "5df17b49a7de9e42fe313401dad94827",
+    "lastmod": "2026-09-10"
   },
   "vin-till-fisk": {
-    "hash": "b7c8319dad338548ebb90541c493e84f",
-    "lastmod": "2026-09-01"
+    "hash": "e8ac8b64c3483de6a3690b2df738a26b",
+    "lastmod": "2026-09-10"
   },
   "vin-till-pasta": {
-    "hash": "ca3a31fab78389c6f90a4ec684547d06",
-    "lastmod": "2026-08-31"
+    "hash": "14c49dabe27368dc9079b2c882ad5e0e",
+    "lastmod": "2026-09-10"
   },
   "basta-malbec": {
-    "hash": "61b54c738f3558387308b42fc88cba19",
-    "lastmod": "2026-08-31"
+    "hash": "4104df85e21c8be8d34a7c4297518fa5",
+    "lastmod": "2026-09-10"
   },
   "basta-cabernet-sauvignon": {
-    "hash": "e03af393c8a1329cdb1afd3e2796d49a",
-    "lastmod": "2026-08-31"
+    "hash": "3c3852f69f5984872f6e927d886fdcdb",
+    "lastmod": "2026-09-10"
   },
   "ekologiskt-vin": {
-    "hash": "a9ec54c4f3bf85ee4458b13efcaec6f2",
-    "lastmod": "2026-09-01"
+    "hash": "6cddfc5cfac09555303e79a19f494940",
+    "lastmod": "2026-09-10"
   },
   "vin-till-ost": {
-    "hash": "b0a886341f2f217a4fbe2a706acb4323",
-    "lastmod": "2026-09-01"
+    "hash": "d24cc872d6fb419eb72055bd3527a36a",
+    "lastmod": "2026-09-10"
   },
   "basta-pinot-noir": {
-    "hash": "8b85c71a3fdbfac1784771c1866f79a5",
-    "lastmod": "2026-08-31"
+    "hash": "3c4c718604233b20bb231ccc7787b2b3",
+    "lastmod": "2026-09-10"
   },
   "basta-syrah-shiraz": {
-    "hash": "034d08f1c3ad71fe9292820bea5bbca3",
-    "lastmod": "2026-08-31"
+    "hash": "ad41f67e5e0545fe9c62fd41f7160c9b",
+    "lastmod": "2026-09-10"
   },
   "basta-riesling": {
-    "hash": "983185456bcbb16e8ebad9bbc0dafbfc",
-    "lastmod": "2026-09-01"
+    "hash": "a334023d0705214ed94bad92239d0cb4",
+    "lastmod": "2026-09-10"
   },
   "basta-tempranillo": {
-    "hash": "7608d78da7548bb9ff984792ff3888b7",
-    "lastmod": "2026-08-31"
+    "hash": "c353f2f0947bb5b06cfc783cedf91776",
+    "lastmod": "2026-09-10"
   },
   "basta-sangiovese": {
-    "hash": "88c9adb1ca22444ddb26f9fca14c5d54",
-    "lastmod": "2026-08-31"
+    "hash": "e89e6e63d319298f2d1c3176573600c3",
+    "lastmod": "2026-09-10"
   },
   "basta-chardonnay": {
-    "hash": "d5e5d68cdd174ab8dcc59973749ad115",
-    "lastmod": "2026-09-01"
+    "hash": "d6a612d334616bdb3bb354138bcc64dd",
+    "lastmod": "2026-09-10"
   },
   "basta-sauvignon-blanc": {
-    "hash": "a5ce86d07f7d53f6a52d7e5434dc8c89",
-    "lastmod": "2026-09-01"
+    "hash": "8b42494711e08f3478f03ab0ddca2931",
+    "lastmod": "2026-09-10"
   },
   "basta-zinfandel": {
-    "hash": "e731c0b401250ed37866ee3f91be2d72",
-    "lastmod": "2026-08-31"
+    "hash": "6a8ccc2406424d881c42ada8fc8fa1c8",
+    "lastmod": "2026-09-10"
   },
   "basta-italienska-vin": {
-    "hash": "80a3647f706953a329217ed83bc649c1",
-    "lastmod": "2026-09-01"
+    "hash": "f238a5f973e26a055f07c918fcc92846",
+    "lastmod": "2026-09-10"
   },
   "basta-franska-vin": {
-    "hash": "f4ba4707138a646aee6f19854ebe3a59",
-    "lastmod": "2026-09-01"
+    "hash": "4e5b21df92e1edb6dd7cccc61ce980e2",
+    "lastmod": "2026-09-10"
   },
   "basta-spanska-vin": {
-    "hash": "38259a4424c9188189e03649c87172da",
-    "lastmod": "2026-09-01"
+    "hash": "f154b51befb09cad4d1553dd9ac5b63e",
+    "lastmod": "2026-09-10"
   },
   "basta-chilenska-vin": {
-    "hash": "ea9f0014076173fe532e4ebf3b70b9f1",
-    "lastmod": "2026-09-01"
+    "hash": "5d328ad0dc2207f6f35f9a19de087313",
+    "lastmod": "2026-09-10"
   },
   "basta-sydafrikanska-vin": {
-    "hash": "6b20ead79f3e84d49d5d3ee163bb94e4",
-    "lastmod": "2026-09-01"
+    "hash": "ee83295cacbe9a9d573132204c55f759",
+    "lastmod": "2026-09-10"
   },
   "basta-australiska-vin": {
-    "hash": "c08ff28e50b08ad1acf40089ce08a1d3",
-    "lastmod": "2026-09-01"
+    "hash": "1af4d73a94663bb168b8bcb34a7319f8",
+    "lastmod": "2026-09-10"
   },
   "basta-portugisiska-vin": {
-    "hash": "ab4ea4de8aca821627c8a1a4827bcf8f",
-    "lastmod": "2026-09-01"
+    "hash": "2b743b711c7dee3b0d655830f85d7fc5",
+    "lastmod": "2026-09-10"
   },
   "vin-till-dejt": {
-    "hash": "4b70a4bbdc9af383fdf8d8cb9b11277e",
-    "lastmod": "2026-09-01"
+    "hash": "88e2c108e9e5dc0d3b02393733b7bd37",
+    "lastmod": "2026-09-10"
   },
   "vin-till-julmat": {
-    "hash": "3d95cee4319a7a2e22bb65378f6db794",
-    "lastmod": "2026-09-01"
+    "hash": "bb0dde1bea45afe21eb34793ef18c8a7",
+    "lastmod": "2026-09-10"
   },
   "vin-till-kyckling": {
-    "hash": "8bae8f9499bc4bdbafc46ac2bddeeaee",
-    "lastmod": "2026-09-01"
+    "hash": "6c804bb50afd18b2ab33065cec37ba39",
+    "lastmod": "2026-09-10"
   },
   "vin-under-200-kr": {
-    "hash": "5a12b50b8bef253d2af4a22f591a22ac",
-    "lastmod": "2026-09-01"
+    "hash": "1adf389f6440b3fac429d5f15567bde9",
+    "lastmod": "2026-09-10"
   },
   "basta-premium-vin": {
-    "hash": "ad7d78e556956711ea078e8acf2f00cb",
-    "lastmod": "2026-09-01"
+    "hash": "5b5c6c80ec057c601b4d749cd02b902c",
+    "lastmod": "2026-09-10"
   },
   "prissankt-vin": {
-    "hash": "2a9adfa1a3787c7b8764a5e1920d3597",
-    "lastmod": "2026-09-01"
+    "hash": "380f9a044515e63eda3ad2bbb635279d",
+    "lastmod": "2026-09-10"
   },
   "fylliga-roda-vin": {
-    "hash": "e1a7469bfb9831b48e9932372fe89219",
-    "lastmod": "2026-08-31"
+    "hash": "4726318616a6eff45d40ef8d789a9aee",
+    "lastmod": "2026-09-10"
   },
   "latta-vita-vin": {
-    "hash": "eba2023e2ff362624de8f864fb8fa5a6",
-    "lastmod": "2026-09-01"
+    "hash": "742558b5b62abe19f275cad125ff41bb",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-bordeaux": {
-    "hash": "62a6526e8d5436e28c98dfc43eef2d29",
-    "lastmod": "2026-09-01"
+    "hash": "d20256490a45442200f69133299dc3ad",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-toscana": {
-    "hash": "8db4be199cc76d051f1e7f65ee5277ff",
-    "lastmod": "2026-09-01"
+    "hash": "58a7f84bbb056f5687abc17b3c431ba5",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-rioja": {
-    "hash": "565cecd38abff94c638b3116d2b2e601",
-    "lastmod": "2026-09-01"
+    "hash": "db9312356dc45e3a03c40a8f4380c0db",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-bourgogne": {
-    "hash": "160ff6da2337d6e1baf3406c13de939a",
-    "lastmod": "2026-09-01"
+    "hash": "41441780449e0a65631200aac7e5ee15",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-rhonedalen": {
-    "hash": "2747e8845ab70edc07cf2ed5839a199a",
-    "lastmod": "2026-09-01"
+    "hash": "678448e71bcf4aa1ab93ede4fa295ee1",
+    "lastmod": "2026-09-10"
   },
   "vin-till-brunch": {
-    "hash": "80fa187658c90e1774d9220092cfe3aa",
-    "lastmod": "2026-09-01"
+    "hash": "50de9b2e4c11233987bb1aa9e1e87fec",
+    "lastmod": "2026-09-10"
   },
   "vin-till-lax": {
-    "hash": "b23616977f9f4203e0bfbbdb47cd4509",
-    "lastmod": "2026-09-01"
+    "hash": "7eda1df69add79536015dbb8d8c4fc9a",
+    "lastmod": "2026-09-10"
   },
   "vin-till-tacos": {
-    "hash": "37c26e8d83607b1a1d8c70042358218e",
-    "lastmod": "2026-09-01"
+    "hash": "3db4d9e89888d52598f8878bc42d7a11",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-champagne": {
-    "hash": "075a49df02c1339cf95c3c1a0cc000e0",
-    "lastmod": "2026-09-01"
+    "hash": "901eafd817c9787e0cb12d129541bdb3",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-languedoc": {
-    "hash": "85ef1af6777b42046ec922be3e8634ae",
-    "lastmod": "2026-09-01"
+    "hash": "a892be60628b7daf640c2ff4d1d5c0e0",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-fran-alsace": {
-    "hash": "9252c978a8b9fd8d0214877a7b432f77",
-    "lastmod": "2026-09-01"
+    "hash": "69f67580441097c2bd9bdcb667709a7c",
+    "lastmod": "2026-09-10"
   },
   "basta-kaliforniska-vin": {
-    "hash": "7361a86274024882b12b10154a468614",
-    "lastmod": "2026-09-01"
+    "hash": "fdb9b6b783709c1595c76747175396ba",
+    "lastmod": "2026-09-10"
   },
   "vin-under-80-kr": {
-    "hash": "2f4d8ad9df2fb4143b6d1860df30784c",
-    "lastmod": "2026-09-01"
+    "hash": "a778543c010772c61fd24cd08f447d45",
+    "lastmod": "2026-09-10"
   },
   "fruktiga-roda-vin": {
-    "hash": "d2fd637dba60f3d37c030a1a27cfba1e",
-    "lastmod": "2026-08-31"
+    "hash": "3076946ab25cb9abc4b4c92a729d708b",
+    "lastmod": "2026-09-10"
   },
   "ekologiskt-vin-under-150-kr": {
-    "hash": "60930c85726b04bc10d6ed634a61e030",
-    "lastmod": "2026-09-01"
+    "hash": "53af3f67a201dee04fb9bdd5fdc6be05",
+    "lastmod": "2026-09-10"
   },
   "torra-vita-vin": {
-    "hash": "641cb1cd25424d1084e89aba5808a4e8",
-    "lastmod": "2026-09-01"
+    "hash": "9f7812371598a1e12cebc6be83422261",
+    "lastmod": "2026-09-10"
   },
   "vin-under-90-kr": {
-    "hash": "db5a144e56c0482fd46bede642e55129",
-    "lastmod": "2026-09-01"
+    "hash": "272ea37b9708afdc8dbcb27019edd787",
+    "lastmod": "2026-09-10"
   },
   "sommarvin": {
-    "hash": "42de3dccc1f7c6084fc5fa072fc38d55",
-    "lastmod": "2026-09-01"
+    "hash": "936574b4c3d6109e6d41e6e8c4f2d560",
+    "lastmod": "2026-09-10"
   },
   "hostvin": {
-    "hash": "144bf5b966e669cc1e64c4e6b0cd0231",
-    "lastmod": "2026-08-31"
+    "hash": "93f159b547fd4f3db9f45dfeba649728",
+    "lastmod": "2026-09-10"
   },
   "vin-till-pizza": {
-    "hash": "5902c46d145901ca2eec7de915dfe9e7",
-    "lastmod": "2026-09-01"
+    "hash": "1e84f1d5c310732d2d2ebc05eca9ba08",
+    "lastmod": "2026-09-10"
   },
   "vin-till-sushi": {
-    "hash": "aff56e454fa68f2c6ab9fc6022115878",
-    "lastmod": "2026-09-01"
+    "hash": "90aee19f00b75093dc0eb136f4bcdfbb",
+    "lastmod": "2026-09-10"
   },
   "vin-till-lamm": {
-    "hash": "cb5ee381fff655d762b1be192c199ce9",
-    "lastmod": "2026-08-31"
+    "hash": "33d5d544033d3ad1350ee292052abbce",
+    "lastmod": "2026-09-10"
   },
   "vin-till-picknick": {
-    "hash": "e57cdcb7171d3b39042a3c9e885c7776",
-    "lastmod": "2026-09-01"
+    "hash": "17ab4260899ec81b4b856e51077e49a3",
+    "lastmod": "2026-09-10"
   },
   "basta-merlot": {
-    "hash": "29acbd72271d63002462f265151ef207",
-    "lastmod": "2026-08-31"
+    "hash": "5050a515f4dcf68424d1523f149164ce",
+    "lastmod": "2026-09-10"
   },
   "basta-grenache": {
-    "hash": "85f8203443379e2b882988fb2b3e7b7f",
-    "lastmod": "2026-08-31"
+    "hash": "5d333683ebb7fe171b4b0cc2435d2f03",
+    "lastmod": "2026-09-10"
   },
   "basta-argentinska-vin": {
-    "hash": "4709c439bd2eaaac2aebd4f4a0b0dc22",
-    "lastmod": "2026-09-01"
+    "hash": "23e2baf80953b78b9262b65c11c5d98e",
+    "lastmod": "2026-09-10"
   },
   "basta-cava": {
-    "hash": "561874871303e2ddd25a8659f7f9396c",
-    "lastmod": "2026-09-01"
+    "hash": "43c4ea971af9b6ccfe9343a8772f1e95",
+    "lastmod": "2026-09-10"
   },
   "mousserande-vin-under-150-kr": {
-    "hash": "0c7b8b9d0ee8ab2b7f19d5c2845baa2e",
-    "lastmod": "2026-09-01"
+    "hash": "8fb124ebd83887364b7d4650bc59bec3",
+    "lastmod": "2026-09-10"
   },
   "vin-till-svamp": {
-    "hash": "49356746fd12b3d02ce162567a4fd436",
-    "lastmod": "2026-09-01"
+    "hash": "b5e60861dfdabef5e2ae38b61bef1328",
+    "lastmod": "2026-09-10"
   },
   "vin-till-nyar": {
-    "hash": "62deb932134c85871b007786b2ff3cf0",
-    "lastmod": "2026-09-01"
+    "hash": "6b75137a1bd3292921e3715678d0f855",
+    "lastmod": "2026-09-10"
   },
   "basta-carmenere": {
-    "hash": "1c86c4e0968747e238cd2ba1a02730be",
-    "lastmod": "2026-08-31"
+    "hash": "76cd5d56cb5db17869aa1d29760e0fc3",
+    "lastmod": "2026-09-10"
   },
   "basta-champagne": {
-    "hash": "5ff4b13a240b22cb9495fbe18eadb66d",
-    "lastmod": "2026-09-01"
+    "hash": "0fbdb0c998f51d692f8a2fd3123b3103",
+    "lastmod": "2026-09-10"
   },
   "basta-roda-boxvin": {
-    "hash": "15ee37c8d22fdb0f5e775866d4f7d63d",
-    "lastmod": "2026-08-31"
+    "hash": "a588fc1839f0686d66be463f7e70620f",
+    "lastmod": "2026-09-10"
   },
   "basta-vita-boxvin": {
-    "hash": "951891972ec3b13363f9eb44955e5cbb",
-    "lastmod": "2026-09-01"
+    "hash": "11bb2bb9bca0e1724494495555b81480",
+    "lastmod": "2026-09-10"
   },
   "alkoholfritt-vin": {
-    "hash": "d04b29d4a05aa644f20a6e25fd9f30f3",
-    "lastmod": "2026-09-01"
+    "hash": "44d7e5f3e21216c50bcfe68b91410a3d",
+    "lastmod": "2026-09-10"
   },
   "naturvin": {
-    "hash": "80eb475b283dfe6baa473265c3f41efa",
-    "lastmod": "2026-09-01"
+    "hash": "cc37094f4cf431e01027f5ebb3bccbfe",
+    "lastmod": "2026-09-10"
   },
   "vin-for-nyborjare": {
-    "hash": "b52e5670a58eeeba2687285c56dc3c2e",
-    "lastmod": "2026-09-01"
+    "hash": "25e2de7b2dac75cfa9299386c1360396",
+    "lastmod": "2026-09-10"
   },
   "vin-present": {
-    "hash": "8001846555440935dc855b6d01a0e95e",
-    "lastmod": "2026-09-01"
+    "hash": "fc71428ae16405654e602850f256ff38",
+    "lastmod": "2026-09-10"
   },
   "vin-till-fredagsmys": {
-    "hash": "e7291d9fff0b7662b6565f5ca3a09d7a",
-    "lastmod": "2026-09-01"
+    "hash": "32bfbed92f0c8bad124d8c40d68b89d5",
+    "lastmod": "2026-09-10"
   },
   "vin-till-svarforaldrar": {
-    "hash": "b4025cfdc386d7ca971daf38e6eb7193",
-    "lastmod": "2026-09-01"
+    "hash": "e56c770d28fa11c3ab174662e11ef503",
+    "lastmod": "2026-09-10"
   },
   "basta-vin-for-norrman": {
-    "hash": "8f23dd4834e3f513e6af5eedd5831170",
-    "lastmod": "2026-09-01"
+    "hash": "b605aedb98deccb29675570cca8181ef",
+    "lastmod": "2026-09-10"
   },
   "gode-kjop-pa-systembolaget": {
-    "hash": "8242f65e6f94bcbf3f6555141bb12c9d",
-    "lastmod": "2026-09-01"
+    "hash": "1459e25bd3a168cbbb4f8aa80339f9d6",
+    "lastmod": "2026-09-10"
   },
   "basta-rose-under-100-kr": {
-    "hash": "3f31f096bf668d61724be61bf4be0986",
-    "lastmod": "2026-09-01"
+    "hash": "7836fac112ef76277cb88378101703fd",
+    "lastmod": "2026-09-10"
   },
   "basta-provence-rose": {
-    "hash": "40e58c9e1024d905c2d24f9cde651615",
-    "lastmod": "2026-09-01"
+    "hash": "6df80810162703fc6c964637ebc233e0",
+    "lastmod": "2026-09-10"
   },
   "rose-till-grillat": {
-    "hash": "431714d171956976202672f26617df32",
-    "lastmod": "2026-09-01"
+    "hash": "81ca2d70a62a21923b41391c7ab4dd7b",
+    "lastmod": "2026-09-10"
   },
   "champagne-under-300-kr": {
-    "hash": "b29eea382b3c3afd4b4aacbba92f87ad",
-    "lastmod": "2026-09-01"
+    "hash": "487b82b1b84b1d91c11d830617cb7767",
+    "lastmod": "2026-09-10"
   },
   "champagne-under-500-kr": {
-    "hash": "8b8fc1dbaa9cb4e59321f530257ecbf6",
-    "lastmod": "2026-09-01"
+    "hash": "8e3eb4d0827dcf3fe467b3d1cf54b652",
+    "lastmod": "2026-09-10"
   },
   "basta-prosecco": {
-    "hash": "0865ea8b06192e7e7c2e1e381aad829c",
-    "lastmod": "2026-09-01"
+    "hash": "18facda80326c842b73e227aaf06b54d",
+    "lastmod": "2026-09-10"
   },
   "basta-cremant": {
-    "hash": "4f2f5c23da9c79ef8087c2d222b5545d",
-    "lastmod": "2026-09-01"
+    "hash": "8ab09649b2af585eb7db7a28cf6527a4",
+    "lastmod": "2026-09-10"
   },
   "basta-boxvin": {
-    "hash": "f6adbc8b8f081fd010ae73ca892bc934",
-    "lastmod": "2026-09-01"
+    "hash": "9a38640f85d606f6fce0c8f150eb6d9d",
+    "lastmod": "2026-09-10"
   },
   "vin-till-midsommar": {
-    "hash": "414c2315a93242a4fc450026e9c2f13a",
-    "lastmod": "2026-09-01"
+    "hash": "015c3ef0debaa76886f02344213d6aa6",
+    "lastmod": "2026-09-10"
   },
   "vin-till-kraftskiva": {
-    "hash": "010beb5d096ae3f4a989573d9f6ebcc6",
-    "lastmod": "2026-09-01"
+    "hash": "be8aacd5649db6e9d91a1103721382f3",
+    "lastmod": "2026-09-10"
   },
   "/": {
-    "hash": "f7c21476ba724b4936a2cebd12cb2d27",
-    "lastmod": "2026-09-01"
+    "hash": "493c6a9cdd71bf14158ab2eb74bfe534",
+    "lastmod": "2026-09-10"
   },
   "basta-bag-in-box": {
     "hash": "74bc4507207d2278517a658c49b62c76",
@@ -380,8 +380,8 @@
     "lastmod": "2026-06-23"
   },
   "billigt-och-bra-vin": {
-    "hash": "cfdbe0e72039ce7ccc2f7ea1776a9c40",
-    "lastmod": "2026-09-01"
+    "hash": "db1e5f3eac4262a68a11f19f2192b732",
+    "lastmod": "2026-09-10"
   },
   "gabriels-val-april-2026": {
     "hash": "158b498d0787c8026aed5953a959a8c0",
@@ -400,7 +400,11 @@
     "lastmod": "2026-03-26"
   },
   "prissankt": {
-    "hash": "7a89b3ccf343453996beea1c2a5f7308",
-    "lastmod": "2026-09-01"
+    "hash": "3479dae24913d3b7e3ef6d49bd80a02e",
+    "lastmod": "2026-09-10"
+  },
+  "basta-vin-september-2026": {
+    "hash": "109087bb5d9100327a0a7de558b3f3cd",
+    "lastmod": "2026-09-10"
   }
 }
