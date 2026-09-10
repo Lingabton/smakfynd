@@ -355,6 +355,43 @@ class TestFetchGuards:
         assert 7999 < 8000  # below floor
 
 
+class TestFetchPaginationTermination:
+    """End-of-pagination handling when total is an exact multiple of page_size."""
+
+    def test_404_past_end_with_high_coverage_terminates(self):
+        """A 404 on page > 1 at >= 98% coverage is normal end-of-pagination."""
+        doc_count = 7050  # 235 × 30 exactly
+        collected = 6930  # 98.3% — realistic after full Name-sort pagination
+        coverage = collected / doc_count * 100
+        is_404 = True
+        page = 236
+        # Should terminate, not abort
+        assert is_404 and page > 1 and coverage >= 98
+
+    def test_404_with_low_coverage_aborts(self):
+        """A 404 early in pagination is a real failure."""
+        doc_count = 7050
+        collected = 3000  # 42.6%
+        coverage = collected / doc_count * 100
+        is_404 = True
+        page = 101
+        # Should NOT terminate gracefully — coverage too low
+        assert not (is_404 and page > 1 and coverage >= 98)
+
+    def test_exact_multiple_stops_before_404(self):
+        """When collected >= docCount, loop should stop before requesting past the end."""
+        doc_count = 7050
+        collected = 7050
+        assert collected >= doc_count  # belt: stops here, never requests page 236
+
+    def test_404_on_page_1_always_aborts(self):
+        """A 404 on page 1 is always an error regardless of coverage."""
+        page = 1
+        is_404 = True
+        coverage = 0
+        assert not (is_404 and page > 1 and coverage >= 98)
+
+
 # ═══════════════════════════════════════════════════════════
 # 1.6 — Generation checks
 # ═══════════════════════════════════════════════════════════

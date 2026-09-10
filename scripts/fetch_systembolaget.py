@@ -105,6 +105,15 @@ def fetch_pages(cat_name, page_size, requests, sort_by="Name", sort_dir="Ascendi
                 data = r.json()
                 break
             except Exception as e:
+                # A 404 past page 1 with high coverage is normal end-of-pagination
+                # (happens when total is an exact multiple of page_size)
+                is_404 = "404" in str(e)
+                coverage = len(products) / doc_count * 100 if doc_count and doc_count > 0 else 0
+                if is_404 and page > 1 and coverage >= 98:
+                    print(f"    {sort_dir} p{page}: 404 at {coverage:.0f}% coverage — normal end of pagination")
+                    data = {"products": []}  # empty → triggers break below
+                    break
+
                 backoff = [1, 2, 4][attempt]
                 if attempt < 2:
                     print(f"    RETRY {sort_dir} page {page} attempt {attempt+1}: {e} (backoff {backoff}s)")
@@ -132,7 +141,11 @@ def fetch_pages(cat_name, page_size, requests, sort_by="Name", sort_dir="Ascendi
         if page % 50 == 0 or len(items) < page_size:
             print(f"    {sort_dir} p{page}: {len(items)} returned, {new_count} new (unique: {len(products)})")
 
+        # Stop if we've collected everything or hit a short page
         if len(items) < page_size:
+            break
+        if doc_count and len(products) >= doc_count:
+            print(f"    {sort_dir} p{page}: collected {len(products)} >= docCount {doc_count} — done")
             break
 
         page += 1
