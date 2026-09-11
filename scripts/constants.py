@@ -26,3 +26,27 @@ def load_wines(path):
     if isinstance(data, list):
         return data
     raise ValueError(f"Unexpected format in {path}: neither list nor {{meta, wines}}")
+
+
+def read_snapshot(path):
+    """Read a daily price snapshot, accepting both formats:
+    - Old: {nr: price}  (float)
+    - New: {nr: {p: price, v: vol, a: assortment, o: oos, t: temp_oos, y: vintage}}
+
+    Returns {nr: {p, v, a, o, t, y}} — always the rich format.
+    """
+    data = json.load(open(path))
+    result = {}
+    for nr, val in data.items():
+        if isinstance(val, dict):
+            result[nr] = val
+        else:
+            result[nr] = {"p": val}
+    return result
+
+
+def snapshot_price(row):
+    """Extract the price from a snapshot row (old or new format)."""
+    if isinstance(row, dict):
+        return row.get("p", 0)
+    return row  # old format: row is the price directly

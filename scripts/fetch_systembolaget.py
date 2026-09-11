@@ -221,19 +221,33 @@ def fetch_all():
         raise SystemExit(1)
     return products
 
+from constants import read_snapshot as _read_snapshot
+
+
 def save_price_snapshot(products):
-    """Save daily price snapshot for price drop detection."""
+    """Save daily price snapshot with full product metadata."""
     os.makedirs(HIST_DIR, exist_ok=True)
     today = date.today().isoformat()
 
-    prices = {p["nr"]: p["price"] for p in products if p.get("nr") and p.get("price")}
+    # Rich snapshot: price, volume, assortment, stock status, vintage
+    snapshot = {}
+    for p in products:
+        nr = p.get("nr")
+        if not nr or not p.get("price"):
+            continue
+        row = {"p": p["price"]}
+        if p.get("vol"): row["v"] = p["vol"]
+        if p.get("assortment"): row["a"] = p["assortment"]
+        if p.get("is_out_of_stock"): row["o"] = True
+        if p.get("is_temp_out"): row["t"] = True
+        if p.get("vintage"): row["y"] = p["vintage"]
+        snapshot[nr] = row
 
-    # Daily snapshot
     snapshot_file = os.path.join(HIST_DIR, f"prices_{today}.json")
-    json.dump(prices, open(snapshot_file, "w"))
-    print(f"  Price snapshot: {len(prices)} wines → {snapshot_file}")
+    json.dump(snapshot, open(snapshot_file, "w"), separators=(',', ':'))
+    print(f"  Snapshot: {len(snapshot)} wines → {snapshot_file}")
 
-    # Update first-seen prices
+    # Update first-seen prices (uses price only, backward compatible)
     first_seen_file = os.path.join(HIST_DIR, "first_seen_prices.json")
     first_seen = {}
     if os.path.exists(first_seen_file):
@@ -241,7 +255,8 @@ def save_price_snapshot(products):
 
     new_count = 0
     drop_count = 0
-    for nr, price in prices.items():
+    for nr, row in snapshot.items():
+        price = row["p"]
         if nr not in first_seen:
             first_seen[nr] = {"price": price, "date": today}
             new_count += 1
@@ -256,6 +271,66 @@ def save_price_snapshot(products):
 
     json.dump(first_seen, open(first_seen_file, "w"))
     print(f"  First-seen: {len(first_seen)} total, {new_count} new, {drop_count} new drops")
+
+    # Compute daily deltas against yesterday's snapshot
+    yesterday_files = sorted([f for f in os.listdir(HIST_DIR) if f.startswith("prices_") and f < f"prices_{today}"])
+    if yesterday_files:
+        prev = _read_snapshot(os.path.join(HIST_DIR, yesterday_files[-1]))
+        prev_date = yesterday_files[-1].replace("prices_", "").replace(".json", "")
+        today_nrs = set(snapshot.keys())
+        prev_nrs = set(prev.keys())
+
+        arrivals = today_nrs - prev_nrs
+        delistings = prev_nrs - today_nrs
+        price_changes = []
+        assortment_moves = []
+        stock_changes = []
+
+        for nr in today_nrs & prev_nrs:
+            t, p = snapshot[nr], prev[nr]
+            # Price change
+            tp, pp = t["p"], p.get("p", p) if isinstance(p, dict) else p
+            if isinstance(pp, dict):
+                pp = pp.get("p", 0)
+            if tp != pp and pp > 0:
+                pct = round((tp - pp) / pp * 100)
+                if abs(pct) >= 1:
+                    price_changes.append({"nr": nr, "old": pp, "new": tp, "pct": pct})
+            # Assortment move
+            ta = t.get("a", "")
+            pa = p.get("a", "")
+            if ta and pa and ta != pa:
+                assortment_moves.append({"nr": nr, "from": pa, "to": ta})
+            # Stock status change
+            t_oos = t.get("o", False) or t.get("t", False)
+            p_oos = p.get("o", False) or p.get("t", False)
+            if t_oos != p_oos:
+                stock_changes.append({"nr": nr, "was_oos": p_oos, "now_oos": t_oos})
+
+        deltas = {
+            "date": today,
+            "vs": prev_date,
+            "arrivals": len(arrivals),
+            "delistings": len(delistings),
+            "price_changes": len(price_changes),
+            "assortment_moves": len(assortment_moves),
+            "stock_changes": len(stock_changes),
+            "detail": {
+                "arrivals": sorted(arrivals)[:50],
+                "delistings": sorted(delistings)[:50],
+                "price_up": sorted([c for c in price_changes if c["pct"] > 0], key=lambda x: -x["pct"])[:20],
+                "price_down": sorted([c for c in price_changes if c["pct"] < 0], key=lambda x: x["pct"])[:20],
+                "assortment_moves": assortment_moves[:20],
+                "stock_changes": stock_changes[:20],
+            },
+        }
+        delta_file = os.path.join(HIST_DIR, f"deltas_{today}.json")
+        json.dump(deltas, open(delta_file, "w"), indent=2, ensure_ascii=False)
+        print(f"  Deltas vs {prev_date}: +{len(arrivals)} arrivals, -{len(delistings)} delistings, "
+              f"{len(price_changes)} price changes, {len(assortment_moves)} assortment moves, "
+              f"{len(stock_changes)} stock changes")
+    else:
+        print(f"  No previous snapshot — skipping deltas")
 
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)

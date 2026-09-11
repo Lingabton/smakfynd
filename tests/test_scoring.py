@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from score_wines_v2 import (
     smakfynd_score, vivino_to_10, expert_to_10, confidence, predict_food_pairings,
 )
-from constants import IN_STORE, LOCKED_CORPUS_COUNT, load_wines
+from constants import IN_STORE, LOCKED_CORPUS_COUNT, load_wines, read_snapshot, snapshot_price
 
 
 # ═══════════════════════════════════════════════════════════
@@ -480,3 +480,49 @@ class TestFoodPrediction:
     def test_sparkling(self):
         result = predict_food_pairings("Mousserande", "")
         assert "Fisk" in result or "Skaldjur" in result
+
+
+# ═══════════════════════════════════════════════════════════
+# 1.8 — Price snapshot format
+# ═══════════════════════════════════════════════════════════
+
+class TestSnapshotReader:
+    """read_snapshot and snapshot_price handle both old and new formats."""
+
+    def test_old_format(self, tmp_path):
+        f = tmp_path / "prices.json"
+        f.write_text(json.dumps({"100": 99.0, "200": 149.0}))
+        result = read_snapshot(str(f))
+        assert result["100"] == {"p": 99.0}
+        assert result["200"] == {"p": 149.0}
+
+    def test_new_format(self, tmp_path):
+        f = tmp_path / "prices.json"
+        f.write_text(json.dumps({
+            "100": {"p": 99.0, "v": 750, "a": "Fast sortiment"},
+            "200": {"p": 149.0, "v": 3000, "a": "Ordervaror", "o": True},
+        }))
+        result = read_snapshot(str(f))
+        assert result["100"]["p"] == 99.0
+        assert result["100"]["a"] == "Fast sortiment"
+        assert result["200"]["o"] is True
+
+    def test_mixed_format(self, tmp_path):
+        """Should never happen in practice but must not crash."""
+        f = tmp_path / "prices.json"
+        f.write_text(json.dumps({
+            "100": 99.0,
+            "200": {"p": 149.0, "v": 750},
+        }))
+        result = read_snapshot(str(f))
+        assert result["100"]["p"] == 99.0
+        assert result["200"]["p"] == 149.0
+
+    def test_snapshot_price_old(self):
+        assert snapshot_price(99.0) == 99.0
+
+    def test_snapshot_price_new(self):
+        assert snapshot_price({"p": 149.0, "v": 750}) == 149.0
+
+    def test_snapshot_price_missing(self):
+        assert snapshot_price({}) == 0
