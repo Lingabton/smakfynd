@@ -29,13 +29,18 @@ def load_wines(path):
 
 
 def read_snapshot(path):
-    """Read a daily price snapshot, accepting both formats:
-    - Old: {nr: price}  (float)
-    - New: {nr: {p: price, v: vol, a: assortment, o: oos, t: temp_oos, y: vintage}}
+    """Read a daily price snapshot, accepting all formats:
+    - Old: {nr: price}  (float), .json
+    - New: {nr: {p: price, v: vol, a: assortment, o: oos, t: temp_oos, y: vintage}}, .json or .json.gz
 
     Returns {nr: {p, v, a, o, t, y}} — always the rich format.
     """
-    data = json.load(open(path))
+    import gzip as _gzip
+    if path.endswith(".gz"):
+        with _gzip.open(path, "rt", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = json.load(open(path))
     result = {}
     for nr, val in data.items():
         if isinstance(val, dict):

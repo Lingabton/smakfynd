@@ -243,9 +243,12 @@ def save_price_snapshot(products):
         if p.get("vintage"): row["y"] = p["vintage"]
         snapshot[nr] = row
 
-    snapshot_file = os.path.join(HIST_DIR, f"prices_{today}.json")
-    json.dump(snapshot, open(snapshot_file, "w"), separators=(',', ':'))
-    print(f"  Snapshot: {len(snapshot)} wines → {snapshot_file}")
+    import gzip as _gzip
+    snapshot_file = os.path.join(HIST_DIR, f"prices_{today}.json.gz")
+    with _gzip.open(snapshot_file, "wt", encoding="utf-8", compresslevel=9) as f:
+        json.dump(snapshot, f, separators=(',', ':'), ensure_ascii=False)
+    sz = os.path.getsize(snapshot_file)
+    print(f"  Snapshot: {len(snapshot)} wines → {snapshot_file} ({sz/1024:.0f} KB)")
 
     # Update first-seen prices (uses price only, backward compatible)
     first_seen_file = os.path.join(HIST_DIR, "first_seen_prices.json")
@@ -273,10 +276,12 @@ def save_price_snapshot(products):
     print(f"  First-seen: {len(first_seen)} total, {new_count} new, {drop_count} new drops")
 
     # Compute daily deltas against yesterday's snapshot
-    yesterday_files = sorted([f for f in os.listdir(HIST_DIR) if f.startswith("prices_") and f < f"prices_{today}"])
+    yesterday_files = sorted([f for f in os.listdir(HIST_DIR)
+                              if f.startswith("prices_") and (f.endswith(".json") or f.endswith(".json.gz"))
+                              and f < f"prices_{today}"])
     if yesterday_files:
         prev = _read_snapshot(os.path.join(HIST_DIR, yesterday_files[-1]))
-        prev_date = yesterday_files[-1].replace("prices_", "").replace(".json", "")
+        prev_date = yesterday_files[-1].replace("prices_", "").replace(".json.gz", "").replace(".json", "")
         today_nrs = set(snapshot.keys())
         prev_nrs = set(prev.keys())
 

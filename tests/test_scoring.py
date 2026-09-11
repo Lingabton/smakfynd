@@ -526,3 +526,25 @@ class TestSnapshotReader:
 
     def test_snapshot_price_missing(self):
         assert snapshot_price({}) == 0
+
+
+class TestSnapshotGzip:
+    """read_snapshot handles .json.gz files."""
+
+    def test_gzip_format(self, tmp_path):
+        import gzip
+        f = tmp_path / "prices.json.gz"
+        data = {"100": {"p": 99.0, "v": 750, "a": "Fast sortiment"}}
+        with gzip.open(str(f), "wt", encoding="utf-8") as gz:
+            json.dump(data, gz)
+        result = read_snapshot(str(f))
+        assert result["100"]["p"] == 99.0
+        assert result["100"]["a"] == "Fast sortiment"
+
+    def test_gzip_old_format(self, tmp_path):
+        import gzip
+        f = tmp_path / "prices.json.gz"
+        with gzip.open(str(f), "wt", encoding="utf-8") as gz:
+            json.dump({"100": 99.0}, gz)
+        result = read_snapshot(str(f))
+        assert result["100"] == {"p": 99.0}
