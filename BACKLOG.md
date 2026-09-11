@@ -169,3 +169,41 @@ Pages exist for sushi, svamp, lax — but avg position is 40-80. These need cont
 | **Total** | | **+195-285 clicks/quarter** |
 
 Current baseline: ~170 clicks/quarter (post-crash). Full execution could 2-3x organic traffic.
+
+---
+
+## Closed investigations
+
+### Per-store stock availability
+**Status:** Closed, 2026-09-11. Per-store stock is not available through Systembolaget's public API. All store-related endpoints return 404. Only global flags (isCompletelyOutOfStock, isTemporaryOutOfStock) are exposed. Building "finns just nu i [butik]" would require a Systembolaget partnership — not a near-term option. Do not re-investigate.
+
+### sortBy=Score as quality signal
+**Status:** Closed, 2026-09-11. SB's `sortBy=Score` is an assortment-type ordering (Ordervaror first, Fast sortiment last), not an editorial quality ranking. Within Ordervaror, top-quarter and bottom-quarter wines have identical average quality scores (45.8 vs 45.6). Not useful as a quality proxy.
+
+
+### Click data extraction (needs Gabriel)
+**Status:** Blocked on admin key. The analytics worker at `smakfynd-analytics.smakfynd.workers.dev` stores per-article `sb_click` events in Cloudflare D1.
+
+**To extract top articles (last 7 days):**
+```bash
+curl -s https://smakfynd-analytics.smakfynd.workers.dev/stats \
+  -H "X-Admin-Key: YOUR_KEY" | python3 -m json.tool
+```
+
+**To extract full 90-day click data, add this endpoint to `workers/analytics/worker.js`:**
+```javascript
+if (request.method === "GET" && url.pathname === "/clicks-export") {
+  if (!requireAdmin(request, env)) return new Response("Unauthorized", { status: 401 });
+  const result = await env.DB.prepare(
+    `SELECT wine_nr, SUM(sb_clicks) as clicks, MIN(date) as first, MAX(date) as last
+     FROM popular_wines WHERE date >= date('now', '-90 days') AND sb_clicks > 0
+     GROUP BY wine_nr ORDER BY clicks DESC`
+  ).all();
+  return new Response(JSON.stringify(result.results), { headers });
+}
+```
+
+**What it answers:** position-vs-click-rate, under-ranked-but-loved wines, which pages drive outbound value.
+
+### Search zero-result logging (post-freeze)
+**Status:** Needs SPA deploy. Add to `App.jsx`: when `filtered.length === 0` after a search, call `trackSearch(search, 0, null)` with a `zero_results: true` flag. Currently search tracking exists but doesn't distinguish zero-result from non-zero.
