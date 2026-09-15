@@ -11,7 +11,7 @@ IN_STORE = {"Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"}
 # shown on every page as "Baserat på N viner" and validated against
 # the actual wines.json count. Update only in a commit that states
 # old → new values and the reason.
-LOCKED_CORPUS_COUNT = 4362  # Sep 2026: Name sort, after dedup
+LOCKED_CORPUS_COUNT = 4316  # Sep 15 2026: updated after Sep 1 assortment churn (-46 net since 4362)
 
 
 def load_wines(path):
