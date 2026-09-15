@@ -49,13 +49,39 @@ python3 scripts/score_wines_v2.py 2>&1 | grep "Scored:"
 python3 scripts/build_slim.py 2>&1 | grep "Slim:"
 ```
 
-**Fix:**
-- If the change is real (assortment grew/shrank): update `LOCKED_CORPUS_COUNT` in `scripts/validate_data.py` with old→new values in the commit message
-- If unexpected: check what changed since the last successful build
+**First action: account for the delta, not move the constant.**
 
-**History:** Corpus varied 3,333–4,578 across daily builds (Jun-Aug 2026). Causes: Score sort losing products, transient fetch errors, WineSearcher cache removal. Each move had a different cause. The locked constant prevents silent drift.
+```bash
+# 1. Check the deltas files for recent catalog changes
+cat data/history/deltas_YYYY-MM-DD.json | python3 -m json.tool | head -10
 
-**Escalate if:** the count drops more than 10% with no known cause.
+# 2. Check scored_history.json for the trend
+cat data/deploy/scored_history.json
+
+# 3. Compare current scored set against the baseline
+python3 -c "
+import json
+old = json.load(open('docs/wines.json'))
+old_nrs = {str(w['nr']) for w in (old.get('wines',old) if isinstance(old,dict) else old) if not w.get('unrated')}
+ranked = json.load(open('data/smakfynd_ranked_v2.json'))
+new_nrs = {str(w['nr']) for w in ranked}
+print(f'Lost: {len(old_nrs - new_nrs)}, Gained: {len(new_nrs - old_nrs)}')
+"
+```
+
+**Fix — in this order:**
+1. Account for every wine in the delta (removed from SB catalog / failed scoring / deduped)
+2. Check the deltas files: do arrivals and delistings explain the gap?
+3. Check the trend: is the count stable at the new level or still declining?
+4. **Only then** update `LOCKED_CORPUS_COUNT` in `scripts/constants.py`, with old→new values and the documented cause in the commit message
+
+Moving the constant is the last step. Moving it without accounting is silencing an alarm.
+
+**History:**
+- 4,362 set Sep 2: Name sort recovered full catalog
+- 4,316 set Sep 15: Sep 1 assortment change removed 94 products over Sep 12-13 (deltas show -56 and -38 delistings), stabilized at 4,315-4,316
+
+**Escalate if:** the count drops more than 10% with no known cause, or declines for 7+ consecutive days without corresponding catalog delistings.
 
 ---
 
