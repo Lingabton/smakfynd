@@ -267,7 +267,7 @@ def validate(path, is_primary=True):
             errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
 
     # Secondary: run-over-run drift check
-    prev_count_file = DATA_DIR / "deploy" / "prev_corpus_count.txt"
+    prev_count_file = DATA_DIR / "history" / "prev_corpus_count.txt"
     if prev_count_file.exists():
         try:
             prev_count = int(prev_count_file.read_text().strip())

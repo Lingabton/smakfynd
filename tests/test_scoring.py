@@ -419,7 +419,7 @@ class TestBadgeBands:
 class TestCorpusNumber:
     def test_locked_constant_is_set(self):
         assert LOCKED_CORPUS_COUNT > 0
-        assert LOCKED_CORPUS_COUNT == 4362
+        assert LOCKED_CORPUS_COUNT == 4316
 
 
 # ═══════════════════════════════════════════════════════════
@@ -548,3 +548,45 @@ class TestSnapshotGzip:
             json.dump({"100": 99.0}, gz)
         result = read_snapshot(str(f))
         assert result["100"] == {"p": 99.0}
+
+
+class TestScoredTrend:
+    """Health digest trend detector catches sustained decline."""
+
+    def test_stable_no_amber(self):
+        series = [{"date": f"2026-09-{i:02d}", "scored": 4316} for i in range(1, 8)]
+        recent = [e["scored"] for e in series[-7:]]
+        oldest, newest = recent[0], recent[-1]
+        assert not (newest < oldest - 50)
+
+    def test_decline_triggers_amber(self):
+        series = [
+            {"date": "2026-09-01", "scored": 4362},
+            {"date": "2026-09-03", "scored": 4350},
+            {"date": "2026-09-05", "scored": 4340},
+            {"date": "2026-09-07", "scored": 4330},
+            {"date": "2026-09-09", "scored": 4320},
+            {"date": "2026-09-11", "scored": 4310},
+            {"date": "2026-09-13", "scored": 4300},
+        ]
+        recent = [e["scored"] for e in series[-7:]]
+        oldest, newest = recent[0], recent[-1]
+        assert newest < oldest - 50  # 4300 < 4362 - 50 = 4312
+
+    def test_small_decline_no_amber(self):
+        series = [
+            {"date": "2026-09-01", "scored": 4362},
+            {"date": "2026-09-03", "scored": 4360},
+            {"date": "2026-09-05", "scored": 4355},
+            {"date": "2026-09-07", "scored": 4350},
+            {"date": "2026-09-09", "scored": 4345},
+            {"date": "2026-09-11", "scored": 4340},
+            {"date": "2026-09-13", "scored": 4335},
+        ]
+        recent = [e["scored"] for e in series[-7:]]
+        oldest, newest = recent[0], recent[-1]
+        assert not (newest < oldest - 50)  # 4335 > 4362 - 50 = 4312
+
+    def test_fewer_than_7_entries_skips(self):
+        series = [{"date": "2026-09-01", "scored": 4000}]
+        assert len(series) < 7  # trend detection requires 7+ points

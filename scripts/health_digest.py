@@ -57,7 +57,7 @@ def check_corpus():
                       "Check fetch and scoring pipeline. See RUNBOOK.md §corpus-drift")
 
     # Track scored count as a time series for trend detection
-    series_file = DATA_DIR / "deploy" / "scored_history.json"
+    series_file = DATA_DIR / "history" / "scored_history.json"
     series = []
     if series_file.exists():
         try:
