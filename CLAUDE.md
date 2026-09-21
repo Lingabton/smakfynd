@@ -105,6 +105,8 @@ Konsensusbonus om crowd + expert överens.
 - **CSP**: Meta-tag i index.html (GitHub Pages stödjer inte HTTP-headers)
 - **Token**: localStorage (inte httpOnly cookie) — workers är på annan subdomain
 - **Push to a named branch at end of every session** — even unfinished work. A branch on origin costs nothing and survives any local operation. Work has been lost twice to branch resets (build_manifest.py, Sprint 1 fixes) and recovered only because someone checked reflog
+- **Never take local docs/ versions when resolving merge conflicts with CI.** Always `git checkout --theirs docs/`. Local docs/ includes uncommitted builds (wines.json, index.html) that may be in a format the deployed SPA doesn't expect. This caused a 16-day outage (Sep 5-21) where wines.json was in envelope format while index.html expected a flat array
+- **docs/wines.json and docs/index.html are coupled.** Never deploy one without the other. The manifest guard blocks both in CI, but local merges bypass it
 
 ## Landningssidor (67 st)
 
