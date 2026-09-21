@@ -590,3 +590,26 @@ class TestScoredTrend:
     def test_fewer_than_7_entries_skips(self):
         series = [{"date": "2026-09-01", "scored": 4000}]
         assert len(series) < 7  # trend detection requires 7+ points
+
+
+class TestWinesJsonContract:
+    """The deployed wines.json shape must match what index.html expects."""
+
+    def test_envelope_has_wines_key(self):
+        """If wines.json is an envelope, it must have a 'wines' key."""
+        import os
+        wines_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'wines.json')
+        if os.path.exists(wines_path):
+            data = json.load(open(wines_path))
+            if isinstance(data, dict):
+                assert 'wines' in data, "Envelope format missing 'wines' key"
+                assert isinstance(data['wines'], list), "'wines' must be a list"
+
+    def test_index_html_handles_envelope(self):
+        """index.html must contain the envelope handler (raw.wines || raw)."""
+        import os
+        index_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'index.html')
+        if os.path.exists(index_path):
+            html = open(index_path).read()
+            assert 'raw.wines' in html or '.wines||' in html, \
+                "index.html does not handle the {meta, wines} envelope — will show 0 products"
