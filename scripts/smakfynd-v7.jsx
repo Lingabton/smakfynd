@@ -260,13 +260,13 @@ function wineSimilarity(a, b) {
   return sim;
 }
 
+// 85+ Exceptionellt fynd | 75-84 Toppköp | 65-74 Starkt fynd | 50-64 Okej värde | <50 no badge
 function getScoreInfo(s100) {
-  if (s100 >= 90) return ["Exceptionellt", "#1a7a2e", ""];
-  if (s100 >= 80) return ["Toppköp", t.green, ""];
-  if (s100 >= 70) return ["Starkt fynd", "#5a7542", ""];
-  if (s100 >= 55) return ["Bra köp", "#7a7054", ""];
-  if (s100 >= 40) return ["Okej värde", "#8a7a6a", ""];
-  return ["Svagt värde", "#8a7a6a", ""];
+  if (s100 >= 85) return ["Exceptionellt fynd", "#1a7a2e", ""];
+  if (s100 >= 75) return ["Toppköp", t.green, ""];
+  if (s100 >= 65) return ["Starkt fynd", "#5a7542", ""];
+  if (s100 >= 50) return ["Okej värde", "#7a7054", ""];
+  return ["", "", ""];  // No badge below 50
 }
 
 // ════════════════════════════════════════════════════════════
@@ -645,7 +645,7 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
   return (
     <div
       role="button" tabIndex={0} aria-expanded={open}
-      aria-label={`${p.name} ${p.sub || ''}, ${s100} poäng, ${p.price}\u00A0kr`}
+      aria-label={`${p.name} ${p.sub || ''}, ${p.unrated ? 'ej betygsatt' : s100 + ' poäng'}, ${p.price}\u00A0kr`}
       onClick={handleOpen}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
       style={{
@@ -674,14 +674,14 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
             }}>{p.name}</h3>
             {p.organic && <span style={statusPill("EKO", t.green)}>EKO</span>}
             {p.price_vs_launch_pct > 0 && <span style={statusPill(`−${p.price_vs_launch_pct}%`, t.deal)}>−{p.price_vs_launch_pct}%</span>}
-            {!p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
-            {!p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
+            {!p.unrated && !p.organic && !p.price_vs_launch_pct && s100 >= 85 && <span style={statusPill("Toppköp", t.green)}>Toppköp</span>}
+            {!p.unrated && !p.organic && !p.price_vs_launch_pct && s100 >= 75 && s100 < 85 && <span style={statusPill("Starkt fynd", "#5a7542")}>Starkt fynd</span>}
           </div>
 
-          {/* Row 2: Sub + Vintage + Price */}
+          {/* Row 2: Sub + Vintage + Volume + Price */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 2 }}>
             <span style={{ fontSize: 12, color: t.txL, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}
+              {p.sub}{p.vintage ? ` · ${p.vintage}` : ""}{p.vol && p.vol !== 750 && <span style={{ marginLeft: 4, fontSize: 10, color: t.txL }}>{p.vol} ml</span>}
             </span>
             <span style={{ flexShrink: 0, marginLeft: 8, textAlign: "right" }}>
               {p.launch_price && <span style={{ fontSize: 11, color: t.txL, textDecoration: "line-through", marginRight: 4 }}>{p.launch_price}</span>}
@@ -690,6 +690,16 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
               </span>
             </span>
           </div>
+
+          {/* Availability */}
+          {p.assortment && p.assortment !== "Fast sortiment" && (
+            <div style={{ fontSize: 10, color: "#8a7a6a", marginTop: 2 }}>
+              {p.assortment === "Ordervaror" ? "Beställningsvara" : p.assortment}
+            </div>
+          )}
+          {p.assortment === "Fast sortiment" && (
+            <div style={{ fontSize: 10, color: t.green, marginTop: 2 }}>Finns i butik</div>
+          )}
 
           {/* Row 3: Comparison line */}
           {comparison && (() => {
@@ -730,10 +740,26 @@ function Card({ p, rank, delay, allProducts, autoOpen, auth }) {
           </div>
         </div>
 
-        {/* Score with split bars + "?" */}
+        {/* Score or "Ej betygsatt" */}
         <div style={{ flexShrink: 0, textAlign: "center", width: 58, position: "relative" }}>
-          <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
-          <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
+          {p.unrated ? (
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#8a7a6a", lineHeight: 1.2 }}>Ej</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#8a7a6a", marginBottom: 2 }}>betygsatt</div>
+              {p.taste_body != null && (
+                <div style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 3 }}>
+                  {[["F", p.taste_body], ["S", p.taste_sweet], ["Sy", p.taste_fruit]].map(([l, v]) =>
+                    v != null ? <div key={l} style={{ fontSize: 8, color: "#8a7a6a", lineHeight: 1 }} title={l === "F" ? "Fyllighet" : l === "S" ? "Sötma" : "Syra"}>{l}{v}</div> : null
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: col, lineHeight: 1, fontFamily: t.serif }}>{s100}</div>
+              <div style={{ fontSize: 10, color: col, marginTop: 3, marginBottom: 2, fontWeight: 600 }}>{label}</div>
+            </div>
+          )}
           {(() => {
             const reviews = p.crowd_reviews || 0;
             const hasCrowd = reviews >= 25 && p.crowd_score;
@@ -2688,6 +2714,9 @@ function SmakfyndApp() {
   const initHash = useMemo(() => parseHash(), []);
   const [showSaved, setShowSaved] = useState(false);
   const [storeMode, setStoreMode] = useState(false);
+  const [showOrder, setShowOrder] = useState(() => {
+    try { return localStorage.getItem("smakfynd_show_order") === "true"; } catch { return false; }
+  });
   const [cat, setCat] = useState(initHash.cat || "Rött");
   const [price, setPrice] = useState("all");
   const [search, setSearch] = useState(initHash.search || "");
@@ -2703,7 +2732,10 @@ function SmakfyndApp() {
   const [autoOpenNr, setAutoOpenNr] = useState(initHash.openWine || null);
   const [notFound, setNotFound] = useState(false);
 
-  // Load data with retry
+  // Load scored wines (first paint) + lazy-load unrated on demand
+  const unratedLoadedRef = React.useRef(false);
+  const unratedLoadingRef = React.useRef(false);
+
   const loadData = async (attempt = 1) => {
     setLoading(true);
     setLoadError(null);
@@ -2711,8 +2743,12 @@ function SmakfyndApp() {
       try {
         const res = await fetch(DATA_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const raw = await res.json();
+        const data = raw.wines || raw;
         if (!Array.isArray(data) || data.length < 10) throw new Error("Bad data");
+        if (raw.meta?.in_store_assortments) {
+          window.__IN_STORE = new Set(raw.meta.in_store_assortments);
+        }
         setAllData(data);
         setLoading(false);
         return;
@@ -2725,6 +2761,24 @@ function SmakfyndApp() {
       }
     }
     setLoading(false);
+  };
+
+  const loadUnrated = async () => {
+    if (unratedLoadedRef.current || unratedLoadingRef.current) return;
+    unratedLoadingRef.current = true;
+    try {
+      const res = await fetch("wines-unrated.json?v=__BUILD_TS__");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw = await res.json();
+      const data = raw.wines || raw;
+      if (Array.isArray(data) && data.length > 0) {
+        setAllData(prev => [...prev, ...data]);
+        unratedLoadedRef.current = true;
+      }
+    } catch(e) {
+      if (typeof trackEvent === "function") trackEvent("unrated_load_fail", { error: String(e) });
+      unratedLoadingRef.current = false; // allow retry on next interaction
+    }
   };
   useEffect(() => { loadData(); }, []);
 
@@ -2757,6 +2811,10 @@ function SmakfyndApp() {
           const el = document.querySelector('[aria-expanded]');
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 500);
+      } else if (!unratedLoadedRef.current) {
+        // Wine not in scored set — try loading unrated
+        loadUnrated();
+        return; // effect will re-run when allData updates
       } else {
         setNotFound(true);
         setTimeout(() => setNotFound(false), 3000);
@@ -2829,7 +2887,9 @@ function SmakfyndApp() {
 
   const filtered = useMemo(() => {
     let r = [...products];
-    if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
+    const inStore = window.__IN_STORE || new Set(["Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"]);
+    if (!showOrder && !showBest) r = r.filter(p => inStore.has(p.assortment));
+    else if (!showBest) r = r.filter(p => p.assortment === "Fast sortiment");
     r = r.filter(p => p.package === pkg);
     if (cat !== "all" && !search) r = r.filter(p => p.category === cat);
     if (price !== "all") { const [a, b] = price.split("-").map(Number); r = r.filter(p => p.price >= a && p.price <= b); }
@@ -2854,7 +2914,7 @@ function SmakfyndApp() {
     else if (sortBy === "price_desc") r.sort((a, b) => (b.price || 0) - (a.price || 0));
     else if (sortBy === "drop") r.sort((a, b) => (b.price_vs_launch_pct || 0) - (a.price_vs_launch_pct || 0));
     return r;
-  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, selCountry, selFoods, selRegion, selTaste, sortBy]);
+  }, [products, cat, price, search, showNew, showDeals, pkg, showEco, showBest, showOrder, selCountry, selFoods, selRegion, selTaste, sortBy]);
 
   const baseFiltered = useMemo(() => {
     let r = products;
@@ -3127,7 +3187,7 @@ function SmakfyndApp() {
               color: t.tx, outline: "none", boxSizing: "border-box",
               transition: "border-color 0.2s, box-shadow 0.2s",
             }}
-            onFocus={e => { setSearchFocused(true); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
+            onFocus={e => { setSearchFocused(true); loadUnrated(); e.target.style.borderColor = t.wine + "40"; e.target.style.boxShadow = `0 0 0 3px ${t.wine}08`; }}
             onBlur={e => { setSearchFocused(false); e.target.style.borderColor = t.bdr; e.target.style.boxShadow = "none"; }}
           />
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: t.txL, pointerEvents: "none" }}>⌕</span>
@@ -3143,6 +3203,24 @@ function SmakfyndApp() {
               {ct.l}
             </button>
           ))}
+        </div>
+
+        {/* ═══ AVAILABILITY TOGGLE ═══ */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: "8px 12px", background: showOrder ? "#fefcf8" : "#f0f7f0", border: `1px solid ${showOrder ? t.bdrL : t.green}`, borderRadius: 10, cursor: "pointer" }}
+          onClick={() => {
+            const next = !showOrder;
+            setShowOrder(next);
+            if (next) loadUnrated();
+            try { localStorage.setItem("smakfynd_show_order", String(next)); } catch {}
+            if (typeof trackEvent === "function") trackEvent("order_toggle", { show_order: next });
+          }}>
+          <span style={{ fontSize: 18 }}>{showOrder ? "\uD83C\uDFEA" : "\uD83D\uDED2"}</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: showOrder ? t.txM : "#1a7a2e" }}>
+            {showOrder ? "Visar alla viner" : "Visar viner som finns i butik"}
+          </span>
+          <span style={{ marginLeft: "auto", fontSize: 11, color: showOrder ? t.wine : t.txL, textDecoration: showOrder ? "none" : "underline", cursor: "pointer" }}>
+            {showOrder ? "Visa bara butik" : "Visa även beställningsvaror"}
+          </span>
         </div>
 
         {/* ═══ ACTIVE FILTER CHIPS ═══ */}
