@@ -16,7 +16,7 @@ DATA_DIR = BASE / "data"
 DOCS = BASE / "docs"
 
 sys.path.insert(0, str(BASE / "scripts"))
-from constants import IN_STORE, load_wines
+from constants import IN_STORE, LOCKED_CORPUS_COUNT, load_wines
 
 
 def status(level, msg, action=None):
@@ -50,7 +50,7 @@ def check_corpus():
         return status("red", "wines.json not found", "Run build_slim.py")
     wines = load_wines(str(wines_path))
     scored = sum(1 for w in wines if not w.get("unrated"))
-    LOCKED = 4362
+    LOCKED = LOCKED_CORPUS_COUNT
     pct = abs(scored - LOCKED) / LOCKED * 100
     if pct > 1:
         return status("red", f"Scored wines {scored} vs locked {LOCKED} ({pct:.1f}% drift)",
@@ -159,6 +159,46 @@ def check_deploy_size():
     return status("green", "Deploy hash tracking active")
 
 
+def check_live_site():
+    """Synthetic check: fetch the live site and verify it serves wine data."""
+    import requests as _req
+    try:
+        # Check wines.json
+        r = _req.get("https://smakfynd.se/wines.json", timeout=15)
+        if r.status_code != 200:
+            return status("red", f"wines.json returned {r.status_code}",
+                          "Check GitHub Pages deployment. See RUNBOOK.md")
+        data = r.json()
+        wines = data.get("wines", data) if isinstance(data, dict) else data
+        if not isinstance(wines, list) or len(wines) < 100:
+            return status("red", f"wines.json has {len(wines) if isinstance(wines, list) else 0} wines (expected 4000+)",
+                          "wines.json may be malformed or empty")
+        pct = abs(len(wines) - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
+        if pct > 5:
+            return status("red", f"wines.json has {len(wines)} wines vs locked {LOCKED_CORPUS_COUNT} ({pct:.0f}% off)",
+                          "wines.json corpus mismatch — check build pipeline")
+
+        # Check homepage
+        r2 = _req.get("https://smakfynd.se/", timeout=15)
+        if r2.status_code != 200:
+            return status("red", f"Homepage returned {r2.status_code}",
+                          "Check GitHub Pages deployment")
+        html = r2.text
+        if "raw.wines" not in html and ".wines||" not in html:
+            return status("red", "Homepage missing envelope handler — app will show 0 products",
+                          "Run build_app.py && deploy_html.py && push docs/index.html")
+        if "DATA_URL" not in html and "wines.json" not in html:
+            return status("red", "Homepage missing DATA_URL — app cannot load wine data",
+                          "Check deploy_html.py output")
+
+        return status("green", f"Live site OK: {len(wines)} wines, homepage loads")
+    except _req.ConnectionError:
+        return status("red", "Cannot reach smakfynd.se",
+                      "Check DNS and GitHub Pages settings")
+    except Exception as e:
+        return status("red", f"Live site check failed: {e}")
+
+
 def main():
     print("=" * 60)
     print("  SMAKFYND HEALTH DIGEST")
@@ -166,6 +206,7 @@ def main():
     print("=" * 60)
 
     checks = {
+        "Live site": check_live_site,
         "Last build": check_last_build,
         "Corpus count": check_corpus,
         "Validator": check_validator,

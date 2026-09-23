@@ -177,6 +177,22 @@ def validate(path, is_primary=True):
     if not is_primary:
         return errors, warnings
 
+    # ── wines.json / index.html coupling check ──
+    # If wines.json is in envelope format, index.html must handle it
+    index_html = DOCS / "index.html"
+    if meta and index_html.exists():
+        html = index_html.read_text()
+        if "raw.wines" not in html and ".wines||" not in html:
+            errors.append("[COUPLING] wines.json is envelope format but index.html lacks envelope handler — app will show 0 products. Run build_app.py && deploy_html.py")
+
+    # ── Build staleness check ──
+    # src/App.jsx must not be newer than site/smakfynd-v7-slim.jsx
+    src_app = BASE / "src" / "App.jsx"
+    slim_jsx = BASE / "site" / "smakfynd-v7-slim.jsx"
+    if src_app.exists() and slim_jsx.exists():
+        if src_app.stat().st_mtime > slim_jsx.stat().st_mtime:
+            errors.append("[STALE_BUILD] src/App.jsx is newer than site/smakfynd-v7-slim.jsx — run build_app.py first")
+
     # ── AggregateRating without real data ──
     import re as _re2
     for slug in sorted(os.listdir(DOCS)):
