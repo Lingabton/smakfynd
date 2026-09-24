@@ -230,7 +230,9 @@ def save_price_snapshot(products):
     os.makedirs(HIST_DIR, exist_ok=True)
     today = date.today().isoformat()
 
-    # Rich snapshot: price, volume, assortment, stock status, vintage
+    import hashlib as _hl
+
+    # Rich snapshot: price, volume, assortment, stock status, vintage, name fingerprint
     snapshot = {}
     for p in products:
         nr = p.get("nr")
@@ -242,6 +244,9 @@ def save_price_snapshot(products):
         if p.get("is_out_of_stock"): row["o"] = True
         if p.get("is_temp_out"): row["t"] = True
         if p.get("vintage"): row["y"] = p["vintage"]
+        # Name fingerprint: detect article-number reuse
+        name_key = f"{p.get('name', '')}|{p.get('sub', '')}"
+        row["n"] = _hl.md5(name_key.encode()).hexdigest()[:6]
         snapshot[nr] = row
 
     import gzip as _gzip
@@ -291,9 +296,21 @@ def save_price_snapshot(products):
         price_changes = []
         assortment_moves = []
         stock_changes = []
+        reused_nrs = []
 
         for nr in today_nrs & prev_nrs:
             t, p = snapshot[nr], prev[nr]
+
+            # Article-number reuse detection: name fingerprint changed
+            t_name = t.get("n", "")
+            p_name = p.get("n", "")
+            if t_name and p_name and t_name != p_name:
+                reused_nrs.append(nr)
+                # Reset first_seen_price — this is a new product
+                if nr in first_seen:
+                    first_seen[nr] = {"price": t["p"], "date": today}
+                continue  # don't compare price/assortment across different products
+
             # Price change
             tp, pp = t["p"], p.get("p", p) if isinstance(p, dict) else p
             if isinstance(pp, dict):
@@ -321,6 +338,7 @@ def save_price_snapshot(products):
             "price_changes": len(price_changes),
             "assortment_moves": len(assortment_moves),
             "stock_changes": len(stock_changes),
+            "article_reuses": len(reused_nrs),
             "detail": {
                 "arrivals": sorted(arrivals)[:50],
                 "delistings": sorted(delistings)[:50],
@@ -328,13 +346,14 @@ def save_price_snapshot(products):
                 "price_down": sorted([c for c in price_changes if c["pct"] < 0], key=lambda x: x["pct"])[:20],
                 "assortment_moves": assortment_moves[:20],
                 "stock_changes": stock_changes[:20],
+                "article_reuses": sorted(reused_nrs)[:20],
             },
         }
         delta_file = os.path.join(HIST_DIR, f"deltas_{today}.json")
         json.dump(deltas, open(delta_file, "w"), indent=2, ensure_ascii=False)
         print(f"  Deltas vs {prev_date}: +{len(arrivals)} arrivals, -{len(delistings)} delistings, "
               f"{len(price_changes)} price changes, {len(assortment_moves)} assortment moves, "
-              f"{len(stock_changes)} stock changes")
+              f"{len(stock_changes)} stock changes, {len(reused_nrs)} article reuses")
     else:
         print(f"  No previous snapshot — skipping deltas")
 
