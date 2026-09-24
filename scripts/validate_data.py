@@ -153,6 +153,17 @@ def validate(path, is_primary=True):
         if price and (price < lo or price > hi):
             warnings.append(f"[PRICE_BAND] {w.get('name','?')}: {price} kr outside [{lo}, {hi}]")
 
+        # Huge price drop: >60% flagged for review
+        # >80% almost always corrupted data or article number reuse
+        # 60-80% can be real (large format → bottle, sortiment change)
+        drop_pct = w.get('price_vs_launch_pct', 0)
+        if drop_pct and drop_pct > 60:
+            warnings.append(f"[LARGE_DROP] {w.get('name','?')} (#{w.get('nr','?')}): {drop_pct}% drop — verify first_seen_prices.json")
+
+        # Crowd score without reviews is a Bayesian prior leak
+        if w.get('crowd_score') and (w.get('crowd_reviews', 0) or 0) < 1:
+            errors.append(f"[FAKE_CROWD] {w.get('name','?')} (#{w.get('nr','?')}): crowd_score={w['crowd_score']} with 0 reviews")
+
         # Score without rating source
         if score and score > 0:
             if not w.get('crowd_score') and not w.get('expert_score'):

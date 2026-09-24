@@ -73,6 +73,8 @@ def get_vivino(p, vivino_cache):
 def vivino_to_10(rating, reviews):
     if not rating or rating < 1:
         return None
+    if not reviews or reviews < 1:
+        return None  # no reviews = no crowd signal, not a 6.0 prior
     raw = (rating - 1) * 2.25 + 0.5
     raw = max(1.0, min(10.0, raw))
     # Bayesian shrinkage: k=30 (less aggressive, trust actual ratings more)

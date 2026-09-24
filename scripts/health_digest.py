@@ -191,6 +191,18 @@ def check_live_site():
             return status("red", "Homepage missing DATA_URL — app cannot load wine data",
                           "Check deploy_html.py output")
 
+        # Content quality checks on live data
+        huge_drops = sum(1 for w in wines if w.get('price_vs_launch_pct', 0) > 60)
+        fake_crowd = sum(1 for w in wines if w.get('crowd_score') and (w.get('crowd_reviews', 0) or 0) < 1)
+        issues = []
+        if huge_drops > 0:
+            issues.append(f"{huge_drops} wines with >60% price drop")
+        if fake_crowd > 0:
+            issues.append(f"{fake_crowd} wines with crowd_score but 0 reviews")
+        if issues:
+            return status("red", f"Live data issues: {'; '.join(issues)}",
+                          "Check first_seen_prices.json and vivino_to_10()")
+
         return status("green", f"Live site OK: {len(wines)} wines, homepage loads")
     except _req.ConnectionError:
         return status("red", "Cannot reach smakfynd.se",
