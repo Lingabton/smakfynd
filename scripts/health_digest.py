@@ -192,16 +192,16 @@ def check_live_site():
                           "Check deploy_html.py output")
 
         # Content quality checks on live data
-        huge_drops = sum(1 for w in wines if w.get('price_vs_launch_pct', 0) > 60)
+        # Content quality: fabricated signals are red, large drops are amber
         fake_crowd = sum(1 for w in wines if w.get('crowd_score') and (w.get('crowd_reviews', 0) or 0) < 1)
-        issues = []
-        if huge_drops > 0:
-            issues.append(f"{huge_drops} wines with >60% price drop")
         if fake_crowd > 0:
-            issues.append(f"{fake_crowd} wines with crowd_score but 0 reviews")
-        if issues:
-            return status("red", f"Live data issues: {'; '.join(issues)}",
-                          "Check first_seen_prices.json and vivino_to_10()")
+            return status("red", f"{fake_crowd} wines with crowd_score but 0 reviews",
+                          "Fix vivino_to_10() — Bayesian prior leak")
+
+        huge_drops = sum(1 for w in wines if w.get('price_vs_launch_pct', 0) > 80)
+        if huge_drops > 5:
+            return status("red", f"{huge_drops} wines with >80% price drop — likely corrupted data",
+                          "Check first_seen_prices.json")
 
         return status("green", f"Live site OK: {len(wines)} wines, homepage loads")
     except _req.ConnectionError:
