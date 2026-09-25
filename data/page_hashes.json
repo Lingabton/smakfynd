@@ -1,11 +1,11 @@
 {
   "basta-roda-vin": {
-    "hash": "7d39af0a4ea0adf3068e42787f973a2c",
-    "lastmod": "2026-09-24"
+    "hash": "d3f89b0df9518ce22543b463adc0833c",
+    "lastmod": "2026-09-25"
   },
   "basta-vita-vin": {
-    "hash": "8e13584d653f610fea944348578c6804",
-    "lastmod": "2026-09-23"
+    "hash": "8b3c4a70ca7c6e3a6e80ffa2ee18d213",
+    "lastmod": "2026-09-25"
   },
   "basta-bubbel": {
     "hash": "6871d2f4124645a92def936059eb3dc1",
@@ -16,12 +16,12 @@
     "lastmod": "2026-09-24"
   },
   "vin-under-100-kr": {
-    "hash": "8bad69da4cf8fe1b4f83e9ef8cfd529c",
-    "lastmod": "2026-09-24"
+    "hash": "33f9fe1eff78b83ea94e02f594cbda99",
+    "lastmod": "2026-09-25"
   },
   "vin-under-150-kr": {
-    "hash": "ef76dc38021f72ea1a8b33e18b159fde",
-    "lastmod": "2026-09-24"
+    "hash": "277614039c563f5c31bf83bbfb4e6419",
+    "lastmod": "2026-09-25"
   },
   "vin-till-grillat": {
     "hash": "5df17b49a7de9e42fe313401dad94827",
@@ -36,8 +36,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-malbec": {
-    "hash": "2bd54fd234f0127b85caa8e99d0a757d",
-    "lastmod": "2026-09-24"
+    "hash": "ad29b8ae9456a03abd5c5ee7ea73760a",
+    "lastmod": "2026-09-25"
   },
   "basta-cabernet-sauvignon": {
     "hash": "3c3852f69f5984872f6e927d886fdcdb",
@@ -92,8 +92,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-spanska-vin": {
-    "hash": "76adee8412f821283cd1ad03b2276e6c",
-    "lastmod": "2026-09-24"
+    "hash": "348b49a558bd264d98da5f368629019a",
+    "lastmod": "2026-09-25"
   },
   "basta-chilenska-vin": {
     "hash": "5d328ad0dc2207f6f35f9a19de087313",
@@ -188,8 +188,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-kaliforniska-vin": {
-    "hash": "e916d3c7e16f60eb6c91ea2c0a3ebd38",
-    "lastmod": "2026-09-24"
+    "hash": "bfe6c45e785abe573f6e4d6f915cf296",
+    "lastmod": "2026-09-25"
   },
   "vin-under-80-kr": {
     "hash": "a778543c010772c61fd24cd08f447d45",
@@ -352,8 +352,8 @@
     "lastmod": "2026-09-04"
   },
   "/": {
-    "hash": "4875614befc73489067eb0ec92542da4",
-    "lastmod": "2026-09-24"
+    "hash": "95c5aa0a8011d46d197b6d49fc35d969",
+    "lastmod": "2026-09-25"
   },
   "basta-bag-in-box": {
     "hash": "74bc4507207d2278517a658c49b62c76",
@@ -380,8 +380,8 @@
     "lastmod": "2026-06-23"
   },
   "billigt-och-bra-vin": {
-    "hash": "db1e5f3eac4262a68a11f19f2192b732",
-    "lastmod": "2026-09-24"
+    "hash": "f59d28d02ab6763a4fb0db2f926231ee",
+    "lastmod": "2026-09-25"
   },
   "gabriels-val-april-2026": {
     "hash": "158b498d0787c8026aed5953a959a8c0",
@@ -400,11 +400,11 @@
     "lastmod": "2026-03-26"
   },
   "prissankt": {
-    "hash": "f952802e7ef2ef811f580b473c821b09",
-    "lastmod": "2026-09-24"
+    "hash": "c0229d7ec868474e5df6971e4a2872c3",
+    "lastmod": "2026-09-25"
   },
   "basta-vin-september-2026": {
-    "hash": "109087bb5d9100327a0a7de558b3f3cd",
-    "lastmod": "2026-09-24"
+    "hash": "4f8593009bf762d7c7eb7405d45c4f3c",
+    "lastmod": "2026-09-25"
   }
 }
