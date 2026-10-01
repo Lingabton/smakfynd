@@ -50818,3 +50818,815 @@
    9305201    2339.0kr  750.0ml  median:459kr  5.1x  Veuve Clicquot La Grande Dame
    7252406     699.0kr  1500.0ml  median:139kr  5.0x  Black Stallion Napa Valley Cabernet Sauvignon
    9063401     699.0kr  750.0ml  median:139kr  5.0x  Matthiasson Napa Valley Cabernet Sauvignon
+
+--- 2026-10-01 ---
+   7724306   64609.0kr  1500.0ml  median:349kr  185.1x  Boërl & Kroff Cuvée Sélectionnée Brut Rosé
+   7829409   70000.0kr  6000.0ml  median:460kr  152.3x  Amour de Deutz Brut Millesimé
+   9003001   49999.0kr  750.0ml  median:330kr  151.5x  Screaming Eagle Cabernet Sauvignon
+   7722006   64609.0kr  1500.0ml  median:460kr  140.6x  Boërl & Kroff Cuvée Sélectionnée Brut
+   9544308   32495.0kr  3000.0ml  median:330kr  98.5x  Vega Sicilia Double magnum
+   9474506   30004.0kr  1500.0ml  median:330kr  90.9x  Barbaresco Crichët Pajé Roagna  Azienda Agricola I
+   9481608   29950.0kr  3000.0ml  median:330kr  90.8x  Barolo Falletto Vigna le Rocche Riserva
+   9124708   29950.0kr  3000.0ml  median:330kr  90.8x  Barolo Vigna Le Rocche Riserva, Bruno Giacosa
+   7742306   18999.0kr  1500.0ml  median:250kr  76.0x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9127501   16975.0kr  750.0ml  median:250kr  67.9x  Meursault Premier Cru Les Gouttes d'Or Arnaud Ente
+   9475601   29999.0kr  750.0ml  median:460kr  65.3x  Krug Clos du Mesnil
+   9476606   21499.0kr  1500.0ml  median:330kr  65.1x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9266601   21018.0kr  750.0ml  median:330kr  63.7x  Musigny Grand Cru Domaine Jacques Frédéric Mugnier
+   9234006   19991.0kr  1500.0ml  median:330kr  60.6x  Masseto Ornellaia
+   7708106   19999.0kr  1500.0ml  median:330kr  60.6x  Musigny Grand Cru Vieilles Vignes Domaine Comte Ge
+   7488906   19999.0kr  1500.0ml  median:330kr  60.6x  Musigny Grand Cru Vieilles Vignes Domaine Comte Ge
+   9388401   19900.0kr  750.0ml  median:330kr  60.3x  Chambertin Clos de Bèze Grand Cru Domaine Perrot-M
+   9024101   19900.0kr  750.0ml  median:330kr  60.3x  Chambertin Grand Cru Domaine Perrot-Minot
+   9304701   14999.0kr  750.0ml  median:250kr  60.0x  Montrachet Grand Cru Domaine Etienne Sauzet
+   5863001   18628.0kr  750.0ml  median:330kr  56.4x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9021201   18595.0kr  750.0ml  median:330kr  56.3x  Richebourg Grand Cru Domaine Jean Grivot
+   9416901   18499.0kr  750.0ml  median:330kr  56.1x  Château Latour
+   7842401   12999.0kr  750.0ml  median:250kr  52.0x  Montrachet Grand Cru Bouchard Père Fils
+   9283201   16999.0kr  750.0ml  median:330kr  51.5x  Roagna Barbaresco Crichët Pajé
+   7933001   12522.0kr  750.0ml  median:250kr  50.1x  Montrachet Grand Cru Bouchard Père et Fils
+   7237006   16499.0kr  1500.0ml  median:330kr  50.0x  Chambertin Grand Cru Domaine Trapet
+   7234210   16495.0kr  5000.0ml  median:330kr  50.0x  Gaja Pieve Santa Restituta Rennina Brunello di Mon
+   9312601   12449.0kr  750.0ml  median:250kr  49.8x  Chevalier-Montrachet Grand Cru Olivier Leflaive
+   9227901   16001.0kr  750.0ml  median:330kr  48.5x  Château Lafite Rothschild
+   7986801   15999.0kr  750.0ml  median:330kr  48.5x  Château Latour
+   7514501   15999.0kr  750.0ml  median:330kr  48.5x  Screaming Eagle The Flight
+   9473501   11999.0kr  750.0ml  median:250kr  48.0x  Musigny Blanc Grand Cru Domaine Comte Georges de V
+   8735912   21800.0kr  15000.0ml  median:460kr  47.4x  Pol Roger Brut Réserve
+   9407306   15599.0kr  1500.0ml  median:330kr  47.3x  Château Latour
+   9473801   15501.0kr  750.0ml  median:330kr  47.0x  Barbaresco Crichët Pajé Roagna Azienda Agricola I 
+   7576906   15499.0kr  1500.0ml  median:330kr  47.0x  Bonnes-Mares Grand Cru Domaine Comte Georges de Vo
+   7552306   15499.0kr  1500.0ml  median:330kr  47.0x  Chambertin Grand Cru Domaine Trapet
+   9439101   11499.0kr  750.0ml  median:250kr  46.0x  Montrachet Grand Cru Bouchard Père et Fils
+   7053101   11499.0kr  750.0ml  median:250kr  46.0x  Musigny Blanc Grand Cru Domaine Comte Georges de V
+   7435701   11499.0kr  750.0ml  median:250kr  46.0x  Musigny Blanc Grand Cru Domaine Comte Georges de V
+   9410106   14995.0kr  1500.0ml  median:330kr  45.4x  Barolo Falletto Vigna le Rocche Riserva
+   7535601   10999.0kr  750.0ml  median:250kr  44.0x  Montrachet Grand Cru Domaine Domaine Bouchard Père
+   7381501   20019.0kr  750.0ml  median:460kr  43.6x  Bollinger Vieilles Vignes
+   8732712   19995.0kr  15000.0ml  median:460kr  43.5x  Taittinger Brut Réserve
+   9486001   10499.0kr  750.0ml  median:250kr  42.0x  Musigny Blanc Grand Cru Domaine Comte Georges de V
+   9456406   12999.0kr  1500.0ml  median:330kr  39.4x  Opus One
+   7052111    6999.0kr  18000.0ml  median:179kr  39.1x  The Butcher Pinot Noir
+   9388601    9589.0kr  750.0ml  median:250kr  38.4x  Bâtard-Montrachet Grand Cru Olivier Leflaive
+   7758501   12499.0kr  750.0ml  median:330kr  37.9x  Château Lafite-Rothschild
+   7983801   11999.0kr  750.0ml  median:330kr  36.4x  Clos des Lambrays Grand Cru Domaine Taupenot-Merme
+   9453009   11943.0kr  2250.0ml  median:330kr  36.2x  Vérité Estate Le Désir, La Muse, La Joie
+   5863201   11765.0kr  750.0ml  median:330kr  35.7x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   7980601   11499.0kr  750.0ml  median:330kr  34.8x  Clos Des Lambrays Grand Cru Domaine Taupenot Merme
+   9244501   11499.0kr  750.0ml  median:330kr  34.8x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9285701    8499.0kr  750.0ml  median:250kr  34.0x  Bienvenues-Bâtard-Montrachet Grand Cru Domaine Eti
+   9318101    8499.0kr  750.0ml  median:250kr  34.0x  Bâtard-Montrachet Grand Cru Domaine Etienne Sauzet
+   9118101    8459.0kr  750.0ml  median:250kr  33.8x  Bâtard-Montrachet Grand Cru Lucien Le Moine
+   7670401   11019.0kr  750.0ml  median:330kr  33.4x  Musigny Grand Cru Domaine de la Vougeraie
+   9316001   10999.0kr  750.0ml  median:330kr  33.3x  Musigny Grand Cru Vieilles Vignes Domaine Comte Ge
+   9058906   10999.0kr  1500.0ml  median:330kr  33.3x  Opus One
+   7994301    8319.0kr  750.0ml  median:250kr  33.3x  Lucien Le Moine Bâtard-Montrachet Grand Cru
+   9029501    8279.0kr  750.0ml  median:250kr  33.1x  Batard Montrachet Grand Cru Henri Boillot
+   9043601    8269.0kr  750.0ml  median:250kr  33.1x  Criots-Bâtard-Montrachet Grand Cru Lucien le Moine
+   9040601   10785.0kr  750.0ml  median:330kr  32.7x  Château Ausone
+   9038501   10759.0kr  750.0ml  median:330kr  32.6x  Pingus
+   9121801   15001.0kr  750.0ml  median:460kr  32.6x  Salon Vintage
+   7575201    7999.0kr  750.0ml  median:250kr  32.0x  Saint-Aubin Premier Cru Derrière Chez Edouard Haut
+   9472906   10495.0kr  1500.0ml  median:330kr  31.8x  Gaja Sperss Barolo
+   9485601   10499.0kr  750.0ml  median:330kr  31.8x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9235806   10119.0kr  1500.0ml  median:330kr  30.7x  Gaja Conteisa Barolo
+   5504710   13950.0kr  12000.0ml  median:460kr  30.4x  Taittinger Brut Réserve
+   9469001    9999.0kr  750.0ml  median:330kr  30.3x  Barolo Riserva Monfortino Conterno
+   7641501    9999.0kr  750.0ml  median:330kr  30.3x  Chambertin Grand Cru Domaine Trapet Père & Fils
+   7875108    9999.0kr  3000.0ml  median:330kr  30.3x  Charmes Chambertin les Mazoyères Grand Cru Domaine
+   9062301    9999.0kr  750.0ml  median:330kr  30.3x  Chateau Lafleur
+   7934601    9999.0kr  750.0ml  median:330kr  30.3x  Château Mouton-Rothschild
+   7590801    9999.0kr  750.0ml  median:330kr  30.3x  Musigny Grand Cru Vieilles Vignes Domaine Comte Ge
+   9474106    9999.0kr  1500.0ml  median:330kr  30.3x  Opus One Magnum
+   7606501    9999.0kr  750.0ml  median:330kr  30.3x  Musigny Grand Cru Domaine de la Vougeraie
+   9405506    9801.0kr  1500.0ml  median:330kr  29.7x  Gaja Barbaresco
+   9403501    9698.0kr  750.0ml  median:330kr  29.4x  Pingus
+   7298301    7299.0kr  750.0ml  median:250kr  29.2x  Corton-Charlemagne Grand Cru Domaine Bonneau du Ma
+   9353001    7300.0kr  750.0ml  median:250kr  29.2x  Meursault Domaine Arnaud Ente
+   5516001    9613.0kr  750.0ml  median:330kr  29.1x  Château Mouton-Rothschild
+   9222501    9549.0kr  750.0ml  median:330kr  28.9x  Chateau Ausone
+   7331401    9499.0kr  750.0ml  median:330kr  28.8x  Chambertin Grand Cru Domaine Trapet
+   9388901    9495.0kr  750.0ml  median:330kr  28.8x  Chambolle-Musigny 1er Cru La Combe d'Orveau Ultra 
+   9383201    9495.0kr  750.0ml  median:330kr  28.8x  Chapelle-Chambertin Grand Cru Domaine Perrot-Minot
+   7982801    9499.0kr  750.0ml  median:330kr  28.8x  Château Ausone
+   7785001    9499.0kr  750.0ml  median:330kr  28.8x  Musigny Grand Cru Domaine de la Vougeraie
+   9257901    9499.0kr  750.0ml  median:330kr  28.8x  Musigny Vieilles Vignes Grand Cru Domaine Comte Ge
+   9335001    9495.0kr  750.0ml  median:330kr  28.8x  Nuits-Saint-Georges 1er Cru La Richemone Ultra Dom
+   7522201    7199.0kr  750.0ml  median:250kr  28.8x  Chevalier Montrachet Grand Cru Domaine de la Vouge
+   9438901    9401.0kr  750.0ml  median:330kr  28.5x  Château Latour
+   7516001    6999.0kr  750.0ml  median:250kr  28.0x  Charlemagne Grand Cru Domaine Bonneau du Martray
+   9583701    6999.0kr  750.0ml  median:250kr  28.0x  Charlemagne Grand Cru Domaine Bonneau du Martray
+   7745601    6999.0kr  750.0ml  median:250kr  28.0x  Corton Grand Cru Domaine Bonneau du Martray
+   7779901    6999.0kr  750.0ml  median:250kr  28.0x  Domaine Bonneau du Martray Charlemagne Grand Cru
+   7900001    6999.0kr  750.0ml  median:250kr  28.0x  Saint-Aubin Premier Cru Derriére Chez Edouard Haut
+   9386701    9199.0kr  750.0ml  median:330kr  27.9x  Chambolle Musigny Premier Cru Les Amoureuses Domai
+   7000601    9199.0kr  750.0ml  median:330kr  27.9x  Chambolle-Musigny Premier Cru Les Amoureuses Domai
+   8751810   12789.0kr  9000.0ml  median:460kr  27.8x  Moët & Chandon
+   7030701    8999.0kr  750.0ml  median:330kr  27.3x  Chambertin Grand Cru Domaine Trapet
+   7408501    9015.0kr  750.0ml  median:330kr  27.3x  Chambertin Grand Cru Domaine Trapet
+   9362501    8995.0kr  750.0ml  median:330kr  27.3x  Château Latour
+   7255301    8999.0kr  750.0ml  median:330kr  27.3x  Château Latour
+   9336701    8999.0kr  750.0ml  median:330kr  27.3x  L'Ermita Alvaro Palacios
+   9587901    8999.0kr  750.0ml  median:330kr  27.3x  Masseto
+   9284506    8995.0kr  1500.0ml  median:330kr  27.3x  Opus One
+   9251106    8995.0kr  1500.0ml  median:330kr  27.3x  Vega Sicilia Unico
+   9405006    8722.0kr  1500.0ml  median:330kr  26.4x  Gaja Barbaresco
+   9326601    8650.0kr  750.0ml  median:330kr  26.2x  Château Latour Paulliac 1er cru classé
+   9340401    8599.0kr  750.0ml  median:330kr  26.1x  Bonnes-Mares Grand Cru Robert Groffier Père & Fils
+   9452601    8599.0kr  750.0ml  median:330kr  26.1x  Chambertin Clos de Bèze Grand Cru Domaine Pierre D
+   9291301    8599.0kr  750.0ml  median:330kr  26.1x  Chambolle-Musigny 1er Cru Les Amoureuses Robert Gr
+   9214801    8595.0kr  750.0ml  median:330kr  26.0x  Masseto Ornellaia
+   7238601    8499.0kr  750.0ml  median:330kr  25.8x  Chambertin Grand Cru Domaine Trapet
+   9365201    8407.0kr  750.0ml  median:330kr  25.5x  Clos De Tart Grand Cru Monopole
+   9433206    8299.0kr  1500.0ml  median:330kr  25.1x  Shafer Vineyards Hillside Select
+   9128201    8199.0kr  750.0ml  median:330kr  24.8x  Château Mouton Rothschild
+   9301401    8119.0kr  750.0ml  median:330kr  24.6x  Château Haut-Brion
+   9368901    7999.0kr  750.0ml  median:330kr  24.2x  Chambertin Clos de Beze Grand Cru Joseph Drouhin
+   7850601    7999.0kr  750.0ml  median:330kr  24.2x  Château Haut-Brion
+   7684601    7999.0kr  750.0ml  median:330kr  24.2x  Château Mouton-Rothschild
+   7509001    7999.0kr  750.0ml  median:330kr  24.2x  Domaine Trapet Chambertin Grand Cru
+   7753901    7999.0kr  750.0ml  median:330kr  24.2x  Musigny Grand Cru Domaine de la Vougeraie
+   9217801    7999.0kr  750.0ml  median:330kr  24.2x  Chambertin Grand Cru Domaine Trapet
+   9444406    7959.0kr  1500.0ml  median:330kr  24.1x  Shafer Vineyards Hillside Select
+   7824201    6010.0kr  750.0ml  median:250kr  24.0x  Chevalier-Montrachet Grand Cru Bouchard Père Fils
+   7720601    5999.0kr  750.0ml  median:250kr  24.0x  Chevalier-Montrachet Grand Cru Domaine Domaine Bou
+   7728101    7899.0kr  750.0ml  median:330kr  23.9x  Château Haut-Brion Clarence Dillon Wines
+   9407301    7799.0kr  750.0ml  median:330kr  23.6x  Château Latour
+   7177801    7799.0kr  750.0ml  median:330kr  23.6x  Eisele Vineyard Cabernet Sauvignon
+   9403401    7799.0kr  750.0ml  median:330kr  23.6x  Romanée Saint Vivant Grand Cru Domaine de l’Arlot
+   9290001    7664.0kr  750.0ml  median:330kr  23.2x  Chateau Latour
+   9233006    7659.0kr  1500.0ml  median:330kr  23.2x  Shafer Vineyards Hillside Select
+   7412601    7599.0kr  750.0ml  median:330kr  23.0x  Bonnes-Mares Grand Cru Domaine Comte Georges de Vo
+   9470501    7599.0kr  750.0ml  median:330kr  23.0x  Bonnes-Mares Grand Cru Domaine Comte Georges de Vo
+   9015701    7599.0kr  750.0ml  median:330kr  23.0x  Ch Ausone
+   9415801    7495.0kr  750.0ml  median:330kr  22.7x  Barolo Falletto Vigna le Rocche Riserva
+   9123501    7495.0kr  750.0ml  median:330kr  22.7x  Barolo Vigna Le Rocche Riserva, Bruno Giacosa
+   9508401    7499.0kr  750.0ml  median:330kr  22.7x  Bond Vecina Bond
+   7657701    7499.0kr  750.0ml  median:330kr  22.7x  Chambertin Grand Cru Domaine Trapet
+   5834806    7499.0kr  1500.0ml  median:330kr  22.7x  Vajo dei Masi Amarone
+   9298801    7329.0kr  750.0ml  median:330kr  22.2x  Penfolds Grange
+   9006301    7299.0kr  750.0ml  median:330kr  22.1x  Bonnes-Mares Grand Cru Domaine Comte Georges de Vo
+   7387301    7299.0kr  750.0ml  median:330kr  22.1x  Château Latour
+   9356301    7295.0kr  750.0ml  median:330kr  22.1x  Gaja Sorì San Lorenzo
+   9553501    7299.0kr  750.0ml  median:330kr  22.1x  Vosne-Romanee Premier Cru Aux Malconsorts Sylvain 
+   9471801    7295.0kr  750.0ml  median:330kr  22.1x  Gaja Sorì San Lorenzo Barbaresco
+    786610    5499.0kr  750.0ml  median:250kr  22.0x  Corton-Charlemagne Grand Cru Domaine Etienne Sauze
+   7898601    5509.0kr  750.0ml  median:250kr  22.0x  Corton-Charlemagne Grand Cru Domaine Etienne Sauze
+   9247801    9999.0kr  750.0ml  median:460kr  21.8x  Bollinger La Côte aux Enfants Champagne
+   9400201    9999.0kr  750.0ml  median:460kr  21.8x  Salon Le Mesnil Blanc de Blancs
+   8732710    9999.0kr  9000.0ml  median:460kr  21.8x  Taittinger Brut Réserve
+   9118001    5349.0kr  750.0ml  median:250kr  21.4x  Chapoutier l'Ermite Blanc Ermitage
+   9414202    6157.0kr  375.0ml  median:289kr  21.3x  Royal Tokaji Essencia
+   5270306    7000.0kr  1500.0ml  median:330kr  21.2x  Château Hosanna
+   9296106    6864.0kr  1500.0ml  median:330kr  20.8x  Gaja Conteisa Barolo
+   9211701    6795.0kr  750.0ml  median:330kr  20.6x  Gaja Sorì Tildìn Barbaresco
+   9472501    6795.0kr  750.0ml  median:330kr  20.6x  Gaja Sorì Tildìn Barbaresco
+   9066201    6801.0kr  750.0ml  median:330kr  20.6x  Henschke Hill of Grace
+   8730609    9469.0kr  6000.0ml  median:460kr  20.6x  Veuve Clicquot Brut
+   9131606    6695.0kr  1500.0ml  median:330kr  20.3x  Barolo Falletto Vigna le Rocche
+   7156301    6599.0kr  750.0ml  median:330kr  20.0x  Bonnes-Mares Grand Cru Domaine Comte Georges de Vo
+   9304101    6599.0kr  750.0ml  median:330kr  20.0x  Chambertin-Clos de Bèze Grand Cru Lucien le Moine
+   7226301    6599.0kr  750.0ml  median:330kr  20.0x  Corton Grand Cru Domaine Bonneau du Martray
+   7253301    6599.0kr  750.0ml  median:330kr  20.0x  Corton Grand Cru Domaine Bonneau du Martray
+   7723701    4999.0kr  750.0ml  median:250kr  20.0x  Château Grillet
+   7225801    6499.0kr  750.0ml  median:330kr  19.7x  Chapelle-Chambertin Grand Cru Domaine Trapet
+   7909601    6511.0kr  750.0ml  median:330kr  19.7x  Chapelle-Chambertin Grand Cru Domaine Trapet
+   7849406    6511.0kr  1500.0ml  median:330kr  19.7x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   7488401    6499.0kr  750.0ml  median:330kr  19.7x  Domaine Trapet Chapelle-Chambertin Grand Cru
+   9047101    6495.0kr  750.0ml  median:330kr  19.7x  Kapcsándy Grand Vin Cabernet Sauvignon
+   7536101    6499.0kr  750.0ml  median:330kr  19.7x  Latricières-Chambertin Grand Cru Domaine Trapet
+   7895701    6511.0kr  750.0ml  median:330kr  19.7x  Latricières-Chambertin Grand Cru Domaine Trapet
+   8735910    8950.0kr  9000.0ml  median:460kr  19.5x  Pol Roger Brut Réserve
+   9373701    6299.0kr  750.0ml  median:330kr  19.1x  Soldera Case Basse
+   9043201    6299.0kr  750.0ml  median:330kr  19.1x  Soldera Case Basse Case Basse di Gianfranco Solder
+   9217101    6195.0kr  750.0ml  median:330kr  18.8x  Barbaresco Costa Russi Gaja
+   9361701    6195.0kr  750.0ml  median:330kr  18.8x  Gaja Costa Russi Barbaresco
+   7975901    4709.0kr  750.0ml  median:250kr  18.8x  Rafael Palacios Sorte O Soro
+   9232301    6135.0kr  750.0ml  median:330kr  18.6x  Volnay Premier Cru Les Santenots du Milieu Arnaud 
+   9279101    5999.0kr  750.0ml  median:330kr  18.2x  Barolo Monprivato Riserva Ca d'Morissio, Giuseppe 
+   9214001    5999.0kr  750.0ml  median:330kr  18.2x  Barolo Monprivato Riserva Cà d’Morissio Giuseppe M
+   7858506    5999.0kr  1500.0ml  median:330kr  18.2x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   7288601    5999.0kr  750.0ml  median:330kr  18.2x  Domaine Trapet Latricières-Chambertin Grand Cru
+   7552401    5999.0kr  750.0ml  median:330kr  18.2x  Latricières-Chambertin Grand Cru Domaine Trapet
+   7668908    5999.0kr  3000.0ml  median:330kr  18.2x  Nuits-St-Georges Premier Cru Clos de Thorey Domain
+   9447101    5999.0kr  750.0ml  median:330kr  18.2x  Penfolds Grange
+   9349006    5879.0kr  1500.0ml  median:330kr  17.8x  Gaja Barbaresco
+   8751809    8179.0kr  6000.0ml  median:460kr  17.8x  Moët & Chandon
+   9244901    5849.0kr  750.0ml  median:330kr  17.7x  Château Lafite Rotschild
+   9061801    5799.0kr  750.0ml  median:330kr  17.6x  Colgin Cariad
+   9496501    5789.0kr  750.0ml  median:330kr  17.5x  Bonnes Mares Grand Cru Domaine Louis Jadot
+   7747501    5699.0kr  750.0ml  median:330kr  17.3x  Barolo Riserva Villero Vietti
+   9344101    5699.0kr  750.0ml  median:330kr  17.3x  Barolo Monprivato Riserva Ca’ d’Morissio Giuseppe 
+   9225801    5695.0kr  750.0ml  median:330kr  17.3x  Penfolds Grange
+   9393201    4289.0kr  750.0ml  median:250kr  17.2x  Corton-Charlemagne Grand Cru Lucien le Moine
+   9405101    5595.0kr  750.0ml  median:330kr  17.0x  Bruno Clair Bonnes Mares Grand Cru
+   9409301    5595.0kr  750.0ml  median:330kr  17.0x  Bruno Clair Chambertin Clos de Bèze Grand Cru
+   9370301    5599.0kr  750.0ml  median:330kr  17.0x  Opus One
+   9364801    5595.0kr  750.0ml  median:330kr  17.0x  Vega Sicilia Reserva Especial
+   9478801    5561.0kr  750.0ml  median:330kr  16.9x  Dominio de Es La Diva
+   9293901    5559.0kr  750.0ml  median:330kr  16.8x  Château Trotanoy
+   5364801    5499.0kr  750.0ml  median:330kr  16.7x  Biondi-Santi Brunello di Montalcino Riserva
+   7746101    5499.0kr  750.0ml  median:330kr  16.7x  Carruades de Lafite Château Lafite Rothschild
+   9054206    5499.0kr  1500.0ml  median:330kr  16.7x  Gaja Barbaresco
+   9543701    5495.0kr  750.0ml  median:330kr  16.7x  Vega Sicilia Reserva Especial
+   9421301    5399.0kr  750.0ml  median:330kr  16.4x  Chateau Angelus
+   7662006    5399.0kr  1500.0ml  median:330kr  16.4x  Gaja Pieve Santa Restituta Sugarille Brunello di M
+   9320301    5315.0kr  750.0ml  median:330kr  16.1x  Château Margaux
+   7150601    5300.0kr  750.0ml  median:330kr  16.1x  Corton Loliers Grand Cru Esprit Leflaive
+   7436106    3999.0kr  1500.0ml  median:250kr  16.0x  Corton Grand Cru Blanc Domaine Parent
+   7855201    5209.0kr  750.0ml  median:330kr  15.8x  Bonne Mares Grand Cru Domaine de la Vougeraie
+   8753109    7250.0kr  6000.0ml  median:460kr  15.8x  Deutz Brut Classic
+   7010206    7009.0kr  1500.0ml  median:460kr  15.3x  Bollinger R.D.
+   5270001    5000.0kr  750.0ml  median:330kr  15.2x  Dominus Estate
+   9026406    6999.0kr  1500.0ml  median:460kr  15.2x  Bollinger R.D.
+   7140506    6995.0kr  1500.0ml  median:460kr  15.2x  Pommery Clos Pompadour
+   9325601    4999.0kr  750.0ml  median:330kr  15.1x  Barbaresco Pajé Vecchie Viti Roagna Azienda Agrico
+   9110101    4999.0kr  750.0ml  median:330kr  15.1x  Barbaresco Pajé Vecchie Viti Roagna
+   9030501    4999.0kr  750.0ml  median:330kr  15.1x  Barolo Pira Vecchie Viti Roagna Azienda Agricola I
+   9321901    4999.0kr  750.0ml  median:330kr  15.1x  Barolo Pira Vecchie Viti Roagna
+   9217201    4999.0kr  750.0ml  median:330kr  15.1x  Chapelle-Chambertin Grand Cru Domaine Trapet
+   7109206    4999.0kr  1500.0ml  median:330kr  15.1x  Charmes-Chambertin les Mazoyères Grand Cru Domaine
+   7684801    4999.0kr  750.0ml  median:330kr  15.1x  Château Angélus
+   7617102    4999.0kr  375.0ml  median:330kr  15.1x  Château Latour
+   7472001    4999.0kr  750.0ml  median:330kr  15.1x  Château Pavie
+   9494601    4999.0kr  750.0ml  median:330kr  15.1x  Clos de Vougeot Grand Cru Domaine d'Eugénie
+   7116008    4995.0kr  3000.0ml  median:330kr  15.1x  Nicolas Catena Zapata Bodega Catena Zapata
+   9521301    4999.0kr  750.0ml  median:330kr  15.1x  Sine Qua Non Eleven Confession Grenache
+   9260901    3699.0kr  750.0ml  median:250kr  14.8x  Corton Charlemagne Grand Cru Henri Boillot
+   9123406    4849.0kr  1500.0ml  median:330kr  14.7x  Barbaresco Asili Falletto di Bruno Giacosa
+   9446801    4849.0kr  750.0ml  median:330kr  14.7x  Bonnes Mares Grand Cru Louis Jadot
+   9448701    4849.0kr  750.0ml  median:330kr  14.7x  Chambertin Clos de Bèze Grand Cru Domaine Louis Ja
+   7799301    4799.0kr  750.0ml  median:330kr  14.5x  Bonnes Mares Grand Cru Domaine de la Vougeraie
+   9258001    4795.0kr  750.0ml  median:330kr  14.5x  Chambolle-Musigny 1er Cru Les Amoureuses Domaine L
+   7233706    4795.0kr  1500.0ml  median:330kr  14.5x  Gaja Pieve Santa Restituta Rennina Brunello di Mon
+   9258601    4754.0kr  750.0ml  median:330kr  14.4x  Château Mouton Rotschild
+   9421001    4695.0kr  750.0ml  median:330kr  14.2x  Clos de la Roche Grand Cru Domaine Dujac
+   7795201    4599.0kr  750.0ml  median:330kr  13.9x  Bonnes-Mares Grand Cru Domaine de la Vougeraie
+   9355101    4589.0kr  750.0ml  median:330kr  13.9x  Gaja Sperss Barolo
+   9461301    6409.0kr  750.0ml  median:460kr  13.9x  Dom Pérignon P2
+   9513106    4559.0kr  1500.0ml  median:330kr  13.8x  Il Caberlot Ris Vigna Vincaie
+   7838701    4508.0kr  750.0ml  median:330kr  13.7x  Mazoyères Chambertin Grand Cru Domaine Taupenot-Me
+   7829706    4499.0kr  1500.0ml  median:330kr  13.6x  Barolo Riserva Rocche dell'Annunziata Paolo Scavin
+   5820801    4499.0kr  750.0ml  median:330kr  13.6x  Chapelle-Chambertin Grand Cru Domaine Trapet
+   9446901    4499.0kr  750.0ml  median:330kr  13.6x  Château Palmer
+   9449601    4495.0kr  750.0ml  median:330kr  13.6x  Côte-Rôtie La Reynarde E.Guigal
+   7221401    4499.0kr  750.0ml  median:330kr  13.6x  Latricières-Chambertin Grand Cru Domaine Trapet
+   9249301    4495.0kr  750.0ml  median:330kr  13.6x  Vega Sicilia Unico
+   9471906    6219.0kr  1500.0ml  median:460kr  13.5x  Dom Pérignon
+   9035208    4419.0kr  3000.0ml  median:330kr  13.4x  Sadie Family Wines Columella
+   9461501    4399.0kr  750.0ml  median:330kr  13.3x  Chambolle-Musigny Premier Cru Domaine Comte George
+   7885701    4399.0kr  750.0ml  median:330kr  13.3x  Chambolle-Musigny Premier Cru Domaine Comte George
+   9228801    4399.0kr  750.0ml  median:330kr  13.3x  Charmes-Chambertin Grand Cru Lucien le Moine
+   9487401    4395.0kr  750.0ml  median:330kr  13.3x  Côte-Rôtie La Landonne E.Guigal
+   9450601    4395.0kr  750.0ml  median:330kr  13.3x  Côte-Rôtie La Mouline E. Guigal
+   9472301    4395.0kr  750.0ml  median:330kr  13.3x  Côte-Rôtie La Turque E.Guigal
+   9366301    4389.0kr  750.0ml  median:330kr  13.3x  Echezeaux Grand Cru Lucien le Moine
+   9170201    4389.0kr  750.0ml  median:330kr  13.3x  Latricières-Chambertin Grand Cru Lucien le Moine
+   9361601    6109.0kr  750.0ml  median:460kr  13.3x  Dom Pérignon P2
+   8735909    6100.0kr  6000.0ml  median:460kr  13.3x  Pol Roger Brut Réserve
+   9369001    4359.0kr  750.0ml  median:330kr  13.2x  Clos de Vougeot Grand Cru Lucien le Moine
+   9241601    4359.0kr  750.0ml  median:330kr  13.2x  Côte Rôtie La Mouline Guigal
+   9026601    4359.0kr  750.0ml  median:330kr  13.2x  Côte Rôtie La Turque Guigal
+   9032901    4349.0kr  750.0ml  median:330kr  13.2x  Guigal Côte Rôtie La Landonne E. Guigal
+   9302201    4349.0kr  750.0ml  median:330kr  13.2x  Guigal Côte Rôtie La Mouline E.Guigal
+   9252801    3299.0kr  750.0ml  median:250kr  13.2x  Puligny-Montrachet Premier Cru Pucelles Olivier Le
+   9449001    3299.0kr  750.0ml  median:250kr  13.2x  Trimbach Clos Sainte Hune Riesling
+    760210    6010.0kr  6000.0ml  median:460kr  13.1x  Louis Roederer Collection 243
+   9472701    4295.0kr  750.0ml  median:330kr  13.0x  Gaja Sperss Barolo
+   9213901    4299.0kr  750.0ml  median:330kr  13.0x  Gaja Conteisa Barolo
+   9544001    4295.0kr  750.0ml  median:330kr  13.0x  Vega Sicilia Unico
+   9004201    4280.0kr  750.0ml  median:330kr  13.0x  Volnay Premier Cru Coche-Dury
+   9405801    3249.0kr  750.0ml  median:250kr  13.0x  Corton-Charlemagne Grand Cru Domaine des Héritiers
+   9207701    5990.0kr  750.0ml  median:460kr  13.0x  Dom Pérignon P2
+   7100808    5995.0kr  6000.0ml  median:460kr  13.0x  Pommery Brut Royal
+   9052701    4268.0kr  750.0ml  median:330kr  12.9x  Château L'Eglise Clinet
+   9478701    4244.0kr  750.0ml  median:330kr  12.9x  Dominio de Es La Mata
+   9478201    3190.0kr  750.0ml  median:250kr  12.8x  Criots-Bâtard-Montrachet Fontaine-Gagnard
+   9242301    4189.0kr  750.0ml  median:330kr  12.7x  Barolo Conteisa Gaja
+   9433201    4159.0kr  750.0ml  median:330kr  12.6x  Shafer Vineyards Hillside Select
+   7793201    4349.0kr  750.0ml  median:349kr  12.5x  Armand de Brignac Brut Rosé
+   8732709    5695.0kr  6000.0ml  median:460kr  12.4x  Taittinger Brut Réserve
+   9353101    4068.0kr  750.0ml  median:330kr  12.3x  Château La Mission Haut-Brion
+   9551206    3995.0kr  1500.0ml  median:330kr  12.1x  Barolo Cicala Poderi Aldo Conterno
+   9363201    3999.0kr  750.0ml  median:330kr  12.1x  Borgogno Barolo Riserva Giacomo Borgogno & Figli
+   7975301    3999.0kr  750.0ml  median:330kr  12.1x  Charmes Chambertin Grand Cru Domaine Taupenot-Merm
+   7853801    3999.0kr  750.0ml  median:330kr  12.1x  Charmes Chambertin les Mazoyères Grand Cru Domaine
+   7856301    4008.0kr  750.0ml  median:330kr  12.1x  Château La Fleur-Pétrus Etab.Jean-Pierre Mouiex
+   7378101    4008.0kr  750.0ml  median:330kr  12.1x  Château Trotanoy
+   9327801    3999.0kr  750.0ml  median:330kr  12.1x  Clos de Vougeot Domaine Jean Grivot
+   9584301    3995.0kr  750.0ml  median:330kr  12.1x  Côte Rôtie La Ladonne E. Guigal
+   9584401    3995.0kr  750.0ml  median:330kr  12.1x  Côte Rôtie La Mouline E. Guigal
+   9584501    3995.0kr  750.0ml  median:330kr  12.1x  Côte Rôtie La Turque E. Guigal
+   7495306    3995.0kr  1500.0ml  median:330kr  12.1x  Domaine Parent Corton Grand Cru Les Renardes
+   9472601    3995.0kr  750.0ml  median:330kr  12.1x  Gaja Conteisa Barolo
+   7924901    3999.0kr  750.0ml  median:330kr  12.1x  Mazoyères-Chambertin Grand Cru Domaine Taupenot Me
+   9279001    3995.0kr  750.0ml  median:330kr  12.1x  Opus One
+   9527501    3999.0kr  750.0ml  median:330kr  12.1x  Poggio di Sotto Brunello di Montalcino Riserva
+   9029801    3999.0kr  750.0ml  median:330kr  12.1x  Shafer Vineyards Hillside Select
+   9902001    3999.0kr  750.0ml  median:330kr  12.1x  Vérité Le Desir
+   7079906    2999.0kr  1500.0ml  median:250kr  12.0x  Chassagne-Montrachet 1er Cru Morgeot Chapelle Blan
+   7093506    2999.0kr  1500.0ml  median:250kr  12.0x  Chassagne-Montrachet 1er Cru Morgeot Clos de la Ch
+   9455801    2995.0kr  750.0ml  median:250kr  12.0x  Corton-Charlemagne Grand Cru Domaine de Héritieres
+   7275301    2999.0kr  750.0ml  median:250kr  12.0x  Trimbach Trimbach Clos St Hune Riesling
+   9310401    3879.0kr  750.0ml  median:330kr  11.8x  Conterno Barolo Francia
+   9380101    3900.0kr  750.0ml  median:330kr  11.8x  Morey-Saint-Denis Premier Cru La Riotte Domaine Pe
+   9262901    3895.0kr  750.0ml  median:330kr  11.8x  Vega Sicilia Unico
+   9419001    3849.0kr  750.0ml  median:330kr  11.7x  E. Guigal Ermitage Ex Voto Rouge
+   9444401    3849.0kr  750.0ml  median:330kr  11.7x  Shafer Vineyards Hillside Select
+   9443401    2899.0kr  750.0ml  median:250kr  11.6x  Puligny-Montrachet 1er Cru Folatières Olivier Lefl
+   5261601    3799.0kr  750.0ml  median:330kr  11.5x  Chambolle-Musigny Premier Cru Les Amoureuses
+   7456401    3799.0kr  750.0ml  median:330kr  11.5x  Charmes-Chambertin Les Mazoyères Grand Cru
+   9322001    3799.0kr  750.0ml  median:330kr  11.5x  Penfolds Bin 707 Cabernet Sauvignon
+   9233001    3800.0kr  750.0ml  median:330kr  11.5x  Shafer Vineyards Hillside Select
+   9508001    2867.0kr  750.0ml  median:250kr  11.5x  Willi Schaefer Domprobst Riesling Beerenauslese Wi
+   9576801    5299.0kr  750.0ml  median:460kr  11.5x  Pol Roger Vinothèque Sir Winston Churchill
+   7704101    3699.0kr  750.0ml  median:330kr  11.2x  Château Figeac
+   7916101    3699.0kr  750.0ml  median:330kr  11.2x  Solaia
+   9053001    3699.0kr  750.0ml  median:330kr  11.2x  Tenuta di Trinoro Vini Franchetti
+   7527101    3649.0kr  750.0ml  median:330kr  11.1x  Chapelle-Chambertin Grand Cru Bouchard Père et Fil
+   5314702    3201.0kr  375.0ml  median:289kr  11.1x  Château d'Yquem
+   9575901    3623.0kr  750.0ml  median:330kr  11.0x  Chateau la Conseillante
+   7562601    3599.0kr  750.0ml  median:330kr  10.9x  Charmes-Chambertin Grand Cru Domaine Taupenot Merm
+   7262201    3599.0kr  750.0ml  median:330kr  10.9x  Château Latour Les Forts de Latour
+   7821701    3599.0kr  750.0ml  median:330kr  10.9x  Château Léoville-Las Cases
+   7319510    3605.0kr  5000.0ml  median:330kr  10.9x  Château de Lauga
+   7443206    3595.0kr  1500.0ml  median:330kr  10.9x  Domaine Parent Pommard Premier Cru Les Epenots
+   9566201    3599.0kr  750.0ml  median:330kr  10.9x  Heitz Cellar Martha’s Vineyard, Cabernet Sauvignon
+   9120008    3595.0kr  3000.0ml  median:330kr  10.9x  Malbec Argentino Bodega Catena Zapata
+   9503001    3599.0kr  750.0ml  median:330kr  10.9x  Massetino Ornellaia
+   7320308    5019.0kr  3000.0ml  median:460kr  10.9x  Champagne Bollinger Bollinger Special Cuvée Brut
+   7574010    4999.0kr  6000.0ml  median:460kr  10.9x  G.H. Mumm Mumm Cordon Rouge
+   8213909    4999.0kr  6000.0ml  median:460kr  10.9x  Palmer & Co La Réserve Brut
+   9209701    3569.0kr  750.0ml  median:330kr  10.8x  Chapoutier l'Ermite Hermitage
+   9066701    3569.0kr  750.0ml  median:330kr  10.8x  l'Ermite Ermitage M. Chapoutier
+   7804001    2699.0kr  750.0ml  median:250kr  10.8x  Charlemagne Grand Cru Domaine de la Vougeraie
+   9434301    3721.0kr  750.0ml  median:349kr  10.7x  Krug Rosé 27th Edition
+   9384201    3499.0kr  750.0ml  median:330kr  10.6x  Barolo Riserva Rocche dell'Annunziata Paolo Scavin
+   9576201    3495.0kr  750.0ml  median:330kr  10.6x  Chateau Le Tertre Roteboeuf
+   9482501    3495.0kr  750.0ml  median:330kr  10.6x  Sassicaia Tenuta San Guido
+   9432601    2599.0kr  750.0ml  median:250kr  10.4x  Corton-Charlemagne Grand Cru Bouchard Père et Fils
+   7487801    2599.0kr  750.0ml  median:250kr  10.4x  Corton-Charlemagne Grand Cru Domaine Domaine Bouch
+   9315601    2599.0kr  750.0ml  median:250kr  10.4x  Meursault 1er cru Perriers Domaine Jaques Prieur
+   5638501    1899.0kr  750.0ml  median:182kr  10.4x  Gérard Bertrand Clos du Temple
+   7074001    3399.0kr  750.0ml  median:330kr  10.3x  Château Figeac
+   7102801    3399.0kr  750.0ml  median:330kr  10.3x  Clos de Vougeot Grand Cru Domaine Bouchard Père et
+   7753201    3406.0kr  750.0ml  median:330kr  10.3x  Corton Rognet Grand Cru Domaine Taupenot-Merme
+   9067101    3399.0kr  750.0ml  median:330kr  10.3x  Le Pavillon Ermitage M.Chapoutier
+   9297701    3399.0kr  750.0ml  median:330kr  10.3x  Les Forts de Latour
+   7973901    3350.0kr  750.0ml  median:330kr  10.2x  Camille Giroud Clos Vougeot Grand
+   9453201    3369.0kr  750.0ml  median:330kr  10.2x  Chapelle-Chambertin Grand Cru Domaine Louis Jadot
+   5039610    3349.0kr  5000.0ml  median:330kr  10.1x  Arzuaga Crianza
+   9016501    3349.0kr  750.0ml  median:330kr  10.1x  Barolo Falletto Vigna le Rocche
+   9207101    3349.0kr  750.0ml  median:330kr  10.1x  Insignia Joseph Phelps
+   7031701    3289.0kr  750.0ml  median:330kr  10.0x  Bodegas Valduero Una Cepa Premium
+   7832001    3299.0kr  750.0ml  median:330kr  10.0x  Bouchard Père et Fils Clos Vougeot Grand Cru
+   7899101    3299.0kr  750.0ml  median:330kr  10.0x  Château La Mission Haut-Brion
+   9427101    3299.0kr  750.0ml  median:330kr  10.0x  Giuseppe Quintarelli Amarone della Valpolicella Cl
+   9438802    2499.0kr  375.0ml  median:250kr  10.0x  Château d'Yquem
+   9299301    2499.0kr  750.0ml  median:250kr  10.0x  Puligny-Montrachet Premier Cru La Truffière Domain
+   7858601    2499.0kr  750.0ml  median:250kr  10.0x  Puligny-Montrachet Premier Cru Les Combettes Domai
+   7945601    2499.0kr  750.0ml  median:250kr  10.0x  Schloss Johannisberg Goldlack Riesling Trocken
+   7351008    4579.0kr  3000.0ml  median:460kr  10.0x  Veuve Clicquot Yellow Label
+   9478601    3265.0kr  750.0ml  median:330kr  9.9x  Dominio de Es Carravilla
+   7531308    3250.0kr  3000.0ml  median:330kr  9.8x  Château Tour Baladoz
+   7057701    3250.0kr  750.0ml  median:330kr  9.8x  Vosne-Romanée Premier Cru Malconsorts
+   7859106    4499.0kr  1500.0ml  median:460kr  9.8x  Bollinger La Grande Année
+   7607810    4503.0kr  6000.0ml  median:460kr  9.8x  R. Dumont Cuvée Tradition Brut
+   9392901    3199.0kr  750.0ml  median:330kr  9.7x  Barolo Novantesimo Riserva Paolo Scavino
+   7622701    3199.0kr  750.0ml  median:330kr  9.7x  Bonnes-Mares Grand Cru Domaine de la Vougeraie
+   9127801    3199.0kr  750.0ml  median:330kr  9.7x  Château Ducru-Beaucaillou
+   7383001    3206.0kr  750.0ml  median:330kr  9.7x  Dominus Estate
+   7646901    3206.0kr  750.0ml  median:330kr  9.7x  Dominus Estate
+   7955901    3199.0kr  750.0ml  median:330kr  9.7x  Edouard Delaunay Charmes-Chambertin Grand Cru Pino
+   7196401    2389.0kr  750.0ml  median:250kr  9.6x  Lucien Le Moine Puligny-Montrachet Premier Cru Les
+   8751808    4399.0kr  3000.0ml  median:460kr  9.6x  Moët & Chandon
+   9221901    3149.0kr  750.0ml  median:330kr  9.5x  Chapoutier Le  Pavillon Rouge
+   9532601    3149.0kr  750.0ml  median:330kr  9.5x  Sassicaia Tenuta San Guido
+   9231101    2369.0kr  750.0ml  median:250kr  9.5x  Meursault 1er Cru Charmes Lucien le Moine
+   5606201    3108.0kr  750.0ml  median:330kr  9.4x  Château Pichon Baron
+   7804201    3099.0kr  750.0ml  median:330kr  9.4x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   9549706    3099.0kr  1500.0ml  median:330kr  9.4x  Il Caberlot Podere Il Carnasciale - Il Carnasciale
+   9314001    2359.0kr  750.0ml  median:250kr  9.4x  Corton Blanc Grand Cru Lucien Le Moine
+   9539301    3290.0kr  750.0ml  median:349kr  9.4x  Fleur de Miraval Rosé Fleur de Miraval
+   9231601    2299.0kr  750.0ml  median:250kr  9.2x  Chapoutier De l´Orée Ermitage Blanc
+   7035201    2294.0kr  750.0ml  median:250kr  9.2x  Domaine Jean-Noël Gagnard Chassagne-Montrachet Les
+   9217501    2299.0kr  750.0ml  median:250kr  9.2x  Gaja Gaia & Rey
+   9413301    4249.0kr  750.0ml  median:460kr  9.2x  Krug
+   9129701    3005.0kr  750.0ml  median:330kr  9.1x  Argentiera Ventaglio Toscana
+   9459101    2999.0kr  750.0ml  median:330kr  9.1x  Chambolle-Musigny Domaine Comte Georges de Vogüé
+   7849201    2999.0kr  750.0ml  median:330kr  9.1x  Chambolle-Musigny Domaine Comte George de Vogüé
+   7854401    3006.0kr  750.0ml  median:330kr  9.1x  Château Hosanna Pomerol
+   7803901    3006.0kr  750.0ml  median:330kr  9.1x  Château Hosanna Etab.Jean-Pierre Mouiex
+   5104901    3000.0kr  750.0ml  median:330kr  9.1x  Château La Fleur-Pétrus
+   7991301    2999.0kr  750.0ml  median:330kr  9.1x  Château Lynch-Bages
+   7739401    2999.0kr  750.0ml  median:330kr  9.1x  Corton Et Rognet Grand Cru Domaine Taupenot Merme
+   9233101    2995.0kr  750.0ml  median:330kr  9.1x  Dominio del Aguila Canta de Perdiz
+   5269801    3000.0kr  750.0ml  median:330kr  9.1x  Dominus Estate
+   5269901    3000.0kr  750.0ml  median:330kr  9.1x  Dominus Estate
+   7316001    3006.0kr  750.0ml  median:330kr  9.1x  Dominus Estate
+   9350906    2999.0kr  1500.0ml  median:330kr  9.1x  Il Caberlot Podere Il Carnasciale
+   9547901    2995.0kr  750.0ml  median:330kr  9.1x  Las Beatas Telmo Rodriguez
+   9480901    2999.0kr  750.0ml  median:330kr  9.1x  Latricières-Chambertin Grand Cru Rossignol-Trapet
+   5288301    2999.0kr  750.0ml  median:330kr  9.1x  Les Forts de Latour Château Latour
+   7689301    2995.0kr  750.0ml  median:330kr  9.1x  Perez Pascuas Gran Seleccion Gran Reserva
+   9419801    2999.0kr  750.0ml  median:330kr  9.1x  Quiñon de Valmira
+   9223901    2269.0kr  750.0ml  median:250kr  9.1x  Chapoutier Le Méal Blanc Ermitage
+   9343401    2985.0kr  750.0ml  median:330kr  9.0x  Chambolle-Musigny Orveaux des Bussières Domaine Pe
+   7733601    2975.0kr  750.0ml  median:330kr  9.0x  Château Duhart-Milon
+   7014801    2975.0kr  750.0ml  median:330kr  9.0x  Echézeaux Grand Cru
+   9331701    2959.0kr  750.0ml  median:330kr  9.0x  Heitz Cellar Martha’s Vineyard Cabernet Sauvignon
+   9329501    2949.0kr  750.0ml  median:330kr  8.9x  Mazis-Chambertin Grand Cru Marchand-Tawse
+   9535101    2899.0kr  750.0ml  median:330kr  8.8x  Barbaresco Rabajà Riserva Vietti
+   9327901    2899.0kr  750.0ml  median:330kr  8.8x  Barolo Riserva Paolo Scavino
+   9042601    2899.0kr  750.0ml  median:330kr  8.8x  Barolo Vignarionda Riserva
+   7070701    2889.0kr  750.0ml  median:330kr  8.8x  Chateau Pichon Baron
+   9393901    2897.0kr  750.0ml  median:330kr  8.8x  Continuum
+   7531601    1225.0kr  750.0ml  median:139kr  8.8x  Heitz Cabernet Sauvignon
+   7912901    2899.0kr  750.0ml  median:330kr  8.8x  Son Negre
+    208610    2899.0kr  6000.0ml  median:330kr  8.8x  The Chocolate Block
+   7074501    2899.0kr  750.0ml  median:330kr  8.8x  Clos de Vougeot Grand Cru Domaine Faiveley
+   9056101    2197.0kr  750.0ml  median:250kr  8.8x  Gaja Gaia & Rey
+   9558701    2865.0kr  750.0ml  median:330kr  8.7x  Magma Rosso Frank Cornelissen
+   9462601    3999.0kr  750.0ml  median:460kr  8.7x  Bollinger R.D
+   7671001    2849.0kr  750.0ml  median:330kr  8.6x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   9005101    2496.0kr  375.0ml  median:289kr  8.6x  Erdener Treppchen Riesling Trockenbeerenauslese
+   9284002    2495.0kr  375.0ml  median:289kr  8.6x  Erdener Treppchen Riesling Trockenbeerenauslese LG
+   9336301    2149.0kr  750.0ml  median:250kr  8.6x  Hermitage Blanc Domaine Jean-Louis Chave
+   9275401    2149.0kr  750.0ml  median:250kr  8.6x  Hermitage Blanc Domaine Jean-Louis Chave
+   7654601    2499.0kr  750.0ml  median:289kr  8.6x  Moulin Touchais
+   9034501    2150.0kr  750.0ml  median:250kr  8.6x  Puligny-Montrachet Premier Cru Les Pucelles Henri 
+   9367306    2139.0kr  1500.0ml  median:250kr  8.6x  Von Winning MarMar Riesling
+   5848501    2995.0kr  750.0ml  median:349kr  8.6x  Taittinger Comtes Rosé
+   9000701    2995.0kr  750.0ml  median:349kr  8.6x  Taittinger Comtes de Champagne Rosé
+   9434506    2789.0kr  1500.0ml  median:330kr  8.5x  Aalto PS
+   9207201    2799.0kr  750.0ml  median:330kr  8.5x  Barolo Falletto di Bruno Giacosa
+   7444001    2799.0kr  750.0ml  median:330kr  8.5x  Castillo Ygay Marqués de Murrieta
+   9486601    2799.0kr  750.0ml  median:330kr  8.5x  Chambolle-Musigny Domaine Comte Georges de Vogüé
+   7449410    2804.0kr  5000.0ml  median:330kr  8.5x  Château Tayet
+   9337901    2797.0kr  750.0ml  median:330kr  8.5x  Dominio del Aguila Canta de Perdiz
+   7363006    2799.0kr  1500.0ml  median:330kr  8.5x  Nuits-St-Georges Premier Cru Clos de Thorey Domain
+   9200501    2779.0kr  750.0ml  median:330kr  8.4x  Barolo La Serra
+   9404601    2779.0kr  750.0ml  median:330kr  8.4x  Barolo Cerequio
+   9462201    2779.0kr  750.0ml  median:330kr  8.4x  Barolo Rocche dell´Annunziata
+   9462401    2779.0kr  750.0ml  median:330kr  8.4x  Barolo Fossati
+   9010801    2089.0kr  750.0ml  median:250kr  8.4x  Chablis Grand Cru Preuses 36 Mois Lucien le Moine
+   9213201    2749.0kr  750.0ml  median:330kr  8.3x  Barolo Monprivato Giuseppe Mascarello
+   9256401    2749.0kr  750.0ml  median:330kr  8.3x  Barolo Monprivato Giuseppe Mascarello
+   9347402    2395.0kr  375.0ml  median:289kr  8.3x  Erdener Treppchen Riesling Trockenbeerenauslese GK
+   9058601    2079.0kr  750.0ml  median:250kr  8.3x  Puligny Montrachet 1er Cru Les Pucelles Henri Boil
+   9043901    2079.0kr  750.0ml  median:250kr  8.3x  Puligny-Montrachet 1er Cru Les Perrières Henri Boi
+   9342302    2395.0kr  375.0ml  median:289kr  8.3x  Ürziger Würzgarten Riesling Trockenbeerenauslese L
+   7737908    3799.0kr  3000.0ml  median:460kr  8.3x  Gosset Grand Reserve Brut
+   7731806    3799.0kr  1500.0ml  median:460kr  8.3x  Palmer & Co Grand Terroirs
+   9268301    2459.0kr  750.0ml  median:300kr  8.2x  Barbaresco Gaja
+   9005801    2699.0kr  750.0ml  median:330kr  8.2x  Barolo Vignarionda Riserva
+   9379501    2699.0kr  750.0ml  median:330kr  8.2x  Chambolle-Musigny Premier Cru Les Hauts-Doix Domai
+   7249301    2699.0kr  750.0ml  median:330kr  8.2x  Château Montrose
+   7042301    2699.0kr  750.0ml  median:330kr  8.2x  Château Pichon Longueville Comtesse de Lalande
+   9242601    2699.0kr  750.0ml  median:330kr  8.2x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   7293801    2709.0kr  750.0ml  median:330kr  8.2x  Domaine Drouhin-Laroze Chambertin-Clos de Beze Gra
+   7120001    2699.0kr  750.0ml  median:330kr  8.2x  Domaine Drouhin-Laroze Clos de Vougeot Grand Cru
+   7748006    3749.0kr  1500.0ml  median:460kr  8.2x  Perrier-Jouët Belle Epoque
+   9278301    2669.0kr  750.0ml  median:330kr  8.1x  Château Léoville Las Cases
+   5169506    1482.0kr  1500.0ml  median:182kr  8.1x  Château Cibon Cru Classé Cuvée Marius
+   9181001    2649.0kr  750.0ml  median:330kr  8.0x  Le Méal Rouge Ermitage M.Chapoutier
+   9452801    2649.0kr  750.0ml  median:330kr  8.0x  Chapoutier Le Pavillon
+   9353601    2649.0kr  750.0ml  median:330kr  8.0x  Clos Vougeot Le Grand Maupertui Domaine Anne Gros
+   9214501    1999.0kr  750.0ml  median:250kr  8.0x  Albert Bichot Meursault Premier Cru Les Charmes - 
+   7431301    1999.0kr  750.0ml  median:250kr  8.0x  Arioso Châteauneuf-du-Pape Blanc Rotem & Mounir Sa
+   7738701    1999.0kr  750.0ml  median:250kr  8.0x  Arioso Châteauneuf-du-Pape Blanc Rotem & Mounir Sa
+   9528101    1989.0kr  750.0ml  median:250kr  8.0x  Chassagne-Montrachet Premier Cru Clos Saint-Marc O
+   7205001    1995.0kr  750.0ml  median:250kr  8.0x  Corton Grand Cru Blanc Domaine Parent
+   7764001    2003.0kr  750.0ml  median:250kr  8.0x  Meursault Perrières Premier Cru
+   9445701    1998.0kr  750.0ml  median:250kr  8.0x  Meursault Premier Cru les Charmes Domaine du Pavil
+   7895301    1999.0kr  750.0ml  median:250kr  8.0x  Puligny-Montrachet Premier Cru Champ-Canet Domaine
+   7912801    1999.0kr  750.0ml  median:250kr  8.0x  Puligny-Montrachet Premier Cru Les Perrières Etien
+   9531901    1999.0kr  750.0ml  median:250kr  8.0x  Scharzhofberger Kabinett Egon Müller
+   9383401    1995.0kr  750.0ml  median:250kr  8.0x  Viña Tondonia Gran Reserva Blanco
+   9345601    2599.0kr  750.0ml  median:330kr  7.9x  Barolo Monprivato G. Mascarello
+   7539301    2599.0kr  750.0ml  median:330kr  7.9x  De Buris Amarone Riserva
+   7433106    2599.0kr  1500.0ml  median:330kr  7.9x  Gevrey-Chambertin OSTREA Domaine Trapet
+   9260306    2599.0kr  1500.0ml  median:330kr  7.9x  Poggio al Vento Col d'Orcia
+   9545701    2595.0kr  750.0ml  median:330kr  7.9x  Ridge Monte Bello
+   9425001    2595.0kr  750.0ml  median:330kr  7.9x  Vosne-Romanée Premier Cru Les Beaux Monts
+   9424401    1979.0kr  750.0ml  median:250kr  7.9x  Chassagne-Montrachet 1er Cru Abbaye de Morgeot Oli
+   7301109    1968.0kr  4500.0ml  median:250kr  7.9x  Fem Hektar Blandlåda vita viner Priorat
+   9401701    2559.0kr  750.0ml  median:330kr  7.8x  Conterno Nebbiolo d'Alba Vigna Arione
+   9469201    2559.0kr  750.0ml  median:330kr  7.8x  Nebbiolo d'Alba Vigna Arione Conterno
+   9411601    2549.0kr  750.0ml  median:330kr  7.7x  Barbaresco Rabajà Falletto
+   9531401    2549.0kr  750.0ml  median:330kr  7.7x  Barolo Riserva Rüncot Elio Grasso
+   9215101    2295.0kr  750.0ml  median:300kr  7.7x  Gaja Barbaresco
+   9555301    2549.0kr  750.0ml  median:330kr  7.7x  Gevrey-Chambertin Premier Cru Clos Saint-Jacques D
+   9566001    2549.0kr  750.0ml  median:330kr  7.7x  Heitz Cellar Linda Falls Vineyard, Cabernet Sauvig
+   9412901    2529.0kr  750.0ml  median:330kr  7.7x  Vosne-Romanée 1er Cru Les Suchots Lucien le Moine
+   9360801    2499.0kr  750.0ml  median:330kr  7.6x  Barolo Vigna Rionda Ester Canale Giovanni Rosso
+   7858101    2499.0kr  750.0ml  median:330kr  7.6x  Chapelle d'Ausone Château Ausone
+   7805601    2499.0kr  750.0ml  median:330kr  7.6x  Charmes-Chambertin les Mazoyères Grand Cru Domaine
+   7133301    2499.0kr  750.0ml  median:330kr  7.6x  Chateau Montelena Montelena Estate Cabernet Sauvig
+   7870801    2500.0kr  750.0ml  median:330kr  7.6x  Château Bélair-Monange Jean-Pierre Mouiex
+   7921801    2500.0kr  750.0ml  median:330kr  7.6x  Château Bélair-Monange Jean-Pierre Mouiex
+   7483901    2500.0kr  750.0ml  median:330kr  7.6x  Château Bélair-Monange Jean-Pierre Mouiex
+   7581701    2500.0kr  750.0ml  median:330kr  7.6x  Château Latour à Pomerol
+   7612801    2500.0kr  750.0ml  median:330kr  7.6x  Château Latour à Pomerol
+   9477201    2495.0kr  750.0ml  median:330kr  7.6x  Clos Erasmus Clos de Terrasses
+   9405901    2502.0kr  750.0ml  median:330kr  7.6x  Dominio del Aguila Canta de Perdiz
+   7773801    2505.0kr  750.0ml  median:330kr  7.6x  Etab.Jean-Pierre Mouiex Etab.Jean-Pierre Mouiex
+   9348501    2496.0kr  750.0ml  median:330kr  7.6x  Gevrey-Chambertin Justice des Seuvrées Domaine Per
+   9446401    2495.0kr  750.0ml  median:330kr  7.6x  Gevrey-Chambertin Premier Cru Clos Saint Jacques D
+   7746001    2504.0kr  750.0ml  median:330kr  7.6x  Giuseppe Mascarello Barolo Monprivato
+   9044601    2499.0kr  750.0ml  median:330kr  7.6x  Guix Vermell
+   7033708    2499.0kr  3000.0ml  median:330kr  7.6x  Masi Costasera Amarone Classico
+   7882001    2499.0kr  750.0ml  median:330kr  7.6x  Nuits-Saint-Georges Premier Cru Les St-Georges Dom
+   7091209    2496.0kr  4500.0ml  median:330kr  7.6x  Trälåda Château Montus Rouge Rött vin
+   9495901    1899.0kr  750.0ml  median:250kr  7.6x  Cantina Terlan Primo Terlaner I Grande Cuvée
+   7860801    1899.0kr  750.0ml  median:250kr  7.6x  Meursault Premier Cru Perrières Bouchard Père et F
+   7222601    1899.0kr  750.0ml  median:250kr  7.6x  Meursault-Blagny Premier Cru La Genelotte Monopole
+   7244101    1899.0kr  750.0ml  median:250kr  7.6x  Puligny-Montrachet Premier Cru Hameau de Blagny
+   7952401    1899.0kr  750.0ml  median:250kr  7.6x  Puligny-Montrachet Premier Cru Hameau de Blagny Et
+   9285501    1899.0kr  750.0ml  median:250kr  7.6x  Puligny-Montrachet Premier Cru Les Referts Domaine
+   7382801    3489.0kr  750.0ml  median:460kr  7.6x  Pascal Agrapart Expérience 19 Brut Nature Blanc de
+   9021501    2480.0kr  750.0ml  median:330kr  7.5x  Barolo Bartolo Mascarello
+   7471401    2489.0kr  750.0ml  median:330kr  7.5x  Chandon de Briailles Corton-Bressandes Grand Cru
+   9479301    2459.0kr  750.0ml  median:330kr  7.5x  Gaja Barbaresco
+   9224901    2479.0kr  750.0ml  median:330kr  7.5x  Philip Togni Estate Cabernet Sauvignon
+   9236801    2490.0kr  750.0ml  median:330kr  7.5x  Quintessa
+   9388001    1879.0kr  750.0ml  median:250kr  7.5x  Chassagne-Montrachet Premier Cru Abbaye de Morgeot
+   7884809    3456.0kr  4500.0ml  median:460kr  7.5x  ChampagneHuset Christmas Collection BdB
+   7804101    2450.0kr  750.0ml  median:330kr  7.4x  Bonnes Mares Grand Cru Domaine Drouhin-Laroze
+   7373401    2437.0kr  750.0ml  median:330kr  7.4x  Messorio
+   7571802    2442.0kr  750.0ml  median:330kr  7.4x  My Way Bovin Winery
+   9211601    2209.0kr  750.0ml  median:300kr  7.4x  Ornellaia
+   9540401    2449.0kr  750.0ml  median:330kr  7.4x  Poggio Di Sotto Brunello di Montalcino
+   9401006    1849.0kr  1500.0ml  median:250kr  7.4x  Wittmann Morstein Riesling Grosses Gewächs
+   9057801    2599.0kr  750.0ml  median:349kr  7.4x  Bollinger La Grand Année Rosé
+   9123101    2399.0kr  750.0ml  median:330kr  7.3x  Barbaresco Asili Falletto di Bruno Giacosa
+   9023401    2399.0kr  750.0ml  median:330kr  7.3x  Barolo Riserva Rocche dell'Annunziata Paolo Scavin
+   9363506    2399.0kr  1500.0ml  median:330kr  7.3x  Flaccianello della Pieve Fontodi
+   7985001    2399.0kr  750.0ml  median:330kr  7.3x  Jean-Claude Boisset Chambolle-Musigny Premier Cru 
+   8308306    2399.0kr  1500.0ml  median:330kr  7.3x  Pauillac de Latour Château Latour
+   9052206    2399.0kr  1500.0ml  median:330kr  7.3x  Sadie Family Wines Columella
+   9442401    2395.0kr  750.0ml  median:330kr  7.3x  San Polo Vignavecchia
+   9426601    2369.0kr  750.0ml  median:330kr  7.2x  Clos Vougeot Grand Cru Domaine Louis Jadot
+   9509701     999.0kr  750.0ml  median:139kr  7.2x  Saffredi Fattoria Le Pupille
+   7760301    1803.0kr  750.0ml  median:250kr  7.2x  Boyer-Martenot Meursault Charmes 1er Cru
+   9498201    1799.0kr  750.0ml  median:250kr  7.2x  Cantina Terlan Rarity
+   9357506    1789.0kr  1500.0ml  median:250kr  7.2x  Chablis Grand Cru Bougros J M Brocard
+   7671701    1799.0kr  750.0ml  median:250kr  7.2x  Vougeot Premier Cru Le Clos Blanc de Vougeot Domai
+   9487001    1799.0kr  750.0ml  median:250kr  7.2x  Vougeot Premier Cru Le Clos Blanc de Vougeot Monop
+   9281501    2349.0kr  750.0ml  median:330kr  7.1x  Corton Clos du Roi Grand Cru Olivier Leflaive
+   7088601    2351.0kr  750.0ml  median:330kr  7.1x  Merryvale Profile
+   9209801    2349.0kr  750.0ml  median:330kr  7.1x  Tua Rita Per Sempre
+   7309608    1289.0kr  3000.0ml  median:182kr  7.1x  Chateau D'Esclans Whispering Angel
+   7009108    1299.0kr  3000.0ml  median:182kr  7.1x  Cuvée Madame
+   7810901    1650.0kr  750.0ml  median:234kr  7.1x  Giulio Ferrari Riserva del Fondatore
+   9334706    2299.0kr  1500.0ml  median:330kr  7.0x  Barolo Ravera Paolo Scavino
+   5257101    2299.0kr  750.0ml  median:330kr  7.0x  Clos de Vougeot Grand Cru
+   9247301    2295.0kr  750.0ml  median:330kr  7.0x  Dominio del Aguila Penas Aladas
+   7256509    2310.0kr  4500.0ml  median:330kr  7.0x  Elio Sandri Blandlåda 2025
+   7337601    2299.0kr  750.0ml  median:330kr  7.0x  Jonata La Sangre de Jonata Syrah
+   7645301    2299.0kr  750.0ml  median:330kr  7.0x  Opus One Overture
+   9250601    2299.0kr  750.0ml  median:330kr  7.0x  Brunello di Montalcino Biondi-Santi
+   7198801    1750.0kr  750.0ml  median:250kr  7.0x  Chablis Grand Cru Moutonne Albert Bichot
+   7259001    1759.0kr  750.0ml  median:250kr  7.0x  Domaine Chandon de Briailles Corton Grand Cru
+   8753108    3200.0kr  3000.0ml  median:460kr  7.0x  Deutz Brut Classic
+   9248101    3239.0kr  750.0ml  median:460kr  7.0x  Philipponnat Clos des Goisses
+   8153008    3199.0kr  3000.0ml  median:460kr  7.0x  Piper-Heidsieck Brut
+   9472401    2289.0kr  750.0ml  median:330kr  6.9x  Chambolle Musigny Premier Cru Les Charmes Bruno Cl
+   5551701    2266.0kr  750.0ml  median:330kr  6.9x  Favia La Magdalena Napa Valley
+   5552001    2266.0kr  750.0ml  median:330kr  6.9x  Favia Coombsville Cabernet Sauvignon Napa Valley
+   7692102    2000.0kr  375.0ml  median:289kr  6.9x  Château Doisy-Daëne L 'Extravagant
+   7656906    1719.0kr  1500.0ml  median:250kr  6.9x  Trimbach Riesling Grand Cru Geisberg
+   7973609    3186.0kr  4500.0ml  median:460kr  6.9x  ChampagneHuset Collection Grandes Nouveautés
+   7897501    3169.0kr  750.0ml  median:460kr  6.9x  Egly-Ouriet Blanc de Noirs Grand Cru Les Crayères
+   9577301    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Brunate Vietti
+   9579801    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Cerequio Vietti
+   9577501    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Lazzarito Vietti
+   9460801    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Monvigliero Vietti
+   9577201    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Ravera Vietti
+   9577101    2259.0kr  750.0ml  median:330kr  6.8x  Barolo Rocche di Castiglione Vietti
+   5193801    2229.0kr  750.0ml  median:330kr  6.8x  Domaine Roblot Marchand Echezeaux
+   7484401    2239.0kr  750.0ml  median:330kr  6.8x  Bruno Rocca Barbaresco Riserva Currà
+   7187301    1699.0kr  750.0ml  median:250kr  6.8x  Meursault Premier Cru Perrières Domaine Bouchard P
+   7039601    1699.0kr  750.0ml  median:250kr  6.8x  Meursault Premier Cru Perrières Domaine Bouchard P
+   7982701    1695.0kr  750.0ml  median:250kr  6.8x  Puligny-Montrachet 1er Cru Les Referts Camille Gir
+   9129801    1699.0kr  750.0ml  median:250kr  6.8x  Vougeot Premier Cru Le Clos Blanc de Vougeot Monop
+   5789706    1579.0kr  1500.0ml  median:234kr  6.8x  Lamborghini Extra Dry Prosecco Gold Magnum Tenuta 
+   7546809    3138.0kr  4500.0ml  median:460kr  6.8x  Schelin & Mousserande.se Club Trésors Champagnekol
+   9587706    2195.0kr  1500.0ml  median:330kr  6.7x  Alion
+   9519401    2199.0kr  750.0ml  median:330kr  6.7x  Brunello di Montalcino Biondi-Santi
+   9452301    2199.0kr  750.0ml  median:330kr  6.7x  Chapoutier Le Méal Ermitage
+   7554701    2206.0kr  750.0ml  median:330kr  6.7x  Charmes Chambertin Grand Cru
+   7327001    2199.0kr  750.0ml  median:330kr  6.7x  Clos de Vougeot Grand Cru Domaine de la Vougeraie
+   7495601    2199.0kr  750.0ml  median:330kr  6.7x  Gevrey-Chambertin 1er Cru en Ergot Domaine Trapet
+   9206701    2199.0kr  750.0ml  median:330kr  6.7x  Gevrey-Chambertin Premier Cru Clos Prieur Domaine 
+   7333001    2199.0kr  750.0ml  median:330kr  6.7x  Gevrey-Chambertin Premier Cru Clos Prieur Domaine 
+   7521701    2199.0kr  750.0ml  median:330kr  6.7x  Gevrey-Chambertin Premier Cru en Ergot Domaine Tra
+   1303401    2207.0kr  750.0ml  median:330kr  6.7x  Inglenook Rubicon
+   7681801    2199.0kr  750.0ml  median:330kr  6.7x  Nuits-Saint-Georges Premier Cru Les Vaucrains Doma
+   9273702    2195.0kr  375.0ml  median:330kr  6.7x  Opus One
+   9406301    2179.0kr  750.0ml  median:330kr  6.6x  Vosne Romanée Premier Cru Les Suchots Domaine de l
+   7008301    1899.0kr  750.0ml  median:289kr  6.6x  Moulin Touchais
+   7015901    1199.0kr  750.0ml  median:182kr  6.6x  Chateau D'Esclans Garrus
+   5445401    1199.0kr  750.0ml  median:182kr  6.6x  Domaine Rabiega R Rosé
+   9555001    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Rocche di Castiglione
+   9410401    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Brunate Vietti
+   9452501    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Cerequio Vietti
+   9554901    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Lazzarito Vietti
+   9505201    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Monvigliero Vietti
+   9407001    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Ravera Vietti
+   9439901    2149.0kr  750.0ml  median:330kr  6.5x  Barolo Vignarionda Poderi e Cantine Oddero
+   9459501    2139.0kr  750.0ml  median:330kr  6.5x  Barolo Vignarionda Riserva Poderi e Cantine Oddero
+   7839509    2153.0kr  5000.0ml  median:330kr  6.5x  Vivanco Reserva
+   7793101    3009.0kr  750.0ml  median:460kr  6.5x  Armand de Brignac Brut Gold
+   7376309    2994.0kr  4500.0ml  median:460kr  6.5x  Blandlåda Olivier Herbert Champagne
+   7799008    3006.0kr  3000.0ml  median:460kr  6.5x  Michel Turgy Réserve Sélection Blanc de Blancs Gra
+   7096901    2099.0kr  750.0ml  median:330kr  6.4x  Beaune-Grèves Vigne de l’Enfant Jésus Premier Cru 
+   7709401    2099.0kr  750.0ml  median:330kr  6.4x  Black Stallion Bucephalus
+   7963101    2099.0kr  750.0ml  median:330kr  6.4x  Black Stallion Transcendent Cabernet Sauvignon
+   7292401    2100.0kr  750.0ml  median:330kr  6.4x  Château Latour à Pomerol
+   9437701    2101.0kr  750.0ml  median:330kr  6.4x  Cirsion Bodegas Roda
+   7455401    2100.0kr  750.0ml  median:330kr  6.4x  Gevrey-Chambertin Esprit Leflaive
+   7428801    2099.0kr  750.0ml  median:330kr  6.4x  Gevrey-Chambertin Premier Cru Bel Air Domaine Taup
+   9566101    2119.0kr  750.0ml  median:330kr  6.4x  Heitz Cellar Trailside Vineyard, Cabernet Sauvigno
+   9478001    2099.0kr  750.0ml  median:330kr  6.4x  Per Sempre Tua Rita
+   7140601    2100.0kr  750.0ml  median:330kr  6.4x  Pommard 1er Cru Arvelets Esprit Leflaive
+   5396301    2099.0kr  750.0ml  median:330kr  6.4x  Quinta do Crasto Vinha Maria Teresa
+   9008101    1599.0kr  750.0ml  median:250kr  6.4x  Château Smith Haut Lafitte
+   9233301    1599.0kr  750.0ml  median:250kr  6.4x  Condrieu Coteau de Vernon Domaine Georges Vernay
+   7234901    1599.0kr  750.0ml  median:250kr  6.4x  Gérard Bertrand Villa Soleilla
+   9281701    1599.0kr  750.0ml  median:250kr  6.4x  Puligny Montrachet les Combettes 1er cru Domaine J
+   9304801    1595.0kr  750.0ml  median:250kr  6.4x  Trebbiano d'Abruzzo Valentini
+   9538101    2076.0kr  750.0ml  median:330kr  6.3x  Barolo Riserva Bricco Boschis Vigna San Giuseppe, 
+   9303701    2095.0kr  750.0ml  median:330kr  6.3x  Opus One Overture
+   7359609    2088.0kr  4500.0ml  median:330kr  6.3x  The Taste of Barolo
+   7396408    1150.0kr  3000.0ml  median:182kr  6.3x  Minuty Prestige Rosé
+   7217006    2909.0kr  1500.0ml  median:460kr  6.3x  Bollinger PN TX 20
+   7182906    2899.0kr  1500.0ml  median:460kr  6.3x  Bollinger PN AYC21 magnum
+   8751108    2899.0kr  3000.0ml  median:460kr  6.3x  Louis Roederer Collection 246
+   8735908    2900.0kr  3000.0ml  median:460kr  6.3x  Pol Roger Brut Réserve
+   7615208    2854.0kr  3000.0ml  median:460kr  6.2x  Benoit Beaufort Grand Cru Tradition Brut
+   9235501    2859.0kr  750.0ml  median:460kr  6.2x  Louis Roederer Cristal
+   5039908    2001.0kr  3000.0ml  median:330kr  6.1x  Arzuaga Crianza
+   9372701    1999.0kr  750.0ml  median:330kr  6.1x  Barbaresco Albesani Roagna
+   9492501    1999.0kr  750.0ml  median:330kr  6.1x  Barbaresco Gallina Roagna Azienda Agricola I Pagli
+   9372301    1999.0kr  750.0ml  median:330kr  6.1x  Barbaresco Gallina Roagna
+   9123901    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Falletto di Bruno Giacosa
+   9124001    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Pira Roagna Azienda Agricola I Paglieri
+   9063601    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Pira Barolo Pira
+   9037101    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Riserva Bricco Voghera Azelia
+   7279301    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Rocche dell'Annunziata Riserva Paolo Scavin
+   9069201    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Rocche di Castiglione Roagna Azienda Agrico
+   9066101    1999.0kr  750.0ml  median:330kr  6.1x  Barolo Rocche di Castiglione Roagna
+   7604101    1999.0kr  750.0ml  median:330kr  6.1x  Chateau Montelena Cabernet Sauvignon
+   5152701    2000.0kr  750.0ml  median:330kr  6.1x  Château Bélair
+   7261501    2000.0kr  750.0ml  median:330kr  6.1x  Château Bélair-Monange Grand Cru Classé
+   7886401    2000.0kr  750.0ml  median:330kr  6.1x  Château Bélair-Monange Jean-Pierre Mouiex
+   5271401    2000.0kr  750.0ml  median:330kr  6.1x  Château Hosanna
+   7029901    2000.0kr  750.0ml  median:330kr  6.1x  Château Hosanna
+   7335901    2004.0kr  750.0ml  median:330kr  6.1x  Château Hosanna Etab.Jean-Pierre Mouiex
+   5127901    2000.0kr  750.0ml  median:330kr  6.1x  Château La Fleur-Pétrus
+   7206401    2004.0kr  750.0ml  median:330kr  6.1x  Château La Fleur-Pétrus Etab.Jean-Pierre Mouiex
+   7382101    2000.0kr  750.0ml  median:330kr  6.1x  Château La Fleur-Pétrus Etab.Jean-Pierre Mouiex
+   7337801    1999.0kr  750.0ml  median:330kr  6.1x  Château Pape Clément
+   5112601    2000.0kr  750.0ml  median:330kr  6.1x  Château Trotanoy
+   7756001    2004.0kr  750.0ml  median:330kr  6.1x  Château Trotanoy
+   5257001    1999.0kr  750.0ml  median:330kr  6.1x  Corton Grand Cru Clos des Maréchaudes
+   7302601    2003.0kr  750.0ml  median:330kr  6.1x  Côte-Rôtie Lancement
+   7325801    1999.0kr  750.0ml  median:330kr  6.1x  Dalmau Marqués de Murrieta
+   7174801    2009.0kr  750.0ml  median:330kr  6.1x  Domaine Drouhin-Laroze Latricières-Chambertin Gran
+   7216601    1999.0kr  750.0ml  median:330kr  6.1x  Gevrey-Chambertin Premier Cru Capita Domaine Trape
+   7245601    1999.0kr  750.0ml  median:330kr  6.1x  Gevrey-Chambertin Premier Cru Clos Prieur Domaine 
+   5592401    2007.0kr  750.0ml  median:330kr  6.1x  Pierre Brisset Gevrey-Chambertin Premier Cru La Co
+   5592701    2007.0kr  750.0ml  median:330kr  6.1x  Pierre Brisset Brisset Vosne-Romanée Premier Cru L
+   9373101    1999.0kr  750.0ml  median:330kr  6.1x  Roagna Barbaresco Gallina
+   9294301    1999.0kr  750.0ml  median:330kr  6.1x  Vietti Barolo Cerequio
+   9295501    1999.0kr  750.0ml  median:330kr  6.1x  Vietti Barolo Ravera
+   9241301    1525.0kr  750.0ml  median:250kr  6.1x  Penfolds Yattarna
+    768809    2799.0kr  6000.0ml  median:460kr  6.1x  Louis Bouillot Crémant de Bourgogne Brut
+   9412201    2799.0kr  750.0ml  median:460kr  6.1x  Louis Roederer Cristal
+   7304101    2799.0kr  750.0ml  median:460kr  6.1x  Pascal Agrapart Vénus Brut Nature Blanc de Blancs 
+    742208    2795.0kr  3000.0ml  median:460kr  6.1x  Taittinger Brut Réserve
+   9007201    1979.0kr  750.0ml  median:330kr  6.0x  Barolo Perno Giuseppe Mascarello
+   9036301    1979.0kr  750.0ml  median:330kr  6.0x  Barolo Santo Stefano di Perno Giuseppe Mascarello
+   9483301    1995.0kr  750.0ml  median:330kr  6.0x  La Rioja Alta Gran Reserva 890
+   9207901    1995.0kr  750.0ml  median:330kr  6.0x  Pieve Santa Restituta Sugarille Brunello di Montal
+   9275601    1795.0kr  750.0ml  median:300kr  6.0x  Vega Sicilia Valbuena 5º
+   9534501    1995.0kr  750.0ml  median:330kr  6.0x  Viña Tondonia Gran Reserva Tinto
+   7717301    1499.0kr  750.0ml  median:250kr  6.0x  Château Rieussec
+   8923301    1502.0kr  750.0ml  median:250kr  6.0x  Meursault Premier Cru Genevrières Bouchard Père et
+   7583301    1499.0kr  750.0ml  median:250kr  6.0x  Meursault-Blagny Premier Cru La Pièce Sous le Bois
+   7625701    1495.0kr  750.0ml  median:250kr  6.0x  Mikulski Meursault Premier Cru Les Charmes
+   7763601    1495.0kr  750.0ml  median:250kr  6.0x  Mikulski Meursault Premier Cru Poruzots
+   9027601    1499.0kr  750.0ml  median:250kr  6.0x  Puligny-Montrachet 1er Cru Les Combettes Jaques Pr
+   9562901    1495.0kr  750.0ml  median:250kr  6.0x  Puligny-Montrachet Premier Cru Clos de la Garenne 
+   9300101    1499.0kr  750.0ml  median:250kr  6.0x  The Hilt Bentrock Chardonnay
+   9395201    1949.0kr  750.0ml  median:330kr  5.9x  Barolo Vigna Rionda Riserva Massolino
+   7665501    1953.0kr  750.0ml  median:330kr  5.9x  Château Calon-Ségur
+   9392701    1934.0kr  750.0ml  median:330kr  5.9x  Château Montrose
+   7290401    1469.0kr  750.0ml  median:250kr  5.9x  Jülg Opus-Oskar Chardonnay
+   7216501    1699.0kr  750.0ml  median:289kr  5.9x  Moulin Touchais
+   7151601    1469.0kr  750.0ml  median:250kr  5.9x  Weingut Tement Ried Zieregg IZ Reserve
+   7712201    2699.0kr  750.0ml  median:460kr  5.9x  Dumangin Vinothèque Premier Cru Brut
+   9475301    1905.0kr  750.0ml  median:330kr  5.8x  Barbaresco Gallina Roagna Azienda Agricola I Pagli
+   7586501    1899.0kr  750.0ml  median:330kr  5.8x  Beaune-Grèves Premier Cru Vigne de l’Enfant Jésus 
+   7450201    1899.0kr  750.0ml  median:330kr  5.8x  Château Haut-Bailly
+   7513401    1899.0kr  750.0ml  median:330kr  5.8x  Clarence Dillon Wines Château Quintus
+   7847906    1899.0kr  1500.0ml  median:330kr  5.8x  Côte-Rôtie Blonde du Seigneur Domaine Georges Vern
+   7737801    1899.0kr  750.0ml  median:330kr  5.8x  Eisele Vineyard Altagracia Cabernet Sauvignon
+   7197501    1899.0kr  750.0ml  median:330kr  5.8x  Gérard Bertrand Clos d Óra
+   9309901    1919.0kr  750.0ml  median:330kr  5.8x  Pommard Premier Cru Les Epentos Philippe Pacalet
+   7944801    1442.0kr  750.0ml  median:250kr  5.8x  Corton Charlemagne Grand Cru Domaine Denis Père et
+    749401    2649.0kr  750.0ml  median:460kr  5.8x  Krug Grande Cuvée Edition 174
+   7159201    1869.0kr  750.0ml  median:330kr  5.7x  Arioso Châteauneuf-du-Pape Rouge Rotem & Mounir Sa
+   7158101    1868.0kr  750.0ml  median:330kr  5.7x  Azienda Agricola Piccoli Daniela Emblema Rosso Ven
+   9544901    1895.0kr  750.0ml  median:330kr  5.7x  Barolo Bussia Colonnello Aldo Conterno
+   9580701    1895.0kr  750.0ml  median:330kr  5.7x  Barolo Colonnello Poderi Aldo Conterno
+   7087701    1895.0kr  750.0ml  median:330kr  5.7x  Domaine Parent Corton Grand Cru Les Renardes
+   9316601    1879.0kr  750.0ml  median:330kr  5.7x  Novicium Continuum Estate
+   9354001    1695.0kr  750.0ml  median:300kr  5.7x  Vega Sicilia Valbuena 5º
+   8070801    1419.0kr  750.0ml  median:250kr  5.7x  Gaja Alteni di Brassica Langhe
+    742801    2609.0kr  750.0ml  median:460kr  5.7x  Dom Pérignon Blanc
+   9256001    2599.0kr  750.0ml  median:460kr  5.7x  Philipponnat Le Leon Ay Grand Cru
+   9053601    1839.0kr  750.0ml  median:330kr  5.6x  Barolo Bussia Vigna Mondoca Riserva
+   7772101    1850.0kr  750.0ml  median:330kr  5.6x  Brunello di Montalcino Vigna del Suolo
+   7507901    1849.0kr  750.0ml  median:330kr  5.6x  Carillon d'Angelus
+   9019901    1001.0kr  750.0ml  median:179kr  5.6x  Fontanafredda Barolo La Rosa
+   7963701    1838.0kr  750.0ml  median:330kr  5.6x  Gran Arzuaga
+   7515801    1849.0kr  750.0ml  median:330kr  5.6x  Morey-Saint-Denis Premier Cru La Riotte Domaine Ta
+   7881001    1849.0kr  750.0ml  median:330kr  5.6x  Nuits-Saint-Georges 1er Cru Les Chaignots Domaine 
+   7866501    1849.0kr  750.0ml  median:330kr  5.6x  Nuits-Saint-Georges 1er cru Les Bousselots Domaine
+   9277001    1399.0kr  750.0ml  median:250kr  5.6x  Chablis Les Clos William Fèvre
+   7093501    1399.0kr  750.0ml  median:250kr  5.6x  Chassagne-Montrachet 1er Cru Morgeot Clos de la Ch
+   5317001    1399.0kr  750.0ml  median:250kr  5.6x  Louis Latour Meursault 1er cru Château de Blagny
+   9499801    1395.0kr  750.0ml  median:250kr  5.6x  Meursault Premier Cru Perrières Domaine Louis Jado
+   9372601    1799.0kr  750.0ml  median:330kr  5.5x  Altagracia Cabernet Sauvignon Eisele Vineyard
+   9287201    1799.0kr  750.0ml  median:330kr  5.5x  Barolo Lazzarito Vietti
+   9041601    1799.0kr  750.0ml  median:330kr  5.5x  Barolo Monvigliero Vietti
+   9014001    1799.0kr  750.0ml  median:330kr  5.5x  Barolo Ravera Vietti
+   9219901    1799.0kr  750.0ml  median:330kr  5.5x  Barolo Rocche di Castiglione Vietti
+   9234101    1802.0kr  750.0ml  median:330kr  5.5x  Brunello di Montalcino Riserva, Conti Costanti
+   9126601    1828.0kr  750.0ml  median:330kr  5.5x  Château Ducru Beaucaillou
+   7262202    1799.0kr  375.0ml  median:330kr  5.5x  Château Latour Les Forts de Latour
+   9362001    1800.0kr  750.0ml  median:330kr  5.5x  Château Talbot
+   7259401    1799.0kr  750.0ml  median:330kr  5.5x  Corton Clos du Roi Grand Cru Domaine de la Vougera
+   9376601    1799.0kr  750.0ml  median:330kr  5.5x  Gevrey-Chambertin Les Seuvrées Domaine Robert Grof
+   9429601    1799.0kr  750.0ml  median:330kr  5.5x  Giuseppe Quintarelli Rosso del Bepi
+   9429702    1599.0kr  375.0ml  median:289kr  5.5x  Giuseppe Quintarelli Recioto della Valpolicella Cl
+   7701501    1806.0kr  750.0ml  median:330kr  5.5x  Il Priore Rosso Veronese
+   8319201    1799.0kr  750.0ml  median:330kr  5.5x  Joseph Drouhin Chambolle-Musigny Premier Cru
+   7632901    1803.0kr  750.0ml  median:330kr  5.5x  Le Corton Grand Cru Domaine Bouchard Père Fils
+    234506     979.0kr  1500.0ml  median:179kr  5.5x  Masi Costasera Amarone Classico
+   7577101    1799.0kr  750.0ml  median:330kr  5.5x  Nuits-Saint-Georges Premier Cru Les Bousselots Dom
+   7437501    1799.0kr  750.0ml  median:330kr  5.5x  Nuits-Saint-Georges Premier Cru Les Chaignots Doma
+   7499501    1799.0kr  750.0ml  median:330kr  5.5x  Nuits-Saint-Georges Premier Cru Les Pruliers Domai
+   7373301    1801.0kr  750.0ml  median:330kr  5.5x  Scrio
+   7234508    1809.0kr  3000.0ml  median:330kr  5.5x  Tommasi Amarone della Valpolicella Classico
+   9590401    1799.0kr  750.0ml  median:330kr  5.5x  Vosne-Romanée Clos des Réas Michel Gros
+   9010201    1369.0kr  750.0ml  median:250kr  5.5x  Chablis GC Bougros Cote de Bouguerots William Fèvr
+   5748108     999.0kr  3000.0ml  median:182kr  5.5x  Born Rosé Barcelona Dubbelmagnum
+   7425306    1001.0kr  1500.0ml  median:182kr  5.5x  Cuvée des Vignettes Clos Cibonne
+    754801    2549.0kr  750.0ml  median:460kr  5.5x  Cuvée Sir Winston Churchill
+   9048601    1797.0kr  750.0ml  median:330kr  5.4x  Brunello di Montalcino Reninna Pieve Santa Restitu
+   9359801    1789.0kr  750.0ml  median:330kr  5.4x  Gaja Ca'Marcanda Camarcanda
+   9423001    1795.0kr  750.0ml  median:330kr  5.4x  Morey-Saint-Denis Premier Cru Domaine Dujac
+   9444301    1795.0kr  750.0ml  median:330kr  5.4x  Pieve Santa Restituta Rennina Brunello di Montalci
+   7323501    1349.0kr  750.0ml  median:250kr  5.4x  Meursault Bois de Blagny Domaine Comtesse de Chéri
+   7872506    1349.0kr  1500.0ml  median:250kr  5.4x  Wehlener Sonnenuhr Riesling Auslese Joh Jos Prüm
+   9252001    2499.0kr  750.0ml  median:460kr  5.4x  Charles Heidsieck Blanc des Millénaires
+   7059601    2499.0kr  750.0ml  median:460kr  5.4x  Clos Lanson
+   5238101    2499.0kr  750.0ml  median:460kr  5.4x  Gosset Celebris Blanc de Blancs
+   8213908    2499.0kr  3000.0ml  median:460kr  5.4x  Palmer & Co La Réserve Brut
+   8117301    2495.0kr  750.0ml  median:460kr  5.4x  Piper-Heidsieck Cuvée Rare
+   7430601    1749.0kr  750.0ml  median:330kr  5.3x  Arioso Châteauneuf-du-Pape Rouge Rotem & Mounir Sa
+   7643609    1746.0kr  4500.0ml  median:330kr  5.3x  IL Palagio lådan nr 1
+   5661901    1758.0kr  750.0ml  median:330kr  5.3x  MAC Shiraz
+   7189901    1758.0kr  750.0ml  median:330kr  5.3x  Marie Elizabeth Cabernet Sauvignon Bird in Hand
+   9288701    1749.0kr  750.0ml  median:330kr  5.3x  Massolino Vigna Rionda
+   9292201    1759.0kr  750.0ml  median:330kr  5.3x  Mayacamas Cabernet Sauvignon
+   9235401    1750.0kr  750.0ml  median:330kr  5.3x  Penfolds Bin 169
+   9482502    1749.0kr  375.0ml  median:330kr  5.3x  Sassicaia Tenuta San Guido
+   7406101     961.0kr  1500.0ml  median:182kr  5.3x  Château de Pibarnon
+   7142209    2436.0kr  4500.0ml  median:460kr  5.3x  ChampagneHuset Collection Le Dernier Cru Mousseran
+   7457001    1704.0kr  750.0ml  median:330kr  5.2x  Château Certan de May
+   7876901    1703.0kr  750.0ml  median:330kr  5.2x  Le Corton Grand Cru Domaine Bouchard Père Fils
+   5463501    1709.0kr  750.0ml  median:330kr  5.2x  Robert Mondavi Winery The Reserve Cabernet Sauvign
+   7945909    1702.0kr  5000.0ml  median:330kr  5.2x  Vivanco Crianza
+   7002701    1499.0kr  750.0ml  median:289kr  5.2x  Stegreben de Rorschwihr Gewurtztraminer Cuvée Anne
+   5229506    2399.0kr  1500.0ml  median:460kr  5.2x  Guy Michel Paris Folies Magnum Brut
+   9124601    1699.0kr  750.0ml  median:330kr  5.1x  Barbaresco Falletto di Bruno Giacosa
+   7800008    1699.0kr  3000.0ml  median:330kr  5.1x  Château Tayet
+   9066301    1699.0kr  750.0ml  median:330kr  5.1x  Fay Cabernet Sauvignon
+   9460301    1699.0kr  750.0ml  median:330kr  5.1x  Gallica Cabernet Sauvignon Oakville Ranch Vineyard
+   7468501    1699.0kr  750.0ml  median:330kr  5.1x  La Spinetta Vürzù Barolo Campe'
+   7247801    1699.0kr  750.0ml  median:330kr  5.1x  Nuits St Georges Esprit Leflaive
+   7052110    1699.0kr  6000.0ml  median:330kr  5.1x  The Butcher Pinot Noir
+   9444501    1699.0kr  750.0ml  median:330kr  5.1x  Volnay Santenots du Milieu Domaine des Comtes Lafo
+   7464309    1698.0kr  4500.0ml  median:330kr  5.1x  Xavier Vignon Trälåda #6 Arcane
+   9484401    1201.0kr  750.0ml  median:234kr  5.1x  Mas del Serral Pepe Raventós
+   7246609    1182.0kr  4500.0ml  median:234kr  5.1x  Monmousseau Mousserande viner
+   9580301    1199.0kr  750.0ml  median:234kr  5.1x  Nyetimber Tillington Single Vineyard
+   9305201    2339.0kr  750.0ml  median:460kr  5.1x  Veuve Clicquot La Grande Dame
+   7252406     699.0kr  1500.0ml  median:139kr  5.0x  Black Stallion Napa Valley Cabernet Sauvignon
+   9063401     699.0kr  750.0ml  median:139kr  5.0x  Matthiasson Napa Valley Cabernet Sauvignon
+   9598401     799.0kr  750.0ml  median:159kr  5.0x  Weingut Dönnhoff Hermannshöhle Riesling Trocken Gr
+    740506    1749.0kr  1500.0ml  median:349kr  5.0x  Gosset Grand Rosé Brut

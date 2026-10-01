@@ -1,39 +1,49 @@
 {
   "date": "2026-10-01",
   "vs": "2026-09-30",
-  "arrivals": 12,
-  "delistings": 14,
+  "arrivals": 21,
+  "delistings": 15,
   "price_changes": 0,
   "assortment_moves": 0,
-  "stock_changes": 89,
+  "stock_changes": 108,
   "article_reuses": 1,
   "detail": {
     "arrivals": [
+      "5154001",
+      "5862001",
       "630701",
       "7152801",
       "7284501",
       "7879401",
       "8764201",
+      "9013101",
+      "9044301",
       "9113601",
       "9214301",
       "9234101",
+      "9253701",
+      "9262801",
       "9291701",
       "9311106",
       "9320201",
-      "9405701"
+      "9333401",
+      "9336001",
+      "9405701",
+      "9537801"
     ],
     "delistings": [
       "5173301",
       "5466801",
+      "7023301",
       "7171501",
       "7385209",
       "7475106",
       "7645901",
       "7751101",
-      "9054206",
-      "9131301",
-      "9215101",
+      "7918101",
+      "9257201",
       "9300301",
+      "9335901",
       "9369101",
       "9484001",
       "9591901"
@@ -43,24 +53,34 @@
     "assortment_moves": [],
     "stock_changes": [
       {
-        "nr": "7706001",
-        "was_oos": true,
-        "now_oos": false
-      },
-      {
-        "nr": "8353101",
-        "was_oos": true,
-        "now_oos": false
-      },
-      {
-        "nr": "7973101",
+        "nr": "7724901",
         "was_oos": false,
         "now_oos": true
       },
       {
-        "nr": "5671501",
+        "nr": "7247401",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "220801",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7922701",
         "was_oos": true,
         "now_oos": false
+      },
+      {
+        "nr": "5607601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7267201",
+        "was_oos": false,
+        "now_oos": true
       },
       {
         "nr": "7905301",
@@ -68,57 +88,17 @@
         "now_oos": true
       },
       {
-        "nr": "5943801",
-        "was_oos": false,
-        "now_oos": true
-      },
-      {
-        "nr": "5490201",
+        "nr": "5053601",
         "was_oos": true,
         "now_oos": false
       },
       {
-        "nr": "7076101",
-        "was_oos": false,
-        "now_oos": true
-      },
-      {
-        "nr": "7645701",
-        "was_oos": false,
-        "now_oos": true
-      },
-      {
-        "nr": "7405701",
-        "was_oos": false,
-        "now_oos": true
-      },
-      {
-        "nr": "7444701",
+        "nr": "7709801",
         "was_oos": true,
         "now_oos": false
       },
       {
-        "nr": "7801501",
-        "was_oos": true,
-        "now_oos": false
-      },
-      {
-        "nr": "5055901",
-        "was_oos": true,
-        "now_oos": false
-      },
-      {
-        "nr": "7807202",
-        "was_oos": true,
-        "now_oos": false
-      },
-      {
-        "nr": "7652801",
-        "was_oos": false,
-        "now_oos": true
-      },
-      {
-        "nr": "7914201",
+        "nr": "7566601",
         "was_oos": false,
         "now_oos": true
       },
@@ -128,9 +108,34 @@
         "now_oos": true
       },
       {
-        "nr": "7566601",
+        "nr": "9260306",
         "was_oos": false,
         "now_oos": true
+      },
+      {
+        "nr": "7245101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7694701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7048101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5490201",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "9443401",
+        "was_oos": true,
+        "now_oos": false
       },
       {
         "nr": "7958701",
@@ -138,7 +143,12 @@
         "now_oos": true
       },
       {
-        "nr": "5416301",
+        "nr": "7717101",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "5089601",
         "was_oos": false,
         "now_oos": true
       }
