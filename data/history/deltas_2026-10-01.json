@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-01",
+  "vs": "2026-09-30",
+  "arrivals": 12,
+  "delistings": 14,
+  "price_changes": 0,
+  "assortment_moves": 0,
+  "stock_changes": 89,
+  "article_reuses": 1,
+  "detail": {
+    "arrivals": [
+      "630701",
+      "7152801",
+      "7284501",
+      "7879401",
+      "8764201",
+      "9113601",
+      "9214301",
+      "9234101",
+      "9291701",
+      "9311106",
+      "9320201",
+      "9405701"
+    ],
+    "delistings": [
+      "5173301",
+      "5466801",
+      "7171501",
+      "7385209",
+      "7475106",
+      "7645901",
+      "7751101",
+      "9054206",
+      "9131301",
+      "9215101",
+      "9300301",
+      "9369101",
+      "9484001",
+      "9591901"
+    ],
+    "price_up": [],
+    "price_down": [],
+    "assortment_moves": [],
+    "stock_changes": [
+      {
+        "nr": "7706001",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "8353101",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7973101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5671501",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7905301",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5943801",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5490201",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7076101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7645701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7405701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7444701",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7801501",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "5055901",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7807202",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7652801",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7914201",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5655501",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7566601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7958701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5416301",
+        "was_oos": false,
+        "now_oos": true
+      }
+    ],
+    "article_reuses": [
+      "9455801"
+    ]
+  }
+}
