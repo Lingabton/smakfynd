@@ -36,8 +36,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-malbec": {
-    "hash": "192f96c088eb64ddcad672705afa7370",
-    "lastmod": "2026-09-30"
+    "hash": "5ef5f37116cb19a8cedfe7012fbf51c6",
+    "lastmod": "2026-10-02"
   },
   "basta-cabernet-sauvignon": {
     "hash": "3c3852f69f5984872f6e927d886fdcdb",
@@ -92,8 +92,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-spanska-vin": {
-    "hash": "a62ca10960671c92aa8cfea63dc82f42",
-    "lastmod": "2026-09-29"
+    "hash": "1772872447e2089bb4c10a3c2f3d22f1",
+    "lastmod": "2026-10-02"
   },
   "basta-chilenska-vin": {
     "hash": "5d328ad0dc2207f6f35f9a19de087313",
@@ -188,8 +188,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-kaliforniska-vin": {
-    "hash": "e916d3c7e16f60eb6c91ea2c0a3ebd38",
-    "lastmod": "2026-09-26"
+    "hash": "98c41be1776b9fbb8a5ada4f0684c5b0",
+    "lastmod": "2026-10-02"
   },
   "vin-under-80-kr": {
     "hash": "a778543c010772c61fd24cd08f447d45",
@@ -400,11 +400,15 @@
     "lastmod": "2026-03-26"
   },
   "prissankt": {
-    "hash": "a3094bd2d5df5061f7680336045159ef",
-    "lastmod": "2026-10-01"
+    "hash": "4f6ff2ede40a7e210dad19ec14d07657",
+    "lastmod": "2026-10-02"
   },
   "basta-vin-september-2026": {
     "hash": "4f8593009bf762d7c7eb7405d45c4f3c",
     "lastmod": "2026-09-29"
+  },
+  "basta-vin-oktober-2026": {
+    "hash": "4fd9b8fbb3cc669681311e10692e82c7",
+    "lastmod": "2026-10-01"
   }
 }
