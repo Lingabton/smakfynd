@@ -142,11 +142,42 @@ def main():
     }
 
     out = DATA_DIR / "gsc_history.json"
+
+    # Merge with existing history: keep old daily entries, add/update new ones
+    existing = {}
+    if out.exists():
+        try:
+            existing = json.load(open(out))
+        except (json.JSONDecodeError, ValueError):
+            existing = {}
+
+    # Build cumulative daily history (keyed by date)
+    old_daily = {d["date"]: d for d in existing.get("daily", [])}
+    for d in daily:
+        old_daily[d["date"]] = d  # new data overwrites old for same date
+    merged_daily = sorted(old_daily.values(), key=lambda x: x["date"])
+
+    # Update period to reflect full range
+    if merged_daily:
+        full_start = merged_daily[0]["date"]
+        full_end = merged_daily[-1]["date"]
+        result["period"] = f"{full_start} \u2013 {full_end}"
+
+    result["daily"] = merged_daily
+
+    # Keep latest queries/pages/devices (current window is most relevant)
+    # But preserve old ones for reference if they have more history
+    result["previous_export"] = {
+        "exported": existing.get("exported", ""),
+        "totals": existing.get("totals", {}),
+    } if existing.get("exported") else None
+
     with open(out, "w") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     print(f"GSC: {total_clicks} clicks, {total_impressions} impressions, pos {avg_pos}")
     print(f"  {len(queries)} queries, {len(pages)} pages, {len(devices)} devices")
+    print(f"  Daily history: {len(merged_daily)} days ({merged_daily[0]['date']} to {merged_daily[-1]['date']})" if merged_daily else "  No daily data")
     print(f"  Saved: {out}")
 
 
