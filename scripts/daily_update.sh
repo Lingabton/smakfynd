@@ -171,6 +171,11 @@ if added:
     print(f'  Added {added} monthly URLs to sitemap')
 " 2>&1
 
+# ── Step 6.7: Health digest ──
+echo ""
+echo "→ Step 6.7: Health digest..."
+$PYTHON scripts/health_digest.py 2>&1 | tail -15 || echo "  Health digest flagged RED"
+
 # ── Step 7: Git commit + push ──
 echo ""
 echo "→ Step 7: Deploying..."

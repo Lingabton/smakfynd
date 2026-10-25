@@ -91,6 +91,14 @@ jobs:
         run: |
           python3 scripts/build_admin.py
 
+      - name: Health digest
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+        run: |
+          pip install requests >/dev/null 2>&1
+          python3 scripts/health_digest.py || echo "Health digest flagged RED — check email"
+
       - name: Save data cache
         uses: actions/cache/save@v4
         with:
@@ -166,5 +174,6 @@ jobs:
             CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
             echo "Pages changed: $CHANGED_PAGES"
             git commit -m "data: daily price update $(date '+%Y-%m-%d')"
+            git pull --rebase origin main
             git push
           fi

@@ -137,18 +137,51 @@ def check_wine_list_stability():
 
 
 def check_gsc():
-    """Check GSC data for indexed page trends."""
+    """Check GSC data freshness and indexed page trends."""
     gsc_file = DATA_DIR / "gsc_history.json"
     if not gsc_file.exists():
-        return status("amber", "No GSC data available")
+        return status("red", "No GSC data file", "Set up GSC credentials and run fetch_gsc.py")
     try:
+        mtime = datetime.fromtimestamp(os.path.getmtime(gsc_file))
+        age = datetime.now() - mtime
+        if age > timedelta(days=14):
+            return status("red", f"GSC data is {age.days} days stale (last modified {mtime.strftime('%Y-%m-%d')})",
+                          "Check GSC credentials and fetch_gsc.py")
+        if age > timedelta(days=7):
+            return status("amber", f"GSC data is {age.days} days old")
         data = json.load(open(gsc_file))
         totals = data.get("totals", {})
         clicks = totals.get("clicks", 0)
         impressions = totals.get("impressions", 0)
-        return status("green", f"GSC: {clicks} clicks, {impressions} impressions (last export)")
-    except Exception:
-        return status("amber", "Cannot parse GSC data")
+        return status("green", f"GSC: {clicks} clicks, {impressions} impressions (updated {mtime.strftime('%Y-%m-%d')})")
+    except Exception as e:
+        return status("red", f"Cannot parse GSC data: {e}")
+
+
+def check_scored_history():
+    """Check scored_history.json freshness."""
+    series_file = DATA_DIR / "history" / "scored_history.json"
+    if not series_file.exists():
+        return status("red", "scored_history.json missing", "Run health_digest.py to seed it")
+    try:
+        series = json.load(open(series_file))
+        if not series:
+            return status("red", "scored_history.json is empty")
+        last_date = series[-1].get("date", "")
+        last_scored = series[-1].get("scored", 0)
+        if last_date:
+            from datetime import date as date_type
+            last = date_type.fromisoformat(last_date)
+            age = (datetime.now().date() - last).days
+            if age > 7:
+                return status("red", f"scored_history.json last entry is {age} days old ({last_date})",
+                              "The daily build is not updating scored_history")
+            if age > 3:
+                return status("amber", f"scored_history.json last entry is {age} days old ({last_date})")
+            return status("green", f"scored_history: {last_scored} wines as of {last_date} ({len(series)} data points)")
+        return status("amber", "scored_history.json has entries but no date field")
+    except Exception as e:
+        return status("red", f"Cannot read scored_history.json: {e}")
 
 
 def check_deploy_size():
@@ -221,6 +254,7 @@ def main():
         "Live site": check_live_site,
         "Last build": check_last_build,
         "Corpus count": check_corpus,
+        "Scored history": check_scored_history,
         "Validator": check_validator,
         "Price history": check_price_history,
         "Wine-list stability": check_wine_list_stability,
@@ -258,7 +292,61 @@ def main():
     json.dump(output, open(out_path, "w"), indent=2, ensure_ascii=False)
     print(f"\nJSON: {out_path}")
 
+    # Email alert when red
+    if worst == "red":
+        red_items = [f"[{name}] {r['msg']}" + (f"\n  → {r['action']}" if r.get('action') else '')
+                     for name, r in results.items() if r['level'] == 'red']
+        body = f"Smakfynd health digest — {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+        body += "RED ALERTS:\n" + "\n".join(red_items)
+        body += "\n\nRun: python3 scripts/health_digest.py for full report"
+        _send_alert(body)
+
     return 0 if worst != "red" else 1
+
+
+def _send_alert(body):
+    """Send health alert email via Resend API or fallback to macOS notification."""
+    resend_key = os.environ.get("RESEND_API_KEY", "")
+    to_email = "gabriel.linton@gmail.com"
+    from_email = os.environ.get("FROM_EMAIL", "health@smakfynd.se")
+
+    if resend_key:
+        try:
+            import urllib.request
+            payload = json.dumps({
+                "from": from_email,
+                "to": [to_email],
+                "subject": "Smakfynd: health digest RED",
+                "text": body,
+            }).encode()
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {resend_key}",
+                    "Content-Type": "application/json",
+                },
+            )
+            urllib.request.urlopen(req, timeout=15)
+            print("  Alert email sent via Resend")
+            return
+        except Exception as e:
+            print(f"  Resend failed: {e}")
+
+    # Fallback: macOS notification (works for local cron)
+    try:
+        subprocess.run([
+            "osascript", "-e",
+            f'display notification "{body[:200]}" with title "Smakfynd RED"'
+        ], timeout=5, capture_output=True)
+        print("  macOS notification sent")
+    except Exception:
+        pass
+
+    # Fallback: write to a flag file that GA can check
+    flag = Path(__file__).parent.parent / "data" / "health_red.flag"
+    flag.write_text(body)
+    print(f"  Alert written to {flag}")
 
 
 if __name__ == "__main__":
