@@ -15,6 +15,10 @@
 set -e
 cd "$(dirname "$0")/.."
 PROJECT="$PWD"
+
+# Cron doesn't inherit shell profile — set PATH explicitly
+export PATH="/opt/homebrew/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 LOG_DIR="$PROJECT/data/logs"
 mkdir -p "$LOG_DIR"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
@@ -176,7 +180,13 @@ if git diff --quiet docs/ site/ 2>/dev/null; then
 else
     git add docs/ site/
     git commit -m "data: daily price update $(date '+%Y-%m-%d')" --no-verify 2>&1 | tail -1
-    git push 2>&1 | tail -1
+    # Use gh token for auth (cron can't access macOS keychain)
+    GH_TOKEN=$(gh auth token 2>/dev/null || cat ~/.smakfynd-gh-token 2>/dev/null || true)
+    if [ -n "$GH_TOKEN" ]; then
+        git -c "http.https://github.com/.extraheader=Authorization: token $GH_TOKEN" push 2>&1 | tail -1
+    else
+        git push 2>&1 | tail -1
+    fi
     echo "  ✓ Deployed!"
 fi
 

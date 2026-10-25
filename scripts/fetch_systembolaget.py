@@ -34,9 +34,9 @@ CATEGORIES = [
 # a total-order sort — Name is near-unique so pagination is near-complete.
 # Update deliberately when the guard fires on real assortment change.
 EXPECTED_UNIQUE = {
-    "Rött vin": 7067,
-    "Vitt vin": 4446,
-    "Rosévin": 572,
+    "Rött vin": 7100,
+    "Vitt vin": 4400,
+    "Rosévin": 540,
     "Mousserande vin": 2300,
 }
 

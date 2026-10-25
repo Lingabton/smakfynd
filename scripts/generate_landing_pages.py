@@ -1757,6 +1757,38 @@ def get_cross_links(current_slug, all_pages):
 def render_page(page, all_pages=None, modified_date=None):
     is_deals = page['slug'] == 'prissankt-vin'
     wines_html = '\n'.join(render_wine_row(w, i+1, sortable=is_deals) for i, w in enumerate(page['wines']))
+
+    # Deals sort buttons (extracted to avoid f-string nesting issues)
+    deals_sort_html = ''
+    if is_deals:
+        deals_sort_html = '''<div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#7a7060;align-self:center;margin-right:4px">Sortera:</span>
+      <button onclick="sortWines('drop')" class="sf-sort" data-key="drop" style="padding:6px 12px;border-radius:8px;border:1px solid #8b2332;background:#8b2332;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">Sänkning</button>
+      <button onclick="sortWines('price')" class="sf-sort" data-key="price" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Pris</button>
+      <button onclick="sortWines('score')" class="sf-sort" data-key="score" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Poäng</button>
+    </div>
+    <script>
+    function sortWines(key) {
+      var ol = document.querySelector("ol");
+      var items = Array.from(ol.querySelectorAll("li[data-score]"));
+      items.sort(function(a, b) {
+        var av = parseFloat(a.dataset[key]) || 0;
+        var bv = parseFloat(b.dataset[key]) || 0;
+        return key === "price" ? av - bv : bv - av;
+      });
+      items.forEach(function(li, i) {
+        var s = li.querySelector("strong");
+        if (s) s.textContent = (i + 1) + ". " + s.textContent.replace(/^\\d+\\.\\s*/, "");
+        ol.appendChild(li);
+      });
+      document.querySelectorAll(".sf-sort").forEach(function(btn) {
+        var active = btn.dataset.key === key;
+        btn.style.background = active ? "#8b2332" : "#fefcf8";
+        btn.style.color = active ? "#fff" : "#4a4238";
+        btn.style.borderColor = active ? "#8b2332" : "#e6ddd0";
+      });
+    }
+    </script>'''
     num_wines = len(page['wines'])
 
     # Alternatives section (e.g. crémant/cava on champagne pages)
@@ -2068,34 +2100,7 @@ def render_page(page, all_pages=None, modified_date=None):
 
     {quick_nav_html}
 
-    {"" if not is_deals else '''<div style="margin-bottom:16px;display:flex;gap:6px;flex-wrap:wrap">
-      <span style="font-size:11px;color:#7a7060;align-self:center;margin-right:4px">Sortera:</span>
-      <button onclick="sortWines('drop')" class="sf-sort" data-key="drop" style="padding:6px 12px;border-radius:8px;border:1px solid #8b2332;background:#8b2332;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">Sänkning</button>
-      <button onclick="sortWines('price')" class="sf-sort" data-key="price" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Pris</button>
-      <button onclick="sortWines('score')" class="sf-sort" data-key="score" style="padding:6px 12px;border-radius:8px;border:1px solid #e6ddd0;background:#fefcf8;color:#4a4238;font-size:12px;cursor:pointer;font-family:inherit">Poäng</button>
-    </div>
-    <script>
-    function sortWines(key) {
-      var ol = document.querySelector("ol");
-      var items = Array.from(ol.querySelectorAll("li[data-score]"));
-      items.sort(function(a, b) {
-        var av = parseFloat(a.dataset[key]) || 0;
-        var bv = parseFloat(b.dataset[key]) || 0;
-        return key === "price" ? av - bv : bv - av;
-      });
-      items.forEach(function(li, i) {
-        var s = li.querySelector("strong");
-        if (s) s.textContent = (i + 1) + ". " + s.textContent.replace(/^\\d+\\.\\s*/, "");
-        ol.appendChild(li);
-      });
-      document.querySelectorAll(".sf-sort").forEach(function(btn) {
-        var active = btn.dataset.key === key;
-        btn.style.background = active ? "#8b2332" : "#fefcf8";
-        btn.style.color = active ? "#fff" : "#4a4238";
-        btn.style.borderColor = active ? "#8b2332" : "#e6ddd0";
-      });
-    }
-    </script>'''}
+    {deals_sort_html}
 
     {'<p style="font-size:12px;color:#8a7a6a;margin:0 0 12px;padding:8px 12px;background:#fefcf8;border:1px solid #e6ddd0;border-radius:8px">Visar viner som finns i butik. <a href="https://smakfynd.se/#' + page['slug'] + '/" style="color:#8b2332">Visa även beställningsvaror →</a></p>' if not page.get('ignore_in_store_filter') else ''}
 
