@@ -117,8 +117,9 @@ def check_price_history():
     missing = []
     for i in range(14):
         d = today - timedelta(days=i)
-        f = hist_dir / f"prices_{d.isoformat()}.json"
-        if not f.exists():
+        f_json = hist_dir / f"prices_{d.isoformat()}.json"
+        f_gz = hist_dir / f"prices_{d.isoformat()}.json.gz"
+        if not f_json.exists() and not f_gz.exists():
             missing.append(d.isoformat())
     if len(missing) > 3:
         return status("red", f"{len(missing)} missing days in last 14: {', '.join(missing[:5])}",
@@ -137,16 +138,33 @@ def check_wine_list_stability():
 
 
 def check_gsc():
-    """Check GSC data for indexed page trends."""
+    """Check GSC data freshness and indexed page trends."""
     gsc_file = DATA_DIR / "gsc_history.json"
     if not gsc_file.exists():
-        return status("amber", "No GSC data available")
+        return status("red", "No GSC data — fetch has never run or secret is missing",
+                      "Set GSC_CREDENTIALS_JSON secret in repo settings")
     try:
         data = json.load(open(gsc_file))
+        exported = data.get("exported", "")
         totals = data.get("totals", {})
         clicks = totals.get("clicks", 0)
         impressions = totals.get("impressions", 0)
-        return status("green", f"GSC: {clicks} clicks, {impressions} impressions (last export)")
+
+        # Check staleness
+        if exported:
+            from datetime import datetime as _dt
+            days_old = (datetime.now().date() - _dt.fromisoformat(exported).date()).days
+            if days_old > 7:
+                return status("red",
+                    f"GSC data is {days_old} days stale (exported {exported}). "
+                    f"Fetch is failing silently or secret is missing.",
+                    "Check GSC_CREDENTIALS_JSON secret and workflow step")
+            if days_old > 3:
+                return status("amber",
+                    f"GSC data is {days_old} days old (exported {exported}). "
+                    f"{clicks} clicks, {impressions} impressions")
+
+        return status("green", f"GSC: {clicks} clicks, {impressions} impressions (exported {exported})")
     except Exception:
         return status("amber", "Cannot parse GSC data")
 

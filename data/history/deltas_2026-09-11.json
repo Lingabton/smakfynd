@@ -1,0 +1,120 @@
+{
+  "date": "2026-09-11",
+  "vs": "2026-09-10",
+  "arrivals": 0,
+  "delistings": 1,
+  "price_changes": 0,
+  "assortment_moves": 0,
+  "stock_changes": 2309,
+  "detail": {
+    "arrivals": [],
+    "delistings": [
+      "630706"
+    ],
+    "price_up": [],
+    "price_down": [],
+    "assortment_moves": [],
+    "stock_changes": [
+      {
+        "nr": "9458801",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5028601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7390601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7880901",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7065101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5179001",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "9427601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7087201",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "301301",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5303601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "3937001",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7116701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7598701",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5169601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "238808",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5417601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7745001",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7296901",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7936601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7309141",
+        "was_oos": false,
+        "now_oos": true
+      }
+    ]
+  }
+}

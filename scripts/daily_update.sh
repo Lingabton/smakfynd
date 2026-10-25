@@ -138,7 +138,8 @@ echo ""
 echo "→ Step 6: Generating landing pages + prissänkningar..."
 $PYTHON scripts/generate_landing_pages.py 2>&1 | tail -3
 $PYTHON scripts/generate_monthly_seo.py 2>&1 | tail -2
-$PYTHON scripts/generate_prissankt.py 2>&1 | tail -2
+# CONTAINMENT: prissankt disabled — pre-pipeline data, rebuild after step 2
+# $PYTHON scripts/generate_prissankt.py 2>&1 | tail -2
 
 # ── Step 6.5: Fetch GSC data ──
 echo ""

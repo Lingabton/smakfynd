@@ -251,13 +251,13 @@ html = f'''<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prissänkta viner på Systembolaget {YEAR} — Smakfynd</title>
-  <meta name="description" content="{len(drops)} viner har sänkts i pris på Systembolaget just nu. Spara upp till {drops[0]['drop_pct'] if drops else 0}%. Uppdaterad {DATE_STR}.">
+  <meta name="description" content="Prissänkta viner på Systembolaget. Uppdaterad {DATE_STR}. Sidan håller på att byggas om med verifierade prisdata.">
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://smakfynd.se/prissankt/">
-  <meta property="og:title" content="Prissänkta viner på Systembolaget — {len(drops)} fynd just nu">
-  <meta property="og:description" content="Systembolaget skyltar inte alltid med prissänkningar. Vi håller koll — {len(drops)} viner sänkta just nu.">
+  <meta property="og:title" content="Prissänkta viner på Systembolaget — Smakfynd">
+  <meta property="og:description" content="Prissänkta viner på Systembolaget. Sidan håller på att byggas om med verifierade prisdata.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://smakfynd.se/prissankt/">
   <meta property="og:image" content="https://smakfynd.se/og-image.png">

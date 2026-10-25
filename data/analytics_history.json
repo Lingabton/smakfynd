@@ -273,5 +273,122 @@
     "wines": 4362,
     "vivino_matches": 1527,
     "price_drops": 284
+  },
+  {
+    "date": "2026-09-22",
+    "events": 9673,
+    "searches": 1767,
+    "ai_queries": 138,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 288
+  },
+  {
+    "date": "2026-09-27",
+    "events": 10228,
+    "searches": 1862,
+    "ai_queries": 140,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-09-28",
+    "events": 10281,
+    "searches": 1870,
+    "ai_queries": 140,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-09-29",
+    "events": 10398,
+    "searches": 1889,
+    "ai_queries": 140,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-01",
+    "events": 10562,
+    "searches": 1925,
+    "ai_queries": 140,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-06",
+    "events": 11089,
+    "searches": 2027,
+    "ai_queries": 145,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-07",
+    "events": 11190,
+    "searches": 2049,
+    "ai_queries": 145,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-08",
+    "events": 11363,
+    "searches": 2094,
+    "ai_queries": 148,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-09",
+    "events": 11423,
+    "searches": 2106,
+    "ai_queries": 148,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-10",
+    "events": 11563,
+    "searches": 2125,
+    "ai_queries": 148,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-16",
+    "events": 12043,
+    "searches": 2195,
+    "ai_queries": 149,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-21",
+    "events": 12470,
+    "searches": 2266,
+    "ai_queries": 153,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
+  },
+  {
+    "date": "2026-10-22",
+    "events": 12523,
+    "searches": 2272,
+    "ai_queries": 153,
+    "wines": 4338,
+    "vivino_matches": 1527,
+    "price_drops": 256
   }
 ]

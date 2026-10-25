@@ -340,6 +340,49 @@ def validate(path, is_primary=True):
             if token.lower() in body.lower():
                 errors.append(f"[NORWEGIAN_IN_SV] /{slug}/: found '{token}'")
 
+    # ── Expert-match producer check (top 50) ──
+    # For the sitewide top 50, verify the WE winery matches the SB producer.
+    # Catches corrupted expert matches before they reach users.
+    expert_cache_path = DATA_DIR / "expert_cache.json"
+    sb_raw_path = DATA_DIR / "systembolaget_raw.json"
+    if expert_cache_path.exists() and sb_raw_path.exists():
+        from rapidfuzz import fuzz as _fuzz
+        expert_cache = json.load(open(expert_cache_path))
+        sb_data = json.load(open(sb_raw_path))
+        sb_names = {str(p.get('nr', '')): p for p in sb_data if p.get('cat1') == 'Vin'}
+
+        scored_wines = sorted(
+            [w for w in wines if not w.get('unrated') and w.get('expert_score')],
+            key=lambda w: -w.get('smakfynd_score', 0)
+        )
+        expert_mismatch_count = 0
+        for w in scored_wines[:50]:
+            nr = str(w.get('nr', ''))
+            sb = sb_names.get(nr, {})
+            we = expert_cache.get(nr, {})
+            if not sb or not we:
+                continue
+            sb_name = sb.get('name', '').lower()
+            sb_sub = (sb.get('sub') or '').lower()
+            we_winery = we.get('expert_winery', '').lower()
+            best = max(
+                _fuzz.token_set_ratio(sb_name, we_winery),
+                _fuzz.token_set_ratio(sb_sub, we_winery) if sb_sub else 0,
+                _fuzz.token_set_ratio(f"{sb_name} {sb_sub}", we_winery),
+            )
+            if best < 50:
+                expert_mismatch_count += 1
+                errors.append(
+                    f"[EXPERT_MISMATCH] Top-50 wine {sb.get('name','')} (#{nr}): "
+                    f"SB producer '{sb.get('name','')}'/'{sb.get('sub','')}' vs "
+                    f"WE winery '{we.get('expert_winery','')}' (fuzzy {best})"
+                )
+        if expert_mismatch_count > 0:
+            errors.append(
+                f"[EXPERT_CORRUPTION] {expert_mismatch_count}/50 top wines have mismatched expert producers — "
+                f"expert_cache.json may be corrupted"
+            )
+
     # ── Corpus count in rendered HTML ──
     # The number shown on pages must match LOCKED_CORPUS_COUNT
     # Error for shipped pages, warning for un-shipped (they'll be fixed in later batches)

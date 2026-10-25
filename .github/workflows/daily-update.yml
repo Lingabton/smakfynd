@@ -72,7 +72,9 @@ jobs:
             echo "No shipped pages — skipping landing page generation"
           fi
           python3 scripts/generate_monthly_seo.py
-          python3 scripts/generate_prissankt.py
+          # CONTAINMENT: prissankt disabled — 269/270 drops are pre-pipeline fiction.
+          # Rebuild after price history is verified (step 2).
+          # python3 scripts/generate_prissankt.py
 
       - name: Validate data
         run: |
