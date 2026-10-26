@@ -1,0 +1,332 @@
+{
+  "date": "2026-10-26",
+  "vs": "2026-10-13",
+  "arrivals": 330,
+  "delistings": 186,
+  "price_changes": 2,
+  "assortment_moves": 15,
+  "stock_changes": 418,
+  "article_reuses": 20,
+  "detail": {
+    "arrivals": [
+      "2009841",
+      "219041",
+      "246541",
+      "5568301",
+      "5662701",
+      "626421",
+      "7004301",
+      "7027201",
+      "7059001",
+      "7066601",
+      "7082601",
+      "7090101",
+      "7109001",
+      "7114401",
+      "7114501",
+      "7124001",
+      "7125101",
+      "7134604",
+      "7140801",
+      "7148401",
+      "7161701",
+      "7162801",
+      "7168901",
+      "7171501",
+      "7176501",
+      "7176601",
+      "7182301",
+      "7186301",
+      "7196201",
+      "7197401",
+      "7215634",
+      "7228501",
+      "7251901",
+      "7256701",
+      "7266909",
+      "7278601",
+      "7285701",
+      "7298501",
+      "7300201",
+      "7309301",
+      "7310201",
+      "73134",
+      "7315301",
+      "7319101",
+      "7325501",
+      "7329201",
+      "7344201",
+      "7351601",
+      "7352601",
+      "7369001"
+    ],
+    "delistings": [
+      "100201",
+      "207601",
+      "218108",
+      "233601",
+      "288708",
+      "3128601",
+      "3195001",
+      "3226702",
+      "3293201",
+      "3608901",
+      "3622901",
+      "3964101",
+      "5008001",
+      "5088201",
+      "5115101",
+      "5140601",
+      "5153101",
+      "5174301",
+      "5193801",
+      "5195201",
+      "5279501",
+      "5285901",
+      "5392201",
+      "5402301",
+      "5403701",
+      "546201",
+      "5493101",
+      "5573601",
+      "5592501",
+      "5629701",
+      "5633301",
+      "5644601",
+      "5750401",
+      "5763501",
+      "5787901",
+      "5812901",
+      "5825901",
+      "5826801",
+      "5828301",
+      "5893101",
+      "5894501",
+      "5957301",
+      "5971901",
+      "5977201",
+      "649301",
+      "7070001",
+      "7080601",
+      "7084301",
+      "7110702",
+      "7122801"
+    ],
+    "price_up": [
+      {
+        "nr": "5863201",
+        "old": 11765.0,
+        "new": 11999.0,
+        "pct": 2
+      },
+      {
+        "nr": "9393601",
+        "old": 959.0,
+        "new": 969.0,
+        "pct": 1
+      }
+    ],
+    "price_down": [],
+    "assortment_moves": [
+      {
+        "nr": "9287201",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9549706",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9427401",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9292701",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9014001",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9468601",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9306801",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9219901",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9221301",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9041601",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9467701",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9549601",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9245801",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9439901",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      },
+      {
+        "nr": "9315601",
+        "from": "Webblanseringar",
+        "to": "Tillfälligt sortiment"
+      }
+    ],
+    "stock_changes": [
+      {
+        "nr": "7249001",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5426801",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7052111",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7196301",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7774106",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7779001",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7076301",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "9005501",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7001701",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7732601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "5568601",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7018001",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7978501",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "5685501",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7024501",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7424101",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "5785101",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "7900501",
+        "was_oos": true,
+        "now_oos": false
+      },
+      {
+        "nr": "7189801",
+        "was_oos": false,
+        "now_oos": true
+      },
+      {
+        "nr": "9043201",
+        "was_oos": false,
+        "now_oos": true
+      }
+    ],
+    "article_reuses": [
+      "5741601",
+      "7115509",
+      "7153401",
+      "7195801",
+      "7205001",
+      "7257501",
+      "7271101",
+      "7376309",
+      "7389101",
+      "7415701",
+      "7419501",
+      "7436106",
+      "7474801",
+      "7694401",
+      "7749401",
+      "7804101",
+      "7806901",
+      "7818101",
+      "7962601",
+      "7982701"
+    ]
+  }
+}
