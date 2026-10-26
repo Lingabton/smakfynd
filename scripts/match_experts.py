@@ -219,12 +219,14 @@ def main():
         else:
             no_match += 1
 
-        # Save periodically
-        if (matched + no_match) % 500 == 0 and matched > 0:
+        # Save periodically (never in --sample mode)
+        if not sample_only and (matched + no_match) % 500 == 0 and matched > 0:
             json.dump(cache, open(OUT_FILE, 'w'), ensure_ascii=False, indent=1)
             print(f"  ... saved {len(cache)} entries ({i+1}/{len(wine_sb)} processed)")
+        elif sample_only and (matched + no_match) % 500 == 0:
+            print(f"  ... {len(cache)} matches ({i+1}/{len(wine_sb)} processed)")
 
-    # Final save
+    # Final save (never in --sample mode)
     if not sample_only:
         json.dump(cache, open(OUT_FILE, 'w'), ensure_ascii=False, indent=1)
 
@@ -235,7 +237,10 @@ def main():
     print(f"  No country: {no_country}")
     print(f"  Skipped:    {skipped} (already cached)")
     print(f"  Total cache: {len(cache)}")
-    print(f"  Saved to: {OUT_FILE}")
+    if sample_only:
+        print(f"  --sample mode: expert_cache.json NOT written")
+    else:
+        print(f"  Saved to: {OUT_FILE}")
     print("=" * 60)
 
     # Generate 50/50 labelled sample for human review

@@ -36,7 +36,7 @@ CATEGORIES = [
 EXPECTED_UNIQUE = {
     "Rött vin": 7100,
     "Vitt vin": 4400,
-    "Rosévin": 540,
+    "Rosévin": 552,  # Oct 2026: summer rosé range rotating out
     "Mousserande vin": 2300,
 }
 
