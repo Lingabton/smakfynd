@@ -6,6 +6,7 @@ data/*
 !data/gsc_history.json
 !data/gsc_coverage_*.json
 !data/expert_match_sample.json
+!data/prissankt_observed.json
 !data/history
 !data/page_hashes.json
 vivino_log.txt
