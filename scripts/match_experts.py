@@ -83,7 +83,10 @@ def match_wine(sb_wine, candidates):
     sub = sb_wine.get('sub', '')
     grape = sb_wine.get('grape', '').lower()
     region = sb_wine.get('region', '') or ''
-    producer = _normalize_producer(sub) if sub else ''
+    # SB puts producer in sub for some wines (Barolo Monvigliero / Oddero)
+    # and in name for others (Gérard Bertrand / Corbières)
+    name_normalized = _normalize_producer(name) if name else ''
+    sub_normalized = _normalize_producer(sub) if sub else ''
 
     best = 0
     best_we = None
@@ -98,11 +101,12 @@ def match_wine(sb_wine, candidates):
         we_province = we.get('province', '') or ''
         we_region1 = we.get('region_1', '') or ''
 
-        # GATE 1: Producer match — SB sub vs WE winery
-        if producer and winery:
-            producer_score = fuzz.token_set_ratio(producer, winery)
-        else:
-            producer_score = 0
+        # GATE 1: Producer match — best of fuzz(name, winery) and fuzz(sub, winery)
+        if not winery:
+            continue
+        score_name = fuzz.token_set_ratio(name_normalized, winery) if name_normalized else 0
+        score_sub = fuzz.token_set_ratio(sub_normalized, winery) if sub_normalized else 0
+        producer_score = max(score_name, score_sub)
         if producer_score < 70:
             continue
 

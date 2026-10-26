@@ -4,6 +4,8 @@ data/*
 !data/prissankt_bootstrap.json
 !data/analytics_history.json
 !data/gsc_history.json
+!data/gsc_coverage_*.json
+!data/expert_match_sample.json
 !data/history
 !data/page_hashes.json
 vivino_log.txt
@@ -26,3 +28,4 @@ scripts/vivino_playwright.py
 credentials.json
 secrets.json
 scripts/__pycache__/
+logs/

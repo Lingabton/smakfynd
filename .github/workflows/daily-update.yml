@@ -50,6 +50,7 @@ jobs:
             wine-data-
 
       - name: Fetch Systembolaget data
+        timeout-minutes: 45
         run: |
           python3 scripts/fetch_systembolaget.py
 
@@ -174,6 +175,5 @@ jobs:
             CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
             echo "Pages changed: $CHANGED_PAGES"
             git commit -m "data: daily price update $(date '+%Y-%m-%d')"
-            git pull --rebase origin main
             git push
           fi

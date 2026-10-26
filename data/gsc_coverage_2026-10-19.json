@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-19",
+  "source": "Google Search Console > Indexing > Pages",
+  "summary": {
+    "known_pages": 106,
+    "indexed": 14,
+    "discovered_not_indexed": 68,
+    "crawled_not_indexed": 21,
+    "not_found_404": 3,
+    "impressions_per_day": "65-75"
+  },
+  "notes": "Manual snapshot from GSC UI. Automated fetch (fetch_gsc.py) has been broken since July 2 due to missing google-auth in cron env. Script now fixed but needs valid GSC_CREDENTIALS_JSON secret in GitHub Actions."
+}
