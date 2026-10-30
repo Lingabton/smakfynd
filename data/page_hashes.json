@@ -1,11 +1,11 @@
 {
   "basta-roda-vin": {
-    "hash": "642e9d4c2d15130713591aacb337653c",
-    "lastmod": "2026-10-26"
+    "hash": "b8a728f8dc28245894d56b6747c144a3",
+    "lastmod": "2026-10-30"
   },
   "basta-vita-vin": {
-    "hash": "50999cd8a3b0adfd43897ea4603ba405",
-    "lastmod": "2026-10-26"
+    "hash": "428dfc80f40d2ea386d67165ff92ddf2",
+    "lastmod": "2026-10-30"
   },
   "basta-bubbel": {
     "hash": "6871d2f4124645a92def936059eb3dc1",
@@ -92,8 +92,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-spanska-vin": {
-    "hash": "7540abd05c853858baada666d1c10547",
-    "lastmod": "2026-10-28"
+    "hash": "a0cdf2b02a3d3694711d6fb6af0348a7",
+    "lastmod": "2026-10-30"
   },
   "basta-chilenska-vin": {
     "hash": "5d328ad0dc2207f6f35f9a19de087313",
@@ -188,8 +188,8 @@
     "lastmod": "2026-09-04"
   },
   "basta-kaliforniska-vin": {
-    "hash": "bd7276d11103f613d52f299c376217fc",
-    "lastmod": "2026-10-27"
+    "hash": "fb67bd40a7c074f7300bd0f4d58ec54f",
+    "lastmod": "2026-10-30"
   },
   "vin-under-80-kr": {
     "hash": "a778543c010772c61fd24cd08f447d45",
@@ -352,8 +352,8 @@
     "lastmod": "2026-09-04"
   },
   "/": {
-    "hash": "d64bd351fb928b0b2cc259b052f6e1b5",
-    "lastmod": "2026-10-29"
+    "hash": "68550d246063d10bf40febc598810b5d",
+    "lastmod": "2026-10-30"
   },
   "basta-bag-in-box": {
     "hash": "74bc4507207d2278517a658c49b62c76",
@@ -408,7 +408,7 @@
     "lastmod": "2026-10-26"
   },
   "basta-vin-oktober-2026": {
-    "hash": "876f679ab152fcd7fbafd42735199476",
-    "lastmod": "2026-10-29"
+    "hash": "198be5a718b39984400347ba1b985daf",
+    "lastmod": "2026-10-30"
   }
 }
