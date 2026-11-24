@@ -117,12 +117,18 @@ def check_price_history():
     missing = []
     for i in range(14):
         d = today - timedelta(days=i)
-        f = hist_dir / f"prices_{d.isoformat()}.json"
-        if not f.exists():
+        # fetch_systembolaget.py writes .json.gz; older snapshots are plain .json
+        base = hist_dir / f"prices_{d.isoformat()}"
+        if not (base.with_suffix(".json.gz").exists() or base.with_suffix(".json").exists()):
             missing.append(d.isoformat())
-    if len(missing) > 3:
-        return status("red", f"{len(missing)} missing days in last 14: {', '.join(missing[:5])}",
+    # RED only for an ongoing outage (no snapshot in the last 2 days). Old gaps
+    # can't be backfilled, so they stay amber instead of failing the job for two weeks.
+    recent = {(today - timedelta(days=i)).isoformat() for i in range(2)}
+    if recent <= set(missing):
+        return status("red", f"No price snapshot since {min(recent)} ({len(missing)} missing in last 14)",
                       "Check fetch_systembolaget.py and daily workflow")
+    if len(missing) > 3:
+        return status("amber", f"{len(missing)} missing days in last 14 (historical gap): {', '.join(missing[:5])}")
     if missing:
         return status("amber", f"{len(missing)} missing days: {', '.join(missing)}")
     return status("green", "No gaps in last 14 days")
@@ -206,6 +212,14 @@ def check_live_site():
         if not isinstance(wines, list) or len(wines) < 100:
             return status("red", f"wines.json has {len(wines) if isinstance(wines, list) else 0} wines (expected 4000+)",
                           "wines.json may be malformed or empty")
+        # The SPA data only ships in deliberate batches, so the daily job can be
+        # green while the app serves month-old prices. Alert on that directly.
+        built = data.get("meta", {}).get("built") if isinstance(data, dict) else None
+        if built:
+            data_age = (datetime.now().date() - datetime.fromisoformat(built).date()).days
+            if data_age > 14:
+                return status("red", f"Live wines.json built {built} ({data_age} days old)",
+                              "Ship an SPA batch: docs/wines.json + docs/index.html together. See RUNBOOK.md")
         pct = abs(len(wines) - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
         if pct > 5:
             return status("red", f"wines.json has {len(wines)} wines vs locked {LOCKED_CORPUS_COUNT} ({pct:.0f}% off)",
@@ -298,6 +312,9 @@ def main():
                      for name, r in results.items() if r['level'] == 'red']
         body = f"Smakfynd health digest — {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
         body += "RED ALERTS:\n" + "\n".join(red_items)
+        lock_report = DATA_DIR / "deploy" / "corpus_lock_report.txt"
+        if lock_report.exists():
+            body += "\n\nCorpus lock: " + lock_report.read_text().strip()
         body += "\n\nRun: python3 scripts/health_digest.py for full report"
         _send_alert(body)
 

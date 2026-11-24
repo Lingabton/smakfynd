@@ -57,6 +57,7 @@ jobs:
           python3 scripts/build_app.py
           python3 scripts/build_slim.py
           python3 scripts/deploy_html.py
+          python3 scripts/corpus_lock.py
           # Only regenerate pages that have shipped in a batch
           ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(','.join(json.load(open(f))) if os.path.exists(f) else '')")
           if [ -n "$ALLOWLIST" ]; then
@@ -93,7 +94,7 @@ jobs:
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
           # Stage only allowed docs/ files
-          git add site/
+          git add site/ data/deploy/corpus_lock.json
           ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(' '.join(f'docs/{p}/index.html' for p in json.load(open(f)))) if os.path.exists(f) else ''")
           for f in $ALLOWLIST; do [ -f "$f" ] && git add "$f"; done
           for f in docs/sitemap.xml docs/sitemap-fixed.xml docs/sitemap-all.xml docs/admin/data.json \
