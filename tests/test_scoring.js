@@ -48,12 +48,16 @@ assertRange("raw 6 → 1-21", rescale(6), 1, 21);
 
 // ── getScoreInfo tests ──
 console.log("getScoreInfo():");
-assert("score 95 → Exceptionellt", getScoreInfo(95)[0], "Exceptionellt");
-assert("score 85 → Toppköp", getScoreInfo(85)[0], "Toppköp");
-assert("score 75 → Starkt fynd", getScoreInfo(75)[0], "Starkt fynd");
-assert("score 65 → Bra köp", getScoreInfo(65)[0], "Bra köp");
-assert("score 55 → Bra köp", getScoreInfo(55)[0], "Bra köp");
-assert("score 40 → Okej värde", getScoreInfo(40)[0], "Okej värde");
+// Bands per src/utils.jsx (S1-4, Sep 2026):
+// 85+ Exceptionellt fynd | 75-84 Toppköp | 65-74 Starkt fynd | 50-64 Okej värde | <50 no badge
+assert("score 95 → Exceptionellt fynd", getScoreInfo(95)[0], "Exceptionellt fynd");
+assert("score 85 → Exceptionellt fynd", getScoreInfo(85)[0], "Exceptionellt fynd");
+assert("score 84 → Toppköp", getScoreInfo(84)[0], "Toppköp");
+assert("score 75 → Toppköp", getScoreInfo(75)[0], "Toppköp");
+assert("score 65 → Starkt fynd", getScoreInfo(65)[0], "Starkt fynd");
+assert("score 55 → Okej värde", getScoreInfo(55)[0], "Okej värde");
+assert("score 50 → Okej värde", getScoreInfo(50)[0], "Okej värde");
+assert("score 40 → no badge", getScoreInfo(40)[0], "");
 
 // ── Summary ──
 console.log(`\n${passed} passed, ${failed} failed`);
