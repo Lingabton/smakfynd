@@ -33,6 +33,7 @@ CATEGORIES = [
 # two-pass Name sort (Ascending + Descending union). Near-complete under
 # a total-order sort — Name is near-unique so pagination is near-complete.
 # Update deliberately when the guard fires on real assortment change.
+# RULE: Never set an expected value below what was observed — only raise it.
 EXPECTED_UNIQUE = {
     "Rött vin": 7100,
     "Vitt vin": 4400,

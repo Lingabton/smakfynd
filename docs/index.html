@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smakfynd — Hitta bästa vinerna på Systembolaget 2026</title>
-  <meta name="description" content="Smakfynd rankar 4761 viner från 31 länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Uppdaterad september 2026.">
+  <meta name="description" content="Smakfynd rankar 4761 viner från 31 länder efter kvalitet per krona. Crowd-betyg + expertrecensioner + prisjämförelse = Smakfynd-poäng. Uppdaterad november 2026.">
   <meta name="author" content="Gabriel Linton">
   <meta name="theme-color" content="#7a2332">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
@@ -30,7 +30,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="Smakfynd">
-  <meta property="article:modified_time" content="2026-09-21">
+  <meta property="article:modified_time" content="2026-11-02">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -169,7 +169,7 @@
       <p>Smakfynd är en oberoende tjänst skapad av Gabriel Linton, utbildad i dryckeskunskap vid
       Restaurang- och hotellhögskolan i Grythyttan och forskare vid Örebro universitet.
       Drivs av Olav Innovation AB. Ingen koppling till Systembolaget. Vi säljer inte alkohol.</p>
-      <p>Uppdaterad september 2026 — 4761 viner från 31 länder.</p>
+      <p>Uppdaterad november 2026 — 4761 viner från 31 länder.</p>
 
       <p><a href="https://smakfynd.se">Besök Smakfynd</a> — kräver JavaScript.</p>
     </div>
@@ -241,10 +241,24 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 // ═══════════════════════════════════════════════════════════════
 
 // Data: loaded async from wines.json, cache-busted at build time
-const DATA_URL = "wines.json?v=1789993237";
+const DATA_URL = "wines.json?v=1793614900";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+
+// Internal traffic exclusion: visit with ?internal=1 once per device to flag it
+try {
+  if (new URLSearchParams(location.search).get("internal") === "1") {
+    localStorage.setItem("sf_internal", "1");
+  }
+} catch (e) {}
+const _isInternal = (() => {
+  try {
+    return localStorage.getItem("sf_internal") === "1";
+  } catch (e) {
+    return false;
+  }
+})();
 const _sid = (() => {
   try {
     let s = sessionStorage.getItem("sf_sid");
@@ -258,6 +272,7 @@ const _sid = (() => {
   }
 })();
 function track(event, data) {
+  if (_isInternal) return;
   try {
     const device = window.innerWidth < 768 ? "mobile" : "desktop";
     fetch(ANALYTICS_URL + "/event", {
@@ -281,6 +296,7 @@ function track(event, data) {
 // Session duration tracking
 const _sessionStart = Date.now();
 function _sendSessionEnd() {
+  if (_isInternal) return;
   const duration_s = Math.round((Date.now() - _sessionStart) / 1000);
   if (duration_s < 1) return;
   const device = window.innerWidth < 768 ? "mobile" : "desktop";
@@ -323,6 +339,7 @@ window.addEventListener("pagehide", () => {
   }
 });
 function trackSearch(query, count, clickedNr) {
+  if (_isInternal) return;
   try {
     fetch(ANALYTICS_URL + "/search", {
       method: "POST",
@@ -340,6 +357,7 @@ function trackSearch(query, count, clickedNr) {
   } catch (e) {}
 }
 function trackAI(meal, response, latencyMs) {
+  if (_isInternal) return;
   try {
     const wines = (response?.courses || []).flatMap(c => c.wines || []).map(w => w.nr).filter(Boolean).join(",");
     fetch(ANALYTICS_URL + "/ai", {
@@ -5273,7 +5291,7 @@ function SmakfyndApp() {
     if (unratedLoadedRef.current || unratedLoadingRef.current) return;
     unratedLoadingRef.current = true;
     try {
-      const res = await fetch("wines-unrated.json?v=1789993237");
+      const res = await fetch("wines-unrated.json?v=1793614900");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const raw = await res.json();
       const data = raw.wines || raw;

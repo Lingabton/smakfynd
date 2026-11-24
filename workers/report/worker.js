@@ -1,7 +1,16 @@
 /**
  * Smakfynd Weekly Analytics Report
  * Runs every Monday 07:00 UTC, emails report via Resend.
+ * Daily health check at 08:00 UTC — sends immediate alert on red status.
  */
+
+// Known bot UA patterns
+const BOT_UA_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|mediapartners|google-inspectiontool|headlesschrome|phantomjs|puppet|wget|curl|python-requests|go-http-client|java\/|libwww|httpunit|nutch|biglotron|teoma|convera|gigablast|ia_archiver|webmon|httrack|grub|netresearchserver|speedy|fluffy|findlink|panscient|iodc|yandex|rambler|openbot|duckduckbot|ahrefsbot|semrushbot|dotbot|mj12bot|rogerbot|screaming frog|petalbot|bytespider/i;
+
+function isBot(ua) {
+  if (!ua) return true; // no UA = likely bot
+  return BOT_UA_RE.test(ua);
+}
 
 async function q(db, sql) {
   try {
@@ -17,32 +26,137 @@ function pct(n, total) {
   return Math.round((n / total) * 100) + "%";
 }
 
+// ─── Health checks ───────────────────────────────────────────────────
+
+async function checkHealth(db) {
+  const checks = [];
+
+  // 1. Sessions this week vs last week
+  const [thisWeek] = await q(db,
+    `SELECT COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-7 days')`);
+  const [lastWeek] = await q(db,
+    `SELECT COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-14 days') AND ts < datetime('now', '-7 days')`);
+
+  if ((thisWeek?.n || 0) === 0) {
+    checks.push({ status: "red", label: "Noll sessioner senaste 7 dagarna", action: "Kontrollera att analytics-workern svarar och att frontend skickar events" });
+  } else if (lastWeek?.n > 0 && thisWeek.n < lastWeek.n * 0.4) {
+    checks.push({ status: "amber", label: `Sessioner ner ${Math.round((1 - thisWeek.n / lastWeek.n) * 100)}% vecka-över-vecka`, action: "Kolla om deploy/CDN gick sönder eller om det är en naturlig dipp" });
+  } else {
+    checks.push({ status: "green", label: `${thisWeek.n} sessioner (OK)` });
+  }
+
+  // 2. Data freshness — any event in last 24h?
+  const [recent] = await q(db,
+    `SELECT COUNT(*) as n FROM events WHERE ts >= datetime('now', '-24 hours')`);
+  if ((recent?.n || 0) === 0) {
+    checks.push({ status: "red", label: "Inga events senaste 24h", action: "Analytics-workern kan vara nere — kolla Cloudflare dashboard" });
+  } else {
+    checks.push({ status: "green", label: `${recent.n} events senaste 24h` });
+  }
+
+  // 3. Price data freshness
+  const [latestPrice] = await q(db,
+    `SELECT MAX(snapshot_date) as d FROM price_history`);
+  if (latestPrice?.d) {
+    const daysSince = Math.floor((Date.now() - new Date(latestPrice.d + "T00:00:00Z").getTime()) / 86400000);
+    if (daysSince > 10) {
+      checks.push({ status: "red", label: `Prisdata ${daysSince} dagar gammal`, action: "daily-update.yml kan ha stannat — kolla GitHub Actions" });
+    } else if (daysSince > 7) {
+      checks.push({ status: "amber", label: `Prisdata ${daysSince} dagar gammal`, action: "Inte kritiskt ännu men bör uppdateras snart" });
+    } else {
+      checks.push({ status: "green", label: `Prisdata ${daysSince}d gammal` });
+    }
+  }
+
+  // 4. Bot traffic ratio
+  const [botRatio] = await q(db,
+    `SELECT
+       SUM(CASE WHEN ua IS NULL OR ua = '' THEN 1 ELSE 0 END) as no_ua,
+       COUNT(*) as total
+     FROM events WHERE ts >= datetime('now', '-7 days') AND event = 'session_end'`);
+  // Sessions with session_end = JS ran = likely real. If very few have session_end vs total distinct sessions, flag it.
+  const [totalSessions] = await q(db,
+    `SELECT COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-7 days')`);
+  const [endedSessions] = await q(db,
+    `SELECT COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-7 days') AND event = 'session_end'`);
+  const humanPct = totalSessions?.n ? Math.round((endedSessions?.n || 0) / totalSessions.n * 100) : 0;
+  if (humanPct < 20 && (totalSessions?.n || 0) > 10) {
+    checks.push({ status: "amber", label: `Bara ${humanPct}% sessioner med JS-interaktion`, action: "Hög bot-andel eller trasig session_end-tracking" });
+  }
+
+  const overall = checks.some(c => c.status === "red") ? "red"
+    : checks.some(c => c.status === "amber") ? "amber" : "green";
+
+  return { overall, checks };
+}
+
+// ─── Bot/human session classification ────────────────────────────────
+
+async function classifySessions(db, days) {
+  // A "human" session has a session_end event (JS lifecycle fired)
+  // AND doesn't have a known-bot UA
+  const sessions = await q(db, `
+    SELECT
+      session,
+      COUNT(*) as events,
+      MAX(CASE WHEN event = 'session_end' THEN 1 ELSE 0 END) as has_end,
+      GROUP_CONCAT(DISTINCT ua) as uas,
+      MAX(device) as device
+    FROM events
+    WHERE ts >= datetime('now', '-${days} days')
+    GROUP BY session
+  `);
+
+  let human = 0, bot = 0;
+  const humanSessions = [];
+  for (const s of sessions) {
+    const uaStr = s.uas || "";
+    const uaIsBot = isBot(uaStr);
+    // Bot if: known bot UA, OR no session_end AND single event (crawl hit)
+    if (uaIsBot || (!s.has_end && s.events <= 1)) {
+      bot++;
+    } else {
+      human++;
+      humanSessions.push(s.session);
+    }
+  }
+  return { human, bot, total: sessions.length, humanSessions };
+}
+
+// ─── Report builder ──────────────────────────────────────────────────
+
 async function buildReport(db) {
   const days = 7;
 
-  // Core metrics
+  // Health status
+  const health = await checkHealth(db);
+
+  // Bot/human split
+  const sessionSplit = await classifySessions(db, days);
+  const prevSplit = await classifySessions(db, days * 2);
+  // prevSplit covers 14 days; subtract this week's humans for last-week-only
+  const prevHuman = Math.max(0, prevSplit.human - sessionSplit.human);
+
+  // Core metrics (human sessions only)
+  const humanFilter = sessionSplit.humanSessions.length > 0
+    ? `session IN (${sessionSplit.humanSessions.map(s => `'${s}'`).join(",")})`
+    : "1=0";
+
   const [overview] = await q(db,
-    `SELECT COUNT(DISTINCT session) as sessions, COUNT(*) as events FROM events WHERE ts >= datetime('now', '-${days} days')`);
+    `SELECT COUNT(DISTINCT session) as sessions, COUNT(*) as events FROM events WHERE ts >= datetime('now', '-${days} days') AND ${humanFilter}`);
 
-  const [prevOverview] = await q(db,
-    `SELECT COUNT(DISTINCT session) as sessions, COUNT(*) as events FROM events WHERE ts >= datetime('now', '-${days * 2} days') AND ts < datetime('now', '-${days} days')`);
-
-  // Device split
+  // Device split (human only)
   const devices = await q(db,
-    `SELECT device, COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-${days} days') GROUP BY device ORDER BY n DESC`);
+    `SELECT device, COUNT(DISTINCT session) as n FROM events WHERE ts >= datetime('now', '-${days} days') AND ${humanFilter} GROUP BY device ORDER BY n DESC`);
 
-  // Event breakdown
-  const events = await q(db,
-    `SELECT event, COUNT(*) as n FROM events WHERE ts >= datetime('now', '-${days} days') GROUP BY event ORDER BY n DESC`);
-
-  // Top wines
+  // Top wines (all traffic — bots don't click)
   const topWines = await q(db,
     `SELECT json_extract(data, '$.name') as name, json_extract(data, '$.nr') as nr,
             json_extract(data, '$.score') as score, COUNT(*) as clicks
      FROM events WHERE event='click' AND ts >= datetime('now', '-${days} days')
      GROUP BY nr ORDER BY clicks DESC LIMIT 10`);
 
-  // SB clicks (purchase intent)
+  // SB clicks
   const [sbClicks] = await q(db,
     `SELECT COUNT(*) as n FROM events WHERE event='sb_click' AND ts >= datetime('now', '-${days} days')`);
 
@@ -58,10 +172,10 @@ async function buildReport(db) {
   const aiMeals = await q(db,
     `SELECT meal, COUNT(*) as n FROM ai_logs WHERE ts >= datetime('now', '-${days} days') GROUP BY meal ORDER BY n DESC LIMIT 5`);
 
-  // Daily trend
+  // Daily trend (human only)
   const daily = await q(db,
     `SELECT date(ts) as day, COUNT(DISTINCT session) as sessions, COUNT(*) as events
-     FROM events WHERE ts >= datetime('now', '-${days} days')
+     FROM events WHERE ts >= datetime('now', '-${days} days') AND ${humanFilter}
      GROUP BY day ORDER BY day ASC`);
 
   // Shares & saves
@@ -76,13 +190,18 @@ async function buildReport(db) {
      FROM events WHERE event='filter' AND ts >= datetime('now', '-${days} days')
      GROUP BY filter_type ORDER BY n DESC LIMIT 5`);
 
-  // Week-over-week change
-  const sessionDelta = prevOverview?.sessions
-    ? Math.round(((overview.sessions - prevOverview.sessions) / prevOverview.sessions) * 100)
+  // Week-over-week change (human sessions)
+  const sessionDelta = prevHuman
+    ? Math.round(((sessionSplit.human - prevHuman) / prevHuman) * 100)
     : null;
   const deltaStr = sessionDelta !== null
     ? `${sessionDelta >= 0 ? "+" : ""}${sessionDelta}% vs förra veckan`
     : "Första veckan med data";
+
+  // Health status colors
+  const statusColors = { green: "#2d6b3f", amber: "#b8860b", red: "#c0392b" };
+  const statusBg = { green: "#e8f0e4", amber: "#fef9e7", red: "#fde8e8" };
+  const statusDot = { green: "\u25CF", amber: "\u25CF", red: "\u25CF" };
 
   // Build HTML
   const maxDaily = Math.max(...daily.map(d => d.sessions), 1);
@@ -97,11 +216,39 @@ async function buildReport(db) {
     <span style="font-size:13px;color:#7a7060;margin-left:8px">Veckorapport</span>
   </div>
 
-  <!-- KPIs -->
+  <!-- Health status -->
+  <div style="padding:16px;border-radius:12px;background:${statusBg[health.overall]};border:2px solid ${statusColors[health.overall]};margin-bottom:20px">
+    <div style="font-size:14px;font-weight:700;color:${statusColors[health.overall]};margin-bottom:${health.checks.some(c => c.status !== "green") ? "8px" : "0"}">
+      <span style="font-size:18px">${statusDot[health.overall]}</span> Hälsostatus: ${health.overall === "green" ? "Allt OK" : health.overall === "amber" ? "Varning" : "Problem"}
+    </div>
+    ${health.checks.filter(c => c.status !== "green").map(c => `
+      <div style="font-size:12px;color:${statusColors[c.status]};margin-top:4px;padding-left:22px">
+        ${statusDot[c.status]} ${c.label}${c.action ? ` — <em>${c.action}</em>` : ""}
+      </div>
+    `).join("")}
+  </div>
+
+  <!-- Traffic split -->
+  <div style="padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #e6ddd0;margin-bottom:20px;display:flex;gap:16px;align-items:center">
+    <div style="flex:1">
+      <div style="font-size:20px;font-weight:700;color:#1e1710;font-family:Georgia,serif">${sessionSplit.human}</div>
+      <div style="font-size:11px;color:#2d6b3f">Troliga besökare</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:20px;font-weight:700;color:#9a9080;font-family:Georgia,serif">${sessionSplit.bot}</div>
+      <div style="font-size:11px;color:#9a9080">Troliga bottar</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:20px;font-weight:700;color:#7a7060;font-family:Georgia,serif">${sessionSplit.total}</div>
+      <div style="font-size:11px;color:#7a7060">Totalt</div>
+    </div>
+  </div>
+
+  <!-- KPIs (human only) -->
   <div style="display:flex;gap:12px;margin-bottom:20px">
     ${[
       ["Sessioner", overview?.sessions || 0, deltaStr],
-      ["Events", overview?.events || 0, ""],
+      ["Events", overview?.events || 0, "enbart mänskliga"],
       ["SB-klick", sbClicks?.n || 0, "köpintention"],
       ["AI-frågor", aiTotal?.n || 0, ""],
     ].map(([label, val, sub]) => `
@@ -115,7 +262,7 @@ async function buildReport(db) {
 
   <!-- Daily trend -->
   <div style="padding:16px;border-radius:12px;background:#fff;border:1px solid #e6ddd0;margin-bottom:16px">
-    <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:10px">Daglig trend</div>
+    <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:10px">Daglig trend (mänskliga sessioner)</div>
     ${daily.map(d => `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <span style="font-size:11px;color:#7a7060;width:70px">${d.day.slice(5)}</span>
@@ -129,7 +276,7 @@ async function buildReport(db) {
 
   <!-- Devices -->
   <div style="padding:16px;border-radius:12px;background:#fff;border:1px solid #e6ddd0;margin-bottom:16px">
-    <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:8px">Enheter</div>
+    <div style="font-size:12px;font-weight:600;color:#1e1710;margin-bottom:8px">Enheter (mänskliga)</div>
     <div style="display:flex;gap:12px">
       ${devices.map(d => `
         <div style="font-size:13px;color:#4a4238"><strong>${d.n}</strong> ${d.device}</div>
@@ -198,32 +345,76 @@ async function buildReport(db) {
 </body></html>`;
 }
 
+// ─── Email sender ────────────────────────────────────────────────────
+
+async function sendEmail(env, subject, html) {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Smakfynd <onboarding@resend.dev>",
+      to: [env.REPORT_EMAIL],
+      subject,
+      html,
+    }),
+  });
+  if (!res.ok) {
+    console.error("Email failed:", await res.text());
+  }
+}
+
+async function buildAlertHtml(checks) {
+  const reds = checks.filter(c => c.status === "red");
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f7f3ec;font-family:-apple-system,sans-serif">
+<div style="max-width:560px;margin:0 auto;padding:24px 20px">
+  <div style="margin-bottom:16px">
+    <span style="font-family:Georgia,serif;font-size:22px;color:#7a2332">Smakfynd</span>
+    <span style="font-size:13px;color:#c0392b;margin-left:8px;font-weight:600">ALERT</span>
+  </div>
+  <div style="padding:16px;border-radius:12px;background:#fde8e8;border:2px solid #c0392b">
+    <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">\u25CF Problem upptäckt</div>
+    ${reds.map(c => `
+      <div style="font-size:13px;color:#7a2332;margin-top:6px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8b4b8">
+        <strong>${c.label}</strong><br>
+        <span style="font-size:12px;color:#666">${c.action}</span>
+      </div>
+    `).join("")}
+  </div>
+  <div style="font-size:10px;color:#9a9080;text-align:center;margin-top:20px">
+    Smakfynd · Alert ${new Date().toISOString().slice(0, 16)} UTC · Olav Innovation AB
+  </div>
+</div>
+</body></html>`;
+}
+
 export default {
-  // Cron trigger — runs every Monday 07:00 UTC
+  // Cron triggers:
+  //   Monday 07:00 — weekly report
+  //   Daily 08:00  — health check, alert on red
   async scheduled(event, env) {
-    const html = await buildReport(env.DB);
+    const cronPattern = event?.cron || "";
 
-    // Send via Resend
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Smakfynd <onboarding@resend.dev>",
-        to: [env.REPORT_EMAIL],
-        subject: `Smakfynd veckorapport — ${new Date().toLocaleDateString("sv-SE")}`,
-        html,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error("Email failed:", await res.text());
+    if (cronPattern === "0 8 * * *") {
+      // Daily health check — only alert on red
+      const health = await checkHealth(env.DB);
+      if (health.overall === "red") {
+        const html = await buildAlertHtml(health.checks);
+        await sendEmail(env, `\u26A0 Smakfynd ALERT — ${new Date().toLocaleDateString("sv-SE")}`, html);
+      }
+      return;
     }
+
+    // Default: weekly report
+    const html = await buildReport(env.DB);
+    await sendEmail(env, `Smakfynd veckorapport — ${new Date().toLocaleDateString("sv-SE")}`, html);
   },
 
-  // HTTP trigger — for testing: GET /report (admin only)
+  // HTTP trigger — for testing
   async fetch(request, env) {
     const url = new URL(request.url);
     const adminKey = request.headers.get("X-Admin-Key") || url.searchParams.get("key");
@@ -232,10 +423,25 @@ export default {
       const html = await buildReport(env.DB);
       return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
+    if (url.pathname === "/health") {
+      if (adminKey !== env.ADMIN_KEY) return new Response("Unauthorized", { status: 401 });
+      const health = await checkHealth(env.DB);
+      return new Response(JSON.stringify(health, null, 2), { headers: { "Content-Type": "application/json" } });
+    }
     if (url.pathname === "/send") {
       if (adminKey !== env.ADMIN_KEY) return new Response("Unauthorized", { status: 401 });
-      await this.scheduled({}, env);
+      await this.scheduled({ cron: "0 7 * * 1" }, env);
       return new Response("Report sent!");
+    }
+    if (url.pathname === "/alert-test") {
+      if (adminKey !== env.ADMIN_KEY) return new Response("Unauthorized", { status: 401 });
+      const health = await checkHealth(env.DB);
+      if (health.overall === "red") {
+        const html = await buildAlertHtml(health.checks);
+        await sendEmail(env, `\u26A0 Smakfynd ALERT — ${new Date().toLocaleDateString("sv-SE")}`, html);
+        return new Response("Alert sent!");
+      }
+      return new Response(`No red issues. Status: ${health.overall}`);
     }
     return new Response("Smakfynd Report Worker", { status: 200 });
   },

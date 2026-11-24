@@ -2175,6 +2175,8 @@ def render_page(page, all_pages=None, modified_date=None):
   </script>
 <script>
 (function(){{
+  try{{if(new URLSearchParams(location.search).get("internal")==="1")localStorage.setItem("sf_internal","1")}}catch(e){{}}
+  try{{if(localStorage.getItem("sf_internal")==="1")return}}catch(e){{}}
   var A="https://smakfynd-analytics.smakfynd.workers.dev";
   var sid;try{{sid=sessionStorage.getItem("sf_sid");if(!sid){{sid=Math.random().toString(36).slice(2);sessionStorage.setItem("sf_sid",sid)}}}}catch(e){{sid="anon"}}
   var dev=window.innerWidth<768?"mobile":"desktop";

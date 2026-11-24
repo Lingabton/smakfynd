@@ -46,6 +46,11 @@ export default {
     }
 
     try {
+      // GET /health — synthetic check (no D1 write)
+      if (request.method === "GET" && url.pathname === "/health") {
+        return new Response(JSON.stringify({ ok: true, ts: Date.now() }), { headers });
+      }
+
       // POST /event — log a user event
       if (request.method === "POST" && url.pathname === "/event") {
         const body = await request.json();
@@ -55,12 +60,14 @@ export default {
           return new Response(JSON.stringify({ error: "event required" }), { status: 400, headers });
         }
 
+        const ua = request.headers.get("User-Agent") || null;
+
         await env.DB.prepare(
-          `INSERT INTO events (session, user_id, event, wine_nr, data, page, device, referrer)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO events (session, user_id, event, wine_nr, data, page, device, referrer, ua)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         ).bind(
           session || null, user_id || null, event, wine_nr || null,
-          data ? JSON.stringify(data) : null, page || null, device || null, referrer || null
+          data ? JSON.stringify(data) : null, page || null, device || null, referrer || null, ua
         ).run();
 
         // Update popular_wines aggregate

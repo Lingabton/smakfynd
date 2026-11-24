@@ -73,7 +73,7 @@ jobs:
             echo "No shipped pages — skipping landing page generation"
           fi
           python3 scripts/generate_monthly_seo.py
-          python3 scripts/generate_prissankt.py
+          python3 scripts/rebuild_prissankt.py
 
       - name: Validate data
         run: |

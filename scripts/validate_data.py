@@ -197,12 +197,17 @@ def validate(path, is_primary=True):
             errors.append("[COUPLING] wines.json is envelope format but index.html lacks envelope handler — app will show 0 products. Run build_app.py && deploy_html.py")
 
     # ── Build staleness check ──
-    # src/App.jsx must not be newer than site/smakfynd-v7-slim.jsx
-    src_app = BASE / "src" / "App.jsx"
+    # Any file under src/ newer than site/smakfynd-v7-slim.jsx means a rebuild is needed
     slim_jsx = BASE / "site" / "smakfynd-v7-slim.jsx"
-    if src_app.exists() and slim_jsx.exists():
-        if src_app.stat().st_mtime > slim_jsx.stat().st_mtime:
-            errors.append("[STALE_BUILD] src/App.jsx is newer than site/smakfynd-v7-slim.jsx — run build_app.py first")
+    if slim_jsx.exists():
+        slim_mtime = slim_jsx.stat().st_mtime
+        src_dir = BASE / "src"
+        if src_dir.exists():
+            for src_file in sorted(src_dir.rglob("*.jsx")):
+                if src_file.stat().st_mtime > slim_mtime:
+                    rel = src_file.relative_to(BASE)
+                    errors.append(f"[STALE_BUILD] {rel} is newer than site/smakfynd-v7-slim.jsx — run build_app.py first")
+                    break  # one error is enough
 
     # ── AggregateRating without real data ──
     import re as _re2

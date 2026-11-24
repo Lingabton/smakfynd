@@ -65,6 +65,20 @@ const DATA_URL = "wines.json?v=__BUILD_TS__";
 
 // Analytics
 const ANALYTICS_URL = "https://smakfynd-analytics.smakfynd.workers.dev";
+
+// Internal traffic exclusion: visit with ?internal=1 once per device to flag it
+try {
+  if (new URLSearchParams(location.search).get("internal") === "1") {
+    localStorage.setItem("sf_internal", "1");
+  }
+} catch (e) {}
+const _isInternal = (() => {
+  try {
+    return localStorage.getItem("sf_internal") === "1";
+  } catch (e) {
+    return false;
+  }
+})();
 const _sid = (() => {
   try {
     let s = sessionStorage.getItem("sf_sid");
@@ -78,6 +92,7 @@ const _sid = (() => {
   }
 })();
 function track(event, data) {
+  if (_isInternal) return;
   try {
     const device = window.innerWidth < 768 ? "mobile" : "desktop";
     fetch(ANALYTICS_URL + "/event", {
@@ -101,6 +116,7 @@ function track(event, data) {
 // Session duration tracking
 const _sessionStart = Date.now();
 function _sendSessionEnd() {
+  if (_isInternal) return;
   const duration_s = Math.round((Date.now() - _sessionStart) / 1000);
   if (duration_s < 1) return;
   const device = window.innerWidth < 768 ? "mobile" : "desktop";
@@ -143,6 +159,7 @@ window.addEventListener("pagehide", () => {
   }
 });
 function trackSearch(query, count, clickedNr) {
+  if (_isInternal) return;
   try {
     fetch(ANALYTICS_URL + "/search", {
       method: "POST",
@@ -160,6 +177,7 @@ function trackSearch(query, count, clickedNr) {
   } catch (e) {}
 }
 function trackAI(meal, response, latencyMs) {
+  if (_isInternal) return;
   try {
     const wines = (response?.courses || []).flatMap(c => c.wines || []).map(w => w.nr).filter(Boolean).join(",");
     fetch(ANALYTICS_URL + "/ai", {

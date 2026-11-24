@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS events (
   data TEXT,              -- JSON blob with event-specific data
   page TEXT,              -- page/route where event happened
   device TEXT,            -- mobile/desktop
-  referrer TEXT           -- how they got here
+  referrer TEXT,          -- how they got here
+  ua TEXT                 -- user-agent (for bot detection)
 );
 
 -- AI interactions (queries + responses)

@@ -140,7 +140,8 @@ def check_gsc():
     """Check GSC data freshness and indexed page trends."""
     gsc_file = DATA_DIR / "gsc_history.json"
     if not gsc_file.exists():
-        return status("red", "No GSC data file", "Set up GSC credentials and run fetch_gsc.py")
+        return status("amber", "No GSC data file — credentials not configured yet",
+                       "Set up GSC_CREDENTIALS_JSON secret and run fetch_gsc.py")
     try:
         mtime = datetime.fromtimestamp(os.path.getmtime(gsc_file))
         age = datetime.now() - mtime
