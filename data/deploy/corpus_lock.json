@@ -1,0 +1,21 @@
+{
+ "count": 4316,
+ "set_on": "2026-09-15",
+ "reason": "SB delistings Sep 12 (-56) + Sep 13 (-38) = -94 products, partially offset by arrivals. Stabilized at 4315-4316 over Sep 14-15.",
+ "nrs": [],
+ "history": [
+  {
+   "date": "2026-09-02",
+   "to": 4362,
+   "auto": false,
+   "reason": "Name sort recovered full catalog"
+  },
+  {
+   "date": "2026-09-15",
+   "from": 4362,
+   "to": 4316,
+   "auto": false,
+   "reason": "Sep 1 assortment change removed 94 products over Sep 12-13, stabilized at 4315-4316"
+  }
+ ]
+}

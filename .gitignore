@@ -30,3 +30,8 @@ credentials.json
 secrets.json
 scripts/__pycache__/
 logs/
+# Corpus lock is shared state between CI runs (scripts/corpus_lock.py)
+!data/deploy/
+data/deploy/*
+!data/deploy/corpus_lock.json
+!data/deploy/shipped_pages.json

@@ -11,7 +11,13 @@ IN_STORE = {"Fast sortiment", "Tillfälligt sortiment", "Lokalt & Småskaligt"}
 # shown on every page as "Baserat på N viner" and validated against
 # the actual wines.json count. Update only in a commit that states
 # old → new values and the reason.
-LOCKED_CORPUS_COUNT = 4316  # Sep 15 2026: SB delistings Sep 12 (-56) + Sep 13 (-38) = -94 products, partially offset by arrivals. Stabilized at 4315-4316 over Sep 14-15.
+import os as _os
+
+LOCK_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "data", "deploy", "corpus_lock.json")
+# Lives in data/deploy/corpus_lock.json so scripts/corpus_lock.py can re-baseline it
+# when drift is fully explained by SB delistings. Manual changes: edit that file,
+# and state old -> new and the reason in the commit message.
+LOCKED_CORPUS_COUNT = json.load(open(LOCK_FILE))["count"]
 
 
 def load_wines(path):

@@ -49,6 +49,18 @@ python3 scripts/score_wines_v2.py 2>&1 | grep "Scored:"
 python3 scripts/build_slim.py 2>&1 | grep "Slim:"
 ```
 
+**Automatic handling (since Nov 2026):** `scripts/corpus_lock.py` runs in CI after
+`build_slim.py` and does the accounting below on its own. The lock lives in
+`data/deploy/corpus_lock.json` with the scored article numbers at lock time and a history.
+- Within 1% → nothing happens.
+- 1–5% and every lost wine is gone from today's SB snapshot or moved out of the
+  in-store assortments (at most 1% unexplained) → re-baselines, logs old→new and the
+  breakdown in the lock history and the commit message.
+- Otherwise → leaves the lock; the validator fails with `CORPUS_SHIFT`, and
+  `data/deploy/corpus_lock_report.txt` (included in the alert email) says why.
+
+If you are reading this section, the automatic step refused. Do the manual accounting.
+
 **First action: account for the delta, not move the constant.**
 
 ```bash
@@ -73,7 +85,7 @@ print(f'Lost: {len(old_nrs - new_nrs)}, Gained: {len(new_nrs - old_nrs)}')
 1. Account for every wine in the delta (removed from SB catalog / failed scoring / deduped)
 2. Check the deltas files: do arrivals and delistings explain the gap?
 3. Check the trend: is the count stable at the new level or still declining?
-4. **Only then** update `LOCKED_CORPUS_COUNT` in `scripts/constants.py`, with old→new values and the documented cause in the commit message
+4. **Only then** update `count` in `data/deploy/corpus_lock.json` (set `nrs` to the current scored set and add a `history` entry), with old→new values and the documented cause in the commit message
 
 Moving the constant is the last step. Moving it without accounting is silencing an alarm.
 

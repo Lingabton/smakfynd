@@ -29,7 +29,8 @@ if (!fs.existsSync(WINES_PATH)) {
   process.exit(1);
 }
 
-const wines = JSON.parse(fs.readFileSync(WINES_PATH, 'utf8'));
+const _raw = JSON.parse(fs.readFileSync(WINES_PATH, 'utf8'));
+const wines = Array.isArray(_raw) ? _raw : _raw.wines;  // {meta, wines} envelope since Sep 2026
 
 assert("is array", Array.isArray(wines));
 assert("has 100+ wines", wines.length >= 100);
@@ -58,7 +59,9 @@ assert("all wines have valid type", badTypes.length === 0);
 const withImages = wines.filter(w => w.image_url).length;
 const withCrowd = wines.filter(w => w.crowd_score).length;
 assert(`image coverage >50% (${withImages}/${wines.length})`, withImages > wines.length * 0.5);
-assert(`crowd coverage >20% (${withCrowd}/${wines.length})`, withCrowd > wines.length * 0.2);
+// Expert-only wines are publishable (25+ reviews OR expert score), so crowd coverage is
+// structurally ~18% (Oct-Nov 2026). The floor catches a Vivino-matching collapse.
+assert(`crowd coverage >15% (${withCrowd}/${wines.length})`, withCrowd > wines.length * 0.15);
 
 // ── No unknown fields ──
 const known = new Set([
@@ -67,7 +70,7 @@ const known = new Set([
   'price_score', 'confidence', 'assortment', 'image_url',
   'organic', 'cat3', 'food_pairings', 'taste_body', 'taste_sweet',
   'taste_fruit', 'taste_bitter', 'style', 'region', 'expert_source',
-  'launch_price', 'price_vs_launch_pct', 'is_new',
+  'launch_price', 'price_vs_launch_pct', 'is_new', '_score_raw',
   'critics', 'num_critics', 'critic_spread', 'critic_consensus', 'insight',
   'avail', 'drop_date',
 ]);
