@@ -50,6 +50,7 @@ jobs:
             wine-data-
 
       - name: Fetch Systembolaget data
+        id: fetch
         timeout-minutes: 45
         run: |
           python3 scripts/fetch_systembolaget.py
@@ -62,6 +63,12 @@ jobs:
         run: |
           python3 scripts/build_slim.py
           python3 scripts/deploy_html.py
+
+      # Re-baselines the corpus lock when drift is explained by SB delistings.
+      # Must run before page generation: pages render the locked count.
+      - name: Corpus lock
+        run: |
+          python3 scripts/corpus_lock.py
 
       - name: Generate landing pages + price drops
         run: |
@@ -110,7 +117,7 @@ jobs:
           git config user.name "Smakfynd Bot"
           git config user.email "bot@smakfynd.se"
           # Stage only allowed docs/ files, never docs/index.html or docs/wines*.json
-          git add site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json data/page_hashes.json
+          git add site/ data/history/ data/prissankt_bootstrap.json data/gsc_history.json data/page_hashes.json data/deploy/corpus_lock.json
           # Stage shipped landing pages
           ALLOWLIST=$(python3 -c "import json,os; f='data/deploy/shipped_pages.json'; print(' '.join(f'docs/{p}/index.html' for p in json.load(open(f)))) if os.path.exists(f) else ''")
           for f in $ALLOWLIST; do [ -f "$f" ] && git add "$f"; done
@@ -165,10 +172,33 @@ jobs:
           else
             CHANGED_PAGES=$(git diff --cached --name-only -- 'docs/*/index.html' | wc -l)
             echo "Pages changed: $CHANGED_PAGES"
-            git commit -m "data: daily price update $(date '+%Y-%m-%d')"
+            git commit -m "data: daily price update $(date '+%Y-%m-%d')" -m "Corpus lock: $(cat data/deploy/corpus_lock_report.txt 2>/dev/null)"
             git push
           fi
 
+      # A failed validation used to drop the day's snapshot, leaving holes in the
+      # price history that /prissankt/ is built from (Nov 2-24 2026 were lost).
+      # Save only the raw observations; never pages or SPA data.
+      - name: Preserve price history (on failure)
+        if: failure() && steps.fetch.outcome == 'success'
+        run: |
+          git config user.name "Smakfynd Bot"
+          git config user.email "bot@smakfynd.se"
+          git reset -q
+          git add data/history/prices_*.json.gz data/history/deltas_*.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No new history to preserve"
+          else
+            git commit -m "data: preserve price history $(date '+%Y-%m-%d') (build failed)"
+            git pull --rebase
+            git push
+          fi
+
+      # always(): the digest must run when the build fails, or failures go unreported.
       - name: Health digest (alerts on RED)
+        if: always()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
         run: |
           python3 scripts/health_digest.py

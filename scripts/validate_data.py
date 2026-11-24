@@ -291,7 +291,8 @@ def validate(path, is_primary=True):
         n_scored = sum(1 for w in wines if not w.get('unrated'))
         locked_pct = abs(n_scored - LOCKED_CORPUS_COUNT) / LOCKED_CORPUS_COUNT * 100
         if locked_pct > 1:
-            errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%)")
+            errors.append(f"[CORPUS_SHIFT] Scored wines {n_scored} vs locked {LOCKED_CORPUS_COUNT} ({locked_pct:.1f}% — max 1%). "
+                          f"corpus_lock.py could not re-baseline — see data/deploy/corpus_lock_report.txt")
 
     # Secondary: run-over-run drift check
     prev_count_file = DATA_DIR / "history" / "prev_corpus_count.txt"

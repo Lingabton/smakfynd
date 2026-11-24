@@ -30,7 +30,8 @@ assert("has JSON-LD", html.includes('application/ld+json'));
 assert("has FAQPage schema", html.includes('FAQPage'));
 
 // wines.json exists and has valid data
-const wines = JSON.parse(fs.readFileSync(path.join(DOCS, 'wines.json'), 'utf8'));
+const _raw = JSON.parse(fs.readFileSync(path.join(DOCS, 'wines.json'), 'utf8'));
+const wines = Array.isArray(_raw) ? _raw : _raw.wines;  // {meta, wines} envelope since Sep 2026
 assert("wines.json has 100+ wines", wines.length >= 100);
 assert("no wines with empty name", wines.every(w => w.name && w.name.length >= 1));
 assert("no wines with zero score", wines.every(w => w.smakfynd_score > 0));
@@ -47,8 +48,11 @@ for (const page of landingPages) {
 assert("privacy policy exists", fs.existsSync(path.join(DOCS, 'integritet', 'index.html')));
 
 // Sitemap has multiple URLs
+// sitemap.xml is a sitemap index; count URLs across the child sitemaps it lists
 const sitemap = fs.readFileSync(path.join(DOCS, 'sitemap.xml'), 'utf8');
-const urlCount = (sitemap.match(/<url>/g) || []).length;
+const children = [...sitemap.matchAll(/<loc>https:\/\/smakfynd\.se\/([^<]+\.xml)<\/loc>/g)].map(m => m[1]);
+const urlCount = [sitemap, ...children.map(f => fs.readFileSync(path.join(DOCS, f), 'utf8'))]
+  .reduce((n, xml) => n + (xml.match(/<url>/g) || []).length, 0);
 assert(`sitemap has ${urlCount} URLs (>5)`, urlCount > 5);
 
 // manifest.json valid
